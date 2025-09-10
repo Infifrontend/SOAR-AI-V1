@@ -1765,12 +1765,15 @@ class LeadViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post'])
     def send_message(self, request, pk=None):
-        """Send email with proper HTML rendering"""
+        """Send email with proper HTML rendering using standard templates"""
         try:
             lead = self.get_object()
             subject = request.data.get("subject", "")
             message = request.data.get("message", "")
             recipient_email = request.data.get("recipient_email") or getattr(lead.contact, "email", None)
+            recipient_name = request.data.get("recipient_name", "")
+            contact_type = request.data.get("contact_type", "lead")
+            template_used = request.data.get("template_used", "")
 
             if not subject or not message:
                 return Response({"error": "Subject and message are required"}, status=400)
@@ -1778,35 +1781,111 @@ class LeadViewSet(viewsets.ModelViewSet):
             if not recipient_email:
                 return Response({"error": "No recipient email found"}, status=400)
 
-            # Check if message is already complete HTML
+            # Check if message is already complete HTML (standard template)
             is_complete_html = message.strip().startswith('<!DOCTYPE') or message.strip().startswith('<html')
 
             if is_complete_html:
-                # Message is already complete HTML
+                # Message is already complete HTML (from standard template)
                 html_message = message
                 plain_text_message = strip_tags(message)
+                print(f"Using pre-formatted template: {template_used}")
             else:
-                # Message needs HTML wrapper
+                # Message needs HTML wrapper - use enhanced template for corporate contacts
                 plain_text_message = strip_tags(message)
-                html_message = f"""
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <meta charset="utf-8">
-                    <title>{subject}</title>
-                </head>
-                <body style="font-family: Arial, sans-serif; color: #333;">
-                    <div style="max-width:600px;margin:0 auto;padding:20px;border:1px solid #ddd;">
-                        <h2 style="background:#007bff;color:white;padding:10px;">SOAR-AI</h2>
-                        <div style="padding:20px;">
+
+                if contact_type == "corporate":
+                    # Use enhanced corporate template
+                    html_message = f"""
+                    <!DOCTYPE html>
+                    <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+                    <head>
+                        <meta charset="utf-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>{subject}</title>
+                        <style>
+                            body {{ margin:0; padding:0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color:#f0f4f8; }}
+                            .wrapper {{ width:100%; background-color:#f0f4f8; padding:40px 20px; }}
+                            .content {{ max-width:650px; margin:0 auto; background:#ffffff; border-radius:16px; overflow:hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }}
+                            .header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding:40px 30px; text-align:center; color:#ffffff; }}
+                            .logo {{ font-size:32px; font-weight:800; margin:0; letter-spacing:-1px; }}
+                            .tagline {{ font-size:16px; margin:10px 0 0 0; opacity:0.9; }}
+                            .main-content {{ padding:40px 30px; }}
+                            .greeting {{ font-size:20px; color:#2d3748; margin:0 0 20px 0; font-weight:600; }}
+                            .content-text {{ font-size:16px; color:#4a5568; line-height:1.6; margin:0 0 20px 0; }}
+                            .footer {{ background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%); color:#a0aec0; padding:30px; text-align:center; }}
+                            .footer-logo {{ color:#ffffff; font-size:24px; font-weight:700; margin:0 0 10px 0; }}
+                            .footer-text {{ font-size:14px; margin:8px 0; }}
+                            .footer-links a {{ color:#81e6d9; text-decoration:none; margin:0 15px; }}
+                            ul {{ margin:16px 0; padding-left:20px; }}
+                            ul li {{ margin:8px 0; color:#4a5568; line-height:1.5; }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class="wrapper">
+                            <div class="content">
+                                <div class="header">
+                                    <h1 class="logo">SOAR-AI</h1>
+                                    <p class="tagline">Corporate Travel Solutions</p>
+                                </div>
+                                <div class="main-content">
+                                    <h2 class="greeting">Dear {recipient_name or 'Valued Partner'},</h2>
+                                    <div class="content-text">
+                                        {message}
+                                    </div>
+                                    <div class="content-text">
+                                        <p>We look forward to the opportunity to transform your corporate travel experience.</p>
+                                        <p>Best regards,<br><strong>The SOAR-AI Partnership Team</strong></p>
+                                    </div>
+                                </div>
+                                <div class="footer">
+                                    <h3 class="footer-logo">SOAR-AI</h3>
+                                    <p class="footer-text">Transforming Corporate Travel Through Innovation</p>
+                                    <div class="footer-links">
+                                        <a href="#">Privacy Policy</a>
+                                        <a href="#">Terms of Service</a>
+                                        <a href="#">Unsubscribe</a>
+                                    </div>
+                                    <p class="footer-text" style="font-size:12px; margin-top:20px;">
+                                        © {datetime.now().year} SOAR-AI Corporation. All rights reserved.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </body>
+                    </html>
+                    """
+                else:
+                    # Use standard template for leads
+                    html_message = f"""
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="utf-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>{subject}</title>
+                        <style>
+                            body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }}
+                            .header {{ background-color: #007bff; color: white; padding: 20px; text-align: center; margin-bottom: 20px; }}
+                            .content {{ padding: 20px; background-color: #f9f9f9; }}
+                            .footer {{ margin-top: 20px; padding: 10px; text-align: center; font-size: 12px; color: #666; }}
+                            .button {{ display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; }}
+                        </style>
+                    </head>
+                    <body>
+                        <div class="header">
+                            <h1>SOAR-AI</h1>
+                            <p>Corporate Travel Solutions</p>
+                        </div>
+                        <div class="content">
                             {message}
                         </div>
-                        <hr>
-                        <p style="font-size:12px;color:#888;">Best regards, SOAR-AI Team</p>
-                    </div>
-                </body>
-                </html>
-                """
+                        <div class="footer">
+                            <p>&copy; {datetime.now().year} SOAR-AI. All rights reserved.</p>
+                            <p><a href="#">Unsubscribe</a> | <a href="#">Privacy Policy</a></p>
+                        </div>
+                    </body>
+                    </html>
+                    """
 
             # Send multipart email (plain text + HTML)
             email = EmailMultiAlternatives(
@@ -1819,7 +1898,16 @@ class LeadViewSet(viewsets.ModelViewSet):
             email.attach_alternative(html_message, "text/html")
             email.send(fail_silently=False)
 
-            return Response({"success": True, "message": f"Email sent to {recipient_email}"}, status=200)
+            return Response({
+                "success": True,
+                "message": f"Email sent to {recipient_email}" + (f" using {template_used} template" if template_used else ""),
+                "subject": subject,
+                "recipient": recipient_email,
+                "recipient_name": recipient_name,
+                "contact_type": contact_type,
+                "template_used": template_used,
+                "method": "Email"
+            })
 
         except Exception as e:
             return Response({"error": f"Failed to send email: {str(e)}"}, status=500)
@@ -1858,18 +1946,14 @@ class LeadViewSet(viewsets.ModelViewSet):
                         from django.core.mail import EmailMultiAlternatives
                         from django.utils.html import strip_tags
 
-                        # Check if message contains HTML
-                        is_html_content = any(tag in message for tag in ['<html>', '<p>', '<div>', '<!DOCTYPE', '<br>', '<strong>', '<em>', '<table>', '<style>'])
+                        # Create plain text version by stripping HTML tags
+                        plain_text_message = strip_tags(message)
 
-                        if is_html_content:
-                            # Create plain text version by stripping HTML tags
-                            plain_text_message = strip_tags(message)
-
-                            # Ensure the HTML content is properly formatted
-                            html_content = message
-                            if not message.strip().startswith('<!DOCTYPE'):
-                                # If it's partial HTML, wrap it in a basic HTML structure
-                                html_content = f"""<!DOCTYPE html>
+                        # Ensure the HTML content is properly formatted
+                        html_content = message
+                        if not message.strip().startswith('<!DOCTYPE'):
+                            # If it's partial HTML, wrap it in a basic HTML structure
+                            html_content = f"""<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
@@ -1881,27 +1965,27 @@ class LeadViewSet(viewsets.ModelViewSet):
 </body>
 </html>"""
 
-                            email = EmailMultiAlternatives(
-                                subject=subject,
-                                body=plain_text_message,  # Plain text fallback
-                                from_email=settings.DEFAULT_FROM_EMAIL,
-                                to=[recipient_email],
-                                bcc=['nagendran.g@infinitisoftware.net','muniraj@infinitisoftware.net'],
-                            )
-                            email.attach_alternative(html_content, "text/html")
-                        else:
-                            # For plain text, create professional corporate template using Django templates
-                            from django.template import Template, Context
+                        email = EmailMultiAlternatives(
+                            subject=subject,
+                            body=plain_text_message,  # Plain text fallback
+                            from_email=settings.DEFAULT_FROM_EMAIL,
+                            to=[recipient_email],
+                            bcc=['nagendran.g@infinitisoftware.net','muniraj@infinitisoftware.net'],
+                        )
+                        email.attach_alternative(html_content, "text/html")
+                    else:
+                        # For plain text, create professional corporate template using Django templates
+                        from django.template import Template, Context
 
-                            # Create context for template rendering
-                            template_context = Context({
-                                'recipient_name': recipient_name,
-                                'company_name': request.data.get('company_name', 'Your Company'),
-                                'message_content': message,
-                                'subject': subject
-                            })
+                        # Create context for template rendering
+                        template_context = Context({
+                            'recipient_name': recipient_name,
+                            'company_name': request.data.get('company_name', 'Your Company'),
+                            'message_content': message,
+                            'subject': subject
+                        })
 
-                            html_template = """
+                        html_template = """
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
@@ -1989,49 +2073,50 @@ class LeadViewSet(viewsets.ModelViewSet):
   </div>
 </body>
 </html>
-                            """
+                        """
 
-                            # Render the template with context
-                            template = Template(html_template)
-                            html_content = template.render(template_context)
+                        # Render the template with context
+                        template = Template(html_template)
+                        html_content = template.render(template_context)
 
-                            email = EmailMultiAlternatives(
-                                subject=subject,
-                                body=strip_tags(message),  # Plain text fallback
-                                from_email=settings.DEFAULT_FROM_EMAIL,
-                                to=[recipient_email],
-                                bcc=['nagendran.g@infinitisoftware.net','muniraj@infinitisoftware.net'],
-                            )
-                            email.attach_alternative(html_content, "text/html")
+                        email = EmailMultiAlternatives(
+                            subject=subject,
+                            body=strip_tags(message),  # Plain text fallback
+                            from_email=settings.DEFAULT_FROM_EMAIL,
+                            to=[recipient_email],
+                            bcc=['nagendran.g@infinitisoftware.net','muniraj@infinitisoftware.net'],
+                        )
+                        email.attach_alternative(html_content, "text/html")
 
-                        email.send(fail_silently=False)
+                    email.send(fail_silently=False)
 
-                        return Response({
-                            'success': True,
-                            'message': f'Email sent successfully to {recipient_name} ({recipient_email})'
-                        }, status=status.HTTP_200_OK)
-
-                    except Exception as email_error:
-                        return Response({
-                            'success': False,
-                            'error': f'Failed to send email: {str(email_error)}'
-                        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-                else:
                     return Response({
                         'success': True,
-                        'message': f'{method} message logged successfully for {recipient_name}'
+                        'message': f'Email sent successfully to {recipient_name} ({recipient_email})'
                     }, status=status.HTTP_200_OK)
-            else:
-                return Response(
-                    {'error': 'Invalid contact type or missing required parameters'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
 
-        except Exception as e:
+                except Exception as email_error:
+                    return Response({
+                        'success': False,
+                        'error': f'Failed to send email: {str(email_error)}'
+                    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                # For non-email methods, just create an activity record
+                return Response({
+                    'success': True,
+                    'message': f'{method} message logged successfully for {recipient_name}'
+                }, status=status.HTTP_200_OK)
+        else:
             return Response(
-                {'error': f'Failed to send message: {str(e)}'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {'error': 'Invalid contact type or missing required parameters'},
+                status=status.HTTP_400_BAD_REQUEST
             )
+
+    except Exception as e:
+        return Response(
+            {'error': f'Failed to send message: {str(e)}'},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 class OpportunityViewSet(viewsets.ModelViewSet):
     queryset = Opportunity.objects.prefetch_related('activities').all()
@@ -4664,7 +4749,7 @@ class ContractViewSet(viewsets.ModelViewSet):
                 response['Content-Disposition'] = f'inline; filename="{smart_str(original_name or os.path.basename(file_path))}"'
 
                 # Add headers to prevent caching issues
-                response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+                response[''Cache-Control': 'no-cache, no-store, must-revalidate'
                 response['Pragma'] = 'no-cache'
                 response['Expires'] = '0'
 
@@ -4822,7 +4907,7 @@ def track_email_open(request, tracking_id):
 
         tracking.save()
 
-        # Return a 1x1 transparent pixel
+        # Return a 1x1 transparent GIF pixel
         from django.http import HttpResponse
         import base64
 

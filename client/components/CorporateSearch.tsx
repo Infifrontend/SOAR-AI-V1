@@ -1050,10 +1050,9 @@ export function CorporateSearch({
   }
   // Function to open dialog for contacting a lead
   const handleContactCorporate = (corporate: any) => {
-    setContactForm({
-      method: "Email",
-      subject: `Partnership Opportunity - ${corporate.name}`,
-      message: `<p>I hope this message finds you well. I wanted to follow up regarding our corporate travel solutions that could benefit ${corporate.name}.</p>
+    // Create professional message content for the template
+    const messageContent = `
+<p>I hope this message finds you well. I wanted to follow up regarding our corporate travel solutions that could benefit ${corporate.name}.</p>
 
 <p>Based on your organization's profile in the ${corporate.industry} sector with ${corporate.employees?.toLocaleString()} team members, I believe we can help optimize your travel operations and significantly reduce costs.</p>
 
@@ -1067,7 +1066,13 @@ export function CorporateSearch({
 
 <p>Given your current travel budget of ${corporate.travelBudget} and ${corporate.annualTravelVolume}, we see significant opportunities for partnership and cost optimization.</p>
 
-<p>Would you be available for a brief 15-minute call this week to discuss how we can support ${corporate.name}'s travel needs and show you personalized savings projections?</p>`,
+<p>Would you be available for a brief 15-minute call this week to discuss how we can support ${corporate.name}'s travel needs and show you personalized savings projections?</p>
+    `.trim();
+
+    setContactForm({
+      method: "Email",
+      subject: `Partnership Opportunity - ${corporate.name}`,
+      message: messageContent,
       followUpDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
         .toISOString()
         .split("T")[0], // 7 days from now
@@ -1087,15 +1092,24 @@ export function CorporateSearch({
     setIsSendingMessage(true); // Start spinner
 
     try {
-      // Generate professional HTML email using the template service
-      const htmlMessage = EmailTemplateService.renderCorporateContactTemplate(
-        contactForm.corporateData.name,
-        contactForm.corporateData.name,
-        contactForm.message,
-        contactForm.subject,
-        "Schedule a Call",
-        "https://calendly.com/soar-ai/partnership-discussion"
-      );
+      // Generate professional HTML email using the standard email template
+      const templateVariables = {
+        subject: contactForm.subject,
+        preheader: 'Partnership opportunity with SOAR-AI for your corporate travel needs',
+        logo_url: 'https://soarai.infinitisoftware.net/assets/SOAR%20Logo-Bnqz16_i.svg',
+        company_name: 'SOAR-AI',
+        main_heading: `Partnership Opportunity for ${contactForm.corporateData.name}`,
+        intro_paragraph: `Dear ${contactForm.corporateData.name} Team,`,
+        body_content: contactForm.message,
+        cta_url: 'https://calendly.com/soar-ai/partnership-discussion',
+        cta_text: 'Schedule a Call',
+        company_address: '123 Business Ave, Corporate Solutions District, Tech City 12345',
+        unsubscribe_url: 'https://soarai.infinitisoftware.net/unsubscribe',
+        year: new Date().getFullYear().toString()
+      };
+
+      // Use the standard layout template for consistent branding
+      const htmlMessage = EmailTemplateService.generateStandardLayoutHTML(templateVariables);
 
       // Use the leadApi to send message (we'll use company data to create a temporary lead-like structure)
       const response = await leadApi.sendMessage(contactForm.corporateData.id, {
@@ -1109,14 +1123,15 @@ export function CorporateSearch({
         recipient_name: contactForm.corporateData.name,
         contact_type: "corporate",
         is_html: true, // Specify this is HTML content
+        template_used: "standard_layout", // Track template usage
       });
 
       if (response && response.success) {
         setSuccessMessage(
-          `Email sent to ${contactForm.corporateData.name} successfully!`,
+          `Email sent to ${contactForm.corporateData.name} successfully using standard template!`,
         );
         setTimeout(() => setSuccessMessage(""), 5000);
-        toast.success("Email sent successfully");
+        toast.success("Professional email sent successfully");
       } else {
         throw new Error(response?.message || "Failed to send email");
       }
