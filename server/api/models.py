@@ -598,26 +598,84 @@ class EmailCampaign(models.Model):
                 # Add tracking functionality
                 rendered_content_with_tracking = self._add_email_tracking(rendered_content, tracking)
 
-                # Create EmailMultiAlternatives for proper HTML handling
+                # Apply standard SOAR-AI template layout if content is not already HTML
                 from django.core.mail import EmailMultiAlternatives
                 from django.utils.html import strip_tags
+                
+                is_complete_html = rendered_content_with_tracking.strip().startswith('<!DOCTYPE') or rendered_content_with_tracking.strip().startswith('<html')
+                
+                if not is_complete_html:
+                    # Wrap content in standard SOAR-AI template
+                    contact_name = f"{lead.contact.first_name} {lead.contact.last_name}".strip() or 'Valued Customer'
+                    
+                    html_content = f"""<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{rendered_subject}</title>
+    <style>
+        body {{ margin:0; padding:0; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; }}
+        .wrapper {{ width:100%; background-color:#f5f7fb; padding:20px 0; }}
+        .content {{ max-width:600px; margin:0 auto; background:#ffffff; border-radius:6px; overflow:hidden; }}
+        .header {{ padding:20px; text-align:center; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); }}
+        .logo {{ color:#ffffff; font-size:28px; font-weight:700; margin:0; }}
+        .tagline {{ color:#e0e7ff; font-size:14px; margin:8px 0 0 0; }}
+        .main-content {{ padding:30px 20px; }}
+        .greeting {{ font-size:18px; color:#1f2937; margin:0 0 20px 0; font-weight:600; }}
+        .content-text {{ font-size:16px; color:#374151; line-height:1.6; margin:0 0 16px 0; }}
+        .footer {{ background:#f9fafb; border-top:1px solid #e5e7eb; padding:20px; text-align:center; }}
+        .footer-logo {{ color:#374151; font-size:20px; font-weight:700; margin:0 0 8px 0; }}
+        .footer-text {{ color:#6b7280; font-size:14px; margin:4px 0; }}
+        .footer-links a {{ color:#2563eb; text-decoration:none; margin:0 10px; }}
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="content">
+            <div class="header">
+                <h1 class="logo">SOAR-AI</h1>
+                <p class="tagline">Corporate Travel Solutions</p>
+            </div>
+            <div class="main-content">
+                <h2 class="greeting">Dear {contact_name},</h2>
+                <div class="content-text">
+                    {rendered_content_with_tracking}
+                </div>
+                <div class="content-text">
+                    <p>Thank you for your interest in SOAR-AI's corporate travel solutions.</p>
+                    <p>Best regards,<br><strong>The SOAR-AI Team</strong></p>
+                </div>
+            </div>
+            <div class="footer">
+                <h3 class="footer-logo">SOAR-AI</h3>
+                <p class="footer-text">Transforming Corporate Travel Through Innovation</p>
+                <div class="footer-links">
+                    <a href="#unsubscribe">Unsubscribe</a> | <a href="#privacy">Privacy Policy</a>
+                </div>
+                <p class="footer-text" style="font-size:12px; margin-top:16px;">
+                    © 2025 SOAR-AI Corporation. All rights reserved.
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>"""
+                    rendered_content_with_tracking = html_content
                 
                 # Create plain text version
                 plain_text_content = strip_tags(rendered_content_with_tracking)
                 
                 email_msg = EmailMultiAlternatives(
                     subject=rendered_subject,
-                    body=rendered_content_with_tracking,  # Use HTML as primary body
+                    body=plain_text_content,  # Plain text as primary body
                     from_email=settings.DEFAULT_FROM_EMAIL or 'noreply@soarai.com',
                     to=[email_address],
                     bcc=['nagendran.g@infinitisoftware.net', 'muniraj@infinitisoftware.net']
                 )
                 
-                # Set HTML as the primary content type
-                email_msg.content_subtype = "html"
-                
-                # Add plain text as alternative
-                email_msg.attach_alternative(plain_text_content, "text/plain")
+                # Attach HTML as alternative
+                email_msg.attach_alternative(rendered_content_with_tracking, "text/html")
                 emails_to_send.append((email_msg, lead, tracking))
 
                 smtp_logger.info(

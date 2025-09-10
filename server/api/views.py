@@ -1923,6 +1923,12 @@ class LeadViewSet(viewsets.ModelViewSet):
                 return Response({"error": "No recipient email found"},
                                 status=400)
 
+            # Always use standard template layout design
+            from django.utils.html import strip_tags
+            from django.core.mail import EmailMultiAlternatives
+            from django.conf import settings
+            from datetime import datetime
+
             # Check if message is already complete HTML (standard template)
             is_complete_html = message.strip().startswith(
                 '<!DOCTYPE') or message.strip().startswith('<html')
@@ -1931,109 +1937,100 @@ class LeadViewSet(viewsets.ModelViewSet):
                 # Message is already complete HTML (from standard template)
                 html_message = message
                 plain_text_message = strip_tags(message)
-                print(f"Using pre-formatted template: {template_used}")
+                print(f"Using pre-formatted standard template: {template_used}")
             else:
-                # Message needs HTML wrapper - use enhanced template for corporate contacts
+                # Apply standard SOAR-AI template layout
                 plain_text_message = strip_tags(message)
 
-                if contact_type == "corporate":
-                    # Use enhanced corporate template
-                    html_message = f"""
-                    <!DOCTYPE html>
-                    <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
-                    <head>
-                        <meta charset="utf-8">
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                        <title>{subject}</title>
-                        <style>
-                            body {{ margin:0; padding:0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color:#f0f4f8; }}
-                            .wrapper {{ width:100%; background-color:#f0f4f8; padding:40px 20px; }}
-                            .content {{ max-width:650px; margin:0 auto; background:#ffffff; border-radius:16px; overflow:hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }}
-                            .header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding:40px 30px; text-align:center; color:#ffffff; }}
-                            .logo {{ font-size:32px; font-weight:800; margin:0; letter-spacing:-1px; }}
-                            .tagline {{ font-size:16px; margin:10px 0 0 0; opacity:0.9; }}
-                            .main-content {{ padding:40px 30px; }}
-                            .greeting {{ font-size:20px; color:#2d3748; margin:0 0 20px 0; font-weight:600; }}
-                            .content-text {{ font-size:16px; color:#4a5568; line-height:1.6; margin:0 0 20px 0; }}
-                            .footer {{ background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%); color:#a0aec0; padding:30px; text-align:center; }}
-                            .footer-logo {{ color:#ffffff; font-size:24px; font-weight:700; margin:0 0 10px 0; }}
-                            .footer-text {{ font-size:14px; margin:8px 0; }}
-                            .footer-links a {{ color:#81e6d9; text-decoration:none; margin:0 15px; }}
-                            ul {{ margin:16px 0; padding-left:20px; }}
-                            ul li {{ margin:8px 0; color:#4a5568; line-height:1.5; }}
-                        </style>
-                    </head>
-                    <body>
-                        <div class="wrapper">
-                            <div class="content">
-                                <div class="header">
-                                    <h1 class="logo">SOAR-AI</h1>
-                                    <p class="tagline">Corporate Travel Solutions</p>
-                                </div>
-                                <div class="main-content">
-                                    <h2 class="greeting">Dear {recipient_name or 'Valued Partner'},</h2>
-                                    <div class="content-text">
-                                        {message}
-                                    </div>
-                                    <div class="content-text">
-                                        <p>We look forward to the opportunity to transform your corporate travel experience.</p>
-                                        <p>Best regards,<br><strong>The SOAR-AI Partnership Team</strong></p>
-                                    </div>
-                                </div>
-                                <div class="footer">
-                                    <h3 class="footer-logo">SOAR-AI</h3>
-                                    <p class="footer-text">Transforming Corporate Travel Through Innovation</p>
-                                    <div class="footer-links">
-                                        <a href="#">Privacy Policy</a>
-                                        <a href="#">Terms of Service</a>
-                                        <a href="#">Unsubscribe</a>
-                                    </div>
-                                    <p class="footer-text" style="font-size:12px; margin-top:20px;">
-                                        © {datetime.now().year} SOAR-AI Corporation. All rights reserved.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </body>
-                    </html>
-                    """
-                else:
-                    # Use standard template for leads
-                    html_message = f"""
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <meta charset="utf-8">
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                        <title>{subject}</title>
-                        <style>
-                            body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }}
-                            .header {{ background-color: #007bff; color: white; padding: 20px; text-align: center; margin-bottom: 20px; }}
-                            .content {{ padding: 20px; background-color: #f9f9f9; }}
-                            .footer {{ margin-top: 20px; padding: 10px; text-align: center; font-size: 12px; color: #666; }}
-                            .button {{ display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; }}
-                        </style>
-                    </head>
-                    <body>
-                        <div class="header">
-                            <h1>SOAR-AI</h1>
-                            <p>Corporate Travel Solutions</p>
-                        </div>
-                        <div class="content">
-                            {message}
-                        </div>
-                        <div class="footer">
-                            <p>&copy; {datetime.now().year} SOAR-AI. All rights reserved.</p>
-                            <p><a href="#">Unsubscribe</a> | <a href="#">Privacy Policy</a></p>
-                        </div>
-                    </body>
-                    </html>
-                    """
+                # Standard SOAR-AI Email Template with professional design
+                html_message = f"""<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{subject}</title>
+    <style>
+        /* Email client compatibility styles */
+        body {{ margin:0; padding:0; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; }}
+        table {{ border-spacing:0; }}
+        img {{ border:0; display:block; }}
+        a {{ color:inherit; text-decoration:none; }}
 
-            # Send multipart email (plain text + HTML) with proper encoding
+        /* Main wrapper */
+        .wrapper {{ width:100%; background-color:#f5f7fb; padding:20px 0; }}
+        .content {{ max-width:600px; margin:0 auto; background:#ffffff; border-radius:6px; overflow:hidden; }}
+
+        /* Header styles */
+        .header {{ padding:20px; text-align:center; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); }}
+        .logo {{ max-width:160px; height:auto; color:#ffffff; font-size:28px; font-weight:700; margin:0; }}
+        .tagline {{ color:#e0e7ff; font-size:14px; margin:8px 0 0 0; }}
+
+        /* Main content */
+        .main-content {{ padding:30px 20px; }}
+        .greeting {{ font-size:18px; color:#1f2937; margin:0 0 20px 0; font-weight:600; }}
+        .content-text {{ font-size:16px; color:#374151; line-height:1.6; margin:0 0 16px 0; }}
+        .content-text p {{ margin:0 0 16px 0; }}
+        .content-text ul {{ margin:16px 0; padding-left:20px; }}
+        .content-text li {{ margin:6px 0; }}
+
+        /* CTA Button */
+        .cta-button {{ display:inline-block; background:#2563eb; color:#ffffff; padding:12px 24px; text-decoration:none; border-radius:6px; font-weight:600; margin:20px 0; }}
+        .cta-button:hover {{ background:#1d4ed8; }}
+
+        /* Footer */
+        .footer {{ background:#f9fafb; border-top:1px solid #e5e7eb; padding:20px; text-align:center; }}
+        .footer-logo {{ color:#374151; font-size:20px; font-weight:700; margin:0 0 8px 0; }}
+        .footer-text {{ color:#6b7280; font-size:14px; margin:4px 0; }}
+        .footer-links {{ margin:16px 0; }}
+        .footer-links a {{ color:#2563eb; text-decoration:none; margin:0 10px; }}
+        .footer-links a:hover {{ text-decoration:underline; }}
+
+        /* Responsive design */
+        @media only screen and (max-width: 600px) {{
+            .wrapper {{ padding:10px; }}
+            .main-content {{ padding:20px 15px; }}
+            .header {{ padding:15px; }}
+        }}
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="content">
+            <div class="header">
+                <h1 class="logo">SOAR-AI</h1>
+                <p class="tagline">Corporate Travel Solutions</p>
+            </div>
+            <div class="main-content">
+                <h2 class="greeting">Dear {recipient_name or 'Valued Partner'},</h2>
+                <div class="content-text">
+                    {message}
+                </div>
+                <div class="content-text">
+                    <p>We're committed to transforming your corporate travel experience with innovative solutions tailored to your business needs.</p>
+                    <p>Best regards,<br><strong>The SOAR-AI Team</strong></p>
+                </div>
+            </div>
+            <div class="footer">
+                <h3 class="footer-logo">SOAR-AI</h3>
+                <p class="footer-text">Transforming Corporate Travel Through Innovation</p>
+                <div class="footer-links">
+                    <a href="#privacy">Privacy Policy</a>
+                    <a href="#terms">Terms of Service</a>
+                    <a href="#unsubscribe">Unsubscribe</a>
+                </div>
+                <p class="footer-text" style="font-size:12px; margin-top:16px;">
+                    © {datetime.now().year} SOAR-AI Corporation. All rights reserved.
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>"""
+
+            # Create multipart email with proper MIME types
             email = EmailMultiAlternatives(
                 subject=subject,
-                body=plain_text_message,
+                body=plain_text_message,  # Plain text as primary body
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 to=[recipient_email],
                 bcc=[
@@ -2042,32 +2039,21 @@ class LeadViewSet(viewsets.ModelViewSet):
                 ],
             )
 
-            # Set HTML as primary content type
-            email.content_subtype = "html"
-            # Add plain text as alternative for better compatibility
-            email.attach_alternative(plain_text_message, "text/plain")
+            # Attach HTML version as alternative
+            email.attach_alternative(html_message, "text/html")
 
             # Send the email
             email.send(fail_silently=False)
 
             return Response({
-                "success":
-                True,
-                "message":
-                f"Email sent to {recipient_email}" +
-                (f" using {template_used} template" if template_used else ""),
-                "subject":
-                subject,
-                "recipient":
-                recipient_email,
-                "recipient_name":
-                recipient_name,
-                "contact_type":
-                contact_type,
-                "template_used":
-                template_used,
-                "method":
-                "Email"
+                "success": True,
+                "message": f"Email sent to {recipient_email} using standard SOAR-AI template",
+                "subject": subject,
+                "recipient": recipient_email,
+                "recipient_name": recipient_name,
+                "contact_type": contact_type,
+                "template_used": "Standard SOAR-AI Template",
+                "method": "Email"
             })
 
         except Exception as e:
