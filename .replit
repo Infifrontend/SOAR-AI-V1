@@ -25,7 +25,7 @@ localPort = 8000
 externalPort = 8000
 
 [workflows]
-runButton = "Full Stack Development"
+runButton = "Development Server"
 
 [[workflows.workflow]]
 name = "Run"
@@ -84,6 +84,23 @@ args = "cd server && python manage.py runserver 0.0.0.0:8000"
 name = "Start Frontend"
 author = 44435766
 mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd client && npm run dev"
+
+[[workflows.workflow]]
+name = "Development Server"
+author = 42993393
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd server && python manage.py migrate --run-syncdb"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd server && python manage.py runserver 0.0.0.0:8000 &"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
