@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import axios, { AxiosResponse } from 'axios';
 
 // Use the correct API base URL - check if environment variable exists, otherwise use local
-const API_BASE_URL = 'https://51f54198-a9a2-4b01-b85b-23549e0b6e1c-00-385i2ayjj8nal.pike.replit.dev:5173' || 'http://localhost:8000/api';
+const API_BASE_URL = '/api';
 
 interface ApiState<T> {
   data: T | null;
