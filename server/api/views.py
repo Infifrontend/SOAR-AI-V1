@@ -2041,9 +2041,15 @@ class LeadViewSet(viewsets.ModelViewSet):
                     'muniraj@infinitisoftware.net'
                 ],
             )
-            # Ensure HTML content is properly attached with correct MIME type
-            email.attach_alternative(html_message, "text/html")
-            email.mixed_subtype = 'related'  # For embedded images
+            
+            # Set proper content type for multipart emails
+            email.content_subtype = "html"  # Set main content as HTML
+            email.body = html_message  # Use HTML as primary body
+            
+            # Add plain text as alternative for better compatibility
+            email.attach_alternative(plain_text_message, "text/plain")
+            
+            # Send the email
             email.send(fail_silently=False)
 
             return Response({
@@ -2125,10 +2131,10 @@ class LeadViewSet(viewsets.ModelViewSet):
                     else:
                         html_content = message
 
-                    # Build the email with both plain-text + HTML versions
+                    # Build the email with proper HTML content type
                     email = EmailMultiAlternatives(
                         subject=subject,
-                        body=plain_text_message,
+                        body=html_content,  # Use HTML as primary body
                         from_email=settings.DEFAULT_FROM_EMAIL,
                         to=[recipient_email],
                         bcc=[
@@ -2137,8 +2143,12 @@ class LeadViewSet(viewsets.ModelViewSet):
                         ],
                     )
 
-                    email.attach_alternative(html_content, "text/html")
-                    email.mixed_subtype = "related"  # required for inline images
+                    # Set HTML as the primary content type
+                    email.content_subtype = "html"
+                    
+                    # Add plain text as alternative
+                    email.attach_alternative(plain_text_message, "text/plain")
+                    
                     email.send(fail_silently=False)
 
                     return Response(
@@ -2499,7 +2509,7 @@ class OpportunityViewSet(viewsets.ModelViewSet):
 
                     email = EmailMultiAlternatives(
                         subject=subject,
-                        body=plain_text_content,  # Plain text fallback
+                        body=email_content,  # Use HTML as primary body
                         from_email=settings.DEFAULT_FROM_EMAIL,
                         to=[recipient_email],
                         bcc=[
@@ -2508,8 +2518,11 @@ class OpportunityViewSet(viewsets.ModelViewSet):
                         ],
                     )
 
-                    # Attach HTML version
-                    email.attach_alternative(email_content, "text/html")
+                    # Set HTML as primary content type
+                    email.content_subtype = "html"
+                    
+                    # Add plain text as alternative
+                    email.attach_alternative(plain_text_content, "text/plain")
 
                     # Send the email
                     email.send(fail_silently=False)
