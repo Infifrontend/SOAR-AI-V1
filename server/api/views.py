@@ -26,38 +26,45 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q, Sum, Count, Avg
 from django.utils import timezone
 from datetime import datetime, timedelta
-from .models import (
-    Company, Contact, Lead, Opportunity, OpportunityActivity, Contract, ContractBreach,
-    CampaignTemplate, EmailCampaign, TravelOffer, SupportTicket,
-    RevenueForecast, LeadNote, LeadHistory, ActivityLog, AIConversation, ProposalDraft, AirportCode
-)
-from .serializers import (
-    CompanySerializer, ContactSerializer, LeadSerializer, OpportunitySerializer,
-    OpportunityActivitySerializer, ContractSerializer, ContractBreachSerializer,
-    CampaignTemplateSerializer, EmailCampaignSerializer, TravelOfferSerializer,
-    SupportTicketSerializer, RevenueForecastSerializer, LeadNoteSerializer,
-    LeadHistorySerializer, ActivityLogSerializer, AIConversationSerializer, ProposalDraftSerializer, AirportCodeSerializer
-)
+from .models import (Company, Contact, Lead, Opportunity, OpportunityActivity,
+                     Contract, ContractBreach, CampaignTemplate, EmailCampaign,
+                     TravelOffer, SupportTicket, RevenueForecast, LeadNote,
+                     LeadHistory, ActivityLog, AIConversation, ProposalDraft,
+                     AirportCode)
+from .serializers import (CompanySerializer, ContactSerializer, LeadSerializer,
+                          OpportunitySerializer, OpportunityActivitySerializer,
+                          ContractSerializer, ContractBreachSerializer,
+                          CampaignTemplateSerializer, EmailCampaignSerializer,
+                          TravelOfferSerializer, SupportTicketSerializer,
+                          RevenueForecastSerializer, LeadNoteSerializer,
+                          LeadHistorySerializer, ActivityLogSerializer,
+                          AIConversationSerializer, ProposalDraftSerializer,
+                          AirportCodeSerializer)
+
 
 # Helper function to create lead history entries
-def create_lead_history(lead, history_type, action, details, icon=None, user=None):
+def create_lead_history(lead,
+                        history_type,
+                        action,
+                        details,
+                        icon=None,
+                        user=None):
     """Creates a LeadHistory entry if the table exists."""
     try:
         from .models import LeadHistory
-        LeadHistory.objects.create(
-            lead=lead,
-            history_type=history_type,
-            action=action,
-            details=details,
-            icon=icon or 'plus',
-            user=user,
-            metadata={},
-            timestamp=timezone.now()
-        )
+        LeadHistory.objects.create(lead=lead,
+                                   history_type=history_type,
+                                   action=action,
+                                   details=details,
+                                   icon=icon or 'plus',
+                                   user=user,
+                                   metadata={},
+                                   timestamp=timezone.now())
     except Exception as e:
         # Log the error but don't fail the main operation
         print(f"Error creating lead history: {str(e)}")
         pass
+
 
 class CompanyViewSet(viewsets.ModelViewSet):
     queryset = Company.objects.all()
@@ -75,7 +82,8 @@ class CompanyViewSet(viewsets.ModelViewSet):
         travel_budget = filters.get('travelBudget', '')
         travel_frequency = filters.get('travelFrequency', '')
         company_size = filters.get('companySize', '')
-        global_search = filters.get('globalSearch', '') # Added global search parameter
+        global_search = filters.get('globalSearch',
+                                    '')  # Added global search parameter
 
         # Advanced filters support
         industries = filters.get('industries', [])
@@ -93,10 +101,8 @@ class CompanyViewSet(viewsets.ModelViewSet):
 
         if query:
             companies = companies.filter(
-                Q(name__icontains=query) |
-                Q(location__icontains=query) |
-                Q(description__icontains=query)
-            )
+                Q(name__icontains=query) | Q(location__icontains=query)
+                | Q(description__icontains=query))
 
         if industry:
             companies = companies.filter(industry=industry)
@@ -107,11 +113,19 @@ class CompanyViewSet(viewsets.ModelViewSet):
         if location:
             # Handle location filtering with different mapping
             location_mapping = {
-                'north-america': ['USA', 'United States', 'North America', 'Canada', 'Mexico'],
-                'europe': ['Europe', 'UK', 'Germany', 'France', 'Italy', 'Spain', 'Netherlands'],
-                'asia-pacific': ['Asia', 'Asia-Pacific', 'Japan', 'Singapore', 'Australia', 'China', 'India'],
+                'north-america':
+                ['USA', 'United States', 'North America', 'Canada', 'Mexico'],
+                'europe': [
+                    'Europe', 'UK', 'Germany', 'France', 'Italy', 'Spain',
+                    'Netherlands'
+                ],
+                'asia-pacific': [
+                    'Asia', 'Asia-Pacific', 'Japan', 'Singapore', 'Australia',
+                    'China', 'India'
+                ],
                 'global': ['Global', 'Worldwide', 'International'],
-                'emerging': ['Brazil', 'India', 'South Africa', 'Eastern Europe']
+                'emerging':
+                ['Brazil', 'India', 'South Africa', 'Eastern Europe']
             }
 
             if location in location_mapping:
@@ -137,7 +151,8 @@ class CompanyViewSet(viewsets.ModelViewSet):
                 if max_budget == float('inf'):
                     companies = companies.filter(travel_budget__gte=min_budget)
                 else:
-                    companies = companies.filter(travel_budget__gte=min_budget, travel_budget__lt=max_budget)
+                    companies = companies.filter(travel_budget__gte=min_budget,
+                                                 travel_budget__lt=max_budget)
 
         # Handle company size filtering
         if company_size:
@@ -150,7 +165,8 @@ class CompanyViewSet(viewsets.ModelViewSet):
             }
 
             if company_size in size_mapping:
-                companies = companies.filter(size__in=size_mapping[company_size])
+                companies = companies.filter(
+                    size__in=size_mapping[company_size])
 
         # Handle multiple industries filter (advanced filter)
         if industries:
@@ -159,10 +175,8 @@ class CompanyViewSet(viewsets.ModelViewSet):
         # Handle employee range filter (advanced filter)
         if employee_range and len(employee_range) == 2:
             min_employees, max_employees = employee_range
-            companies = companies.filter(
-                employee_count__gte=min_employees,
-                employee_count__lte=max_employees
-            )
+            companies = companies.filter(employee_count__gte=min_employees,
+                                         employee_count__lte=max_employees)
 
         # Handle revenue range filter (advanced filter)
         if revenue_range:
@@ -177,12 +191,12 @@ class CompanyViewSet(viewsets.ModelViewSet):
             if revenue_range in revenue_ranges:
                 min_revenue, max_revenue = revenue_ranges[revenue_range]
                 if max_revenue == float('inf'):
-                    companies = companies.filter(annual_revenue__gte=min_revenue)
+                    companies = companies.filter(
+                        annual_revenue__gte=min_revenue)
                 else:
                     companies = companies.filter(
                         annual_revenue__gte=min_revenue,
-                        annual_revenue__lt=max_revenue
-                    )
+                        annual_revenue__lt=max_revenue)
 
         serializer = self.get_serializer(companies, many=True)
         return Response(serializer.data)
@@ -190,11 +204,19 @@ class CompanyViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def stats(self, request):
         stats = {
-            'total_companies': self.queryset.filter(is_active=True).count(),
-            'by_industry': dict(self.queryset.values_list('industry').annotate(count=Count('id'))),
-            'by_size': dict(self.queryset.values_list('size').annotate(count=Count('id'))),
-            'total_revenue': self.queryset.aggregate(total=Sum('annual_revenue'))['total'] or 0,
-            'total_employees': self.queryset.aggregate(total=Sum('employee_count'))['total'] or 0,
+            'total_companies':
+            self.queryset.filter(is_active=True).count(),
+            'by_industry':
+            dict(
+                self.queryset.values_list('industry').annotate(
+                    count=Count('id'))),
+            'by_size':
+            dict(
+                self.queryset.values_list('size').annotate(count=Count('id'))),
+            'total_revenue':
+            self.queryset.aggregate(total=Sum('annual_revenue'))['total'] or 0,
+            'total_employees':
+            self.queryset.aggregate(total=Sum('employee_count'))['total'] or 0,
         }
         return Response(stats)
 
@@ -204,12 +226,13 @@ class CompanyViewSet(viewsets.ModelViewSet):
         company_names = request.data.get('company_names', [])
 
         if not company_names:
-            return Response({'error': 'No company names provided'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'No company names provided'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         # Find companies that exist as leads
         existing_leads = Lead.objects.select_related('company').filter(
-            company__name__in=company_names
-        ).values_list('company__name', flat=True)
+            company__name__in=company_names).values_list('company__name',
+                                                         flat=True)
 
         # Create a mapping of company name to lead status
         lead_status = {}
@@ -232,9 +255,11 @@ class CompanyViewSet(viewsets.ModelViewSet):
             })
         except Exception as e:
             return Response(
-                {'error': f'Failed to mark company as moved to lead: {str(e)}'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+                {
+                    'error':
+                    f'Failed to mark company as moved to lead: {str(e)}'
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=False, methods=['post'])
     def upload(self, request):
@@ -245,14 +270,14 @@ class CompanyViewSet(viewsets.ModelViewSet):
             # Check if pandas is available
             if not PANDAS_AVAILABLE:
                 return Response(
-                    {'error': 'Pandas library is not installed. Please install it to use file upload functionality.'},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
+                    {
+                        'error':
+                        'Pandas library is not installed. Please install it to use file upload functionality.'
+                    },
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             if 'file' not in request.FILES:
-                return Response(
-                    {'error': 'No file provided'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                return Response({'error': 'No file provided'},
+                                status=status.HTTP_400_BAD_REQUEST)
 
             uploaded_file = request.FILES['file']
 
@@ -261,16 +286,16 @@ class CompanyViewSet(viewsets.ModelViewSet):
             file_extension = uploaded_file.name.lower().split('.')[-1]
             if f'.{file_extension}' not in allowed_extensions:
                 return Response(
-                    {'error': 'Invalid file type. Please upload Excel (.xlsx, .xls) or CSV (.csv) files only.'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                    {
+                        'error':
+                        'Invalid file type. Please upload Excel (.xlsx, .xls) or CSV (.csv) files only.'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST)
 
             # Validate file size (10MB limit)
             if uploaded_file.size > 10 * 1024 * 1024:
-                return Response(
-                    {'error': 'File size exceeds 10MB limit'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                return Response({'error': 'File size exceeds 10MB limit'},
+                                status=status.HTTP_400_BAD_REQUEST)
 
             # Read the file
             try:
@@ -279,29 +304,35 @@ class CompanyViewSet(viewsets.ModelViewSet):
                 else:
                     # Specify engine explicitly based on file extension
                     if file_extension == 'xlsx':
-                        df = pd.read_excel(io.BytesIO(uploaded_file.read()), engine='openpyxl')
+                        df = pd.read_excel(io.BytesIO(uploaded_file.read()),
+                                           engine='openpyxl')
                     elif file_extension == 'xls':
-                        df = pd.read_excel(io.BytesIO(uploaded_file.read()), engine='xlrd')
+                        df = pd.read_excel(io.BytesIO(uploaded_file.read()),
+                                           engine='xlrd')
                     else:
                         # Fallback to openpyxl for unknown Excel formats
-                        df = pd.read_excel(io.BytesIO(uploaded_file.read()), engine='openpyxl')
+                        df = pd.read_excel(io.BytesIO(uploaded_file.read()),
+                                           engine='openpyxl')
             except Exception as e:
-                return Response(
-                    {'error': f'Failed to read file: {str(e)}'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                return Response({'error': f'Failed to read file: {str(e)}'},
+                                status=status.HTTP_400_BAD_REQUEST)
 
             # Validate required columns
             required_columns = [
-                'Company Name', 'Company Type', 'Industry', 'Number of Employees', 'Location', 'Email'
+                'Company Name', 'Company Type', 'Industry',
+                'Number of Employees', 'Location', 'Email'
             ]
 
-            missing_columns = [col for col in required_columns if col not in df.columns]
+            missing_columns = [
+                col for col in required_columns if col not in df.columns
+            ]
             if missing_columns:
                 return Response(
-                    {'error': f'Missing required columns: {", ".join(missing_columns)}'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                    {
+                        'error':
+                        f'Missing required columns: {", ".join(missing_columns)}'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST)
 
             # Process the data
             created_count = 0
@@ -311,48 +342,97 @@ class CompanyViewSet(viewsets.ModelViewSet):
             for index, row in df.iterrows():
                 try:
                     # Skip rows with empty required fields
-                    if pd.isna(row['Company Name']) or not str(row['Company Name']).strip():
+                    if pd.isna(row['Company Name']) or not str(
+                            row['Company Name']).strip():
                         skipped_count += 1
                         continue
 
                     company_name = str(row['Company Name']).strip()
 
                     # Check if company already exists
-                    if Company.objects.filter(name__iexact=company_name).exists():
+                    if Company.objects.filter(
+                            name__iexact=company_name).exists():
                         skipped_count += 1
                         continue
 
                     # Map form fields to model fields
                     company_data = {
-                        'name': company_name,
-                        'industry': self._map_industry(str(row.get('Industry', '')).strip()),
-                        'size': self._map_company_size(str(row.get('Company Size Category', '')).strip()),
-                        'location': str(row.get('Location', '')).strip(),
-                        'email': str(row.get('Email', '')).strip(),
-                        'phone': str(row.get('Phone', '')).strip(),
-                        'website': str(row.get('Website', '')).strip(),
-                        'company_type': self._map_company_type(str(row.get('Company Type', '')).strip()),
-                        'year_established': self._safe_int(row.get('Year Established')),
-                        'employee_count': self._safe_int(row.get('Number of Employees')),
-                        'annual_revenue': self._safe_decimal(row.get('Annual Revenue (Millions)'), multiplier=1000000),
-                        'travel_budget': self._safe_decimal(row.get('Annual Travel Budget (Millions)'), multiplier=1000000),
-                        'annual_travel_volume': str(row.get('Annual Travel Volume', '')).strip(),
-                        'travel_frequency': self._map_travel_frequency(str(row.get('Travel Frequency', '')).strip()),
-                        'preferred_class': self._map_preferred_class(str(row.get('Preferred Class', '')).strip()),
-                        'credit_rating': self._map_credit_rating(str(row.get('Credit Rating', '')).strip()),
-                        'payment_terms': self._map_payment_terms(str(row.get('Payment Terms', '')).strip()),
-                        'sustainability_focus': self._map_sustainability(str(row.get('Sustainability Focus', '')).strip()),
-                        'risk_level': self._map_risk_level(str(row.get('Risk Level', '')).strip()),
-                        'expansion_plans': self._map_expansion_plans(str(row.get('Expansion Plans', '')).strip()),
-                        'specialties': str(row.get('Specialties (comma-separated)', '')).strip(),
-                        'technology_integration': str(row.get('Technology Integration (comma-separated)', '')).strip(),
-                        'current_airlines': str(row.get('Current Airlines (comma-separated)', '')).strip(),
-                        'description': str(row.get('Notes', '')).strip(),
-                        'is_active': True
+                        'name':
+                        company_name,
+                        'industry':
+                        self._map_industry(
+                            str(row.get('Industry', '')).strip()),
+                        'size':
+                        self._map_company_size(
+                            str(row.get('Company Size Category', '')).strip()),
+                        'location':
+                        str(row.get('Location', '')).strip(),
+                        'email':
+                        str(row.get('Email', '')).strip(),
+                        'phone':
+                        str(row.get('Phone', '')).strip(),
+                        'website':
+                        str(row.get('Website', '')).strip(),
+                        'company_type':
+                        self._map_company_type(
+                            str(row.get('Company Type', '')).strip()),
+                        'year_established':
+                        self._safe_int(row.get('Year Established')),
+                        'employee_count':
+                        self._safe_int(row.get('Number of Employees')),
+                        'annual_revenue':
+                        self._safe_decimal(
+                            row.get('Annual Revenue (Millions)'),
+                            multiplier=1000000),
+                        'travel_budget':
+                        self._safe_decimal(
+                            row.get('Annual Travel Budget (Millions)'),
+                            multiplier=1000000),
+                        'annual_travel_volume':
+                        str(row.get('Annual Travel Volume', '')).strip(),
+                        'travel_frequency':
+                        self._map_travel_frequency(
+                            str(row.get('Travel Frequency', '')).strip()),
+                        'preferred_class':
+                        self._map_preferred_class(
+                            str(row.get('Preferred Class', '')).strip()),
+                        'credit_rating':
+                        self._map_credit_rating(
+                            str(row.get('Credit Rating', '')).strip()),
+                        'payment_terms':
+                        self._map_payment_terms(
+                            str(row.get('Payment Terms', '')).strip()),
+                        'sustainability_focus':
+                        self._map_sustainability(
+                            str(row.get('Sustainability Focus', '')).strip()),
+                        'risk_level':
+                        self._map_risk_level(
+                            str(row.get('Risk Level', '')).strip()),
+                        'expansion_plans':
+                        self._map_expansion_plans(
+                            str(row.get('Expansion Plans', '')).strip()),
+                        'specialties':
+                        str(row.get('Specialties (comma-separated)',
+                                    '')).strip(),
+                        'technology_integration':
+                        str(
+                            row.get('Technology Integration (comma-separated)',
+                                    '')).strip(),
+                        'current_airlines':
+                        str(row.get('Current Airlines (comma-separated)',
+                                    '')).strip(),
+                        'description':
+                        str(row.get('Notes', '')).strip(),
+                        'is_active':
+                        True
                     }
 
                     # Remove empty strings and None values
-                    company_data = {k: v for k, v in company_data.items() if v not in ['', None, 'nan']}
+                    company_data = {
+                        k: v
+                        for k, v in company_data.items()
+                        if v not in ['', None, 'nan']
+                    }
 
                     # Create the company
                     Company.objects.create(**company_data)
@@ -371,16 +451,15 @@ class CompanyViewSet(viewsets.ModelViewSet):
             }
 
             if errors:
-                response_data['errors'] = errors[:10]  # Limit to first 10 errors
+                response_data[
+                    'errors'] = errors[:10]  # Limit to first 10 errors
                 response_data['total_errors'] = len(errors)
 
             return Response(response_data, status=status.HTTP_201_CREATED)
 
         except Exception as e:
-            return Response(
-                {'error': f'Upload failed: {str(e)}'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return Response({'error': f'Upload failed: {str(e)}'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def _map_industry(self, industry):
         """Map industry values to model choices"""
@@ -537,104 +616,60 @@ class CompanyViewSet(viewsets.ModelViewSet):
             # Check if pandas is available
             if not PANDAS_AVAILABLE:
                 return Response(
-                    {'error': 'Pandas library is not installed. Please install it to use file download functionality.'},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
+                    {
+                        'error':
+                        'Pandas library is not installed. Please install it to use file download functionality.'
+                    },
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             # Create sample data with all required columns
             sample_data = {
                 'Company Name': [
-                    'TechCorp Solutions',
-                    'Global Manufacturing Inc',
+                    'TechCorp Solutions', 'Global Manufacturing Inc',
                     'Healthcare Plus'
                 ],
-                'Industry': [
-                    'Technology',
-                    'Manufacturing',
-                    'Healthcare'
-                ],
+                'Industry': ['Technology', 'Manufacturing', 'Healthcare'],
                 'Company Size Category': [
-                    'Large (1001-5000)',
-                    'Enterprise (5000+)',
+                    'Large (1001-5000)', 'Enterprise (5000+)',
                     'Medium (201-1000)'
                 ],
-                'Location': [
-                    'San Francisco, CA',
-                    'Chicago, IL',
-                    'Boston, MA'
-                ],
+                'Location': ['San Francisco, CA', 'Chicago, IL', 'Boston, MA'],
                 'Email': [
-                    'contact@techcorp.com',
-                    'info@globalmanufacturing.com',
+                    'contact@techcorp.com', 'info@globalmanufacturing.com',
                     'admin@healthcareplus.com'
                 ],
                 'Phone': [
-                    '+1 (555) 123-4567',
-                    '+1 (555) 987-6543',
+                    '+1 (555) 123-4567', '+1 (555) 987-6543',
                     '+1 (555) 456-7890'
                 ],
                 'Website': [
-                    'www.techcorp.com',
-                    'www.globalmanufacturing.com',
+                    'www.techcorp.com', 'www.globalmanufacturing.com',
                     'www.healthcareplus.com'
                 ],
-                'Company Type': [
-                    'Corporation',
-                    'Corporation',
-                    'Corporation'
-                ],
+                'Company Type': ['Corporation', 'Corporation', 'Corporation'],
                 'Year Established': [2010, 1995, 2005],
                 'Number of Employees': [2500, 8000, 750],
                 'Annual Revenue (Millions)': [150, 500, 80],
                 'Annual Travel Budget (Millions)': [5, 15, 3],
-                'Annual Travel Volume': [
-                    '500+ trips/year',
-                    '1000+ trips/year',
-                    '200+ trips/year'
-                ],
-                'Travel Frequency': [
-                    'Weekly',
-                    'Daily',
-                    'Monthly'
-                ],
-                'Preferred Class': [
-                    'Business',
-                    'Economy Plus',
-                    'Economy'
-                ],
+                'Annual Travel Volume':
+                ['500+ trips/year', '1000+ trips/year', '200+ trips/year'],
+                'Travel Frequency': ['Weekly', 'Daily', 'Monthly'],
+                'Preferred Class': ['Business', 'Economy Plus', 'Economy'],
                 'Credit Rating': ['AAA', 'AA', 'A'],
-                'Payment Terms': [
-                    'Net 30',
-                    'Net 15',
-                    'Net 45'
-                ],
-                'Sustainability Focus': [
-                    'High',
-                    'Very High',
-                    'Medium'
-                ],
-                'Risk Level': [
-                    'Low',
-                    'Very Low',
-                    'Medium'
-                ],
-                'Expansion Plans': [
-                    'Aggressive',
-                    'Moderate',
-                    'Conservative'
-                ],
+                'Payment Terms': ['Net 30', 'Net 15', 'Net 45'],
+                'Sustainability Focus': ['High', 'Very High', 'Medium'],
+                'Risk Level': ['Low', 'Very Low', 'Medium'],
+                'Expansion Plans': ['Aggressive', 'Moderate', 'Conservative'],
                 'Specialties (comma-separated)': [
                     'Software Development, Cloud Services',
                     'Heavy Machinery, Industrial Equipment',
                     'Medical Devices, Telemedicine'
                 ],
                 'Technology Integration (comma-separated)': [
-                    'API Integration, Mobile Apps',
-                    'IoT, Automation Systems',
+                    'API Integration, Mobile Apps', 'IoT, Automation Systems',
                     'EMR Systems, Patient Portals'
                 ],
                 'Current Airlines (comma-separated)': [
-                    'Delta, United, American',
-                    'Southwest, JetBlue',
+                    'Delta, United, American', 'Southwest, JetBlue',
                     'Alaska, Spirit'
                 ],
                 'Notes': [
@@ -667,24 +702,27 @@ class CompanyViewSet(viewsets.ModelViewSet):
                         except:
                             pass
                     adjusted_width = min(max_length + 2, 50)
-                    worksheet.column_dimensions[column_letter].width = adjusted_width
+                    worksheet.column_dimensions[
+                        column_letter].width = adjusted_width
 
             output.seek(0)
 
             # Create HTTP response
             response = HttpResponse(
                 output.getvalue(),
-                content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                content_type=
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             )
-            response['Content-Disposition'] = 'attachment; filename="corporate_data_sample_template.xlsx"'
+            response[
+                'Content-Disposition'] = 'attachment; filename="corporate_data_sample_template.xlsx"'
 
             return response
 
         except Exception as e:
             return Response(
                 {'error': f'Failed to generate sample file: {str(e)}'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class ContactViewSet(viewsets.ModelViewSet):
     queryset = Contact.objects.all()
@@ -696,8 +734,10 @@ class ContactViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(contacts, many=True)
         return Response(serializer.data)
 
+
 class LeadViewSet(viewsets.ModelViewSet):
-    queryset = Lead.objects.select_related('company', 'contact', 'assigned_to').all()
+    queryset = Lead.objects.select_related('company', 'contact',
+                                           'assigned_to').all()
     serializer_class = LeadSerializer
 
     def create(self, request, *args, **kwargs):
@@ -718,8 +758,7 @@ class LeadViewSet(viewsets.ModelViewSet):
                     'annual_revenue': company_data.get('annual_revenue'),
                     'travel_budget': company_data.get('travel_budget'),
                     'is_active': True
-                }
-            )
+                })
 
             # Create contact
             contact = Contact.objects.create(
@@ -729,8 +768,7 @@ class LeadViewSet(viewsets.ModelViewSet):
                 email=contact_data.get('email'),
                 phone=contact_data.get('phone', ''),
                 position=contact_data.get('position', ''),
-                is_decision_maker=contact_data.get('is_decision_maker', False)
-            )
+                is_decision_maker=contact_data.get('is_decision_maker', False))
 
             # Create the lead
             lead = Lead.objects.create(
@@ -743,8 +781,7 @@ class LeadViewSet(viewsets.ModelViewSet):
                 estimated_value=data.get('estimated_value'),
                 notes=data.get('notes', ''),
                 next_action=data.get('next_action', ''),
-                next_action_date=data.get('next_action_date')
-            )
+                next_action_date=data.get('next_action_date'))
 
             # Mark company as moved to lead
             company.move_as_lead = True
@@ -755,17 +792,19 @@ class LeadViewSet(viewsets.ModelViewSet):
                 lead=lead,
                 history_type='creation',
                 action='Lead created',
-                details=f"Lead created from {lead.source}. Initial contact information collected for {lead.company.name}.",
+                details=
+                f"Lead created from {lead.source}. Initial contact information collected for {lead.company.name}.",
                 icon='plus',
-                user=self.request.user if self.request.user.is_authenticated else None
-            )
+                user=self.request.user
+                if self.request.user.is_authenticated else None)
 
             # Serialize and return the created lead
             serializer = self.get_serializer(lead)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': str(e)},
+                            status=status.HTTP_400_BAD_REQUEST)
 
     def perform_create(self, serializer):
         """Create lead and initial history entry"""
@@ -777,13 +816,13 @@ class LeadViewSet(viewsets.ModelViewSet):
                 lead=lead,
                 history_type='creation',
                 action='Lead created',
-                details=f'Lead created from {lead.source} source. Initial contact information collected for {lead.company.name}.',
+                details=
+                f'Lead created from {lead.source} source. Initial contact information collected for {lead.company.name}.',
                 icon='plus',
-                user=self.request.user if self.request.user.is_authenticated else None
-            )
+                user=self.request.user
+                if self.request.user.is_authenticated else None)
         except Exception as e:
             print(f"Error creating initial lead history: {e}")
-
 
     def get_queryset(self):
         queryset = self.queryset
@@ -808,11 +847,10 @@ class LeadViewSet(viewsets.ModelViewSet):
 
         if search:
             queryset = queryset.filter(
-                Q(company__name__icontains=search) |
-                Q(contact__first_name__icontains=search) |
-                Q(contact__last_name__icontains=search) |
-                Q(contact__email__icontains=search)
-            )
+                Q(company__name__icontains=search)
+                | Q(contact__first_name__icontains=search)
+                | Q(contact__last_name__icontains=search)
+                | Q(contact__email__icontains=search))
 
         return queryset.order_by('-created_at')
 
@@ -826,15 +864,23 @@ class LeadViewSet(viewsets.ModelViewSet):
             stats[status] = {
                 'count': count,
                 'label': status_label,
-                'percentage': (count / total_leads * 100) if total_leads > 0 else 0
+                'percentage':
+                (count / total_leads * 100) if total_leads > 0 else 0
             }
 
         stats['summary'] = {
-            'total_leads': total_leads,
-            'qualified_leads': self.queryset.filter(status='qualified').count(),
-            'unqualified_leads': self.queryset.filter(status='unqualified').count(),
-            'active_leads': self.queryset.filter(status__in=['new', 'contacted', 'qualified']).count(),
-            'conversion_rate': (self.queryset.filter(status='won').count() / max(Lead.objects.count(), 1)) if total_leads > 0 else 0
+            'total_leads':
+            total_leads,
+            'qualified_leads':
+            self.queryset.filter(status='qualified').count(),
+            'unqualified_leads':
+            self.queryset.filter(status='unqualified').count(),
+            'active_leads':
+            self.queryset.filter(
+                status__in=['new', 'contacted', 'qualified']).count(),
+            'conversion_rate':
+            (self.queryset.filter(status='won').count() /
+             max(Lead.objects.count(), 1)) if total_leads > 0 else 0
         }
 
         return Response(stats)
@@ -857,17 +903,18 @@ class LeadViewSet(viewsets.ModelViewSet):
             limit = min(int(filters.get('limit', 50)), 100)  # Max 100 records
 
             # Start with optimized queryset with prefetch for notes and campaigns
-            leads = Lead.objects.select_related('company', 'contact').prefetch_related(
-                'lead_notes', 'emailcampaign_set'
-            ).only(
-                'id', 'status', 'source', 'priority', 'score', 'estimated_value',
-                'notes', 'next_action', 'next_action_date', 'created_at', 'updated_at',
-                'assigned_agent',
-                'company__id', 'company__name', 'company__industry', 'company__location',
-                'company__size', 'company__employee_count',
-                'contact__id', 'contact__first_name', 'contact__last_name',
-                'contact__email', 'contact__phone', 'contact__position'
-            )
+            leads = Lead.objects.select_related(
+                'company', 'contact').prefetch_related(
+                    'lead_notes', 'emailcampaign_set').only(
+                        'id', 'status', 'source', 'priority', 'score',
+                        'estimated_value', 'notes', 'next_action',
+                        'next_action_date', 'created_at', 'updated_at',
+                        'assigned_agent', 'company__id', 'company__name',
+                        'company__industry', 'company__location',
+                        'company__size', 'company__employee_count',
+                        'contact__id', 'contact__first_name',
+                        'contact__last_name', 'contact__email',
+                        'contact__phone', 'contact__position')
 
             # Apply filters efficiently
             if status_filter and status_filter != 'all':
@@ -877,10 +924,9 @@ class LeadViewSet(viewsets.ModelViewSet):
 
             if search_term:
                 leads = leads.filter(
-                    Q(company__name__icontains=search_term) |
-                    Q(contact__first_name__icontains=search_term) |
-                    Q(contact__last_name__icontains=search_term)
-                )
+                    Q(company__name__icontains=search_term)
+                    | Q(contact__first_name__icontains=search_term)
+                    | Q(contact__last_name__icontains=search_term))
 
             # Combine score and engagement filters (they're the same logic)
             score_filter = score or engagement
@@ -909,25 +955,39 @@ class LeadViewSet(viewsets.ModelViewSet):
 
                 # Check if lead has been moved to opportunity by checking the actual opportunity table
                 # Use the database state as the source of truth without updating during search
-                has_opportunity_in_db = Opportunity.objects.filter(lead=lead).exists()
+                has_opportunity_in_db = Opportunity.objects.filter(
+                    lead=lead).exists()
 
                 # Use the database state directly - don't update during search to prevent race conditions
                 has_opportunity = has_opportunity_in_db
 
                 lead_data = {
-                    'id': lead.id,
-                    'status': lead.status,
-                    'source': lead.source,
-                    'priority': lead.priority,
-                    'score': lead.score,
-                    'estimated_value': lead.estimated_value,
-                    'notes': lead.notes,
-                    'next_action': lead.next_action,
-                    'next_action_date': lead.next_action_date,
-                    'created_at': lead.created_at,
-                    'updated_at': lead.updated_at,
-                    'assigned_to': lead.assigned_agent,
-                    'has_opportunity': has_opportunity,
+                    'id':
+                    lead.id,
+                    'status':
+                    lead.status,
+                    'source':
+                    lead.source,
+                    'priority':
+                    lead.priority,
+                    'score':
+                    lead.score,
+                    'estimated_value':
+                    lead.estimated_value,
+                    'notes':
+                    lead.notes,
+                    'next_action':
+                    lead.next_action,
+                    'next_action_date':
+                    lead.next_action_date,
+                    'created_at':
+                    lead.created_at,
+                    'updated_at':
+                    lead.updated_at,
+                    'assigned_to':
+                    lead.assigned_agent,
+                    'has_opportunity':
+                    has_opportunity,
                     'company': {
                         'id': lead.company.id,
                         'name': lead.company.name,
@@ -944,19 +1004,25 @@ class LeadViewSet(viewsets.ModelViewSet):
                         'phone': lead.contact.phone,
                         'position': lead.contact.position
                     },
-                    'notes_count': notes_count,
-                    'campaign_count': campaign_count,
-                    'leadNotes': [
-                        {
-                            'id': note.id,
-                            'note': note.note,
-                            'next_action': note.next_action,
-                            'urgency': note.urgency,
-                            'created_at': note.created_at.isoformat() if note.created_at else None,
-                            'created_by': note.created_by.username if note.created_by else None
-                        }
-                        for note in recent_notes
-                    ]
+                    'notes_count':
+                    notes_count,
+                    'campaign_count':
+                    campaign_count,
+                    'leadNotes': [{
+                        'id':
+                        note.id,
+                        'note':
+                        note.note,
+                        'next_action':
+                        note.next_action,
+                        'urgency':
+                        note.urgency,
+                        'created_at':
+                        note.created_at.isoformat()
+                        if note.created_at else None,
+                        'created_by':
+                        note.created_by.username if note.created_by else None
+                    } for note in recent_notes]
                 }
                 print(lead_data),
                 results.append(lead_data)
@@ -970,13 +1036,17 @@ class LeadViewSet(viewsets.ModelViewSet):
         except Exception as e:
             print(f"Error in leads search: {str(e)}")
             return Response(
-                {'error': f'Search failed: {str(e)}', 'results': [], 'count': 0},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+                {
+                    'error': f'Search failed: {str(e)}',
+                    'results': [],
+                    'count': 0
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=False, methods=['get'])
     def qualified_leads(self, request):
-        leads = self.queryset.filter(status='qualified').order_by('-score', '-created_at')
+        leads = self.queryset.filter(status='qualified').order_by(
+            '-score', '-created_at')
         serializer = self.get_serializer(leads, many=True)
         return Response(serializer.data)
 
@@ -989,15 +1059,13 @@ class LeadViewSet(viewsets.ModelViewSet):
             lead_ids = request.data.get('lead_ids', [])
 
             if not lead_ids:
-                return Response(
-                    {'error': 'lead_ids array is required'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                return Response({'error': 'lead_ids array is required'},
+                                status=status.HTTP_400_BAD_REQUEST)
 
             # Fetch leads with prefetched notes and campaigns
             leads = Lead.objects.filter(id__in=lead_ids).prefetch_related(
-                'lead_notes', 'emailcampaign_set'
-            ).select_related('company', 'contact')
+                'lead_notes',
+                'emailcampaign_set').select_related('company', 'contact')
 
             batch_data = {}
 
@@ -1010,17 +1078,21 @@ class LeadViewSet(viewsets.ModelViewSet):
                 campaign_count = lead.emailcampaign_set.count()
 
                 batch_data[str(lead.id)] = {
-                    'notes_count': notes_count,
-                    'campaign_count': campaign_count,
-                    'recent_notes': [
-                        {
-                            'id': note.id,
-                            'note': note.note,
-                            'urgency': note.urgency,
-                            'created_at': note.created_at.isoformat() if note.created_at else None
-                        }
-                        for note in recent_notes
-                    ]
+                    'notes_count':
+                    notes_count,
+                    'campaign_count':
+                    campaign_count,
+                    'recent_notes': [{
+                        'id':
+                        note.id,
+                        'note':
+                        note.note,
+                        'urgency':
+                        note.urgency,
+                        'created_at':
+                        note.created_at.isoformat()
+                        if note.created_at else None
+                    } for note in recent_notes]
                 }
 
             return Response({
@@ -1030,14 +1102,13 @@ class LeadViewSet(viewsets.ModelViewSet):
             })
 
         except Exception as e:
-            return Response(
-                {'error': f'Batch operation failed: {str(e)}'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return Response({'error': f'Batch operation failed: {str(e)}'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=False, methods=['get'])
     def unqualified_leads(self, request):
-        leads = self.queryset.filter(status='unqualified').order_by('-created_at')
+        leads = self.queryset.filter(
+            status='unqualified').order_by('-created_at')
         serializer = self.get_serializer(leads, many=True)
         return Response(serializer.data)
 
@@ -1054,10 +1125,10 @@ class LeadViewSet(viewsets.ModelViewSet):
             lead=lead,
             history_type='score_update',
             action=f'Lead score updated to {lead.score}',
-            details=f'Lead score updated from {old_score} to {lead.score} based on engagement metrics and profile analysis.',
+            details=
+            f'Lead score updated from {old_score} to {lead.score} based on engagement metrics and profile analysis.',
             icon='trending-up',
-            user=request.user if request.user.is_authenticated else None
-        )
+            user=request.user if request.user.is_authenticated else None)
 
         return Response({'status': 'score updated', 'new_score': lead.score})
 
@@ -1076,18 +1147,20 @@ class LeadViewSet(viewsets.ModelViewSet):
                     lead=lead,
                     history_type='qualification',
                     action='Lead qualified',
-                    details=self._get_status_change_details(old_status, lead.status, lead),
+                    details=self._get_status_change_details(
+                        old_status, lead.status, lead),
                     icon=self._get_status_icon(lead.status),
-                    user=request.user if request.user.is_authenticated else None,
+                    user=request.user
+                    if request.user.is_authenticated else None,
                     metadata={},
-                    timestamp=timezone.now()
-                )
+                    timestamp=timezone.now())
             except Exception as history_error:
                 print(f"Error creating qualification history: {history_error}")
 
             return Response({'status': 'lead qualified'})
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': str(e)},
+                            status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['post'])
     def disqualify(self, request, pk=None):
@@ -1126,27 +1199,29 @@ class LeadViewSet(viewsets.ModelViewSet):
                 lead=lead,
                 history_type='disqualification',
                 action='Lead disqualified',
-                details=f'Lead disqualified. Reason: {reason}' if reason else 'Lead disqualified.',
+                details=f'Lead disqualified. Reason: {reason}'
+                if reason else 'Lead disqualified.',
                 icon='x-circle',
-                user=request.user if request.user.is_authenticated else None
-            )
+                user=request.user if request.user.is_authenticated else None)
 
             # Create history entry for status change
             create_lead_history(
                 lead=lead,
                 history_type='status_change',
                 action=f'Status changed from {old_status} to {lead.status}',
-                details=self._get_status_change_details(old_status, lead.status, lead),
+                details=self._get_status_change_details(
+                    old_status, lead.status, lead),
                 icon=self._get_status_icon(lead.status),
-                user=request.user if request.user.is_authenticated else None
-            )
+                user=request.user if request.user.is_authenticated else None)
 
-            return Response({'message': 'Lead disqualified successfully'}, status=status.HTTP_200_OK)
+            return Response({'message': 'Lead disqualified successfully'},
+                            status=status.HTTP_200_OK)
         except Exception as e:
             print(f"Disqualify error: {str(e)}")
             print(f"Request data: {request.data}")
             print(f"Request data type: {type(request.data)}")
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': str(e)},
+                            status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['get'])
     def notes(self, request, pk=None):
@@ -1157,16 +1232,16 @@ class LeadViewSet(viewsets.ModelViewSet):
             lead = self.get_object()
             notes = lead.lead_notes.all().order_by('-created_at')
             serializer = LeadNoteSerializer(notes, many=True)
-            return Response({
-                'notes': serializer.data,
-                'count': notes.count(),
-                'lead_id': lead.id
-            }, status=status.HTTP_200_OK)
-        except Exception as e:
             return Response(
-                {'error': f'Failed to fetch notes: {str(e)}'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+                {
+                    'notes': serializer.data,
+                    'count': notes.count(),
+                    'lead_id': lead.id
+                },
+                status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': f'Failed to fetch notes: {str(e)}'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['get'])
     def campaign_count(self, request, pk=None):
@@ -1176,15 +1251,16 @@ class LeadViewSet(viewsets.ModelViewSet):
         try:
             lead = self.get_object()
             campaign_count = lead.emailcampaign_set.count()
-            return Response({
-                'lead_id': lead.id,
-                'campaign_count': campaign_count
-            }, status=status.HTTP_200_OK)
+            return Response(
+                {
+                    'lead_id': lead.id,
+                    'campaign_count': campaign_count
+                },
+                status=status.HTTP_200_OK)
         except Exception as e:
             return Response(
                 {'error': f'Failed to fetch campaign count: {str(e)}'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['get'])
     def campaigns(self, request, pk=None):
@@ -1198,26 +1274,35 @@ class LeadViewSet(viewsets.ModelViewSet):
 
             for campaign in campaigns:
                 campaigns_data.append({
-                    'id': campaign.id,
-                    'name': campaign.name,
-                    'status': campaign.status,
-                    'subject_line': campaign.subject_line,
-                    'emails_sent': campaign.emails_sent,
-                    'emails_opened': campaign.emails_opened,
-                    'open_rate': campaign.open_rate,
-                    'created_at': campaign.created_at.isoformat() if campaign.created_at else None
+                    'id':
+                    campaign.id,
+                    'name':
+                    campaign.name,
+                    'status':
+                    campaign.status,
+                    'subject_line':
+                    campaign.subject_line,
+                    'emails_sent':
+                    campaign.emails_sent,
+                    'emails_opened':
+                    campaign.emails_opened,
+                    'open_rate':
+                    campaign.open_rate,
+                    'created_at':
+                    campaign.created_at.isoformat()
+                    if campaign.created_at else None
                 })
 
-            return Response({
-                'campaigns': campaigns_data,
-                'count': len(campaigns_data),
-                'lead_id': lead.id
-            }, status=status.HTTP_200_OK)
-        except Exception as e:
             return Response(
-                {'error': f'Failed to fetch campaigns: {str(e)}'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+                {
+                    'campaigns': campaigns_data,
+                    'count': len(campaigns_data),
+                    'lead_id': lead.id
+                },
+                status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': f'Failed to fetch campaigns: {str(e)}'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['post'])
     def add_note(self, request, pk=None):
@@ -1230,16 +1315,15 @@ class LeadViewSet(viewsets.ModelViewSet):
         urgency = request.data.get('urgency', 'Medium')
 
         if not note_text:
-            return Response({'error': 'Note text is required'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Note text is required'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         try:
             # Create the note
-            note = LeadNote.objects.create(
-                lead=lead,
-                note=note_text,
-                next_action=next_action,
-                urgency=urgency
-            )
+            note = LeadNote.objects.create(lead=lead,
+                                           note=note_text,
+                                           next_action=next_action,
+                                           urgency=urgency)
 
             # Update lead's next action if provided
             if next_action:
@@ -1250,30 +1334,36 @@ class LeadViewSet(viewsets.ModelViewSet):
             create_lead_history(
                 lead=lead,
                 history_type='note_added',
-                action=f'Note added: {note_text[:50]}{"..." if len(note_text) > 50 else ""}',
-                details=f'Note: {note_text}\nNext Action: {next_action}\nUrgency: {urgency}',
+                action=
+                f'Note added: {note_text[:50]}{"..." if len(note_text) > 50 else ""}',
+                details=
+                f'Note: {note_text}\nNext Action: {next_action}\nUrgency: {urgency}',
                 user=request.user if request.user.is_authenticated else None,
-                icon='message-square'
-            )
+                icon='message-square')
 
             # Serialize the note and updated lead
             note_serializer = LeadNoteSerializer(note)
             lead_serializer = LeadSerializer(lead)
 
-            return Response({
-                'message': 'Note added successfully',
-                'note': note_serializer.data,
-                'lead': lead_serializer.data
-            }, status=status.HTTP_201_CREATED)
+            return Response(
+                {
+                    'message': 'Note added successfully',
+                    'note': note_serializer.data,
+                    'lead': lead_serializer.data
+                },
+                status=status.HTTP_201_CREATED)
 
         except Exception as e:
-            return Response({'error': f'Failed to add note: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'error': f'Failed to add note: {str(e)}'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def update(self, request, *args, **kwargs):
         """Handle opportunity updates with proper validation"""
         try:
             instance = self.get_object()
-            serializer = self.get_serializer(instance, data=request.data, partial=True)
+            serializer = self.get_serializer(instance,
+                                             data=request.data,
+                                             partial=True)
 
             if serializer.is_valid():
                 serializer.save()
@@ -1281,29 +1371,36 @@ class LeadViewSet(viewsets.ModelViewSet):
             else:
                 print(f"Validation errors: {serializer.errors}")
                 return Response(
-                    {'error': 'Validation failed', 'details': serializer.errors},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                    {
+                        'error': 'Validation failed',
+                        'details': serializer.errors
+                    },
+                    status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             print(f"Error updating opportunity: {str(e)}")
-            return Response(
-                {'error': f'Update failed: {str(e)}'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return Response({'error': f'Update failed: {str(e)}'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def _get_status_change_details(self, old_status, new_status, lead):
         """Get detailed description for status changes"""
         details_map = {
-            'contacted': f'Initial contact made with {lead.contact.first_name}. Outreach sent via email.',
-            'responded': f'{lead.contact.first_name} responded to initial outreach. Expressed interest in travel solutions.',
-            'qualified': f'Lead qualified based on budget ({f"${int(lead.estimated_value/1000)}K" if lead.estimated_value else "TBD"}), authority, and timeline. Ready for proposal stage.',
-            'unqualified': 'Lead disqualified due to budget constraints or timeline mismatch. Moved to nurture campaign.',
-            'proposal_sent': 'Proposal sent to prospect. Awaiting response and feedback.',
-            'negotiation': 'Entered negotiation phase. Discussing terms and pricing.',
+            'contacted':
+            f'Initial contact made with {lead.contact.first_name}. Outreach sent via email.',
+            'responded':
+            f'{lead.contact.first_name} responded to initial outreach. Expressed interest in travel solutions.',
+            'qualified':
+            f'Lead qualified based on budget ({f"${int(lead.estimated_value/1000)}K" if lead.estimated_value else "TBD"}), authority, and timeline. Ready for proposal stage.',
+            'unqualified':
+            'Lead disqualified due to budget constraints or timeline mismatch. Moved to nurture campaign.',
+            'proposal_sent':
+            'Proposal sent to prospect. Awaiting response and feedback.',
+            'negotiation':
+            'Entered negotiation phase. Discussing terms and pricing.',
             'won': 'Lead successfully converted to customer. Deal closed!',
             'lost': 'Lead was lost to competitor or decided not to proceed.'
         }
-        return details_map.get(new_status, f'Status updated from {old_status} to {new_status}.')
+        return details_map.get(
+            new_status, f'Status updated from {old_status} to {new_status}.')
 
     def _get_status_icon(self, status):
         """Get appropriate icon for status"""
@@ -1336,26 +1433,33 @@ class LeadViewSet(viewsets.ModelViewSet):
                         lead=lead,
                         history_type='creation',
                         action='Lead created',
-                        details=f'Lead created from {lead.source} source. Initial contact information collected for {lead.company.name}.',
+                        details=
+                        f'Lead created from {lead.source} source. Initial contact information collected for {lead.company.name}.',
                         icon='plus',
                         user=None,
-                        timestamp=current_time
-                    )
+                        timestamp=current_time)
 
                     # 2. Parse agent assignments from notes if they exist
                     if lead.notes and '[Agent Assignment' in lead.notes:
                         import re
                         # Extract agent assignments from notes
-                        agent_assignments = re.findall(r'\[Agent Assignment - ([^\]]+)\]\s*Assigned to: ([^\n]+)\s*Priority: ([^\n]+)(?:\s*Assignment Notes: ([^\n]+))?', lead.notes)
+                        agent_assignments = re.findall(
+                            r'\[Agent Assignment - ([^\]]+)\]\s*Assigned to: ([^\n]+)\s*Priority: ([^\n]+)(?:\s*Assignment Notes: ([^\n]+))?',
+                            lead.notes)
 
-                        for idx, (date_str, agent_name, priority, assignment_notes) in enumerate(agent_assignments):
+                        for idx, (date_str, agent_name, priority,
+                                  assignment_notes
+                                  ) in enumerate(agent_assignments):
                             try:
                                 # Parse the date
                                 import datetime
-                                assignment_time = datetime.strptime(date_str, '%Y-%m-%d %H:%M')
-                                assignment_time = timezone.make_aware(assignment_time)
+                                assignment_time = datetime.strptime(
+                                    date_str, '%Y-%m-%d %H:%M')
+                                assignment_time = timezone.make_aware(
+                                    assignment_time)
                             except:
-                                assignment_time = current_time + timedelta(hours=idx + 1)
+                                assignment_time = current_time + timedelta(
+                                    hours=idx + 1)
 
                             history_type = 'agent_reassignment' if idx > 0 else 'agent_assignment'
                             action = f'Agent {"reassigned" if idx > 0 else "assigned"} to {agent_name}'
@@ -1370,22 +1474,23 @@ class LeadViewSet(viewsets.ModelViewSet):
                                 details=details,
                                 icon='user',
                                 user=lead.assigned_to,
-                                timestamp=assignment_time
-                            )
+                                timestamp=assignment_time)
 
                     # 3. Agent assignment (if assigned and not already processed from notes)
                     elif lead.assigned_agent or lead.assigned_to:
                         current_time += timedelta(hours=1)
-                        agent_name = lead.assigned_agent or (f"{lead.assigned_to.first_name} {lead.assigned_to.last_name}".strip() if lead.assigned_to else "Unknown Agent")
+                        agent_name = lead.assigned_agent or (
+                            f"{lead.assigned_to.first_name} {lead.assigned_to.last_name}"
+                            .strip() if lead.assigned_to else "Unknown Agent")
                         LeadHistory.objects.create(
                             lead=lead,
                             history_type='agent_assignment',
                             action=f'Lead assigned to {agent_name}',
-                            details=f'Lead assigned to {agent_name} for follow-up and qualification.',
+                            details=
+                            f'Lead assigned to {agent_name} for follow-up and qualification.',
                             icon='user',
                             user=lead.assigned_to,
-                            timestamp=current_time
-                        )
+                            timestamp=current_time)
 
                     # 4. Status-specific entries
                     if lead.status == 'contacted':
@@ -1394,11 +1499,11 @@ class LeadViewSet(viewsets.ModelViewSet):
                             lead=lead,
                             history_type='contact_made',
                             action='Initial contact made',
-                            details=f'Initial contact made with {lead.contact.first_name}. Email sent introducing our travel solutions.',
+                            details=
+                            f'Initial contact made with {lead.contact.first_name}. Email sent introducing our travel solutions.',
                             icon='mail',
                             user=lead.assigned_to,
-                            timestamp=current_time
-                        )
+                            timestamp=current_time)
 
                         # Add call entry
                         current_time += timedelta(hours=3)
@@ -1406,11 +1511,11 @@ class LeadViewSet(viewsets.ModelViewSet):
                             lead=lead,
                             history_type='call_made',
                             action='Discovery call completed',
-                            details=f'30-minute discovery call with {lead.contact.first_name}. Discussed travel requirements and current pain points.',
+                            details=
+                            f'30-minute discovery call with {lead.contact.first_name}. Discussed travel requirements and current pain points.',
                             icon='phone',
                             user=lead.assigned_to,
-                            timestamp=current_time
-                        )
+                            timestamp=current_time)
 
                     elif lead.status == 'qualified':
                         current_time += timedelta(days=1)
@@ -1418,11 +1523,11 @@ class LeadViewSet(viewsets.ModelViewSet):
                             lead=lead,
                             history_type='qualification',
                             action='Lead qualified',
-                            details=f'Lead qualified based on budget ({f"${int(lead.estimated_value/1000)}K" if lead.estimated_value else "TBD"}), authority, and timeline. Ready for proposal stage.',
+                            details=
+                            f'Lead qualified based on budget ({f"${int(lead.estimated_value/1000)}K" if lead.estimated_value else "TBD"}), authority, and timeline. Ready for proposal stage.',
                             icon='check-circle',
                             user=lead.assigned_to,
-                            timestamp=current_time
-                        )
+                            timestamp=current_time)
 
                     elif lead.status == 'unqualified':
                         current_time += timedelta(days=1)
@@ -1430,11 +1535,11 @@ class LeadViewSet(viewsets.ModelViewSet):
                             lead=lead,
                             history_type='disqualification',
                             action='Lead disqualified',
-                            details='Lead disqualified due to budget constraints or timeline mismatch. Moved to nurture campaign.',
+                            details=
+                            'Lead disqualified due to budget constraints or timeline mismatch. Moved to nurture campaign.',
                             icon='x-circle',
                             user=lead.assigned_to,
-                            timestamp=current_time
-                        )
+                            timestamp=current_time)
 
                     # 5. Add notes from lead_notes (excluding agent assignment entries)
                     for note in lead.lead_notes.all()[:3]:  # Latest 3 notes
@@ -1443,11 +1548,11 @@ class LeadViewSet(viewsets.ModelViewSet):
                             lead=lead,
                             history_type='note_added',
                             action=f'Note added: "{note.note[:30]}..."',
-                            details=f'Note: {note.note}. Next action: {note.next_action or "None"}. Urgency: {note.urgency or "Medium"}.',
+                            details=
+                            f'Note: {note.note}. Next action: {note.next_action or "None"}. Urgency: {note.urgency or "Medium"}.',
                             icon='message-square',
                             user=note.created_by,
-                            timestamp=current_time
-                        )
+                            timestamp=current_time)
 
                     # 6. Score update (if score > 50)
                     if lead.score > 50:
@@ -1456,14 +1561,15 @@ class LeadViewSet(viewsets.ModelViewSet):
                             lead=lead,
                             history_type='score_update',
                             action=f'Lead score updated to {lead.score}',
-                            details=f'Lead score updated to {lead.score} based on engagement metrics and profile analysis.',
+                            details=
+                            f'Lead score updated to {lead.score} based on engagement metrics and profile analysis.',
                             icon='trending-up',
                             user=None,
-                            timestamp=current_time
-                        )
+                            timestamp=current_time)
 
                     # Fetch again after creation
-                    history_entries = lead.history_entries.all().order_by('timestamp')
+                    history_entries = lead.history_entries.all().order_by(
+                        'timestamp')
                 except Exception as create_error:
                     print(f"Error creating initial history: {create_error}")
 
@@ -1483,57 +1589,75 @@ class LeadViewSet(viewsets.ModelViewSet):
             # Check if lead is qualified
             if lead.status != 'qualified':
                 return Response(
-                    {'error': 'Only qualified leads can be moved to opportunities'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                    {
+                        'error':
+                        'Only qualified leads can be moved to opportunities'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST)
 
             # Check if lead has already been moved to opportunity using database as source of truth
             if Opportunity.objects.filter(lead=lead).exists():
                 return Response(
-                    {'error': 'This lead has already been moved to opportunities'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                    {
+                        'error':
+                        'This lead has already been moved to opportunities'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST)
 
             # Double-check to prevent race conditions - use select_for_update to lock the lead record
             from django.db import transaction
             try:
                 with transaction.atomic():
                     # Lock the lead record to prevent concurrent modifications
-                    locked_lead = Lead.objects.select_for_update().get(id=lead.id)
+                    locked_lead = Lead.objects.select_for_update().get(
+                        id=lead.id)
 
                     # Final check after acquiring lock
                     if Opportunity.objects.filter(lead=locked_lead).exists():
                         return Response(
-                            {'error': 'This lead has already been moved to opportunities'},
-                            status=status.HTTP_400_BAD_REQUEST
-                        )
+                            {
+                                'error':
+                                'This lead has already been moved to opportunities'
+                            },
+                            status=status.HTTP_400_BAD_REQUEST)
 
                     # Get opportunity data from request
                     opportunity_data = request.data
 
                     # Validate and process opportunity value
                     try:
-                        opp_value = opportunity_data.get('value', locked_lead.estimated_value or 250000)
+                        opp_value = opportunity_data.get(
+                            'value', locked_lead.estimated_value or 250000)
                         if isinstance(opp_value, str):
                             # Remove any non-numeric characters except decimal point
                             import re
                             opp_value = re.sub(r'[^\d.]', '', str(opp_value))
-                            opp_value = float(opp_value) if opp_value else 250000
+                            opp_value = float(
+                                opp_value) if opp_value else 250000
                     except (ValueError, TypeError):
                         opp_value = 250000
 
                     # Create the opportunity within the transaction
                     opportunity = Opportunity.objects.create(
                         lead=locked_lead,
-                        name=opportunity_data.get('name', f"{locked_lead.company.name} - Corporate Travel Solution"),
+                        name=opportunity_data.get(
+                            'name',
+                            f"{locked_lead.company.name} - Corporate Travel Solution"
+                        ),
                         stage=opportunity_data.get('stage', 'discovery'),
-                        probability=int(opportunity_data.get('probability', 65)),
-                        estimated_close_date=opportunity_data.get('estimated_close_date',
+                        probability=int(opportunity_data.get(
+                            'probability', 65)),
+                        estimated_close_date=opportunity_data.get(
+                            'estimated_close_date',
                             (timezone.now().date() + timedelta(days=30))),
                         value=opp_value,
-                        description=opportunity_data.get('description', f"Opportunity created from qualified lead. {locked_lead.notes or 'No additional notes.'}"),
-                        next_steps=opportunity_data.get('next_steps', 'Send initial proposal and schedule presentation')
-                    )
+                        description=opportunity_data.get(
+                            'description',
+                            f"Opportunity created from qualified lead. {locked_lead.notes or 'No additional notes.'}"
+                        ),
+                        next_steps=opportunity_data.get(
+                            'next_steps',
+                            'Send initial proposal and schedule presentation'))
 
                     # Mark lead as moved to opportunity and add note
                     locked_lead.moved_to_opportunity = True
@@ -1555,11 +1679,12 @@ class LeadViewSet(viewsets.ModelViewSet):
                             lead=locked_lead,
                             history_type='opportunity_created',
                             action='Lead moved to opportunity',
-                            details=f'Lead successfully moved to sales opportunity: {opportunity.name}. Deal value: ${opp_value:,.0f}. Lead remains in leads table for tracking.',
+                            details=
+                            f'Lead successfully moved to sales opportunity: {opportunity.name}. Deal value: ${opp_value:,.0f}. Lead remains in leads table for tracking.',
                             icon='briefcase',
-                            user=request.user if request.user.is_authenticated else None,
-                            timestamp=timezone.now()
-                        )
+                            user=request.user
+                            if request.user.is_authenticated else None,
+                            timestamp=timezone.now())
                     except Exception as history_error:
                         print(f"Error creating lead history: {history_error}")
                         # Continue even if history creation fails
@@ -1568,26 +1693,27 @@ class LeadViewSet(viewsets.ModelViewSet):
                 print(f"Error in transaction: {str(e)}")
                 return Response(
                     {'error': f'Failed to create opportunity: {str(e)}'},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
             # Serialize the created opportunity
             opportunity_serializer = OpportunitySerializer(opportunity)
 
-            return Response({
-                'success': True,
-                'message': f'{lead.company.name} has been successfully moved to opportunities',
-                'opportunity': opportunity_serializer.data,
-                'lead_id': lead.id,
-                'has_opportunity': True
-            }, status=status.HTTP_201_CREATED)
+            return Response(
+                {
+                    'success': True,
+                    'message':
+                    f'{lead.company.name} has been successfully moved to opportunities',
+                    'opportunity': opportunity_serializer.data,
+                    'lead_id': lead.id,
+                    'has_opportunity': True
+                },
+                status=status.HTTP_201_CREATED)
 
         except Exception as e:
             print(f"Error in move_to_opportunity: {str(e)}")
             return Response(
                 {'error': f'Failed to move lead to opportunity: {str(e)}'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=False, methods=['post'])
     def create_lead_from_company(self, request):
@@ -1600,7 +1726,8 @@ class LeadViewSet(viewsets.ModelViewSet):
             # Extract company information - prioritize top-level name if company.name is missing
             company_name = company_data.get('name') or data.get('name')
             if not company_name:
-                return Response({'error': 'Company name is required'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': 'Company name is required'},
+                                status=status.HTTP_400_BAD_REQUEST)
 
             company_data_to_save = {
                 'name': company_name,
@@ -1617,12 +1744,9 @@ class LeadViewSet(viewsets.ModelViewSet):
 
             # print("Company data to save:", company_data_to_save)
 
-
             # Create or get company
             company, created = Company.objects.get_or_create(
-                name=company_name,
-                defaults=company_data_to_save
-            )
+                name=company_name, defaults=company_data_to_save)
 
             # Ensure company has email before binding
             if not company.email and company_data.get('email'):
@@ -1635,14 +1759,20 @@ class LeadViewSet(viewsets.ModelViewSet):
                 company=company,
                 # email=company_data.get('email', f"contact@{company_name.lower().replace(' ', '')}.com"),
                 defaults={
-                    'first_name': company_name.split(' ')[0],
-                    'last_name': company_name.split(' ')[-1] if len(company_name.split(' ')) > 1 else '',
-                    'phone': company_data.get('phone', ''),
-                    'email': company.email,
-                    'position': 'Decision Maker',
-                    'is_decision_maker': True
-                }
-            )
+                    'first_name':
+                    company_name.split(' ')[0],
+                    'last_name':
+                    company_name.split(' ')[-1]
+                    if len(company_name.split(' ')) > 1 else '',
+                    'phone':
+                    company_data.get('phone', ''),
+                    'email':
+                    company.email,
+                    'position':
+                    'Decision Maker',
+                    'is_decision_maker':
+                    True
+                })
             # print("Contact created:", contact)
 
             # Create the lead
@@ -1654,29 +1784,34 @@ class LeadViewSet(viewsets.ModelViewSet):
                 priority='medium',
                 score=50,  # Default score
                 estimated_value=company_data_to_save.get('travel_budget'),
-                notes=f"Lead created from company entry. {data.get('notes', '')}",
-                next_action='Initial outreach and qualification'
-            )
+                notes=
+                f"Lead created from company entry. {data.get('notes', '')}",
+                next_action='Initial outreach and qualification')
 
             # Create initial history entry
             create_lead_history(
                 lead=lead,
                 history_type='lead_created',
                 action='Lead created from company data',
-                details=f"Lead created from manual company entry. Company: {company.name}. Initial contact information collected.",
+                details=
+                f"Lead created from manual company entry. Company: {company.name}. Initial contact information collected.",
                 icon='plus',
-                user=request.user if request.user.is_authenticated else None
-            )
+                user=request.user if request.user.is_authenticated else None)
 
             # Serialize and return the created lead
             serializer = LeadSerializer(lead)
-            return Response({
-                'lead': serializer.data,
-                'message': f'{company.name} has been successfully added as a lead'
-            }, status=status.HTTP_201_CREATED)
+            return Response(
+                {
+                    'lead':
+                    serializer.data,
+                    'message':
+                    f'{company.name} has been successfully added as a lead'
+                },
+                status=status.HTTP_201_CREATED)
 
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': str(e)},
+                            status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['post'])
     def assign_agent(self, request, pk=None):
@@ -1684,15 +1819,18 @@ class LeadViewSet(viewsets.ModelViewSet):
         try:
             lead = self.get_object()
             # Handle both 'agent_name' and 'agent' field names for compatibility
-            agent_name = request.data.get('agent_name') or request.data.get('agent')
+            agent_name = request.data.get('agent_name') or request.data.get(
+                'agent')
             priority = request.data.get('priority', 'Medium Priority')
             assignment_notes = request.data.get('notes', '')
 
             if not agent_name:
                 return Response(
-                    {'error': 'Agent name is required (use agent_name or agent field)'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                    {
+                        'error':
+                        'Agent name is required (use agent_name or agent field)'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST)
 
             # Store previous agent for history
             previous_agent = lead.assigned_agent
@@ -1738,8 +1876,8 @@ class LeadViewSet(viewsets.ModelViewSet):
                         'priority': priority,
                         'assignment_notes': assignment_notes
                     },
-                    user=request.user if request.user.is_authenticated else None
-                )
+                    user=request.user
+                    if request.user.is_authenticated else None)
             except Exception as e:
                 print(f"Error creating lead history: {e}")
 
@@ -1747,21 +1885,22 @@ class LeadViewSet(viewsets.ModelViewSet):
             if lead.notes:
                 import re
                 # Remove old agent assignment entries from notes
-                lead.notes = re.sub(r'\[Agent Assignment[^\]]*\][^\n]*\n?', '', lead.notes)
+                lead.notes = re.sub(r'\[Agent Assignment[^\]]*\][^\n]*\n?', '',
+                                    lead.notes)
                 lead.save()
 
             # Return updated lead
             serializer = LeadSerializer(lead)
-            return Response({
-                'message': f'Lead successfully assigned to {agent_name}',
-                'lead': serializer.data
-            }, status=status.HTTP_200_OK)
+            return Response(
+                {
+                    'message': f'Lead successfully assigned to {agent_name}',
+                    'lead': serializer.data
+                },
+                status=status.HTTP_200_OK)
 
         except Exception as e:
-            return Response(
-                {'error': f'Failed to assign agent: {str(e)}'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return Response({'error': f'Failed to assign agent: {str(e)}'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['post'])
     def send_message(self, request, pk=None):
@@ -1770,19 +1909,23 @@ class LeadViewSet(viewsets.ModelViewSet):
             lead = self.get_object()
             subject = request.data.get("subject", "")
             message = request.data.get("message", "")
-            recipient_email = request.data.get("recipient_email") or getattr(lead.contact, "email", None)
+            recipient_email = request.data.get("recipient_email") or getattr(
+                lead.contact, "email", None)
             recipient_name = request.data.get("recipient_name", "")
             contact_type = request.data.get("contact_type", "lead")
             template_used = request.data.get("template_used", "")
 
             if not subject or not message:
-                return Response({"error": "Subject and message are required"}, status=400)
+                return Response({"error": "Subject and message are required"},
+                                status=400)
 
             if not recipient_email:
-                return Response({"error": "No recipient email found"}, status=400)
+                return Response({"error": "No recipient email found"},
+                                status=400)
 
             # Check if message is already complete HTML (standard template)
-            is_complete_html = message.strip().startswith('<!DOCTYPE') or message.strip().startswith('<html')
+            is_complete_html = message.strip().startswith(
+                '<!DOCTYPE') or message.strip().startswith('<html')
 
             if is_complete_html:
                 # Message is already complete HTML (from standard template)
@@ -1893,7 +2036,10 @@ class LeadViewSet(viewsets.ModelViewSet):
                 body=plain_text_message,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 to=[recipient_email],
-                bcc=['nagendran.g@infinitisoftware.net','muniraj@infinitisoftware.net'],
+                bcc=[
+                    'nagendran.g@infinitisoftware.net',
+                    'muniraj@infinitisoftware.net'
+                ],
             )
             # Ensure HTML content is properly attached with correct MIME type
             email.attach_alternative(html_message, "text/html")
@@ -1901,19 +2047,28 @@ class LeadViewSet(viewsets.ModelViewSet):
             email.send(fail_silently=False)
 
             return Response({
-                "success": True,
-                "message": f"Email sent to {recipient_email}" + (f" using {template_used} template" if template_used else ""),
-                "subject": subject,
-                "recipient": recipient_email,
-                "recipient_name": recipient_name,
-                "contact_type": contact_type,
-                "template_used": template_used,
-                "method": "Email"
+                "success":
+                True,
+                "message":
+                f"Email sent to {recipient_email}" +
+                (f" using {template_used} template" if template_used else ""),
+                "subject":
+                subject,
+                "recipient":
+                recipient_email,
+                "recipient_name":
+                recipient_name,
+                "contact_type":
+                contact_type,
+                "template_used":
+                template_used,
+                "method":
+                "Email"
             })
 
         except Exception as e:
-            return Response({"error": f"Failed to send email: {str(e)}"}, status=500)
-
+            return Response({"error": f"Failed to send email: {str(e)}"},
+                            status=500)
 
     @action(detail=False, methods=['post'], url_path='send_message')
     def send_corporate_message(self, request):
@@ -1921,90 +2076,109 @@ class LeadViewSet(viewsets.ModelViewSet):
         try:
             contact_type = request.data.get('contact_type', '')
 
-            if contact_type == 'corporate':
-                # Handle corporate contact messages
-                recipient_email = request.data.get('recipient_email', '')
-                recipient_name = request.data.get('recipient_name', '')
-                method = request.data.get('method', 'Email')
-                subject = request.data.get('subject', '')
-                message = request.data.get('message', '')
+            if contact_type != 'corporate':
+                return Response(
+                    {
+                        "error":
+                        "Invalid contact type or missing required parameters"
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
-                if not recipient_email or not subject or not message:
-                    return Response(
-                        {'error': 'Recipient email, subject and message are required'},
-                        status=status.HTTP_400_BAD_REQUEST
+            recipient_email = request.data.get('recipient_email', '')
+            recipient_name = request.data.get('recipient_name', '')
+            method = request.data.get('method', 'Email')
+            subject = request.data.get('subject', '')
+            message = request.data.get('message', '')  # expected full HTML
+
+            if not recipient_email or not subject or not message:
+                return Response(
+                    {
+                        "error":
+                        "Recipient email, subject and message are required"
+                    },
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            if method == 'Email':
+                from django.conf import settings
+                from django.core.mail import EmailMultiAlternatives
+                from django.utils.html import strip_tags
+
+                try:
+                    # Plain-text fallback by stripping HTML
+                    plain_text_message = strip_tags(message)
+
+                    # If message is not a full HTML doc, wrap it
+                    if not message.strip().lower().startswith("<!doctype"):
+                        html_content = f"""<!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{subject}</title>
+    </head>
+    <body>
+        {message}
+    </body>
+    </html>"""
+                    else:
+                        html_content = message
+
+                    # Build the email with both plain-text + HTML versions
+                    email = EmailMultiAlternatives(
+                        subject=subject,
+                        body=plain_text_message,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        to=[recipient_email],
+                        bcc=[
+                            "nagendran.g@infinitisoftware.net",
+                            "muniraj@infinitisoftware.net",
+                        ],
                     )
 
-                # Send email via SMTP if method is Email
-                if method == 'Email':
-                    from django.core.mail import EmailMessage
-                    from django.conf import settings
+                    email.attach_alternative(html_content, "text/html")
+                    email.mixed_subtype = "related"  # required for inline images
+                    email.send(fail_silently=False)
 
-                    try:
-                        # Check if message contains HTML
-                        is_html = request.data.get('is_html', True)
+                    return Response(
+                        {
+                            "success":
+                            True,
+                            "message":
+                            f"Email sent successfully to {recipient_name} ({recipient_email})",
+                        },
+                        status=status.HTTP_200_OK,
+                    )
 
-                        # Always use EmailMultiAlternatives for proper HTML handling
-                        from django.core.mail import EmailMultiAlternatives
-                        from django.utils.html import strip_tags
+                except Exception as email_error:
+                    return Response(
+                        {
+                            "success": False,
+                            "error":
+                            f"Failed to send email: {str(email_error)}"
+                        },
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    )
 
-                        # Create plain text version by stripping HTML tags
-                        plain_text_message = strip_tags(message)
-
-                        # Ensure the HTML content is properly formatted
-                        html_content = message
-                        if not message.strip().startswith('<!DOCTYPE'):
-                            # If it's partial HTML, wrap it in a basic HTML structure
-                            html_content = f"""<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{subject}</title>
-</head>
-<body>
-    {message}
-</body>
-</html>"""
-
-                        email = EmailMultiAlternatives(
-                            subject=subject,
-                            body=plain_text_message,  # Plain text fallback
-                            from_email=settings.DEFAULT_FROM_EMAIL,
-                            to=[recipient_email],
-                            bcc=['nagendran.g@infinitisoftware.net','muniraj@infinitisoftware.net'],
-                        )
-                        # Properly attach HTML content with correct MIME type
-                        email.attach_alternative(html_content, "text/html")
-                        email.mixed_subtype = 'related'  # For embedded content
-                        email.send(fail_silently=False)
-
-                        return Response({
-                            'success': True,
-                            'message': f'Email sent successfully to {recipient_name} ({recipient_email})'
-                        }, status=status.HTTP_200_OK)
-
-                    except Exception as email_error:
-                        return Response({
-                            'success': False,
-                            'error': f'Failed to send email: {str(email_error)}'
-                        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-                else:
-                    # For non-email methods, just create an activity record
-                    return Response({
-                        'success': True,
-                        'message': f'{method} message logged successfully for {recipient_name}'
-                    }, status=status.HTTP_200_OK)
             else:
+                # For non-email channels (SMS, WhatsApp, etc.), just log success
                 return Response(
-                    {'error': 'Invalid contact type or missing required parameters'},
-                    status=status.HTTP_400_BAD_REQUEST
+                    {
+                        "success":
+                        True,
+                        "message":
+                        f"{method} message logged successfully for {recipient_name}",
+                    },
+                    status=status.HTTP_200_OK,
                 )
+
         except Exception as e:
             return Response(
-                {'error': f'Failed to send message: {str(e)}'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {"error": f"Failed to send message: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+
 
 class OpportunityViewSet(viewsets.ModelViewSet):
     queryset = Opportunity.objects.prefetch_related('activities').all()
@@ -2014,7 +2188,9 @@ class OpportunityViewSet(viewsets.ModelViewSet):
         """Handle opportunity updates with proper validation"""
         try:
             instance = self.get_object()
-            serializer = self.get_serializer(instance, data=request.data, partial=True)
+            serializer = self.get_serializer(instance,
+                                             data=request.data,
+                                             partial=True)
 
             if serializer.is_valid():
                 serializer.save()
@@ -2022,15 +2198,15 @@ class OpportunityViewSet(viewsets.ModelViewSet):
             else:
                 print(f"Validation errors: {serializer.errors}")
                 return Response(
-                    {'error': 'Validation failed', 'details': serializer.errors},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                    {
+                        'error': 'Validation failed',
+                        'details': serializer.errors
+                    },
+                    status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             print(f"Error updating opportunity: {str(e)}")
-            return Response(
-                {'error': f'Update failed: {str(e)}'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return Response({'error': f'Update failed: {str(e)}'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['post'])
     def add_activity(self, request, pk=None):
@@ -2042,34 +2218,39 @@ class OpportunityViewSet(viewsets.ModelViewSet):
                 'opportunity': opportunity.id,
                 'type': request.data.get('type', 'call'),
                 'description': request.data.get('description', ''),
-                'date': request.data.get('date', timezone.now().date()),
+                'date': request.data.get('date',
+                                         timezone.now().date()),
             }
 
-            activity_serializer = OpportunityActivitySerializer(data=activity_data)
+            activity_serializer = OpportunityActivitySerializer(
+                data=activity_data)
             if activity_serializer.is_valid():
                 # Save with user information
                 activity = activity_serializer.save(
-                    created_by=request.user if request.user.is_authenticated else None
-                )
+                    created_by=request.user if request.user.
+                    is_authenticated else None)
 
                 # Return the activity with updated serializer data including user info
                 response_data = OpportunityActivitySerializer(activity).data
 
-                return Response({
-                    'message': f'Activity added to {opportunity.name}',
-                    'activity': response_data
-                }, status=status.HTTP_201_CREATED)
+                return Response(
+                    {
+                        'message': f'Activity added to {opportunity.name}',
+                        'activity': response_data
+                    },
+                    status=status.HTTP_201_CREATED)
             else:
-                return Response({
-                    'error': 'Invalid activity data',
-                    'details': activity_serializer.errors
-                }, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {
+                        'error': 'Invalid activity data',
+                        'details': activity_serializer.errors
+                    },
+                    status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
             print(f"Error adding activity: {str(e)}")
-            return Response({
-                'error': f'Failed to add activity: {str(e)}'
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'error': f'Failed to add activity: {str(e)}'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['get'])
     def activities(self, request, pk=None):
@@ -2080,9 +2261,8 @@ class OpportunityViewSet(viewsets.ModelViewSet):
             serializer = OpportunityActivitySerializer(activities, many=True)
             return Response(serializer.data)
         except Exception as e:
-            return Response({
-                'error': f'Failed to fetch activities: {str(e)}'
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'error': f'Failed to fetch activities: {str(e)}'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['get'])
     def history(self, request, pk=None):
@@ -2100,7 +2280,8 @@ class OpportunityViewSet(viewsets.ModelViewSet):
                     # Handle created_by user safely
                     user_name = 'System'
                     if activity.created_by:
-                        user_name = f"{activity.created_by.first_name} {activity.created_by.last_name}".strip()
+                        user_name = f"{activity.created_by.first_name} {activity.created_by.last_name}".strip(
+                        )
                         if not user_name:
                             user_name = activity.created_by.username
 
@@ -2108,83 +2289,121 @@ class OpportunityViewSet(viewsets.ModelViewSet):
                     formatted_timestamp = 'Recently'
                     if activity.created_at:
                         try:
-                            formatted_timestamp = activity.created_at.strftime('%B %d, %Y at %I:%M %p')
+                            formatted_timestamp = activity.created_at.strftime(
+                                '%B %d, %Y at %I:%M %p')
                         except:
                             formatted_timestamp = str(activity.created_at)
 
                     history_items.append({
-                        'id': f"opportunity_activity_{activity.id}",
-                        'history_type': activity.type,
-                        'action': activity.type.replace('_', ' ').title(),
-                        'details': activity.description,
-                        'icon': 'activity',
-                        'timestamp': activity.created_at.isoformat() if activity.created_at else '',
-                        'user_name': user_name,
-                        'user_role': 'Sales Representative',
-                        'formatted_timestamp': formatted_timestamp,
-                        'metadata': {'activity_type': activity.type, 'activity_date': str(activity.date)}
+                        'id':
+                        f"opportunity_activity_{activity.id}",
+                        'history_type':
+                        activity.type,
+                        'action':
+                        activity.type.replace('_', ' ').title(),
+                        'details':
+                        activity.description,
+                        'icon':
+                        'activity',
+                        'timestamp':
+                        activity.created_at.isoformat()
+                        if activity.created_at else '',
+                        'user_name':
+                        user_name,
+                        'user_role':
+                        'Sales Representative',
+                        'formatted_timestamp':
+                        formatted_timestamp,
+                        'metadata': {
+                            'activity_type': activity.type,
+                            'activity_date': str(activity.date)
+                        }
                     })
                 except Exception as activity_error:
-                    print(f"Error processing activity {activity.id}: {activity_error}")
+                    print(
+                        f"Error processing activity {activity.id}: {activity_error}"
+                    )
                     continue
 
             # If opportunity is linked to a lead, get lead history
             if hasattr(opportunity, 'lead') and opportunity.lead:
                 try:
-                    lead_history = LeadHistory.objects.filter(lead=opportunity.lead).order_by('-timestamp')
+                    lead_history = LeadHistory.objects.filter(
+                        lead=opportunity.lead).order_by('-timestamp')
                     for history in lead_history:
                         try:
                             # Handle user safely
                             user_name = 'System'
                             user_role = 'System'
                             if history.user:
-                                user_name = f"{history.user.first_name} {history.user.last_name}".strip()
+                                user_name = f"{history.user.first_name} {history.user.last_name}".strip(
+                                )
                                 if not user_name:
                                     user_name = history.user.username
                                 user_role = 'Sales Manager' if history.user.is_staff else 'Sales Representative'
 
                             # Handle metadata safely
                             metadata = {}
-                            if hasattr(history, 'metadata') and history.metadata:
+                            if hasattr(history,
+                                       'metadata') and history.metadata:
                                 metadata = history.metadata
 
                             # Format timestamp
                             formatted_timestamp = 'Recently'
                             if history.timestamp:
                                 try:
-                                    formatted_timestamp = history.timestamp.strftime('%B %d, %Y at %I:%M %p')
+                                    formatted_timestamp = history.timestamp.strftime(
+                                        '%B %d, %Y at %I:%M %p')
                                 except:
-                                    formatted_timestamp = str(history.timestamp)
+                                    formatted_timestamp = str(
+                                        history.timestamp)
 
                             history_items.append({
-                                'id': f"lead_history_{history.id}",
-                                'history_type': history.history_type,
-                                'action': history.action,
-                                'details': history.details,
-                                'icon': history.icon,
-                                'timestamp': history.timestamp.isoformat() if history.timestamp else '',
-                                'user_name': user_name,
-                                'user_role': user_role,
-                                'formatted_timestamp': formatted_timestamp,
-                                'metadata': metadata
+                                'id':
+                                f"lead_history_{history.id}",
+                                'history_type':
+                                history.history_type,
+                                'action':
+                                history.action,
+                                'details':
+                                history.details,
+                                'icon':
+                                history.icon,
+                                'timestamp':
+                                history.timestamp.isoformat()
+                                if history.timestamp else '',
+                                'user_name':
+                                user_name,
+                                'user_role':
+                                user_role,
+                                'formatted_timestamp':
+                                formatted_timestamp,
+                                'metadata':
+                                metadata
                             })
                         except Exception as history_error:
-                            print(f"Error processing lead history {history.id}: {history_error}")
+                            print(
+                                f"Error processing lead history {history.id}: {history_error}"
+                            )
                             continue
                 except Exception as lead_history_error:
                     print(f"Error fetching lead history: {lead_history_error}")
 
             # Sort by timestamp (newest first)
-            history_items.sort(key=lambda x: x['timestamp'] if x['timestamp'] else '', reverse=True)
+            history_items.sort(key=lambda x: x['timestamp']
+                               if x['timestamp'] else '',
+                               reverse=True)
 
             return Response(history_items)
 
         except Exception as e:
             print(f"Error in opportunity history endpoint: {str(e)}")
-            return Response({
-                'error': f'Failed to fetch opportunity history: {str(e)}',
-                'history': []
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {
+                    'error': f'Failed to fetch opportunity history: {str(e)}',
+                    'history': []
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=False, methods=['get'])
     def pipeline_value(self, request):
@@ -2195,7 +2414,9 @@ class OpportunityViewSet(viewsets.ModelViewSet):
         for stage, stage_label in Opportunity.OPPORTUNITY_STAGES:
             opportunities = self.queryset.filter(stage=stage)
             stage_value = sum(float(opp.value) for opp in opportunities)
-            weighted_value = sum(float(opp.value) * (opp.probability / 100) for opp in opportunities)
+            weighted_value = sum(
+                float(opp.value) * (opp.probability / 100)
+                for opp in opportunities)
 
             pipeline[stage] = {
                 'count': opportunities.count(),
@@ -2208,10 +2429,15 @@ class OpportunityViewSet(viewsets.ModelViewSet):
             total_weighted_value += weighted_value
 
         pipeline['summary'] = {
-            'total_opportunities': self.queryset.count(),
-            'total_value': total_value,
-            'total_weighted_value': total_weighted_value,
-            'average_deal_size': total_value / self.queryset.count() if self.queryset.count() > 0 else 0
+            'total_opportunities':
+            self.queryset.count(),
+            'total_value':
+            total_value,
+            'total_weighted_value':
+            total_weighted_value,
+            'average_deal_size':
+            total_value /
+            self.queryset.count() if self.queryset.count() > 0 else 0
         }
 
         return Response(pipeline)
@@ -2223,8 +2449,8 @@ class OpportunityViewSet(viewsets.ModelViewSet):
 
         opportunities = self.queryset.filter(
             estimated_close_date__lte=end_date,
-            stage__in=['proposal', 'negotiation']
-        ).order_by('estimated_close_date')
+            stage__in=['proposal',
+                       'negotiation']).order_by('estimated_close_date')
 
         serializer = self.get_serializer(opportunities, many=True)
         return Response(serializer.data)
@@ -2235,22 +2461,27 @@ class OpportunityViewSet(viewsets.ModelViewSet):
         try:
             opportunity = self.get_object()
 
-            subject = request.data.get('subject', f'Travel Solutions Proposal - {opportunity.lead.company.name if opportunity.lead else "Opportunity"}')
+            subject = request.data.get(
+                'subject',
+                f'Travel Solutions Proposal - {opportunity.lead.company.name if opportunity.lead else "Opportunity"}'
+            )
             email_content = request.data.get('email_content', '')
             delivery_method = request.data.get('delivery_method', 'email')
             validity_period = request.data.get('validity_period', '30')
             special_terms = request.data.get('special_terms', '')
 
             if not email_content:
-                return Response({
-                    'error': 'Email content is required'
-                }, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': 'Email content is required'},
+                                status=status.HTTP_400_BAD_REQUEST)
 
             # Get recipient email from opportunity's lead contact
             if not opportunity.lead or not opportunity.lead.contact or not opportunity.lead.contact.email:
-                return Response({
-                    'error': 'No valid email address found for this opportunity'
-                }, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {
+                        'error':
+                        'No valid email address found for this opportunity'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST)
 
             recipient_email = opportunity.lead.contact.email
 
@@ -2271,7 +2502,10 @@ class OpportunityViewSet(viewsets.ModelViewSet):
                         body=plain_text_content,  # Plain text fallback
                         from_email=settings.DEFAULT_FROM_EMAIL,
                         to=[recipient_email],
-                        bcc=['nagendran.g@infinitisoftware.net', 'muniraj@infinitisoftware.net'],
+                        bcc=[
+                            'nagendran.g@infinitisoftware.net',
+                            'muniraj@infinitisoftware.net'
+                        ],
                     )
 
                     # Attach HTML version
@@ -2284,42 +2518,53 @@ class OpportunityViewSet(viewsets.ModelViewSet):
                     OpportunityActivity.objects.create(
                         opportunity=opportunity,
                         type='proposal',
-                        description=f'Proposal email sent to {recipient_email}. Subject: {subject}',
+                        description=
+                        f'Proposal email sent to {recipient_email}. Subject: {subject}',
                         date=timezone.now().date(),
-                        created_by=request.user if request.user.is_authenticated else None
-                    )
+                        created_by=request.user
+                        if request.user.is_authenticated else None)
 
-                    return Response({
-                        'success': True,
-                        'message': f'Proposal email sent successfully to {recipient_email}',
-                        'recipient': recipient_email
-                    }, status=status.HTTP_200_OK)
+                    return Response(
+                        {
+                            'success': True,
+                            'message':
+                            f'Proposal email sent successfully to {recipient_email}',
+                            'recipient': recipient_email
+                        },
+                        status=status.HTTP_200_OK)
 
                 except Exception as email_error:
-                    return Response({
-                        'success': False,
-                        'error': f'Failed to send email: {str(email_error)}'
-                    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    return Response(
+                        {
+                            'success': False,
+                            'error':
+                            f'Failed to send email: {str(email_error)}'
+                        },
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
             else:
                 # For non-email methods, just create an activity record
                 OpportunityActivity.objects.create(
                     opportunity=opportunity,
                     type='proposal',
-                    description=f'Proposal sent via {delivery_method}. {special_terms}',
+                    description=
+                    f'Proposal sent via {delivery_method}. {special_terms}',
                     date=timezone.now().date(),
-                    created_by=request.user if request.user.is_authenticated else None
-                )
+                    created_by=request.user
+                    if request.user.is_authenticated else None)
 
-                return Response({
-                    'success': True,
-                    'message': f'Proposal sent successfully via {delivery_method}',
-                }, status=status.HTTP_200_OK)
+                return Response(
+                    {
+                        'success':
+                        True,
+                        'message':
+                        f'Proposal sent successfully via {delivery_method}',
+                    },
+                    status=status.HTTP_200_OK)
 
         except Exception as e:
-            return Response({
-                'error': f'Failed to send proposal: {str(e)}'
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'error': f'Failed to send proposal: {str(e)}'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=False, methods=['post'])
     def search(self, request):
@@ -2328,9 +2573,8 @@ class OpportunityViewSet(viewsets.ModelViewSet):
         """
         filters = request.data
 
-        queryset = self.queryset.select_related(
-            'lead__company', 'lead__contact'
-        )
+        queryset = self.queryset.select_related('lead__company',
+                                                'lead__contact')
 
         search = filters.get('search', '')
         stage = filters.get('stage', '')
@@ -2341,11 +2585,10 @@ class OpportunityViewSet(viewsets.ModelViewSet):
 
         if search:
             queryset = queryset.filter(
-                Q(name__icontains=search) |
-                Q(lead__company__name__icontains=search) |
-                Q(lead__contact__first_name__icontains=search) |
-                Q(lead__contact__last_name__icontains=search)
-            )
+                Q(name__icontains=search)
+                | Q(lead__company__name__icontains=search)
+                | Q(lead__contact__first_name__icontains=search)
+                | Q(lead__contact__last_name__icontains=search))
 
         if stage and stage != 'all':
             queryset = queryset.filter(stage=stage)
@@ -2365,6 +2608,7 @@ class OpportunityViewSet(viewsets.ModelViewSet):
         serializer = OptimizedOpportunitySerializer(queryset, many=True)
         return Response(serializer.data)
 
+
 class OpportunityActivityViewSet(viewsets.ModelViewSet):
     queryset = OpportunityActivity.objects.all()
     serializer_class = OpportunityActivitySerializer
@@ -2379,7 +2623,9 @@ class OpportunityActivityViewSet(viewsets.ModelViewSet):
         return queryset.order_by('-date', '-created_at')
 
     def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user if self.request.user.is_authenticated else None)
+        serializer.save(created_by=self.request.user if self.request.user.
+                        is_authenticated else None)
+
 
 class ContractViewSet(viewsets.ModelViewSet):
     queryset = Contract.objects.all()
@@ -2390,10 +2636,8 @@ class ContractViewSet(viewsets.ModelViewSet):
         days_ahead = int(request.query_params.get('days', 30))
         alert_date = timezone.now().date() + timedelta(days=days_ahead)
 
-        contracts = self.queryset.filter(
-            end_date__lte=alert_date,
-            status='active'
-        ).order_by('end_date')
+        contracts = self.queryset.filter(end_date__lte=alert_date,
+                                         status='active').order_by('end_date')
 
         serializer = self.get_serializer(contracts, many=True)
         return Response(serializer.data)
@@ -2401,8 +2645,7 @@ class ContractViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def at_risk(self, request):
         contracts = self.queryset.filter(
-            Q(status='at_risk') | Q(risk_score__gte=7)
-        ).order_by('-risk_score')
+            Q(status='at_risk') | Q(risk_score__gte=7)).order_by('-risk_score')
 
         serializer = self.get_serializer(contracts, many=True)
         return Response(serializer.data)
@@ -2413,19 +2656,25 @@ class ContractViewSet(viewsets.ModelViewSet):
         active_contracts = self.queryset.filter(status='active').count()
         expiring_soon = self.queryset.filter(
             end_date__lte=timezone.now().date() + timedelta(days=30),
-            status='active'
-        ).count()
+            status='active').count()
 
         stats = {
-            'total_contracts': total_contracts,
-            'active_contracts': active_contracts,
-            'expiring_soon': expiring_soon,
-            'total_value': self.queryset.aggregate(total=Sum('value'))['total'] or 0,
-            'average_value': self.queryset.aggregate(avg=Avg('value'))['avg'] or 0,
-            'breach_count': ContractBreach.objects.filter(is_resolved=False).count()
+            'total_contracts':
+            total_contracts,
+            'active_contracts':
+            active_contracts,
+            'expiring_soon':
+            expiring_soon,
+            'total_value':
+            self.queryset.aggregate(total=Sum('value'))['total'] or 0,
+            'average_value':
+            self.queryset.aggregate(avg=Avg('value'))['avg'] or 0,
+            'breach_count':
+            ContractBreach.objects.filter(is_resolved=False).count()
         }
 
         return Response(stats)
+
 
 class ContractBreachViewSet(viewsets.ModelViewSet):
     queryset = ContractBreach.objects.all()
@@ -2433,7 +2682,8 @@ class ContractBreachViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def active_breaches(self, request):
-        breaches = self.queryset.filter(is_resolved=False).order_by('-severity', '-detected_date')
+        breaches = self.queryset.filter(is_resolved=False).order_by(
+            '-severity', '-detected_date')
         serializer = self.get_serializer(breaches, many=True)
         return Response(breaches.data)
 
@@ -2447,6 +2697,7 @@ class ContractBreachViewSet(viewsets.ModelViewSet):
 
         return Response({'status': 'breach resolved'})
 
+
 class CampaignTemplateViewSet(viewsets.ModelViewSet):
     queryset = CampaignTemplate.objects.all()
     serializer_class = CampaignTemplateSerializer
@@ -2458,163 +2709,22 @@ class CampaignTemplateViewSet(viewsets.ModelViewSet):
             custom_templates = []
             try:
                 custom_templates_queryset = self.get_queryset()
-                custom_templates_serializer = self.get_serializer(custom_templates_queryset, many=True)
+                custom_templates_serializer = self.get_serializer(
+                    custom_templates_queryset, many=True)
                 custom_templates = custom_templates_serializer.data
             except Exception as e:
                 print(f"Error getting custom templates: {e}")
                 custom_templates = []
 
             # Define default templates
-            default_templates = [
-                {
-                    'id': 'welcome-series',
-                    'name': 'Welcome Series',
-                    'description': 'Multi-touch welcome sequence for new leads',
-                    'channel_type': 'email',
-                    'target_industry': 'All',
-                    'subject_line': 'Welcome to the future of corporate travel - {{company_name}}',
-                    'content': '''Hi {{contact_name}},
-
-Welcome to SOAR-AI! We're excited to help {{company_name}} transform your corporate travel experience.
-
-Based on your {{industry}} background and {{employees}} team size, we've identified several opportunities to optimize your travel operations:
-
-✈️ Reduce travel costs by up to 35%
-📊 Streamline booking and approval processes  
-🌍 Access our global partner network
-🤖 AI-powered travel recommendations
-
-Ready to see how we can help? Let's schedule a 15-minute discovery call.''',
-                    'cta': 'Schedule Discovery Call',
-                    'linkedin_type': None,
-                    'estimated_open_rate': 45.0,
-                    'estimated_click_rate': 12.0,
-                    'is_custom': False,
-                    'created_by': 'System',
-                    'created_at': '2024-01-01T00:00:00Z',
-                    'updated_at': '2024-01-01T00:00:00Z'
-                },
-                {
-                    'id': 'cost-savings',
-                    'name': 'Cost Savings Focus',
-                    'description': 'Emphasizes ROI and cost reduction benefits',
-                    'channel_type': 'email',
-                    'target_industry': 'Manufacturing',
-                    'subject_line': '{{company_name}}: Cut travel costs by 35% with SOAR-AI',
-                    'content': '''{{contact_name}},
-
-Companies like {{company_name}} in the {{industry}} sector are saving an average of 35% on travel costs with SOAR-AI.
-
-Here's what {{company_name}} could save annually:
-• Current estimated budget: {{travel_budget}}
-• Potential savings: {{calculated_savings}}
-• ROI timeline: 3-6 months
-
-Our AI-powered platform optimizes:
-- Flight routing and pricing
-- Hotel negotiations
-- Policy compliance
-- Expense management
-
-Ready to see your personalized savings analysis?''',
-                    'cta': 'View Savings Report',
-                    'linkedin_type': None,
-                    'estimated_open_rate': 52.0,
-                    'estimated_click_rate': 15.0,
-                    'is_custom': False,
-                    'created_by': 'System',
-                    'created_at': '2024-01-01T00:00:00Z',
-                    'updated_at': '2024-01-01T00:00:00Z'
-                },
-                {
-                    'id': 'linkedin-connection',
-                    'name': 'LinkedIn Connection Request',
-                    'description': 'Professional connection request for LinkedIn outreach',
-                    'channel_type': 'linkedin',
-                    'target_industry': 'All',
-                    'subject_line': None,
-                    'content': '''Hi {{contact_name}},
-
-I noticed {{company_name}} is expanding in the {{industry}} space. I'd love to connect and share how we're helping similar companies optimize their corporate travel operations.
-
-Would you be open to connecting?''',
-                    'cta': 'Connect on LinkedIn',
-                    'linkedin_type': 'connection',
-                    'estimated_open_rate': 65.0,
-                    'estimated_click_rate': 25.0,
-                    'is_custom': False,
-                    'created_by': 'System',
-                    'created_at': '2024-01-01T00:00:00Z',
-                    'updated_at': '2024-01-01T00:00:00Z'
-                },
-                {
-                    'id': 'multi-channel-sequence',
-                    'name': 'Multi-Channel Sequence',
-                    'description': 'Coordinated outreach across email, LinkedIn, and WhatsApp',
-                    'channel_type': 'mixed',
-                    'target_industry': 'All',
-                    'subject_line': 'Partnership opportunity with {{company_name}}',
-                    'content': '''Hi {{contact_name}},
-
-I hope this message finds you well. I've been researching {{company_name}} and I'm impressed by your growth in the {{industry}} sector.
-
-We're helping companies like yours:
-• Reduce travel costs by 25-40%
-• Improve policy compliance
-• Streamline approval workflows
-• Access exclusive corporate rates
-
-Would you be interested in a brief conversation about how we could support {{company_name}}'s travel operations?''',
-                    'cta': 'Schedule 15-min Call',
-                    'linkedin_type': 'message',
-                    'estimated_open_rate': 58.0,
-                    'estimated_click_rate': 18.0,
-                    'is_custom': False,
-                    'created_by': 'System',
-                    'created_at': '2024-01-01T00:00:00Z',
-                    'updated_at': '2024-01-01T00:00:00Z'
-                }
-            ]
-
-            # Combine default templates first, then custom templates
-            all_templates = default_templates + custom_templates
-            return Response(all_templates)
-
-        except Exception as e:
-            print(f"Error in CampaignTemplateViewSet.list: {e}")
-            # Return just default templates if there's any error
-            default_templates = [
-                {
-                    'id': 'welcome-series',
-                    'name': 'Welcome Series',
-                    'description': 'Multi-touch welcome sequence for new leads',
-                    'channel_type': 'email',
-                    'target_industry': 'All',
-                    'subject_line': 'Welcome to the future of corporate travel',
-                    'content': 'Welcome to SOAR-AI!',
-                    'cta': 'Schedule Discovery Call',
-                    'linkedin_type': None,
-                    'estimated_open_rate': 45.0,
-                    'estimated_click_rate': 12.0,
-                    'is_custom': False,
-                    'created_by': 'System',
-                    'created_at': '2024-01-01T00:00:00Z',
-                    'updated_at': '2024-01-01T00:00:00Z'
-                }
-            ]
-            return Response(default_templates)
-
-    @action(detail=False, methods=['get'])
-    def default_templates(self, request):
-        """Get default/built-in campaign templates (legacy endpoint)"""
-        default_templates = [
-            {
+            default_templates = [{
                 'id': 'welcome-series',
                 'name': 'Welcome Series',
                 'description': 'Multi-touch welcome sequence for new leads',
                 'channel_type': 'email',
                 'target_industry': 'All',
-                'subject_line': 'Welcome to the future of corporate travel - {{company_name}}',
+                'subject_line':
+                'Welcome to the future of corporate travel - {{company_name}}',
                 'content': '''Hi {{contact_name}},
 
 Welcome to SOAR-AI! We're excited to help {{company_name}} transform your corporate travel experience.
@@ -2635,14 +2745,14 @@ Ready to see how we can help? Let's schedule a 15-minute discovery call.''',
                 'created_by': 'System',
                 'created_at': '2024-01-01T00:00:00Z',
                 'updated_at': '2024-01-01T00:00:00Z'
-            },
-            {
+            }, {
                 'id': 'cost-savings',
                 'name': 'Cost Savings Focus',
                 'description': 'Emphasizes ROI and cost reduction benefits',
                 'channel_type': 'email',
                 'target_industry': 'Manufacturing',
-                'subject_line': '{{company_name}}: Cut travel costs by 35% with SOAR-AI',
+                'subject_line':
+                '{{company_name}}: Cut travel costs by 35% with SOAR-AI',
                 'content': '''{{contact_name}},
 
 Companies like {{company_name}} in the {{industry}} sector are saving an average of 35% on travel costs with SOAR-AI.
@@ -2667,11 +2777,11 @@ Ready to see your personalized savings analysis?''',
                 'created_by': 'System',
                 'created_at': '2024-01-01T00:00:00Z',
                 'updated_at': '2024-01-01T00:00:00Z'
-            },
-            {
+            }, {
                 'id': 'linkedin-connection',
                 'name': 'LinkedIn Connection Request',
-                'description': 'Professional connection request for LinkedIn outreach',
+                'description':
+                'Professional connection request for LinkedIn outreach',
                 'channel_type': 'linkedin',
                 'target_industry': 'All',
                 'subject_line': None,
@@ -2688,14 +2798,15 @@ Would you be open to connecting?''',
                 'created_by': 'System',
                 'created_at': '2024-01-01T00:00:00Z',
                 'updated_at': '2024-01-01T00:00:00Z'
-            },
-            {
+            }, {
                 'id': 'multi-channel-sequence',
                 'name': 'Multi-Channel Sequence',
-                'description': 'Coordinated outreach across email, LinkedIn, and WhatsApp',
+                'description':
+                'Coordinated outreach across email, LinkedIn, and WhatsApp',
                 'channel_type': 'mixed',
                 'target_industry': 'All',
-                'subject_line': 'Partnership opportunity with {{company_name}}',
+                'subject_line':
+                'Partnership opportunity with {{company_name}}',
                 'content': '''Hi {{contact_name}},
 
 I hope this message finds you well. I've been researching {{company_name}} and I'm impressed by your growth in the {{industry}} sector.
@@ -2715,8 +2826,146 @@ Would you be interested in a brief conversation about how we could support {{com
                 'created_by': 'System',
                 'created_at': '2024-01-01T00:00:00Z',
                 'updated_at': '2024-01-01T00:00:00Z'
-            }
-        ]
+            }]
+
+            # Combine default templates first, then custom templates
+            all_templates = default_templates + custom_templates
+            return Response(all_templates)
+
+        except Exception as e:
+            print(f"Error in CampaignTemplateViewSet.list: {e}")
+            # Return just default templates if there's any error
+            default_templates = [{
+                'id': 'welcome-series',
+                'name': 'Welcome Series',
+                'description': 'Multi-touch welcome sequence for new leads',
+                'channel_type': 'email',
+                'target_industry': 'All',
+                'subject_line': 'Welcome to the future of corporate travel',
+                'content': 'Welcome to SOAR-AI!',
+                'cta': 'Schedule Discovery Call',
+                'linkedin_type': None,
+                'estimated_open_rate': 45.0,
+                'estimated_click_rate': 12.0,
+                'is_custom': False,
+                'created_by': 'System',
+                'created_at': '2024-01-01T00:00:00Z',
+                'updated_at': '2024-01-01T00:00:00Z'
+            }]
+            return Response(default_templates)
+
+    @action(detail=False, methods=['get'])
+    def default_templates(self, request):
+        """Get default/built-in campaign templates (legacy endpoint)"""
+        default_templates = [{
+            'id': 'welcome-series',
+            'name': 'Welcome Series',
+            'description': 'Multi-touch welcome sequence for new leads',
+            'channel_type': 'email',
+            'target_industry': 'All',
+            'subject_line':
+            'Welcome to the future of corporate travel - {{company_name}}',
+            'content': '''Hi {{contact_name}},
+
+Welcome to SOAR-AI! We're excited to help {{company_name}} transform your corporate travel experience.
+
+Based on your {{industry}} background and {{employees}} team size, we've identified several opportunities to optimize your travel operations:
+
+✈️ Reduce travel costs by up to 35%
+📊 Streamline booking and approval processes  
+🌍 Access our global partner network
+🤖 AI-powered travel recommendations
+
+Ready to see how we can help? Let's schedule a 15-minute discovery call.''',
+            'cta': 'Schedule Discovery Call',
+            'linkedin_type': None,
+            'estimated_open_rate': 45.0,
+            'estimated_click_rate': 12.0,
+            'is_custom': False,
+            'created_by': 'System',
+            'created_at': '2024-01-01T00:00:00Z',
+            'updated_at': '2024-01-01T00:00:00Z'
+        }, {
+            'id': 'cost-savings',
+            'name': 'Cost Savings Focus',
+            'description': 'Emphasizes ROI and cost reduction benefits',
+            'channel_type': 'email',
+            'target_industry': 'Manufacturing',
+            'subject_line':
+            '{{company_name}}: Cut travel costs by 35% with SOAR-AI',
+            'content': '''{{contact_name}},
+
+Companies like {{company_name}} in the {{industry}} sector are saving an average of 35% on travel costs with SOAR-AI.
+
+Here's what {{company_name}} could save annually:
+• Current estimated budget: {{travel_budget}}
+• Potential savings: {{calculated_savings}}
+• ROI timeline: 3-6 months
+
+Our AI-powered platform optimizes:
+- Flight routing and pricing
+- Hotel negotiations
+- Policy compliance
+- Expense management
+
+Ready to see your personalized savings analysis?''',
+            'cta': 'View Savings Report',
+            'linkedin_type': None,
+            'estimated_open_rate': 52.0,
+            'estimated_click_rate': 15.0,
+            'is_custom': False,
+            'created_by': 'System',
+            'created_at': '2024-01-01T00:00:00Z',
+            'updated_at': '2024-01-01T00:00:00Z'
+        }, {
+            'id': 'linkedin-connection',
+            'name': 'LinkedIn Connection Request',
+            'description':
+            'Professional connection request for LinkedIn outreach',
+            'channel_type': 'linkedin',
+            'target_industry': 'All',
+            'subject_line': None,
+            'content': '''Hi {{contact_name}},
+
+I noticed {{company_name}} is expanding in the {{industry}} space. I'd love to connect and share how we're helping similar companies optimize their corporate travel operations.
+
+Would you be open to connecting?''',
+            'cta': 'Connect on LinkedIn',
+            'linkedin_type': 'connection',
+            'estimated_open_rate': 65.0,
+            'estimated_click_rate': 25.0,
+            'is_custom': False,
+            'created_by': 'System',
+            'created_at': '2024-01-01T00:00:00Z',
+            'updated_at': '2024-01-01T00:00:00Z'
+        }, {
+            'id': 'multi-channel-sequence',
+            'name': 'Multi-Channel Sequence',
+            'description':
+            'Coordinated outreach across email, LinkedIn, and WhatsApp',
+            'channel_type': 'mixed',
+            'target_industry': 'All',
+            'subject_line': 'Partnership opportunity with {{company_name}}',
+            'content': '''Hi {{contact_name}},
+
+I hope this message finds you well. I've been researching {{company_name}} and I'm impressed by your growth in the {{industry}} sector.
+
+We're helping companies like yours:
+• Reduce travel costs by 25-40%
+• Improve policy compliance
+• Streamline approval workflows
+• Access exclusive corporate rates
+
+Would you be interested in a brief conversation about how we could support {{company_name}}'s travel operations?''',
+            'cta': 'Schedule 15-min Call',
+            'linkedin_type': 'message',
+            'estimated_open_rate': 58.0,
+            'estimated_click_rate': 18.0,
+            'is_custom': False,
+            'created_by': 'System',
+            'created_at': '2024-01-01T00:00:00Z',
+            'updated_at': '2024-01-01T00:00:00Z'
+        }]
 
         return Response(default_templates)
 
@@ -2767,20 +3016,23 @@ Would you be interested in a brief conversation about how we could support {{com
 
                 return Response(response_data, status=status.HTTP_201_CREATED)
             else:
-                print(f"Template creation validation errors: {serializer.errors}")
-                return Response(
-                    {'error': 'Validation failed', 'details': serializer.errors},
-                    status=status.HTTP_400_BAD_REQUEST
+                print(
+                    f"Template creation validation errors: {serializer.errors}"
                 )
+                return Response(
+                    {
+                        'error': 'Validation failed',
+                        'details': serializer.errors
+                    },
+                    status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
             import traceback
             error_details = traceback.format_exc()
             print(f"Template creation error: {error_details}")
-            return Response(
-                {'error': f'Failed to create template: {str(e)}'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return Response({'error': f'Failed to create template: {str(e)}'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -2796,7 +3048,8 @@ def proposal_draft_detail(request, opportunity_id):
     try:
         opportunity = Opportunity.objects.get(id=opportunity_id)
     except Opportunity.DoesNotExist:
-        return Response({'error': 'Opportunity not found'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'error': 'Opportunity not found'},
+                        status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         # Get existing draft if it exists
@@ -2817,7 +3070,8 @@ def proposal_draft_detail(request, opportunity_id):
 
             return Response(draft_data, status=status.HTTP_200_OK)
         except ProposalDraft.DoesNotExist:
-            return Response({'message': 'No draft found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'message': 'No draft found'},
+                            status=status.HTTP_404_NOT_FOUND)
 
     elif request.method == 'POST' or request.method == 'PUT':
         # Handle file upload if present
@@ -2854,7 +3108,9 @@ def proposal_draft_detail(request, opportunity_id):
         # Create or update draft
         try:
             draft = ProposalDraft.objects.get(opportunity=opportunity)
-            serializer = ProposalDraftSerializer(draft, data=data, partial=True)
+            serializer = ProposalDraftSerializer(draft,
+                                                 data=data,
+                                                 partial=True)
         except ProposalDraft.DoesNotExist:
             data['opportunity'] = opportunity.id
             serializer = ProposalDraftSerializer(data=data)
@@ -2864,7 +3120,8 @@ def proposal_draft_detail(request, opportunity_id):
 
             # Include attachment info in response
             response_data = serializer.data
-            if saved_draft.attachment_path and os.path.exists(saved_draft.attachment_path):
+            if saved_draft.attachment_path and os.path.exists(
+                    saved_draft.attachment_path):
                 response_data['attachment_info'] = {
                     'filename': saved_draft.attachment_original_name,
                     'path': saved_draft.attachment_path,
@@ -2887,18 +3144,23 @@ def proposal_draft_detail(request, opportunity_id):
                     pass  # File might be already deleted
 
             draft.delete()
-            return Response({'message': 'Draft deleted successfully'}, status=status.HTTP_200_OK)
+            return Response({'message': 'Draft deleted successfully'},
+                            status=status.HTTP_200_OK)
         except ProposalDraft.DoesNotExist:
-            return Response({'message': 'No draft found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'message': 'No draft found'},
+                            status=status.HTTP_404_NOT_FOUND)
 
     elif request.method == 'DELETE':
         # Delete draft
         try:
             draft = ProposalDraft.objects.get(opportunity=opportunity)
             draft.delete()
-            return Response({'message': 'Draft deleted successfully'}, status=status.HTTP_200_OK)
+            return Response({'message': 'Draft deleted successfully'},
+                            status=status.HTTP_200_OK)
         except ProposalDraft.DoesNotExist:
-            return Response({'message': 'No draft found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'message': 'No draft found'},
+                            status=status.HTTP_404_NOT_FOUND)
+
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -2914,7 +3176,12 @@ def lead_dashboard_stats(request):
         elif time_period == 'last_90_days':
             start_date = end_date - timedelta(days=90)
         elif time_period == 'this_year':
-            start_date = end_date.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0)
+            start_date = end_date.replace(month=1,
+                                          day=1,
+                                          hour=0,
+                                          minute=0,
+                                          second=0,
+                                          microsecond=0)
         else:
             start_date = None
 
@@ -2931,7 +3198,8 @@ def lead_dashboard_stats(request):
         responded_leads = leads_queryset.filter(status='responded').count()
 
         # Calculate conversion rate
-        conversion_rate = (qualified_leads / total_leads * 100) if total_leads > 0 else 0
+        conversion_rate = (qualified_leads / total_leads *
+                           100) if total_leads > 0 else 0
 
         # Calculate email stats (mock data for now - can be enhanced with actual email tracking)
         email_open_rate = 68.5  # This would come from email campaign data
@@ -2946,9 +3214,10 @@ def lead_dashboard_stats(request):
             previous_period_start = start_date - (end_date - start_date)
             previous_leads = Lead.objects.filter(
                 created_at__gte=previous_period_start,
-                created_at__lt=start_date
-            ).count()
-            total_change = ((total_leads - previous_leads) / max(previous_leads, 1) * 100) if previous_leads > 0 else 0
+                created_at__lt=start_date).count()
+            total_change = ((total_leads - previous_leads) /
+                            max(previous_leads, 1) *
+                            100) if previous_leads > 0 else 0
         else:
             total_change = 12.5  # Mock data for all time
 
@@ -2970,20 +3239,22 @@ def lead_dashboard_stats(request):
         return Response(stats)
 
     except Exception as e:
-        return Response({
-            'error': f'Failed to fetch lead stats: {str(e)}',
-            'totalLeads': 0,
-            'qualifiedLeads': 0,
-            'unqualified': 0,
-            'contacted': 0,
-            'responded': 0,
-            'conversionRate': 0,
-            'emailOpenRate': 0,
-            'emailOpenRateChange': 0,
-            'avgResponseTime': '0 hours',
-            'avgResponseTimeChange': 'No change',
-            'totalChange': 0
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response(
+            {
+                'error': f'Failed to fetch lead stats: {str(e)}',
+                'totalLeads': 0,
+                'qualifiedLeads': 0,
+                'unqualified': 0,
+                'contacted': 0,
+                'responded': 0,
+                'conversionRate': 0,
+                'emailOpenRate': 0,
+                'emailOpenRateChange': 0,
+                'avgResponseTime': '0 hours',
+                'avgResponseTimeChange': 'No change',
+                'totalChange': 0
+            },
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['GET'])
@@ -3129,26 +3400,18 @@ def process_revenue_data(df, filename):
     }
 
     # --- Top Destinations ---
-    top_destinations = (
-        df.groupby("Destination_Airport_Code")
-        .agg(bookings=("Booking_ID", "count"),
-             revenue=("Total_Fare_Amount", "sum"))
-        .reset_index()
-        .sort_values(by="bookings", ascending=False)
-        .head(5)
-        .to_dict(orient="records")
-    )
+    top_destinations = (df.groupby("Destination_Airport_Code").agg(
+        bookings=("Booking_ID", "count"),
+        revenue=("Total_Fare_Amount", "sum")).reset_index().sort_values(
+            by="bookings", ascending=False).head(5).to_dict(orient="records"))
 
     # --- Monthly Booking Trends ---
-    monthly_trends = (
-        df.groupby(df["Booking_Month"].dt.strftime("%b %Y"))
-        .agg(bookings=("Booking_ID", "count"),
-             revenue=("Total_Fare_Amount", "sum"))
-        .reset_index()
-        .rename(columns={"Booking_Month": "month"})
-        .sort_values("month")
-        .to_dict(orient="records")
-    )
+    monthly_trends = (df.groupby(df["Booking_Month"].dt.strftime("%b %Y")).agg(
+        bookings=("Booking_ID", "count"),
+        revenue=("Total_Fare_Amount",
+                 "sum")).reset_index().rename(columns={
+                     "Booking_Month": "month"
+                 }).sort_values("month").to_dict(orient="records"))
 
     # ================= SIMULATED KPI METRICS =================
 
@@ -3162,7 +3425,8 @@ def process_revenue_data(df, filename):
     business_stats = {
         "newClientsThisMonth": random.randint(50, 120),
         "bookingGrowthRate": round(abs(growth_rate), 1),
-        "revenueGrowthRate": round(abs(growth_rate) + random.uniform(-5, 5), 1),
+        "revenueGrowthRate":
+        round(abs(growth_rate) + random.uniform(-5, 5), 1),
         "clientRetentionRate": round(85 + random.uniform(-5, 10), 1),
         "averageLeadTime": round(12 + random.uniform(-3, 8), 1),
         "cancelationRate": round(3 + random.uniform(-1, 3), 1),
@@ -3178,7 +3442,8 @@ def process_revenue_data(df, filename):
         "conversionRate": round(20 + random.uniform(-5, 10), 1),
         "salesCycleLength": random.randint(35, 55),
         "forecastAccuracy": round(88 + random.uniform(-5, 8), 1),
-        "quarterlyGrowthRate": round(abs(growth_rate) + random.uniform(-3, 8), 1),
+        "quarterlyGrowthRate":
+        round(abs(growth_rate) + random.uniform(-3, 8), 1),
         "yearOverYearGrowth": round(abs(growth_rate), 1)
     }
 
@@ -3188,11 +3453,16 @@ def process_revenue_data(df, filename):
             "totalRows": total_rows,
             "totalRevenue": float(current_revenue)
         },
-        "businessPerformanceOverview": business_performance,
-        "topDestinations": top_destinations,
-        "monthlyBookingTrends": monthly_trends,
-        "businessStats": business_stats,
-        "keyMetrics": key_metrics,
+        "businessPerformanceOverview":
+        business_performance,
+        "topDestinations":
+        top_destinations,
+        "monthlyBookingTrends":
+        monthly_trends,
+        "businessStats":
+        business_stats,
+        "keyMetrics":
+        key_metrics,
         "insights": [
             f"Processed {total_rows} rows from {filename}",
             f"Detected {business_performance['activeClients']} active clients",
@@ -3337,7 +3607,8 @@ def recent_lead_activity(request):
 
         # Get recent lead history entries
         try:
-            recent_history = LeadHistory.objects.select_related('lead').order_by('-timestamp')[:limit]
+            recent_history = LeadHistory.objects.select_related(
+                'lead').order_by('-timestamp')[:limit]
 
             for history in recent_history:
                 activity_type = 'qualification' if 'qualified' in history.action.lower() else \
@@ -3346,13 +3617,21 @@ def recent_lead_activity(request):
                               'response'
 
                 activities.append({
-                    'id': history.id,
-                    'type': activity_type,
-                    'lead': f"{history.lead.company.name}",
-                    'action': history.action,
-                    'time': history.timestamp.strftime('%d %b %Y, %I:%M %p'),
-                    'status': history.lead.status,
-                    'value': f"Score: {history.lead.score}" if history.lead.score else "No score"
+                    'id':
+                    history.id,
+                    'type':
+                    activity_type,
+                    'lead':
+                    f"{history.lead.company.name}",
+                    'action':
+                    history.action,
+                    'time':
+                    history.timestamp.strftime('%d %b %Y, %I:%M %p'),
+                    'status':
+                    history.lead.status,
+                    'value':
+                    f"Score: {history.lead.score}"
+                    if history.lead.score else "No score"
                 })
         except Exception as activity_error:
             print(f"Error processing history {history.id}: {activity_error}")
@@ -3360,17 +3639,27 @@ def recent_lead_activity(request):
 
         # If no history available, get recent leads as activities
         if not activities:
-            recent_leads = Lead.objects.select_related('company').order_by('-updated_at')[:5]
+            recent_leads = Lead.objects.select_related('company').order_by(
+                '-updated_at')[:5]
 
             for i, lead in enumerate(recent_leads):
                 activities.append({
-                    'id': lead.id,
-                    'type': 'qualification' if lead.status == 'qualified' else 'response',
-                    'lead': lead.company.name,
-                    'action': f'Lead {lead.status} - Recent update',
-                    'time': lead.updated_at.strftime('%d %b %Y, %I:%M %p'),
-                    'status': lead.status,
-                    'value': f"${int(lead.estimated_value/1000)}K" if lead.estimated_value else "No value set"
+                    'id':
+                    lead.id,
+                    'type':
+                    'qualification'
+                    if lead.status == 'qualified' else 'response',
+                    'lead':
+                    lead.company.name,
+                    'action':
+                    f'Lead {lead.status} - Recent update',
+                    'time':
+                    lead.updated_at.strftime('%d %b %Y, %I:%M %p'),
+                    'status':
+                    lead.status,
+                    'value':
+                    f"${int(lead.estimated_value/1000)}K"
+                    if lead.estimated_value else "No value set"
                 })
 
         # If no activities found, return empty list
@@ -3379,10 +3668,9 @@ def recent_lead_activity(request):
 
         return Response(activities)
     except Exception as e:
-        return Response(
-            {'error': str(e)},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
+        return Response({'error': str(e)},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -3393,8 +3681,7 @@ def top_qualified_leads(request):
 
         # Get top qualified leads ordered by score and estimated value
         top_leads = Lead.objects.select_related('company', 'contact').filter(
-            status='qualified'
-        ).order_by('-score', '-estimated_value')[:limit]
+            status='qualified').order_by('-score', '-estimated_value')[:limit]
 
         leads_data = []
         for lead in top_leads:
@@ -3408,18 +3695,35 @@ def top_qualified_leads(request):
                     engagement = 'Low'
 
                 lead_data = {
-                    'id': lead.id,
-                    'company': lead.company.name if lead.company else 'Unknown Company',
-                    'contact': f"{lead.contact.first_name} {lead.contact.last_name}" if lead.contact else 'Unknown Contact',
-                    'title': lead.contact.position if lead.contact else 'Unknown Position',
-                    'industry': lead.company.industry.title() if lead.company and lead.company.industry else 'Unknown',
-                    'employees': lead.company.employee_count if lead.company else 0,
-                    'status': lead.status,
-                    'score': lead.score,
-                    'value': f"${int(lead.estimated_value/1000)}K" if lead.estimated_value else 'TBD',
-                    'engagement': engagement,
-                    'nextAction': lead.next_action or 'Follow up required',
-                    'lastContact': lead.updated_at.strftime('%m/%d/%Y') if lead.updated_at else 'Unknown'
+                    'id':
+                    lead.id,
+                    'company':
+                    lead.company.name if lead.company else 'Unknown Company',
+                    'contact':
+                    f"{lead.contact.first_name} {lead.contact.last_name}"
+                    if lead.contact else 'Unknown Contact',
+                    'title':
+                    lead.contact.position
+                    if lead.contact else 'Unknown Position',
+                    'industry':
+                    lead.company.industry.title()
+                    if lead.company and lead.company.industry else 'Unknown',
+                    'employees':
+                    lead.company.employee_count if lead.company else 0,
+                    'status':
+                    lead.status,
+                    'score':
+                    lead.score,
+                    'value':
+                    f"${int(lead.estimated_value/1000)}K"
+                    if lead.estimated_value else 'TBD',
+                    'engagement':
+                    engagement,
+                    'nextAction':
+                    lead.next_action or 'Follow up required',
+                    'lastContact':
+                    lead.updated_at.strftime('%m/%d/%Y')
+                    if lead.updated_at else 'Unknown'
                 }
                 leads_data.append(lead_data)
 
@@ -3432,6 +3736,7 @@ def top_qualified_leads(request):
     except Exception as e:
         print(f"Error in top leads endpoint: {str(e)}")
         return Response([], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class TravelOfferViewSet(viewsets.ModelViewSet):
     queryset = TravelOffer.objects.all()
@@ -3454,6 +3759,7 @@ class TravelOfferViewSet(viewsets.ModelViewSet):
             offers = self.queryset.all()
         serializer = self.get_serializer(offers, many=True)
         return Response(serializer.data)
+
 
 class SupportTicketViewSet(viewsets.ModelViewSet):
     queryset = SupportTicket.objects.all()
@@ -3489,29 +3795,36 @@ class SupportTicketViewSet(viewsets.ModelViewSet):
         ticket.save()
         return Response({'message': 'Ticket resolved successfully'})
 
+
 class RevenueForecastViewSet(viewsets.ModelViewSet):
     queryset = RevenueForecast.objects.all()
     serializer_class = RevenueForecastSerializer
+
 
 class ActivityLogViewSet(viewsets.ModelViewSet):
     queryset = ActivityLog.objects.all()
     serializer_class = ActivityLogSerializer
 
+
 class AIConversationViewSet(viewsets.ModelViewSet):
     queryset = AIConversation.objects.all()
     serializer_class = AIConversationSerializer
+
 
 class LeadNoteViewSet(viewsets.ModelViewSet):
     queryset = LeadNote.objects.all()
     serializer_class = LeadNoteSerializer
 
+
 class LeadHistoryViewSet(viewsets.ModelViewSet):
     queryset = LeadHistory.objects.all()
     serializer_class = LeadHistorySerializer
 
+
 class ProposalDraftViewSet(viewsets.ModelViewSet):
     queryset = ProposalDraft.objects.all()
     serializer_class = ProposalDraftSerializer
+
 
 class AirportCodeViewSet(viewsets.ModelViewSet):
     queryset = AirportCode.objects.all()
@@ -3522,30 +3835,37 @@ class AirportCodeViewSet(viewsets.ModelViewSet):
         """Lookup airport name by code"""
         code = request.query_params.get('code', '').upper()
         if not code:
-            return Response({'error': 'Airport code is required'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Airport code is required'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         try:
             airport = AirportCode.objects.get(code=code)
             serializer = self.get_serializer(airport)
             return Response(serializer.data)
         except AirportCode.DoesNotExist:
-            return Response({
-                'code': code,
-                'name': f'{code} Airport',
-                'city': code,
-                'country': 'Unknown'
-            }, status=status.HTTP_200_OK)
+            return Response(
+                {
+                    'code': code,
+                    'name': f'{code} Airport',
+                    'city': code,
+                    'country': 'Unknown'
+                },
+                status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['get'])
     def all_codes(self, request):
         """Get all airport codes for mapping"""
         airports = self.queryset.all()
-        airport_dict = {airport.code: {
-            'name': airport.name,
-            'city': airport.city,
-            'country': airport.country
-        } for airport in airports}
+        airport_dict = {
+            airport.code: {
+                'name': airport.name,
+                'city': airport.city,
+                'country': airport.country
+            }
+            for airport in airports
+        }
         return Response(airport_dict)
+
 
 class EmailCampaignViewSet(viewsets.ModelViewSet):
     queryset = EmailCampaign.objects.all()
@@ -3562,7 +3882,8 @@ class EmailCampaignViewSet(viewsets.ModelViewSet):
             connection.ensure_connection()
             return super().list(request, *args, **kwargs)
         except OperationalError as e:
-            if 'SSL connection has been closed' in str(e) or 'connection' in str(e).lower():
+            if 'SSL connection has been closed' in str(
+                    e) or 'connection' in str(e).lower():
                 # Try to close and reopen connection
                 connection.close()
                 try:
@@ -3582,7 +3903,8 @@ class EmailCampaignViewSet(viewsets.ModelViewSet):
         from django.db import connection
         try:
             connection.ensure_connection()
-            return self.queryset.select_related().prefetch_related('target_leads')
+            return self.queryset.select_related().prefetch_related(
+                'target_leads')
         except Exception as e:
             print(f"Error in get_queryset: {str(e)}")
             return self.queryset.none()
@@ -3598,37 +3920,31 @@ class EmailCampaignViewSet(viewsets.ModelViewSet):
 
             # Handle nested email content structure
             email_content = data.get('content', {}).get('email', {})
-            subject_line = (
-                data.get('subjectLine', '') or
-                data.get('subject_line', '') or
-                email_content.get('subject', '')
-            )
-            message_content = (
-                data.get('messageContent', '') or
-                data.get('email_content', '') or
-                email_content.get('body', '')
-            )
+            subject_line = (data.get('subjectLine', '')
+                            or data.get('subject_line', '')
+                            or email_content.get('subject', ''))
+            message_content = (data.get('messageContent', '')
+                               or data.get('email_content', '')
+                               or email_content.get('body', ''))
 
             # Handle CTA and CTA link
             cta_text = email_content.get('cta', '') or data.get('cta', '')
-            cta_link = email_content.get('cta_link', '') or data.get('cta_link', '')
+            cta_link = email_content.get('cta_link', '') or data.get(
+                'cta_link', '')
 
-            campaign_name = data.get('name', '') or f"Campaign - {subject_line[:50]}"
+            campaign_name = data.get('name',
+                                     '') or f"Campaign - {subject_line[:50]}"
 
             # Handle both targetLeads and target_leads formats
             all_target_leads = target_leads + target_lead_ids
 
             if not subject_line:
-                return Response(
-                    {'error': 'Subject line is required'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                return Response({'error': 'Subject line is required'},
+                                status=status.HTTP_400_BAD_REQUEST)
 
             if not message_content:
-                return Response(
-                    {'error': 'Message content is required'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                return Response({'error': 'Message content is required'},
+                                status=status.HTTP_400_BAD_REQUEST)
 
             # Create the campaign
             campaign = EmailCampaign.objects.create(
@@ -3641,8 +3957,7 @@ class EmailCampaignViewSet(viewsets.ModelViewSet):
                 cta_link=cta_link if cta_link else None,
                 scheduled_date=timezone.now(),
                 sent_date=timezone.now(),
-                target_count=len(all_target_leads)
-            )
+                target_count=len(all_target_leads))
 
             # Add target leads to campaign
             valid_leads_count = 0
@@ -3655,10 +3970,8 @@ class EmailCampaignViewSet(viewsets.ModelViewSet):
                     continue
 
             if valid_leads_count == 0:
-                return Response(
-                    {'error': 'No valid target leads found'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                return Response({'error': 'No valid target leads found'},
+                                status=status.HTTP_400_BAD_REQUEST)
 
             # Store CTA text temporarily for email sending
             if cta_text:
@@ -3668,26 +3981,39 @@ class EmailCampaignViewSet(viewsets.ModelViewSet):
             result = campaign.send_emails()
 
             serializer = self.get_serializer(campaign)
-            return Response({
-                'success': True,
-                'campaign': serializer.data,
-                'campaign_id': campaign.id,
-                'message': result.get('message', 'Campaign launched successfully'),
-                'emails_sent': result.get('emails_sent', 0),
-                'failed_count': result.get('failed_count', 0),
-                'smtp_responses': result.get('smtp_responses', []),
-                'smtp_details': result.get('smtp_details', {}),
-                'log_file': result.get('log_file', '')
-            }, status=status.HTTP_201_CREATED)
+            return Response(
+                {
+                    'success':
+                    True,
+                    'campaign':
+                    serializer.data,
+                    'campaign_id':
+                    campaign.id,
+                    'message':
+                    result.get('message', 'Campaign launched successfully'),
+                    'emails_sent':
+                    result.get('emails_sent', 0),
+                    'failed_count':
+                    result.get('failed_count', 0),
+                    'smtp_responses':
+                    result.get('smtp_responses', []),
+                    'smtp_details':
+                    result.get('smtp_details', {}),
+                    'log_file':
+                    result.get('log_file', '')
+                },
+                status=status.HTTP_201_CREATED)
 
         except Exception as e:
             import traceback
             error_details = traceback.format_exc()
             print(f"Campaign launch error: {error_details}")
             return Response(
-                {'error': f'Failed to launch campaign: {str(e)}', 'details': error_details},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+                {
+                    'error': f'Failed to launch campaign: {str(e)}',
+                    'details': error_details
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['get'])
     def real_time_stats(self, request, pk=None):
@@ -3703,19 +4029,30 @@ class EmailCampaignViewSet(viewsets.ModelViewSet):
             total_clicked = tracking_records.filter(click_count__gt=0).count()
 
             # Calculate rates
-            open_rate = (total_opened / total_sent * 100) if total_sent > 0 else 0
-            click_rate = (total_clicked / total_sent * 100) if total_sent > 0 else 0
+            open_rate = (total_opened / total_sent *
+                         100) if total_sent > 0 else 0
+            click_rate = (total_clicked / total_sent *
+                          100) if total_sent > 0 else 0
 
             stats = {
-                'campaign_id': campaign.id,
-                'campaign_name': campaign.name,
-                'emails_sent': total_sent,
-                'emails_opened': total_opened,
-                'emails_clicked': total_clicked,
-                'open_rate': round(open_rate, 2),
-                'click_rate': round(click_rate, 2),
-                'status': campaign.status,
-                'sent_date': campaign.sent_date.isoformat() if campaign.sent_date else None
+                'campaign_id':
+                campaign.id,
+                'campaign_name':
+                campaign.name,
+                'emails_sent':
+                total_sent,
+                'emails_opened':
+                total_opened,
+                'emails_clicked':
+                total_clicked,
+                'open_rate':
+                round(open_rate, 2),
+                'click_rate':
+                round(click_rate, 2),
+                'status':
+                campaign.status,
+                'sent_date':
+                campaign.sent_date.isoformat() if campaign.sent_date else None
             }
 
             return Response(stats)
@@ -3723,8 +4060,7 @@ class EmailCampaignViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response(
                 {'error': f'Failed to get campaign stats: {str(e)}'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['get'])
     def tracking_details(self, request, pk=None):
@@ -3733,23 +4069,42 @@ class EmailCampaignViewSet(viewsets.ModelViewSet):
             campaign = self.get_object()
 
             # Get all tracking records for this campaign
-            tracking_records = EmailTracking.objects.filter(campaign=campaign).select_related('lead')
+            tracking_records = EmailTracking.objects.filter(
+                campaign=campaign).select_related('lead')
 
             tracking_data = []
             for tracking in tracking_records:
                 tracking_data.append({
-                    'tracking_id': str(tracking.tracking_id),
-                    'lead_id': tracking.lead.id if tracking.lead else None,
-                    'lead_name': f"{tracking.lead.company.name}" if tracking.lead and tracking.lead.company else 'Unknown',
-                    'contact_email': tracking.lead.contact.email if tracking.lead and tracking.lead.contact else 'Unknown',
-                    'open_count': tracking.open_count,
-                    'click_count': tracking.click_count,
-                    'first_opened': tracking.first_opened.isoformat() if tracking.first_opened else None,
-                    'last_opened': tracking.last_opened.isoformat() if tracking.last_opened else None,
-                    'first_clicked': tracking.first_clicked.isoformat() if tracking.first_clicked else None,
-                    'last_clicked': tracking.last_clicked.isoformat() if tracking.last_clicked else None,
-                    'user_agent': tracking.user_agent,
-                    'ip_address': tracking.ip_address
+                    'tracking_id':
+                    str(tracking.tracking_id),
+                    'lead_id':
+                    tracking.lead.id if tracking.lead else None,
+                    'lead_name':
+                    f"{tracking.lead.company.name}"
+                    if tracking.lead and tracking.lead.company else 'Unknown',
+                    'contact_email':
+                    tracking.lead.contact.email
+                    if tracking.lead and tracking.lead.contact else 'Unknown',
+                    'open_count':
+                    tracking.open_count,
+                    'click_count':
+                    tracking.click_count,
+                    'first_opened':
+                    tracking.first_opened.isoformat()
+                    if tracking.first_opened else None,
+                    'last_opened':
+                    tracking.last_opened.isoformat()
+                    if tracking.last_opened else None,
+                    'first_clicked':
+                    tracking.first_clicked.isoformat()
+                    if tracking.first_clicked else None,
+                    'last_clicked':
+                    tracking.last_clicked.isoformat()
+                    if tracking.last_clicked else None,
+                    'user_agent':
+                    tracking.user_agent,
+                    'ip_address':
+                    tracking.ip_address
                 })
 
             return Response({
@@ -3762,8 +4117,8 @@ class EmailCampaignViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response(
                 {'error': f'Failed to get tracking details: {str(e)}'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -3778,11 +4133,13 @@ def get_history(request):
             # Get lead history
             try:
                 lead = Lead.objects.get(id=lead_id)
-                history_entries = lead.history_entries.all().order_by('-timestamp')
+                history_entries = lead.history_entries.all().order_by(
+                    '-timestamp')
                 serializer = LeadHistorySerializer(history_entries, many=True)
                 return Response(serializer.data)
             except Lead.DoesNotExist:
-                return Response({'error': 'Lead not found'}, status=status.HTTP_404_NOT_FOUND)
+                return Response({'error': 'Lead not found'},
+                                status=status.HTTP_404_NOT_FOUND)
             except Exception as e:
                 return Response([], status=status.HTTP_200_OK)
 
@@ -3790,44 +4147,61 @@ def get_history(request):
             # Get opportunity history
             try:
                 opportunity = Opportunity.objects.get(id=entity_id)
-                activities = opportunity.activities.all().order_by('-created_at')
+                activities = opportunity.activities.all().order_by(
+                    '-created_at')
                 activity_data = []
 
                 for activity in activities:
                     activity_data.append({
-                        'id': activity.id,
-                        'type': activity.type,
-                        'action': activity.get_type_display(),
-                        'details': activity.description,
-                        'timestamp': activity.created_at.isoformat(),
-                        'user_name': activity.created_by.get_full_name() if activity.created_by else 'System',
-                        'date': activity.date.isoformat() if activity.date else ''
+                        'id':
+                        activity.id,
+                        'type':
+                        activity.type,
+                        'action':
+                        activity.get_type_display(),
+                        'details':
+                        activity.description,
+                        'timestamp':
+                        activity.created_at.isoformat(),
+                        'user_name':
+                        activity.created_by.get_full_name()
+                        if activity.created_by else 'System',
+                        'date':
+                        activity.date.isoformat() if activity.date else ''
                     })
 
                 return Response(activity_data)
             except Opportunity.DoesNotExist:
-                return Response({'error': 'Opportunity not found'}, status=status.HTTP_404_NOT_FOUND)
+                return Response({'error': 'Opportunity not found'},
+                                status=status.HTTP_404_NOT_FOUND)
 
-        return Response({'error': 'Invalid parameters'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': 'Invalid parameters'},
+                        status=status.HTTP_400_BAD_REQUEST)
 
     except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response({'error': str(e)},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def health_check(request):
     """Health check endpoint to verify server status"""
     try:
-        return Response({
-            'status': 'healthy',
-            'message': 'SOAR Backend API is running',
-            'timestamp': timezone.now().isoformat()
-        }, status=status.HTTP_200_OK)
+        return Response(
+            {
+                'status': 'healthy',
+                'message': 'SOAR Backend API is running',
+                'timestamp': timezone.now().isoformat()
+            },
+            status=status.HTTP_200_OK)
     except Exception as e:
         return Response({
             'status': 'error',
             'message': str(e)
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        },
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -3838,8 +4212,10 @@ def campaign_analytics(request):
         analytics_data = []
 
         for campaign in campaigns:
-            open_rate = (campaign.emails_opened / campaign.emails_sent * 100) if campaign.emails_sent > 0 else 0
-            click_rate = (campaign.emails_clicked / campaign.emails_sent * 100) if campaign.emails_sent > 0 else 0
+            open_rate = (campaign.emails_opened / campaign.emails_sent *
+                         100) if campaign.emails_sent > 0 else 0
+            click_rate = (campaign.emails_clicked / campaign.emails_sent *
+                          100) if campaign.emails_sent > 0 else 0
 
             analytics_data.append({
                 'id': campaign.id,
@@ -3853,15 +4229,13 @@ def campaign_analytics(request):
                 'created_at': campaign.created_at
             })
 
-        return Response({
-            'success': True,
-            'analytics': analytics_data
-        })
+        return Response({'success': True, 'analytics': analytics_data})
     except Exception as e:
         return Response({
             'success': False,
             'error': str(e)
-        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        },
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class ContractViewSet(viewsets.ModelViewSet):
@@ -3897,9 +4271,12 @@ class ContractViewSet(viewsets.ModelViewSet):
             print(f"ContractViewSet.list called - Request ID: {id(request)}")
 
             # Get all contracts with related company data
-            contracts = Contract.objects.select_related('company').all().order_by('-created_at')
+            contracts = Contract.objects.select_related(
+                'company').all().order_by('-created_at')
 
-            print(f"Database query executed - Found {contracts.count()} contracts")
+            print(
+                f"Database query executed - Found {contracts.count()} contracts"
+            )
 
             # If no contracts found, return empty array
             if not contracts.exists():
@@ -3911,56 +4288,105 @@ class ContractViewSet(viewsets.ModelViewSet):
             for contract in contracts:
                 try:
                     # Safely handle the formatting with more defensive checks
-                    contract_id = getattr(contract, 'contract_number', None) or f"CTR-{getattr(contract, 'id', 'unknown')}"
-                    company_name = getattr(contract.company, 'name', 'Unknown Company') if contract.company else 'Unknown Company'
+                    contract_id = getattr(
+                        contract, 'contract_number',
+                        None) or f"CTR-{getattr(contract, 'id', 'unknown')}"
+                    company_name = getattr(
+                        contract.company, 'name', 'Unknown Company'
+                    ) if contract.company else 'Unknown Company'
 
                     formatted_contract = {
-                        'id': contract_id,
-                        'vendor': company_name,
-                        'client': getattr(contract, 'client_department', None) or 'SOAR-AI Airlines',
-                        'type': getattr(contract, 'title', None) or 'Contract',
-                        'value': float(getattr(contract, 'value', 0)) if getattr(contract, 'value', None) else 0,
-                        'status': getattr(contract, 'status', 'draft'),
-                        'startDate': contract.start_date.strftime('%Y-%m-%d') if getattr(contract, 'start_date', None) else None,
-                        'endDate': contract.end_date.strftime('%Y-%m-%d') if getattr(contract, 'end_date', None) else None,
-                        'signedDate': None,
-                        'progress': 75 if getattr(contract, 'status', '') == 'active' else 50 if getattr(contract, 'status', '') == 'pending_signature' else 25,
-                        'nextAction': self._get_next_action(getattr(contract, 'status', 'draft')),
-                        'documents': 1,
-                        'breachRisk': self._calculate_breach_risk(contract),
-                        'breachCount': 0,  # Simplified for now to avoid errors
+                        'id':
+                        contract_id,
+                        'vendor':
+                        company_name,
+                        'client':
+                        getattr(contract, 'client_department', None)
+                        or 'SOAR-AI Airlines',
+                        'type':
+                        getattr(contract, 'title', None) or 'Contract',
+                        'value':
+                        float(getattr(contract, 'value', 0)) if getattr(
+                            contract, 'value', None) else 0,
+                        'status':
+                        getattr(contract, 'status', 'draft'),
+                        'startDate':
+                        contract.start_date.strftime('%Y-%m-%d') if getattr(
+                            contract, 'start_date', None) else None,
+                        'endDate':
+                        contract.end_date.strftime('%Y-%m-%d') if getattr(
+                            contract, 'end_date', None) else None,
+                        'signedDate':
+                        None,
+                        'progress':
+                        75 if getattr(contract, 'status', '') == 'active' else
+                        50 if getattr(contract, 'status',
+                                      '') == 'pending_signature' else 25,
+                        'nextAction':
+                        self._get_next_action(
+                            getattr(contract, 'status', 'draft')),
+                        'documents':
+                        1,
+                        'breachRisk':
+                        self._calculate_breach_risk(contract),
+                        'breachCount':
+                        0,  # Simplified for now to avoid errors
                         'parties': [company_name],
-                        'attachedOffer': None,
+                        'attachedOffer':
+                        None,
                         'milestones': [{
-                            'name': 'Contract Creation',
-                            'date': contract.start_date.strftime('%Y-%m-%d') if getattr(contract, 'start_date', None) else None,
-                            'status': 'completed'
+                            'name':
+                            'Contract Creation',
+                            'date':
+                            contract.start_date.strftime('%Y-%m-%d')
+                            if getattr(contract, 'start_date', None) else None,
+                            'status':
+                            'completed'
                         }],
-                        'comments': getattr(contract, 'comments', []) if isinstance(getattr(contract, 'comments', []), list) else [],
-                        'attachments': self._get_contract_documents_safe(contract),
-                        'lastActivity': contract.updated_at.strftime('%Y-%m-%d') if getattr(contract, 'updated_at', None) else None,
-                        'performanceScore': 85,
-                        'slaCompliance': 92,
-                        'customerSatisfaction': 4.2,
-                        'costEfficiency': 88,
+                        'comments':
+                        getattr(contract, 'comments', []) if isinstance(
+                            getattr(contract, 'comments', []), list) else [],
+                        'attachments':
+                        self._get_contract_documents_safe(contract),
+                        'lastActivity':
+                        contract.updated_at.strftime('%Y-%m-%d') if getattr(
+                            contract, 'updated_at', None) else None,
+                        'performanceScore':
+                        85,
+                        'slaCompliance':
+                        92,
+                        'customerSatisfaction':
+                        4.2,
+                        'costEfficiency':
+                        88,
                         'breachHistory': [],
-                        'marketPosition': 'Preferred',
+                        'marketPosition':
+                        'Preferred',
                         'alternativeVendors': [],
-                        'financialHealth': 'Good',
-                        'technicalCapability': 'Advanced',
-                        'relationshipScore': 87,
-                        'terms': getattr(contract, 'terms', None) or 'Standard terms and conditions',
-                        'description': f"Contract with {company_name}"
+                        'financialHealth':
+                        'Good',
+                        'technicalCapability':
+                        'Advanced',
+                        'relationshipScore':
+                        87,
+                        'terms':
+                        getattr(contract, 'terms', None)
+                        or 'Standard terms and conditions',
+                        'description':
+                        f"Contract with {company_name}"
                     }
                     formatted_contracts.append(formatted_contract)
                     print(f"Successfully formatted contract: {contract_id}")
 
                 except Exception as contract_error:
-                    print(f"Error formatting contract {getattr(contract, 'id', 'unknown')}: {str(contract_error)}")
+                    print(
+                        f"Error formatting contract {getattr(contract, 'id', 'unknown')}: {str(contract_error)}"
+                    )
                     # Continue processing other contracts instead of failing completely
                     continue
 
-            print(f"Successfully formatted {len(formatted_contracts)} contracts")
+            print(
+                f"Successfully formatted {len(formatted_contracts)} contracts")
             return Response(formatted_contracts, status=200)
 
         except Exception as e:
@@ -3968,10 +4394,12 @@ class ContractViewSet(viewsets.ModelViewSet):
             import traceback
             traceback.print_exc()
             # Return a proper error response instead of 500
-            return Response({
-                'error': 'Failed to fetch contracts',
-                'detail': str(e)
-            }, status=500)
+            return Response(
+                {
+                    'error': 'Failed to fetch contracts',
+                    'detail': str(e)
+                },
+                status=500)
 
     def create(self, request, *args, **kwargs):
         """Create a new contract"""
@@ -4294,34 +4722,36 @@ class ContractViewSet(viewsets.ModelViewSet):
 
             if 'document' not in request.FILES:
                 return Response({'error': 'No file provided'},
-                              status=status.HTTP_400_BAD_REQUEST)
+                                status=status.HTTP_400_BAD_REQUEST)
 
             uploaded_file = request.FILES['document']
 
             # Validate file type
-            allowed_extensions = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.txt', '.rtf']
+            allowed_extensions = [
+                '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.txt', '.rtf'
+            ]
             allowed_mime_types = [
-                'application/pdf',
-                'application/msword',
+                'application/pdf', 'application/msword',
                 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
                 'application/vnd.ms-excel',
                 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                'text/plain',
-                'application/rtf'
+                'text/plain', 'application/rtf'
             ]
 
             file_extension = uploaded_file.name.lower().split('.')[-1]
             if f'.{file_extension}' not in allowed_extensions and uploaded_file.content_type not in allowed_mime_types:
-                return Response({
-                    'error': 'Invalid file type. Only PDF, DOC, DOCX, XLS, XLSX, TXT, RTF files are allowed.'
-                }, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {
+                        'error':
+                        'Invalid file type. Only PDF, DOC, DOCX, XLS, XLSX, TXT, RTF files are allowed.'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST)
 
             # Validate file size (10MB limit)
             max_size = 10 * 1024 * 1024  # 10MB
             if uploaded_file.size > max_size:
-                return Response({
-                    'error': 'File size exceeds 10MB limit.'
-                }, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': 'File size exceeds 10MB limit.'},
+                                status=status.HTTP_400_BAD_REQUEST)
 
             # Create documents directory if it doesn't exist
             import os
@@ -4359,10 +4789,16 @@ class ContractViewSet(viewsets.ModelViewSet):
                         existing_docs = json.loads(contract.custom_clauses)
                     else:
                         # If custom_clauses is not JSON, preserve it as text
-                        existing_docs = [{'type': 'text', 'content': contract.custom_clauses}]
+                        existing_docs = [{
+                            'type': 'text',
+                            'content': contract.custom_clauses
+                        }]
                 except json.JSONDecodeError:
                     # If it's not JSON, treat as text and preserve it
-                    existing_docs = [{'type': 'text', 'content': contract.custom_clauses}]
+                    existing_docs = [{
+                        'type': 'text',
+                        'content': contract.custom_clauses
+                    }]
 
             # Add new document
             existing_docs.append({
@@ -4374,22 +4810,24 @@ class ContractViewSet(viewsets.ModelViewSet):
             contract.custom_clauses = json.dumps(existing_docs)
             contract.save()
 
-            return Response({
-                'success': True,
-                'message': f'Document {uploaded_file.name} uploaded successfully',
-                'document': {
-                    'name': uploaded_file.name,
-                    'size': f"{uploaded_file.size / 1024 / 1024:.2f} MB",
-                    'uploadDate': timezone.now().strftime('%Y-%m-%d'),
-                    'type': self._get_document_type(uploaded_file.name),
-                    'file_path': file_path
-                }
-            }, status=status.HTTP_201_CREATED)
+            return Response(
+                {
+                    'success': True,
+                    'message':
+                    f'Document {uploaded_file.name} uploaded successfully',
+                    'document': {
+                        'name': uploaded_file.name,
+                        'size': f"{uploaded_file.size / 1024 / 1024:.2f} MB",
+                        'uploadDate': timezone.now().strftime('%Y-%m-%d'),
+                        'type': self._get_document_type(uploaded_file.name),
+                        'file_path': file_path
+                    }
+                },
+                status=status.HTTP_201_CREATED)
 
         except Exception as e:
-            return Response({
-                'error': f'Failed to upload document: {str(e)}'
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'error': f'Failed to upload document: {str(e)}'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['get'])
     def get_documents(self, request, pk=None):
@@ -4418,16 +4856,25 @@ class ContractViewSet(viewsets.ModelViewSet):
                         # Extract document_id and original name from filename
                         # Pattern: contract_number_document_id_original_name
                         parts = file_name.split('_', 2)
-                        document_id = parts[1] if len(parts) >= 2 else file_name
-                        original_name = parts[2] if len(parts) >= 3 else file_name
+                        document_id = parts[1] if len(
+                            parts) >= 2 else file_name
+                        original_name = parts[2] if len(
+                            parts) >= 3 else file_name
 
                         documents.append({
-                            'name': original_name,
-                            'size': f"{file_size / 1024 / 1024:.2f} MB",
-                            'uploadDate': datetime.fromtimestamp(file_mtime).strftime('%Y-%m-%d'),
-                            'type': self._get_document_type(original_name),
-                            'file_path': file_path,
-                            'document_id': document_id
+                            'name':
+                            original_name,
+                            'size':
+                            f"{file_size / 1024 / 1024:.2f} MB",
+                            'uploadDate':
+                            datetime.fromtimestamp(file_mtime).strftime(
+                                '%Y-%m-%d'),
+                            'type':
+                            self._get_document_type(original_name),
+                            'file_path':
+                            file_path,
+                            'document_id':
+                            document_id
                         })
 
             # If no files found in filesystem, try to get from custom_clauses metadata
@@ -4438,29 +4885,36 @@ class ContractViewSet(viewsets.ModelViewSet):
                         clauses_data = json.loads(contract.custom_clauses)
                         if isinstance(clauses_data, list):
                             for item in clauses_data:
-                                if isinstance(item, dict) and item.get('type') == 'document':
+                                if isinstance(item, dict) and item.get(
+                                        'type') == 'document':
                                     metadata = item.get('metadata', {})
                                     documents.append({
-                                        'name': metadata.get('name', ''),
-                                        'size': f"{metadata.get('size', 0) / 1024 / 1024:.2f} MB",
-                                        'uploadDate': metadata.get('uploaded_at', '').split('T')[0] if metadata.get('uploaded_at') else '',
-                                        'type': self._get_document_type(metadata.get('name', '')),
-                                        'file_path': metadata.get('file_path', ''),
-                                        'document_id': metadata.get('document_id', '')
+                                        'name':
+                                        metadata.get('name', ''),
+                                        'size':
+                                        f"{metadata.get('size', 0) / 1024 / 1024:.2f} MB",
+                                        'uploadDate':
+                                        metadata.get('uploaded_at',
+                                                     '').split('T')[0]
+                                        if metadata.get('uploaded_at') else '',
+                                        'type':
+                                        self._get_document_type(
+                                            metadata.get('name', '')),
+                                        'file_path':
+                                        metadata.get('file_path', ''),
+                                        'document_id':
+                                        metadata.get('document_id', '')
                                     })
                 except (json.JSONDecodeError, AttributeError):
                     # If custom_clauses is not JSON, ignore
                     pass
 
-            return Response({
-                'success': True,
-                'documents': documents
-            })
+            return Response({'success': True, 'documents': documents})
 
         except Exception as e:
-            return Response({
-                'error': f'Failed to retrieve documents: {str(e)}'
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {'error': f'Failed to retrieve documents: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def _get_document_type(self, filename):
         """Get document type based on file extension"""
@@ -4481,7 +4935,9 @@ class ContractViewSet(viewsets.ModelViewSet):
         try:
             return self._get_contract_documents(contract)
         except Exception as e:
-            print(f"Error getting documents for contract {getattr(contract, 'id', 'unknown')}: {str(e)}")
+            print(
+                f"Error getting documents for contract {getattr(contract, 'id', 'unknown')}: {str(e)}"
+            )
             return []  # Return empty list on error
 
     def _get_contract_documents(self, contract):
@@ -4514,19 +4970,30 @@ class ContractViewSet(viewsets.ModelViewSet):
 
                             # Extract document_id and original name from filename
                             parts = file_name.split('_', 2)
-                            document_id = parts[1] if len(parts) >= 2 else file_name
-                            original_name = parts[2] if len(parts) >= 3 else file_name
+                            document_id = parts[1] if len(
+                                parts) >= 2 else file_name
+                            original_name = parts[2] if len(
+                                parts) >= 3 else file_name
 
                             documents.append({
-                                'name': original_name,
-                                'size': f"{file_size / 1024 / 1024:.2f} MB",
-                                'uploadDate': datetime.fromtimestamp(file_mtime).strftime('%Y-%m-%d'),
-                                'type': self._get_document_type(original_name),
-                                'file_path': file_path,
-                                'document_id': document_id
+                                'name':
+                                original_name,
+                                'size':
+                                f"{file_size / 1024 / 1024:.2f} MB",
+                                'uploadDate':
+                                datetime.fromtimestamp(file_mtime).strftime(
+                                    '%Y-%m-%d'),
+                                'type':
+                                self._get_document_type(original_name),
+                                'file_path':
+                                file_path,
+                                'document_id':
+                                document_id
                             })
                 except Exception as pattern_error:
-                    print(f"Error processing pattern {pattern}: {str(pattern_error)}")
+                    print(
+                        f"Error processing pattern {pattern}: {str(pattern_error)}"
+                    )
                     continue
 
             # If no files found, try to get from custom_clauses metadata
@@ -4537,18 +5004,30 @@ class ContractViewSet(viewsets.ModelViewSet):
                         clauses_data = json.loads(contract.custom_clauses)
                         if isinstance(clauses_data, list):
                             for item in clauses_data:
-                                if isinstance(item, dict) and item.get('type') == 'document':
+                                if isinstance(item, dict) and item.get(
+                                        'type') == 'document':
                                     metadata = item.get('metadata', {})
                                     documents.append({
-                                        'name': metadata.get('name', ''),
-                                        'size': f"{metadata.get('size', 0) / 1024 / 1024:.2f} MB",
-                                        'uploadDate': metadata.get('uploaded_at', '').split('T')[0] if metadata.get('uploaded_at') else '',
-                                        'type': self._get_document_type(metadata.get('name', '')),
-                                        'file_path': metadata.get('file_path', ''),
-                                        'document_id': metadata.get('document_id', '')
+                                        'name':
+                                        metadata.get('name', ''),
+                                        'size':
+                                        f"{metadata.get('size', 0) / 1024 / 1024:.2f} MB",
+                                        'uploadDate':
+                                        metadata.get('uploaded_at',
+                                                     '').split('T')[0]
+                                        if metadata.get('uploaded_at') else '',
+                                        'type':
+                                        self._get_document_type(
+                                            metadata.get('name', '')),
+                                        'file_path':
+                                        metadata.get('file_path', ''),
+                                        'document_id':
+                                        metadata.get('document_id', '')
                                     })
                 except (json.JSONDecodeError, AttributeError) as json_error:
-                    print(f"Error parsing custom_clauses JSON: {str(json_error)}")
+                    print(
+                        f"Error parsing custom_clauses JSON: {str(json_error)}"
+                    )
                     pass
 
         except Exception as e:
@@ -4564,9 +5043,8 @@ class ContractViewSet(viewsets.ModelViewSet):
             document_id = request.query_params.get('document_id')
 
             if not document_id:
-                return Response({
-                    'error': 'Document ID is required'
-                }, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': 'Document ID is required'},
+                                status=status.HTTP_400_BAD_REQUEST)
 
             import os
             import glob
@@ -4602,9 +5080,11 @@ class ContractViewSet(viewsets.ModelViewSet):
                         clauses_data = json.loads(contract.custom_clauses)
                         if isinstance(clauses_data, list):
                             for item in clauses_data:
-                                if (isinstance(item, dict) and
-                                    item.get('type') == 'document' and
-                                    item.get('metadata', {}).get('document_id') == document_id):
+                                if (isinstance(item, dict)
+                                        and item.get('type') == 'document'
+                                        and item.get('metadata',
+                                                     {}).get('document_id')
+                                        == document_id):
                                     metadata = item.get('metadata', {})
                                     file_path = metadata.get('file_path')
                                     original_name = metadata.get('name')
@@ -4613,9 +5093,12 @@ class ContractViewSet(viewsets.ModelViewSet):
                     pass
 
             if not file_path or not os.path.exists(file_path):
-                return Response({
-                    'error': f'Document file not found. Searched for document_id: {document_id} in contract: {contract.contract_number}'
-                }, status=status.HTTP_404_NOT_FOUND)
+                return Response(
+                    {
+                        'error':
+                        f'Document file not found. Searched for document_id: {document_id} in contract: {contract.contract_number}'
+                    },
+                    status=status.HTTP_404_NOT_FOUND)
 
             # Serve the file for viewing (inline) instead of download
             from django.http import FileResponse
@@ -4628,29 +5111,29 @@ class ContractViewSet(viewsets.ModelViewSet):
                 if not content_type:
                     content_type = 'application/octet-stream'
 
-                response = FileResponse(
-                    open(file_path, 'rb'),
-                    content_type=content_type
-                )
+                response = FileResponse(open(file_path, 'rb'),
+                                        content_type=content_type)
 
                 # Set headers for inline viewing instead of download
-                response['Content-Disposition'] = f'inline; filename="{smart_str(original_name or os.path.basename(file_path))}"'
+                response[
+                    'Content-Disposition'] = f'inline; filename="{smart_str(original_name or os.path.basename(file_path))}"'
 
                 # Add headers to prevent caching issues
-                response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+                response[
+                    'Cache-Control'] = 'no-cache, no-store, must-revalidate'
                 response['Pragma'] = 'no-cache'
                 response['Expires'] = '0'
 
                 return response
             except Exception as e:
-                return Response({
-                    'error': f'Failed to serve document: {str(e)}'
-                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return Response(
+                    {'error': f'Failed to serve document: {str(e)}'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         except Exception as e:
-            return Response({
-                'error': f'Failed to download document: {str(e)}'
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {'error': f'Failed to download document: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=True, methods=['post'])
     def add_comment(self, request, pk=None):
@@ -4661,9 +5144,8 @@ class ContractViewSet(viewsets.ModelViewSet):
             author = request.data.get('author', 'Anonymous')
 
             if not comment_text:
-                return Response({
-                    'error': 'Comment text is required'
-                }, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'error': 'Comment text is required'},
+                                status=status.HTTP_400_BAD_REQUEST)
 
             # Create comment object
             new_comment = {
@@ -4681,16 +5163,17 @@ class ContractViewSet(viewsets.ModelViewSet):
             contract.comments.append(new_comment)
             contract.save()
 
-            return Response({
-                'success': True,
-                'message': 'Comment added successfully',
-                'comment': new_comment
-            }, status=status.HTTP_201_CREATED)
+            return Response(
+                {
+                    'success': True,
+                    'message': 'Comment added successfully',
+                    'comment': new_comment
+                },
+                status=status.HTTP_201_CREATED)
 
         except Exception as e:
-            return Response({
-                'error': f'Failed to add comment: {str(e)}'
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'error': f'Failed to add comment: {str(e)}'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=False, methods=['get'])
     def dashboard_stats(self, request):
@@ -4773,6 +5256,7 @@ class ContractBreachViewSet(viewsets.ModelViewSet):
 
         return Response({'status': 'breach resolved'})
 
+
 # Email tracking functions are defined below
 
 
@@ -4791,7 +5275,9 @@ def track_email_open(request, tracking_id):
 
         # Capture user agent and IP
         tracking.user_agent = request.META.get('HTTP_USER_AGENT', '')
-        tracking.ip_address = request.META.get('REMOTE_ADDR') or request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip()
+        tracking.ip_address = request.META.get(
+            'REMOTE_ADDR') or request.META.get('HTTP_X_FORWARDED_FOR',
+                                               '').split(',')[0].strip()
 
         tracking.save()
 
@@ -4800,7 +5286,8 @@ def track_email_open(request, tracking_id):
         import base64
 
         # 1x1 transparent GIF pixel
-        pixel_data = base64.b64decode('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7')
+        pixel_data = base64.b64decode(
+            'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7')
         response = HttpResponse(pixel_data, content_type='image/gif')
         response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         response['Pragma'] = 'no-cache'
@@ -4811,13 +5298,15 @@ def track_email_open(request, tracking_id):
         # Return pixel even if tracking not found
         from django.http import HttpResponse
         import base64
-        pixel_data = base64.b64decode('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7')
+        pixel_data = base64.b64decode(
+            'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7')
         return HttpResponse(pixel_data, content_type='image/gif')
     except Exception as e:
         logger.error(f"Error tracking email open: {str(e)}")
         from django.http import HttpResponse
         import base64
-        pixel_data = base64.b64decode('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7')
+        pixel_data = base64.b64decode(
+            'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7')
         return HttpResponse(pixel_data, content_type='image/gif')
 
 
@@ -4829,7 +5318,8 @@ def track_email_click(request, tracking_id):
         # Get the original URL from query parameters
         original_url = request.GET.get('url')
         if not original_url:
-            return HttpResponseRedirect('https://soarai.com')  # Default redirect
+            return HttpResponseRedirect(
+                'https://soarai.com')  # Default redirect
 
         # Decode the URL
         original_url = urllib.parse.unquote(original_url)
@@ -4843,11 +5333,13 @@ def track_email_click(request, tracking_id):
                 tracking.first_clicked = timezone.now()
 
             # Capture user agent and IP
-            tracking.user_agent = request.META.get('HTTP_USER_AGENT', '')[:500]  # Limit length
+            tracking.user_agent = request.META.get('HTTP_USER_AGENT',
+                                                   '')[:500]  # Limit length
             tracking.ip_address = request.META.get('REMOTE_ADDR')
             tracking.save()
 
-            logger.info(f"Email click tracked: {tracking_id} -> {original_url}")
+            logger.info(
+                f"Email click tracked: {tracking_id} -> {original_url}")
         except EmailTracking.DoesNotExist:
             logger.warning(f"Tracking record not found: {tracking_id}")
 
@@ -4882,10 +5374,12 @@ def check_smtp_status(request):
         })
 
     except Exception as e:
-        return Response({
-            'status': 'error',
-            'message': f'SMTP connection failed: {str(e)}',
-            'backend': getattr(settings, 'EMAIL_BACKEND', 'unknown'),
-            'host': getattr(settings, 'EMAIL_HOST', 'unknown'),
-            'port': getattr(settings, 'EMAIL_PORT', 'unknown'),
-        }, status=500)
+        return Response(
+            {
+                'status': 'error',
+                'message': f'SMTP connection failed: {str(e)}',
+                'backend': getattr(settings, 'EMAIL_BACKEND', 'unknown'),
+                'host': getattr(settings, 'EMAIL_HOST', 'unknown'),
+                'port': getattr(settings, 'EMAIL_PORT', 'unknown'),
+            },
+            status=500)

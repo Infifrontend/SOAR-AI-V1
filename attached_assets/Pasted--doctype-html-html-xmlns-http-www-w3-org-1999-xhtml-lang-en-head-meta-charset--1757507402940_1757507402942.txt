@@ -1,0 +1,94 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partnership Opportunity - infiniti software</title>
+    <style>
+      /* CLIENT-SAFE, INLINE-FRIENDLY STYLES (keep minimal) */
+      body { margin:0; padding:0; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; }
+      table { border-spacing:0; }
+      img { border:0; display:block; }
+      a { color:inherit; text-decoration:none; }
+      .wrapper { width:100%; background-color:#f5f7fb; padding:20px 0; }
+      .content { max-width:600px; margin:0 auto; background:#ffffff; border-radius:6px; overflow:hidden; }
+      .header { padding:20px; text-align:center; }
+      .logo { max-width:160px; height:auto; }
+      .preheader { display:none !important; visibility:hidden; opacity:0; color:transparent; height:0; width:0; }
+      .main { padding:24px; font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif; color:#333333; font-size:16px; line-height:24px; }
+      .h1 { font-size:22px; margin:0 0 10px 0; color:#111827; }
+      .p { margin:0 0 16px 0; }
+      .button { display:inline-block; padding:12px 20px; border-radius:6px; background:#ff7a00; color:#ffffff; font-weight:600; }
+      .footer { padding:16px 20px; font-size:12px; color:#8b94a6; text-align:center; }
+      @media screen and (max-width:480px) {
+        .content { width:100% !important; border-radius:0; }
+        .main { padding:16px; }
+        .h1 { font-size:20px; }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Preheader: invisible preview text -->
+    <div class="preheader">Partnership opportunity with SOAR-AI for your corporate travel needs</div>
+
+    <table class="wrapper" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+      <tr>
+        <td align="center">
+          <table class="content" width="600" cellpadding="0" cellspacing="0" role="presentation">
+
+            <!-- Header -->
+            <tr>
+              <td class="header">
+                <!-- Logo -->
+                <img src="https://soarai.infinitisoftware.net/assets/SOAR%20Logo-Bnqz16_i.svg" alt="SOAR-AI" class="logo" width="160" />
+              </td>
+            </tr>
+
+            <!-- Hero / Body -->
+            <tr>
+              <td class="main">
+                <!-- Main heading -->
+                <h1 class="h1">Partnership Opportunity for infiniti software</h1>
+
+                <!-- Intro paragraph -->
+               <!-- <p class="p">Dear infiniti software Team,</p> -->
+
+                <!-- Content block (use for dynamic HTML/content) -->
+                <div><p>I hope this message finds you well. I wanted to follow up regarding our corporate travel solutions that could benefit infiniti software.</p>
+
+<p>Based on your organization's profile in the Technology & Software sector with 2,500 team members, I believe we can help optimize your travel operations and significantly reduce costs.</p>
+
+<p>Our AI-powered platform has helped similar companies achieve:</p>
+<ul>
+<li><strong>35% reduction</strong> in travel expenses</li>
+<li><strong>50% faster</strong> booking processes</li>
+<li><strong>90% compliance</strong> with travel policies</li>
+<li><strong>24/7 support</strong> for all travelers</li>
+</ul>
+
+<p>Given your current travel budget of 5.0M and 500+ trips/year, we see significant opportunities for partnership and cost optimization.</p>
+
+<p>Would you be available for a brief 15-minute call this week to discuss how we can support infiniti software's travel needs and show you personalized savings projections?</p></div>
+
+                <!-- CTA -->
+
+
+                <!-- Small note / fallback link -->
+
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td class="footer">
+                <p style="margin:0 0 8px 0;">SOAR-AI • 123 Business Ave, Corporate Solutions District, Tech City 12345</p>
+                <p style="margin:0;">&copy; 2025 SOAR-AI. All rights reserved.</p>
+              </td>
+            </tr>
+
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
