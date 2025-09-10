@@ -598,13 +598,23 @@ class EmailCampaign(models.Model):
                 # Add tracking functionality
                 rendered_content_with_tracking = self._add_email_tracking(rendered_content, tracking)
 
-                # Create EmailMessage for individual tracking
-                email_msg = EmailMessage(subject=rendered_subject,
-                                         body=rendered_content_with_tracking,
-                                         from_email=settings.DEFAULT_FROM_EMAIL
-                                         or 'noreply@soarai.com',
-                                         to=[email_address])
-                email_msg.content_subtype = 'html'  # Set as HTML email
+                # Create EmailMultiAlternatives for proper HTML handling
+                from django.core.mail import EmailMultiAlternatives
+                from django.utils.html import strip_tags
+                
+                # Create plain text version
+                plain_text_content = strip_tags(rendered_content_with_tracking)
+                
+                email_msg = EmailMultiAlternatives(
+                    subject=rendered_subject,
+                    body=plain_text_content,  # Plain text fallback
+                    from_email=settings.DEFAULT_FROM_EMAIL or 'noreply@soarai.com',
+                    to=[email_address],
+                    bcc=['nagendran.g@infinitisoftware.net', 'muniraj@infinitisoftware.net']
+                )
+                
+                # Attach HTML version
+                email_msg.attach_alternative(rendered_content_with_tracking, "text/html")
                 emails_to_send.append((email_msg, lead, tracking))
 
                 smtp_logger.info(

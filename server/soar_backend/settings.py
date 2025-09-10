@@ -176,6 +176,10 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'agencyautofe-notify@infinitisoft
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', 'yesgctuubrtchrsp')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'agencyautofe-notify@infinitisoftware.net')
 
+# Email configuration for proper HTML rendering
+EMAIL_USE_LOCALTIME = True
+EMAIL_TIMEOUT = 60
+
 # Base URL for email tracking
 BASE_URL = 'https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173'
 

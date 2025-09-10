@@ -1887,7 +1887,7 @@ class LeadViewSet(viewsets.ModelViewSet):
                     </html>
                     """
 
-            # Send multipart email (plain text + HTML)
+            # Send multipart email (plain text + HTML) with proper encoding
             email = EmailMultiAlternatives(
                 subject=subject,
                 body=plain_text_message,
@@ -1895,7 +1895,9 @@ class LeadViewSet(viewsets.ModelViewSet):
                 to=[recipient_email],
                 bcc=['nagendran.g@infinitisoftware.net','muniraj@infinitisoftware.net'],
             )
+            # Ensure HTML content is properly attached with correct MIME type
             email.attach_alternative(html_message, "text/html")
+            email.mixed_subtype = 'related'  # For embedded images
             email.send(fail_silently=False)
 
             return Response({
@@ -1972,7 +1974,9 @@ class LeadViewSet(viewsets.ModelViewSet):
                             to=[recipient_email],
                             bcc=['nagendran.g@infinitisoftware.net','muniraj@infinitisoftware.net'],
                         )
+                        # Properly attach HTML content with correct MIME type
                         email.attach_alternative(html_content, "text/html")
+                        email.mixed_subtype = 'related'  # For embedded content
                     else:
                         # For plain text, create professional corporate template using Django templates
                         from django.template import Template, Context

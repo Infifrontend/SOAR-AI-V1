@@ -159,7 +159,7 @@ export class EmailTemplateService {
   static generateStandardLayoutHTML(variables: StandardLayoutVariables): string {
     let html = this.standardLayoutTemplate;
     
-    // Set default values
+    // Set default values with proper HTML encoding
     const defaultVariables: StandardLayoutVariables = {
       subject: variables.subject || 'SOAR-AI Email',
       preheader: variables.preheader || 'Your corporate travel solution',
@@ -175,16 +175,24 @@ export class EmailTemplateService {
       year: variables.year || new Date().getFullYear().toString()
     };
 
-    // Replace all variables
+    // Replace all variables with proper HTML escaping for non-HTML content
     Object.entries(defaultVariables).forEach(([key, value]) => {
       const regex = new RegExp(`{{${key}}}`, 'g');
-      html = html.replace(regex, String(value || ''));
+      // Don't escape HTML for body_content as it should contain HTML
+      const finalValue = (key === 'body_content') ? String(value || '') : this.escapeHtml(String(value || ''));
+      html = html.replace(regex, finalValue);
     });
     
     // Clean up any remaining placeholder variables
     html = html.replace(/{{[^}]+}}/g, '');
     
     return html;
+  }
+
+  private static escapeHtml(text: string): string {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
   }
 
   static generateEmailHTML(template: EmailTemplate, variables: Record<string, string> = {}): string {
