@@ -103,6 +103,9 @@ import { useDebounce } from "../hooks/useDebounce";
 // Import toast for notifications
 import { toast } from "sonner";
 
+// Import email template service for formatting
+import { EmailTemplateService } from "../utils/emailTemplateService";
+
 // API utility functions
 
 const transformCompanyData = (company) => {
@@ -1079,11 +1082,20 @@ export function CorporateSearch({
     setIsSendingMessage(true); // Start spinner
 
     try {
+      // Format the message content with standard email template
+      const formattedMessage = EmailTemplateService.renderTemplateWithBaseLayout(
+        `<p>${contactForm.message.replace(/\n/g, '</p><p>')}</p>`,
+        contactForm.subject,
+        undefined, // No CTA button
+        undefined, // No CTA link
+        'SOAR-AI'
+      );
+
       // Use the leadApi to send message (we'll use company data to create a temporary lead-like structure)
       const response = await leadApi.sendMessage(contactForm.corporateData.id, {
         method: contactForm.method,
         subject: contactForm.subject,
-        message: contactForm.message,
+        message: formattedMessage,
         followUpDate: contactForm.followUpDate,
         followUpMode: contactForm.followUpMode,
         // Add corporate-specific data
