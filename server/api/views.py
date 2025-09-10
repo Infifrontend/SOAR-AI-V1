@@ -1977,143 +1977,33 @@ class LeadViewSet(viewsets.ModelViewSet):
                         # Properly attach HTML content with correct MIME type
                         email.attach_alternative(html_content, "text/html")
                         email.mixed_subtype = 'related'  # For embedded content
-                    else:
-                        # For plain text, create professional corporate template using Django templates
-                        from django.template import Template, Context
+                        email.send(fail_silently=False)
 
-                        # Create context for template rendering
-                        template_context = Context({
-                            'recipient_name': recipient_name,
-                            'company_name': request.data.get('company_name', 'Your Company'),
-                            'message_content': message,
-                            'subject': subject
-                        })
+                        return Response({
+                            'success': True,
+                            'message': f'Email sent successfully to {recipient_name} ({recipient_email})'
+                        }, status=status.HTTP_200_OK)
 
-                        html_template = """
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{subject}}</title>
-  <style>
-    /* Reset and base styles */
-    body { margin:0; padding:0; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color:#f0f4f8; }
-    table { border-spacing:0; border-collapse:collapse; }
-    img { border:0; display:block; outline:none; text-decoration:none; max-width:100%; }
-    a { text-decoration:none; }
-
-    /* Layout styles */
-    .email-wrapper { width:100%; background-color:#f0f4f8; padding:40px 20px; }
-    .email-container { max-width:650px; margin:0 auto; background:#ffffff; border-radius:16px; overflow:hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-    .email-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding:40px 30px; text-align:center; }
-    .company-logo { font-size:32px; font-weight:800; color:#ffffff; margin:0; letter-spacing:-1px; }
-    .company-tagline { font-size:16px; color:rgba(255,255,255,0.9); margin:0; }
-    .email-content { padding:40px 30px; background:#ffffff; }
-    .greeting { font-size:20px; color:#2d3748; margin:0 0 20px 0; font-weight:600; }
-    .content-text { font-size:16px; color:#4a5568; line-height:1.6; margin:0 0 20px 0; }
-    .highlight-box { background: linear-gradient(135deg, #e8f4fd 0%, #f0f9ff 100%); border-left:4px solid #3182ce; padding:20px; margin:25px 0; border-radius:8px; }
-    .benefits-list { list-style:none; padding:0; margin:20px 0; }
-    .benefits-list li { padding:8px 0; color:#4a5568; position:relative; padding-left:30px; font-size:15px; }
-    .benefits-list li::before { content:'🚀'; position:absolute; left:0; top:8px; }
-    .contact-info { background:#f7fafc; padding:25px; margin:30px 0; border-radius:12px; border:1px solid #e2e8f0; }
-    .contact-info h4 { margin:0 0 15px 0; color:#2d3748; font-size:18px; font-weight:600; }
-    .contact-item { margin:8px 0; color:#4a5568; font-size:14px; }
-    .email-footer { background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%); color:#a0aec0; padding:30px; text-align:center; }
-    .footer-logo { color:#ffffff; font-size:24px; font-weight:700; margin:0 0 10px 0; }
-    .signature { margin-top:30px; padding-top:20px; border-top:1px solid #e2e8f0; color:#718096; font-size:14px; }
-  </style>
-</head>
-<body>
-  <div class="email-wrapper">
-    <table class="email-container" width="650" cellpadding="0" cellspacing="0">
-      <tr>
-        <td class="email-header">
-          <h1 class="company-logo">SOAR-AI</h1>
-          <p class="company-tagline">Corporate Travel Solutions</p>
-        </td>
-      </tr>
-      <tr>
-        <td class="email-content">
-          <h2 class="greeting">Dear {{recipient_name}} Team,</h2>
-          <div class="content-text">
-            {{message_content|safe}}
-          </div>
-          <div class="highlight-box">
-            <p style="margin:0; color:#2b6cb0; font-weight:600; font-size:16px;">
-              Why Choose SOAR-AI for {{company_name}}?
-            </p>
-            <ul class="benefits-list">
-              <li>AI-powered travel optimization and cost reduction</li>
-              <li>Seamless integration with your existing systems</li>
-              <li>24/7 traveler support and real-time assistance</li>
-              <li>Comprehensive reporting and analytics dashboard</li>
-              <li>Sustainable travel options and carbon tracking</li>
-            </ul>
-          </div>
-          <div class="contact-info">
-            <h4>Get in Touch</h4>
-            <div class="contact-item">📧 corporate@soar-ai.com</div>
-            <div class="contact-item">📞 +1 (555) 123-4567</div>
-            <div class="contact-item">🌐 www.soar-ai.com</div>
-          </div>
-
-          <div class="signature">
-            <p>We look forward to the opportunity to transform {{company_name}}'s corporate travel experience.</p>
-            <p>Best regards,<br><strong>The SOAR-AI Partnership Team</strong></p>
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td class="email-footer">
-          <h3 class="footer-logo">SOAR-AI</h3>
-          <p>Transforming Corporate Travel Through Innovation</p>
-          <p style="font-size:12px; margin-top:20px;">
-            © 2025 SOAR-AI Corporation. All rights reserved.
-          </p>
-        </td>
-      </tr>
-    </table>
-  </div>
-</body>
-</html>
-                        """
-
-                        # Render the template with context
-                        template = Template(html_template)
-                        html_content = template.render(template_context)
-
-                        email = EmailMultiAlternatives(
-                            subject=subject,
-                            body=strip_tags(message),  # Plain text fallback
-                            from_email=settings.DEFAULT_FROM_EMAIL,
-                            to=[recipient_email],
-                            bcc=['nagendran.g@infinitisoftware.net','muniraj@infinitisoftware.net'],
-                        )
-                        email.attach_alternative(html_content, "text/html")
-
-                    email.send(fail_silently=False)
-
+                    except Exception as email_error:
+                        return Response({
+                            'success': False,
+                            'error': f'Failed to send email: {str(email_error)}'
+                        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                else:
+                    # For non-email methods, just create an activity record
                     return Response({
                         'success': True,
-                        'message': f'Email sent successfully to {recipient_name} ({recipient_email})'
+                        'message': f'{method} message logged successfully for {recipient_name}'
                     }, status=status.HTTP_200_OK)
-
-                except Exception as email_error:
-                    return Response({
-                        'success': False,
-                        'error': f'Failed to send email: {str(email_error)}'
-                    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             else:
-                # For non-email methods, just create an activity record
-                return Response({
-                    'success': True,
-                    'message': f'{method} message logged successfully for {recipient_name}'
-                }, status=status.HTTP_200_OK)
-        else:
+                return Response(
+                    {'error': 'Invalid contact type or missing required parameters'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        except Exception as e:
             return Response(
-                {'error': 'Invalid contact type or missing required parameters'},
-                status=status.HTTP_400_BAD_REQUEST
+                {'error': f'Failed to send message: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
     except Exception as e:
