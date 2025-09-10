@@ -79,7 +79,6 @@ urlpatterns = [
     # Send proposal endpoint
     path('opportunities/<int:pk>/send-proposal/', views.OpportunityViewSet.as_view({'post': 'send_proposal'}), name='send_proposal'),
     path('contracts/<str:pk>/download_document/', views.ContractViewSet.as_view({'get': 'download_document'}), name='contract-download-document'),
-    path('opportunities/closed-won-opportunities/', views.OpportunityViewSet.as_view({'get': 'closed_won_opportunities'}), name='closed-won-opportunities'),
 
     # Email tracking endpoints - Removed as per instructions
     # path('email-tracking/open/<uuid:tracking_id>/', views.track_email_open_pixel, name='track_email_open_pixel'),

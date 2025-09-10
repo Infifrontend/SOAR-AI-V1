@@ -3435,8 +3435,8 @@ def upload_revenue_data(request):
                 },
                 status=status.HTTP_400_BAD_REQUEST)
 
-        # Validate file size (100MB limit)
-        if uploaded_file.size > 100 * 1024 * 1024:
+        # Validate file size (50MB limit)
+        if uploaded_file.size > 50 * 1024 * 1024:
             return Response({'error': 'File size exceeds 50MB limit'},
                             status=status.HTTP_400_BAD_REQUEST)
 

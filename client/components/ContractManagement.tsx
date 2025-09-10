@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useContractApi } from "../hooks/api/useContractApi";
+import { useLeadApi } from "../hooks/api/useLeadApi";
 import {
   Card,
   CardContent,
@@ -364,6 +365,8 @@ export function ContractManagement({
     getClosedWonOpportunities,
   } = useContractApi(); // Use createContract from hook
 
+  const { getOpportunities } = useLeadApi(); // For fetching closed won opportunities
+
   // Helper function to get display value for select components
   const getSelectDisplayValue = (value: string) => {
     return value === "" ? "all" : value;
@@ -430,6 +433,37 @@ export function ContractManagement({
   const fetchVendorNames = useCallback(async () => {
     try {
       console.log("Fetching vendor names from closed won opportunities...");
+      
+      // Get closed won opportunities from the dedicated endpoint
+      try {
+        const response = await fetch('/api/opportunities/closed-won-opportunities/');
+        
+        if (response.ok) {
+          const closedWonOpportunities = await response.json();
+          
+          // Extract vendor/company names from closed won opportunities
+          let vendorNames = [];
+          if (Array.isArray(closedWonOpportunities)) {
+            vendorNames = closedWonOpportunities
+              .map(opp => opp.lead_info?.company?.name)
+              .filter(name => name && name.trim() !== '')
+              .filter((name, index, self) => self.indexOf(name) === index); // Remove duplicates
+          }
+
+        if (vendorNames.length > 0) {
+            setAvailableVendors(vendorNames);
+            console.log("✓ Vendor names loaded from closed won opportunities:", vendorNames.length, "vendors");
+            console.log("Vendor names:", vendorNames);
+            return;
+          }
+        } else {
+          console.warn("Failed to fetch closed won opportunities:", response.status);
+        }
+      } catch (fetchError) {
+        console.warn("Could not fetch from dedicated endpoint:", fetchError);
+      }
+
+      // Fallback to the hook-based API call
       const result = await getClosedWonOpportunities();
 
       if (
@@ -438,15 +472,15 @@ export function ContractManagement({
         result.data.length > 0
       ) {
         setAvailableVendors(result.data);
-        console.log("✓ Vendor names loaded:", result.data.length, "vendors");
+        console.log("✓ Vendor names loaded from fallback endpoint:", result.data.length, "vendors");
 
         // Show info message if using fallback data
         if (result.error) {
           console.info("Note:", result.error);
         }
       } else {
-        console.warn("No vendor names returned from API, using default list");
-        // Fallback to some default vendors if API fails
+        console.warn("No vendor names returned from any API, using default list");
+        // Fallback to some default vendors if all APIs fail
         const defaultVendors = [
           "Global Travel Solutions",
           "Corporate Journey Ltd",

@@ -850,7 +850,5 @@ export const useLeadApi = () => {
     getAttachmentDownloadUrl,
     sendProposal,
     launchCampaign,
-    getAirportCodes,
-    lookupAirport,
   };
 };
