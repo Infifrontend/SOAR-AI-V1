@@ -2041,14 +2041,12 @@ class LeadViewSet(viewsets.ModelViewSet):
                     'muniraj@infinitisoftware.net'
                 ],
             )
-            
-            # Set proper content type for multipart emails
-            email.content_subtype = "html"  # Set main content as HTML
-            email.body = html_message  # Use HTML as primary body
-            
+
+            # Set HTML as primary content type
+            email.content_subtype = "html"
             # Add plain text as alternative for better compatibility
             email.attach_alternative(plain_text_message, "text/plain")
-            
+
             # Send the email
             email.send(fail_silently=False)
 
@@ -2107,8 +2105,8 @@ class LeadViewSet(viewsets.ModelViewSet):
                 )
 
             if method == 'Email':
-                from django.conf import settings
                 from django.core.mail import EmailMultiAlternatives
+                from django.conf import settings
                 from django.utils.html import strip_tags
 
                 try:
@@ -2118,16 +2116,16 @@ class LeadViewSet(viewsets.ModelViewSet):
                     # If message is not a full HTML doc, wrap it
                     if not message.strip().lower().startswith("<!doctype"):
                         html_content = f"""<!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{subject}</title>
-    </head>
-    <body>
-        {message}
-    </body>
-    </html>"""
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{subject}</title>
+</head>
+<body>
+    {message}
+</body>
+</html>"""
                     else:
                         html_content = message
 
@@ -2143,12 +2141,12 @@ class LeadViewSet(viewsets.ModelViewSet):
                         ],
                     )
 
-                    # Set HTML as the primary content type
+                    # Set HTML as primary content type
                     email.content_subtype = "html"
-                    
+
                     # Add plain text as alternative
                     email.attach_alternative(plain_text_message, "text/plain")
-                    
+
                     email.send(fail_silently=False)
 
                     return Response(
@@ -2497,13 +2495,11 @@ class OpportunityViewSet(viewsets.ModelViewSet):
 
             # Send email via SMTP if delivery method is email
             if delivery_method == 'email':
-                from django.core.mail import EmailMessage
+                from django.core.mail import EmailMultiAlternatives
                 from django.conf import settings
+                from django.utils.html import strip_tags
 
                 try:
-                    # Create email message with HTML content using EmailMultiAlternatives
-                    from django.utils.html import strip_tags
-
                     # Create plain text version
                     plain_text_content = strip_tags(email_content)
 
@@ -2520,7 +2516,7 @@ class OpportunityViewSet(viewsets.ModelViewSet):
 
                     # Set HTML as primary content type
                     email.content_subtype = "html"
-                    
+
                     # Add plain text as alternative
                     email.attach_alternative(plain_text_content, "text/plain")
 
@@ -3694,7 +3690,7 @@ def top_qualified_leads(request):
 
         # Get top qualified leads ordered by score and estimated value
         top_leads = Lead.objects.select_related('company', 'contact').filter(
-            status='qualified').order_by('-score', '-estimated_value')[:limit]
+            status='qualified').order_by('-score','-estimated_value')[:limit]
 
         leads_data = []
         for lead in top_leads:

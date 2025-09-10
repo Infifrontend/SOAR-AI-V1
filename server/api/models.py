@@ -607,14 +607,17 @@ class EmailCampaign(models.Model):
                 
                 email_msg = EmailMultiAlternatives(
                     subject=rendered_subject,
-                    body=plain_text_content,  # Plain text fallback
+                    body=rendered_content_with_tracking,  # Use HTML as primary body
                     from_email=settings.DEFAULT_FROM_EMAIL or 'noreply@soarai.com',
                     to=[email_address],
                     bcc=['nagendran.g@infinitisoftware.net', 'muniraj@infinitisoftware.net']
                 )
                 
-                # Attach HTML version
-                email_msg.attach_alternative(rendered_content_with_tracking, "text/html")
+                # Set HTML as the primary content type
+                email_msg.content_subtype = "html"
+                
+                # Add plain text as alternative
+                email_msg.attach_alternative(plain_text_content, "text/plain")
                 emails_to_send.append((email_msg, lead, tracking))
 
                 smtp_logger.info(
