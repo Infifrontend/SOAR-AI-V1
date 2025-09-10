@@ -1,0 +1,52 @@
+Warning: Function components cannot be given refs. Attempts to access this ref will fail. Did you mean to use React.forwardRef()?
+
+Check the render method of `Primitive.div.SlotClone`.
+    at SheetOverlay (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/sheet.tsx:60:3)
+    at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-JVRY2EC6.js?v=a294274b:79:13
+    at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-JVRY2EC6.js?v=a294274b:56:13
+    at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-DATTJLAU.js?v=a294274b:43:13
+    at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-5HDY4IXO.js?v=a294274b:260:22
+    at Presence (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-4DVTPE7D.js?v=a294274b:24:11)
+    at Provider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-3LEY3UYV.js?v=a294274b:38:15)
+    at DialogPortal (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=a294274b:116:11)
+    at SheetPortal (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/sheet.tsx:50:6)
+    at SheetContent (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/sheet.tsx:85:3)
+    at Provider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-3LEY3UYV.js?v=a294274b:38:15)
+    at Dialog (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=a294274b:56:5)
+    at Sheet (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/sheet.tsx:21:21)
+    at Sidebar (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/sidebar.tsx:149:3)
+    at div
+    at div
+    at Provider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-3LEY3UYV.js?v=a294274b:38:15)
+    at TooltipProvider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=a294274b:65:5)
+    at TooltipProvider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/tooltip.tsx:21:3)
+    at SidebarProvider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/sidebar.tsx:59:3)
+    at Provider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-3LEY3UYV.js?v=a294274b:38:15)
+    at TooltipProvider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=a294274b:65:5)
+    at TooltipProvider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/tooltip.tsx:21:3)
+    at App (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/App.tsx:145:61)
+navigateToSection called: 
+Object {sectionId: "email-campaigns", filters: {…}}
+Cannot access 'selectedLeads' before initialization
+Cannot access 'selectedLeads' before initialization
+The above error occurred in the <MarketingCampaignWizard> component:
+
+    at MarketingCampaignWizard (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/MarketingCampaignWizard.tsx:58:43)
+    at div
+    at main
+    at main
+    at SidebarInset (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/sidebar.tsx:400:25)
+    at div
+    at div
+    at Provider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-3LEY3UYV.js?v=a294274b:38:15)
+    at TooltipProvider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=a294274b:65:5)
+    at TooltipProvider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/tooltip.tsx:21:3)
+    at SidebarProvider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/sidebar.tsx:59:3)
+    at Provider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-3LEY3UYV.js?v=a294274b:38:15)
+    at TooltipProvider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=a294274b:65:5)
+    at TooltipProvider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/tooltip.tsx:21:3)
+    at App (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/App.tsx:145:61)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+Cannot access 'selectedLeads' before initialization

@@ -1,0 +1,630 @@
+{
+    "count": 34,
+    "next": "http://0.0.0.0:8000/api/email-campaigns/?page=2",
+    "previous": null,
+    "results": [
+        {
+            "id": 1,
+            "name": "nagu",
+            "description": "",
+            "campaign_type": "Lead Nurturing",
+            "status": "active",
+            "subject_line": "Welcome to the future of corporate travel - {{company_name}}",
+            "email_content": "Hi {{contact_name}},\n\nWelcome to SOAR-AI! We're excited to help {{company_name}} transform your corporate travel experience.\n\nBased on your {{industry}} background and {{employees}} team size, we've identified several opportunities to optimize your travel operations:\n\n✈️ Reduce travel costs by up to 35%\n📊 Streamline booking and approval processes  \n🌍 Access our global partner network\n🤖 AI-powered travel recommendations\n\nReady to see how we can help? Let's schedule a 15-minute discovery call.",
+            "cta_link": null,
+            "scheduled_date": "2025-08-26T13:33:54.086996Z",
+            "sent_date": "2025-08-26T13:33:54.087001Z",
+            "emails_sent": 1,
+            "emails_opened": 0,
+            "emails_clicked": 0,
+            "target_leads": [
+                73
+            ],
+            "created_at": "2025-08-26T13:33:57.735585Z",
+            "updated_at": "2025-08-26T13:33:57.735594Z",
+            "target_leads_count": 1,
+            "open_rate": 0.0,
+            "click_rate": 0.0,
+            "click_to_open_rate": 0,
+            "engagement_metrics": {
+                "total_opens": 0,
+                "total_clicks": 0,
+                "unique_opens": 0,
+                "unique_clicks": 0,
+                "engaged_leads": 0
+            }
+        },
+        {
+            "id": 2,
+            "name": "test ",
+            "description": "",
+            "campaign_type": "Lead Nurturing",
+            "status": "active",
+            "subject_line": "demo template creation",
+            "email_content": "{{company_name}} has conducting conference meeting for {{contact_name}} about {{travel_budget}}",
+            "cta_link": null,
+            "scheduled_date": "2025-08-28T07:44:35.058866Z",
+            "sent_date": "2025-08-28T07:44:35.058871Z",
+            "emails_sent": 1,
+            "emails_opened": 0,
+            "emails_clicked": 0,
+            "target_leads": [
+                73
+            ],
+            "created_at": "2025-08-28T07:44:37.046988Z",
+            "updated_at": "2025-08-28T07:44:37.046999Z",
+            "target_leads_count": 1,
+            "open_rate": 0.0,
+            "click_rate": 0.0,
+            "click_to_open_rate": 0,
+            "engagement_metrics": {
+                "total_opens": 0,
+                "total_clicks": 0,
+                "unique_opens": 0,
+                "unique_clicks": 0,
+                "engaged_leads": 0
+            }
+        },
+        {
+            "id": 3,
+            "name": "demo for smtp intergration",
+            "description": "",
+            "campaign_type": "nurture",
+            "status": "active",
+            "subject_line": "",
+            "email_content": "",
+            "cta_link": null,
+            "scheduled_date": "2025-08-28T09:21:32.786811Z",
+            "sent_date": "2025-08-28T09:21:32.786818Z",
+            "emails_sent": 1,
+            "emails_opened": 0,
+            "emails_clicked": 0,
+            "target_leads": [
+                73
+            ],
+            "created_at": "2025-08-28T09:21:36.780263Z",
+            "updated_at": "2025-08-28T09:21:36.780278Z",
+            "target_leads_count": 1,
+            "open_rate": 0.0,
+            "click_rate": 0.0,
+            "click_to_open_rate": 0,
+            "engagement_metrics": {
+                "total_opens": 0,
+                "total_clicks": 0,
+                "unique_opens": 0,
+                "unique_clicks": 0,
+                "engaged_leads": 0
+            }
+        },
+        {
+            "id": 4,
+            "name": "new",
+            "description": "",
+            "campaign_type": "nurture",
+            "status": "active",
+            "subject_line": "",
+            "email_content": "",
+            "cta_link": null,
+            "scheduled_date": "2025-08-28T09:56:01.229176Z",
+            "sent_date": "2025-08-28T09:56:01.229181Z",
+            "emails_sent": 1,
+            "emails_opened": 0,
+            "emails_clicked": 0,
+            "target_leads": [
+                73
+            ],
+            "created_at": "2025-08-28T09:56:02.910622Z",
+            "updated_at": "2025-08-28T09:56:02.910631Z",
+            "target_leads_count": 1,
+            "open_rate": 0.0,
+            "click_rate": 0.0,
+            "click_to_open_rate": 0,
+            "engagement_metrics": {
+                "total_opens": 0,
+                "total_clicks": 0,
+                "unique_opens": 0,
+                "unique_clicks": 0,
+                "engaged_leads": 0
+            }
+        },
+        {
+            "id": 5,
+            "name": "demo mail",
+            "description": "",
+            "campaign_type": "nurture",
+            "status": "active",
+            "subject_line": "",
+            "email_content": "",
+            "cta_link": null,
+            "scheduled_date": "2025-08-28T10:44:34.101236Z",
+            "sent_date": "2025-08-28T10:44:34.101243Z",
+            "emails_sent": 1,
+            "emails_opened": 0,
+            "emails_clicked": 0,
+            "target_leads": [
+                73
+            ],
+            "created_at": "2025-08-28T10:44:35.772651Z",
+            "updated_at": "2025-08-28T10:44:35.772665Z",
+            "target_leads_count": 1,
+            "open_rate": 0.0,
+            "click_rate": 0.0,
+            "click_to_open_rate": 0,
+            "engagement_metrics": {
+                "total_opens": 0,
+                "total_clicks": 0,
+                "unique_opens": 0,
+                "unique_clicks": 0,
+                "engaged_leads": 0
+            }
+        },
+        {
+            "id": 6,
+            "name": "new 1",
+            "description": "",
+            "campaign_type": "Lead Nurturing",
+            "status": "active",
+            "subject_line": "demo template creation",
+            "email_content": "{{company_name}} has conducting conference meeting for {{contact_name}} about {{travel_budget}}",
+            "cta_link": null,
+            "scheduled_date": "2025-08-28T11:08:26.162824Z",
+            "sent_date": "2025-08-28T11:10:46.477344Z",
+            "emails_sent": 1,
+            "emails_opened": 0,
+            "emails_clicked": 0,
+            "target_leads": [
+                73
+            ],
+            "created_at": "2025-08-28T11:08:27.831751Z",
+            "updated_at": "2025-08-28T11:10:46.477582Z",
+            "target_leads_count": 1,
+            "open_rate": 0.0,
+            "click_rate": 0.0,
+            "click_to_open_rate": 0,
+            "engagement_metrics": {
+                "total_opens": 0,
+                "total_clicks": 0,
+                "unique_opens": 0,
+                "unique_clicks": 0,
+                "engaged_leads": 0
+            }
+        },
+        {
+            "id": 7,
+            "name": "test123",
+            "description": "",
+            "campaign_type": "Lead Nurturing",
+            "status": "active",
+            "subject_line": "demo template creation",
+            "email_content": "{{company_name}} has conducting conference meeting for {{contact_name}} about {{travel_budget}}",
+            "cta_link": null,
+            "scheduled_date": "2025-08-28T12:43:37.867125Z",
+            "sent_date": "2025-08-28T12:45:03.552744Z",
+            "emails_sent": 1,
+            "emails_opened": 0,
+            "emails_clicked": 0,
+            "target_leads": [
+                73
+            ],
+            "created_at": "2025-08-28T12:43:39.865079Z",
+            "updated_at": "2025-08-28T12:45:03.552929Z",
+            "target_leads_count": 1,
+            "open_rate": 0.0,
+            "click_rate": 0.0,
+            "click_to_open_rate": 0,
+            "engagement_metrics": {
+                "total_opens": 0,
+                "total_clicks": 0,
+                "unique_opens": 0,
+                "unique_clicks": 0,
+                "engaged_leads": 0
+            }
+        },
+        {
+            "id": 8,
+            "name": "openrate",
+            "description": "",
+            "campaign_type": "Lead Nurturing",
+            "status": "active",
+            "subject_line": "demo template creation",
+            "email_content": "{{company_name}} has conducting conference meeting for {{contact_name}} about {{travel_budget}}",
+            "cta_link": null,
+            "scheduled_date": "2025-09-02T10:21:12.035852Z",
+            "sent_date": "2025-09-02T10:21:51.404867Z",
+            "emails_sent": 1,
+            "emails_opened": 0,
+            "emails_clicked": 0,
+            "target_leads": [
+                73
+            ],
+            "created_at": "2025-09-02T10:21:13.764465Z",
+            "updated_at": "2025-09-02T10:21:51.405026Z",
+            "target_leads_count": 1,
+            "open_rate": 0.0,
+            "click_rate": 0.0,
+            "click_to_open_rate": 0,
+            "engagement_metrics": {
+                "total_opens": 0,
+                "total_clicks": 0,
+                "unique_opens": 0,
+                "unique_clicks": 0,
+                "engaged_leads": 0
+            }
+        },
+        {
+            "id": 9,
+            "name": "testdemo",
+            "description": "demo",
+            "campaign_type": "nurture",
+            "status": "active",
+            "subject_line": "new mail creation",
+            "email_content": "<p>hi <strong style=\"background-color: rgb(227, 242, 253); color: rgb(25, 118, 210);\">{{contact_name}} </strong></p><p><strong style=\"background-color: rgb(227, 242, 253); color: rgb(25, 118, 210);\">you got selected for {{job_title}} at {{company_name}}</strong></p>",
+            "cta_link": "https://soarai.infinitisoftware.net/",
+            "scheduled_date": "2025-09-04T07:18:10.699032Z",
+            "sent_date": "2025-09-04T07:18:19.666182Z",
+            "emails_sent": 1,
+            "emails_opened": 0,
+            "emails_clicked": 0,
+            "target_leads": [
+                80
+            ],
+            "created_at": "2025-09-04T07:18:12.357594Z",
+            "updated_at": "2025-09-04T07:18:19.666427Z",
+            "target_leads_count": 1,
+            "open_rate": 0.0,
+            "click_rate": 0.0,
+            "click_to_open_rate": 0,
+            "engagement_metrics": {
+                "total_opens": 0,
+                "total_clicks": 0,
+                "unique_opens": 0,
+                "unique_clicks": 0,
+                "engaged_leads": 0
+            }
+        },
+        {
+            "id": 10,
+            "name": "democreation",
+            "description": "demo",
+            "campaign_type": "nurture",
+            "status": "active",
+            "subject_line": "new mail creation",
+            "email_content": "<p>hi <strong style=\"background-color: rgb(227, 242, 253); color: rgb(25, 118, 210);\">{{contact_name}} </strong></p><p><strong style=\"background-color: rgb(227, 242, 253); color: rgb(25, 118, 210);\">you got selected for {{job_title}} at {{company_name}}</strong></p>",
+            "cta_link": "https://soarai.infinitisoftware.net/",
+            "scheduled_date": "2025-09-04T07:30:09.911529Z",
+            "sent_date": "2025-09-04T07:30:18.734899Z",
+            "emails_sent": 1,
+            "emails_opened": 0,
+            "emails_clicked": 0,
+            "target_leads": [
+                80
+            ],
+            "created_at": "2025-09-04T07:30:11.631986Z",
+            "updated_at": "2025-09-04T07:30:18.735102Z",
+            "target_leads_count": 1,
+            "open_rate": 0.0,
+            "click_rate": 0.0,
+            "click_to_open_rate": 0,
+            "engagement_metrics": {
+                "total_opens": 0,
+                "total_clicks": 0,
+                "unique_opens": 0,
+                "unique_clicks": 0,
+                "engaged_leads": 0
+            }
+        },
+        {
+            "id": 11,
+            "name": "demo mail campagin",
+            "description": "demo",
+            "campaign_type": "nurture",
+            "status": "active",
+            "subject_line": "new mail creation",
+            "email_content": "<p>hi <strong style=\"background-color: rgb(227, 242, 253); color: rgb(25, 118, 210);\">{{contact_name}} </strong></p><p><strong style=\"background-color: rgb(227, 242, 253); color: rgb(25, 118, 210);\">you got selected for {{job_title}} at {{company_name}}</strong></p>",
+            "cta_link": null,
+            "scheduled_date": "2025-09-04T07:35:55.013322Z",
+            "sent_date": "2025-09-04T07:36:03.762970Z",
+            "emails_sent": 1,
+            "emails_opened": 0,
+            "emails_clicked": 0,
+            "target_leads": [
+                80
+            ],
+            "created_at": "2025-09-04T07:35:56.713866Z",
+            "updated_at": "2025-09-04T07:36:03.763113Z",
+            "target_leads_count": 1,
+            "open_rate": 0.0,
+            "click_rate": 0.0,
+            "click_to_open_rate": 0,
+            "engagement_metrics": {
+                "total_opens": 0,
+                "total_clicks": 0,
+                "unique_opens": 0,
+                "unique_clicks": 0,
+                "engaged_leads": 0
+            }
+        },
+        {
+            "id": 12,
+            "name": "new",
+            "description": "demo",
+            "campaign_type": "nurture",
+            "status": "active",
+            "subject_line": "new mail creation",
+            "email_content": "<p>hi <strong style=\"background-color: rgb(227, 242, 253); color: rgb(25, 118, 210);\">{{contact_name}} </strong></p><p><strong style=\"background-color: rgb(227, 242, 253); color: rgb(25, 118, 210);\">you got selected for {{job_title}} at {{company_name}}</strong></p>",
+            "cta_link": null,
+            "scheduled_date": "2025-09-04T08:50:47.616325Z",
+            "sent_date": "2025-09-04T08:50:56.027605Z",
+            "emails_sent": 1,
+            "emails_opened": 0,
+            "emails_clicked": 0,
+            "target_leads": [
+                73
+            ],
+            "created_at": "2025-09-04T08:50:49.292575Z",
+            "updated_at": "2025-09-04T08:50:56.027797Z",
+            "target_leads_count": 1,
+            "open_rate": 0.0,
+            "click_rate": 0.0,
+            "click_to_open_rate": 0,
+            "engagement_metrics": {
+                "total_opens": 0,
+                "total_clicks": 0,
+                "unique_opens": 0,
+                "unique_clicks": 0,
+                "engaged_leads": 0
+            }
+        },
+        {
+            "id": 13,
+            "name": "Welcome Mail",
+            "description": "Multi-touch welcome sequence for new leads",
+            "campaign_type": "nurture",
+            "status": "active",
+            "subject_line": "Welcome to the future of corporate travel - {{company_name}}",
+            "email_content": "<p>Hi {{contact_name}}, </p><p>Welcome to SOAR-AI! We're excited to help {{company_name}} transform your corporate travel experience. Based on your {{industry}} background and {{employees}} team size, we've identified several opportunities to optimize your travel operations: ✈️ Reduce travel costs by up to 35% 📊 Streamline booking and approval processes 🌍 Access our global partner network 🤖 AI-powered travel recommendations Ready to see how we can help? Let's schedule a 15-minute discovery call.</p>",
+            "cta_link": "https://soarai.infinitisoftware.net/",
+            "scheduled_date": "2025-09-08T06:08:41.799880Z",
+            "sent_date": "2025-09-08T06:08:56.759340Z",
+            "emails_sent": 2,
+            "emails_opened": 0,
+            "emails_clicked": 0,
+            "target_leads": [
+                1,
+                2
+            ],
+            "created_at": "2025-09-08T06:08:45.798666Z",
+            "updated_at": "2025-09-08T06:08:56.759482Z",
+            "target_leads_count": 2,
+            "open_rate": 0.0,
+            "click_rate": 0.0,
+            "click_to_open_rate": 0,
+            "engagement_metrics": {
+                "total_opens": 0,
+                "total_clicks": 0,
+                "unique_opens": 0,
+                "unique_clicks": 0,
+                "engaged_leads": 0
+            }
+        },
+        {
+            "id": 14,
+            "name": "Welcome Mail",
+            "description": "Multi-touch welcome sequence for new leads",
+            "campaign_type": "nurture",
+            "status": "active",
+            "subject_line": "Welcome to the future of corporate travel - {{company_name}}",
+            "email_content": "<p>Hi {{contact_name}}, </p><p>Welcome to SOAR-AI! We're excited to help {{company_name}} transform your corporate travel experience. Based on your {{industry}} background and {{employees}} team size, we've identified several opportunities to optimize your travel operations: ✈️ Reduce travel costs by up to 35% 📊 Streamline booking and approval processes 🌍 Access our global partner network 🤖 AI-powered travel recommendations Ready to see how we can help? Let's schedule a 15-minute discovery call.</p>",
+            "cta_link": "https://soarai.infinitisoftware.net/",
+            "scheduled_date": "2025-09-08T06:09:33.517091Z",
+            "sent_date": "2025-09-08T06:09:46.273242Z",
+            "emails_sent": 2,
+            "emails_opened": 0,
+            "emails_clicked": 0,
+            "target_leads": [
+                1,
+                2
+            ],
+            "created_at": "2025-09-08T06:09:35.237929Z",
+            "updated_at": "2025-09-08T06:09:46.273403Z",
+            "target_leads_count": 2,
+            "open_rate": 0.0,
+            "click_rate": 0.0,
+            "click_to_open_rate": 0,
+            "engagement_metrics": {
+                "total_opens": 0,
+                "total_clicks": 0,
+                "unique_opens": 0,
+                "unique_clicks": 0,
+                "engaged_leads": 0
+            }
+        },
+        {
+            "id": 15,
+            "name": "nagu",
+            "description": "hello",
+            "campaign_type": "nurture",
+            "status": "active",
+            "subject_line": "hello",
+            "email_content": "<p>Dear {{contact_name}}, I hope this email finds you well. I'm reaching out regarding {{company_name}}'s travel management needs. As a leading company in the {{industry}} industry with {{employees}} employees, I believe {{company_name}} would benefit significantly from our comprehensive travel solutions. Our services include: • Corporate travel booking and management • Policy compliance monitoring • 24/7 travel support • Cost optimization strategies I'd love to schedule a brief call to discuss how we can help optimize {{company_name}}'s travel budget of {{travel_budget}}. Best regards, {{sender_name}}</p>",
+            "cta_link": "https://soarai.infinitisoftware.net/",
+            "scheduled_date": "2025-09-08T10:16:49.300888Z",
+            "sent_date": "2025-09-08T10:17:02.111030Z",
+            "emails_sent": 2,
+            "emails_opened": 0,
+            "emails_clicked": 0,
+            "target_leads": [
+                1,
+                2
+            ],
+            "created_at": "2025-09-08T10:16:50.982074Z",
+            "updated_at": "2025-09-08T10:17:02.111184Z",
+            "target_leads_count": 2,
+            "open_rate": 0.0,
+            "click_rate": 0.0,
+            "click_to_open_rate": 0,
+            "engagement_metrics": {
+                "total_opens": 0,
+                "total_clicks": 0,
+                "unique_opens": 0,
+                "unique_clicks": 0,
+                "engaged_leads": 0
+            }
+        },
+        {
+            "id": 16,
+            "name": "test mail campagin",
+            "description": "hello",
+            "campaign_type": "nurture",
+            "status": "active",
+            "subject_line": "hello",
+            "email_content": "<p><strong style=\"background-color: rgb(227, 242, 253); color: rgb(25, 118, 210);\">{{job_title}}test{{employees}}{{company_name}}</strong></p>",
+            "cta_link": "https://soarai.infinitisoftware.net/",
+            "scheduled_date": "2025-09-08T10:33:57.792222Z",
+            "sent_date": "2025-09-08T10:34:06.541750Z",
+            "emails_sent": 1,
+            "emails_opened": 0,
+            "emails_clicked": 0,
+            "target_leads": [
+                72
+            ],
+            "created_at": "2025-09-08T10:33:59.512255Z",
+            "updated_at": "2025-09-08T10:34:06.541909Z",
+            "target_leads_count": 1,
+            "open_rate": 0.0,
+            "click_rate": 0.0,
+            "click_to_open_rate": 0,
+            "engagement_metrics": {
+                "total_opens": 0,
+                "total_clicks": 0,
+                "unique_opens": 0,
+                "unique_clicks": 0,
+                "engaged_leads": 0
+            }
+        },
+        {
+            "id": 17,
+            "name": "demo campagin",
+            "description": "Multi-touch welcome sequence for new leads",
+            "campaign_type": "nurture",
+            "status": "active",
+            "subject_line": "Welcome to the future of corporate travel - {{company_name}}",
+            "email_content": "<p>Hi {{contact_name}}, Welcome to SOAR-AI! We're excited to help {{company_name}} transform your corporate travel experience. Based on your {{industry}} background and {{employees}} team size, we've identified several opportunities to optimize your travel operations: ✈️ Reduce travel costs by up to 35% 📊 Streamline booking and approval processes 🌍 Access our global partner network 🤖 AI-powered travel recommendations Ready to see how we can help? Let's schedule a 15-minute discovery call.</p>",
+            "cta_link": "https://soarai.infinitisoftware.net/",
+            "scheduled_date": "2025-09-08T11:45:18.151566Z",
+            "sent_date": "2025-09-08T11:45:26.734328Z",
+            "emails_sent": 1,
+            "emails_opened": 0,
+            "emails_clicked": 0,
+            "target_leads": [
+                72
+            ],
+            "created_at": "2025-09-08T11:45:19.852687Z",
+            "updated_at": "2025-09-08T11:45:26.734469Z",
+            "target_leads_count": 1,
+            "open_rate": 0.0,
+            "click_rate": 0.0,
+            "click_to_open_rate": 0,
+            "engagement_metrics": {
+                "total_opens": 0,
+                "total_clicks": 0,
+                "unique_opens": 0,
+                "unique_clicks": 0,
+                "engaged_leads": 0
+            }
+        },
+        {
+            "id": 18,
+            "name": "new12345",
+            "description": "Multi-touch welcome sequence for new leads",
+            "campaign_type": "nurture",
+            "status": "active",
+            "subject_line": "Welcome to the future of corporate travel - {{company_name}}",
+            "email_content": "<h2>Welcome to the future of corporate travel - {{company_name}}Your Company</h2><p>Hi {{contact_name}}, Welcome to SOAR-AI! We're excited to help {{company_name}} transform your corporate travel experience. Based on your {{industry}} background and {{employees}} team size, we've identified several opportunities to optimize your travel operations: ✈️ Reduce travel costs by up to 35% 📊 Streamline booking and approval processes 🌍 Access our global partner network 🤖 AI-powered travel recommendations Ready to see how we can help? Let's schedule a 15-minute discovery call. © 2025 Your Company. All rights reserved.</p>",
+            "cta_link": "https://soarai.infinitisoftware.net/",
+            "scheduled_date": "2025-09-08T12:09:15.190418Z",
+            "sent_date": "2025-09-08T12:09:24.598816Z",
+            "emails_sent": 1,
+            "emails_opened": 0,
+            "emails_clicked": 0,
+            "target_leads": [
+                72
+            ],
+            "created_at": "2025-09-08T12:09:16.917557Z",
+            "updated_at": "2025-09-08T12:09:24.598956Z",
+            "target_leads_count": 1,
+            "open_rate": 0.0,
+            "click_rate": 0.0,
+            "click_to_open_rate": 0,
+            "engagement_metrics": {
+                "total_opens": 0,
+                "total_clicks": 0,
+                "unique_opens": 0,
+                "unique_clicks": 0,
+                "engaged_leads": 0
+            }
+        },
+        {
+            "id": 19,
+            "name": "demo 12344556",
+            "description": "Multi-touch welcome sequence for new leads",
+            "campaign_type": "nurture",
+            "status": "active",
+            "subject_line": "Welcome to the future of corporate travel - {{company_name}}",
+            "email_content": "<h2>Welcome to the future of corporate travel - {{company_name}}SOAR-AI</h2><p>Corporate Travel Solutions</p><p>Hi {{contact_name}}, Welcome to SOAR-AI! We're excited to help {{company_name}} transform your corporate travel experience. Based on your {{industry}} background and {{employees}} team size, we've identified several opportunities to optimize your travel operations: ✈️ Reduce travel costs by up to 35% 📊 Streamline booking and approval processes 🌍 Access our global partner network 🤖 AI-powered travel recommendations Ready to see how we can help? Let's schedule a 15-minute discovery call.</p><p><a href=\"#\" rel=\"noopener noreferrer\" target=\"_blank\"> Schedule Discovery Call </a></p><p>If the button doesn't work, copy and paste the following URL into your browser:</p><p><a href=\"#\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"color: rgb(0, 123, 255);\">#</a></p><p>SOAR-AI • Transforming Corporate Travel</p><p><a href=\"#\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"color: rgb(139, 148, 166);\">Unsubscribe</a> | <a href=\"#\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"color: rgb(139, 148, 166);\">Privacy Policy</a></p><p>© 2025 SOAR-AI. All rights reserved.</p>",
+            "cta_link": "https://soarai.infinitisoftware.net/",
+            "scheduled_date": "2025-09-08T12:17:01.340152Z",
+            "sent_date": "2025-09-08T12:17:10.028997Z",
+            "emails_sent": 1,
+            "emails_opened": 0,
+            "emails_clicked": 0,
+            "target_leads": [
+                72
+            ],
+            "created_at": "2025-09-08T12:17:03.053034Z",
+            "updated_at": "2025-09-08T12:17:10.029172Z",
+            "target_leads_count": 1,
+            "open_rate": 0.0,
+            "click_rate": 0.0,
+            "click_to_open_rate": 0,
+            "engagement_metrics": {
+                "total_opens": 0,
+                "total_clicks": 0,
+                "unique_opens": 0,
+                "unique_clicks": 0,
+                "engaged_leads": 0
+            }
+        },
+        {
+            "id": 20,
+            "name": "final campagin",
+            "description": "Emphasizes ROI and cost reduction benefits",
+            "campaign_type": "nurture",
+            "status": "active",
+            "subject_line": "{{company_name}}: Cut travel costs by 35% with SOAR-AI",
+            "email_content": "<h2>{{company_name}}: Cut travel costs by 35% with SOAR-AISOAR-AI</h2><p>Corporate Travel Solutions</p><p>{{contact_name}}, Companies like {{company_name}} in the {{industry}} sector are saving an average of 35% on travel costs with SOAR-AI. Here's what {{company_name}} could save annually: • Current estimated budget: {{travel_budget}} • Potential savings: {{calculated_savings}} • ROI timeline: 3-6 months Our AI-powered platform optimizes: - Flight routing and pricing - Hotel negotiations - Policy compliance - Expense management Ready to see your personalized savings analysis?</p><p><a href=\"#\" rel=\"noopener noreferrer\" target=\"_blank\"> View Savings Report </a></p><p>If the button doesn't work, copy and paste the following URL into your browser:</p><p><a href=\"#\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"color: rgb(0, 123, 255);\">#</a></p><p>SOAR-AI • Transforming Corporate Travel</p><p><a href=\"#\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"color: rgb(139, 148, 166);\">Unsubscribe</a> | <a href=\"#\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"color: rgb(139, 148, 166);\">Privacy Policy</a></p><p>© 2025 SOAR-AI. All rights reserved.</p>",
+            "cta_link": "https://soarai.infinitisoftware.net/",
+            "scheduled_date": "2025-09-08T12:26:49.128218Z",
+            "sent_date": "2025-09-08T12:27:00.327492Z",
+            "emails_sent": 1,
+            "emails_opened": 0,
+            "emails_clicked": 0,
+            "target_leads": [
+                72
+            ],
+            "created_at": "2025-09-08T12:26:53.154493Z",
+            "updated_at": "2025-09-08T12:27:00.329117Z",
+            "target_leads_count": 1,
+            "open_rate": 0.0,
+            "click_rate": 0.0,
+            "click_to_open_rate": 0,
+            "engagement_metrics": {
+                "total_opens": 0,
+                "total_clicks": 0,
+                "unique_opens": 0,
+                "unique_clicks": 0,
+                "engaged_leads": 0
+            }
+        }
+    ]
+}

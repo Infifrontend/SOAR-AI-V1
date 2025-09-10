@@ -1,0 +1,95 @@
+{
+    "name": "democampagin",
+    "description": "hello",
+    "objective": "Lead Nurturing",
+    "channels": [
+        "email"
+    ],
+    "targetAudience": [
+        {
+            "id": 80,
+            "company": "ConsultPro Services",
+            "contact": "Services",
+            "title": "Decision Maker",
+            "email": "contact@consultproservices.com",
+            "phone": "N/A",
+            "website": "https://wwwwww. consultproservices.com",
+            "industry": "consulting",
+            "employees": "medium",
+            "revenue": "$0K",
+            "location": "Washington, DC",
+            "status": "contacted",
+            "score": 50,
+            "source": "manual_entry",
+            "lastContact": "2025-09-02",
+            "nextAction": "Initial outreach and qualification",
+            "notes": "Lead created from company entry. Moved from corporate search. AI Score: 88. Growing organization with expanding travel needs. Consider volume-based pricing strategies.. Specialties: Business Services, Corporate Solutions. Travel Frequency: Monthly. Preferred Class: Business.",
+            "leadNotes": [
+                {
+                    "id": 9,
+                    "note": "testing the pro",
+                    "next_action": "Initial outreach and qualification",
+                    "urgency": "Medium",
+                    "created_at": "2025-09-02T12:19:24.625061+00:00",
+                    "created_by": null
+                },
+                {
+                    "id": 8,
+                    "note": "muniraj 1111",
+                    "next_action": "Initial outreach and qualification",
+                    "urgency": "Low",
+                    "created_at": "2025-09-02T09:51:35.981221+00:00",
+                    "created_by": null
+                }
+            ],
+            "engagement": "Low",
+            "travelBudget": "$0K",
+            "decisionMaker": true,
+            "urgency": "medium",
+            "aiSuggestion": "AI Score: 50. Low priority - add to nurture campaign",
+            "tags": [
+                "consulting",
+                "contacted"
+            ],
+            "contractReady": false,
+            "lastActivity": "2025-09-04",
+            "followUpDate": "2025-09-06",
+            "assignedAgent": null,
+            "campaignCount": 0,
+            "history_entries": []
+        }
+    ],
+    "target_leads": [
+        80
+    ],
+    "content": {
+        "email": {
+            "subject": "hello",
+            "body": "<p><strong style=\"background-color: rgb(227, 242, 253); color: rgb(25, 118, 210);\">{{job_title}}test{{employees}}{{company_name}}</strong></p>",
+            "cta": "call",
+            "cta_link": ""
+        }
+    },
+    "settings": {
+        "trackOpens": true,
+        "trackClicks": true,
+        "autoFollowUp": false
+    },
+    "selectedTemplate": {
+        "id": 5,
+        "name": "template123",
+        "description": "hello",
+        "channel_type": "email",
+        "target_industry": "All",
+        "subject_line": "hello",
+        "content": "<p><strong style=\"background-color: rgb(227, 242, 253); color: rgb(25, 118, 210);\">{{job_title}}test{{employees}}{{company_name}}</strong></p>",
+        "cta": "call",
+        "linkedin_type": "message",
+        "estimated_open_rate": 40,
+        "estimated_click_rate": 10,
+        "is_custom": true,
+        "created_by": "User",
+        "created_at": "2025-09-04T07:00:02.592149Z",
+        "updated_at": "2025-09-04T07:00:02.592175Z"
+    }
+}

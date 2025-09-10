@@ -1,0 +1,91 @@
+{
+    "name": "final campagin",
+    "description": "Emphasizes ROI and cost reduction benefits",
+    "objective": "Re-engagement",
+    "channels": [
+        "email"
+    ],
+    "targetAudience": [
+        {
+            "id": 72,
+            "company": "nagendran",
+            "contact": "Person",
+            "title": "Decision Maker",
+            "email": "nagendran.g@infinitisoftware.net",
+            "phone": "9845984598",
+            "website": "https://wwwwww. nagendran.com",
+            "industry": "finance",
+            "employees": "medium",
+            "revenue": "$0K",
+            "location": "chennai",
+            "status": "qualified",
+            "score": 99,
+            "source": "corporate_search",
+            "lastContact": "25-08-2025",
+            "nextAction": "Follow up",
+            "notes": "Moved from corporate search. AI Score: 99. Established company with consistent business patterns. Good candidate for long-term contracts.. Specialties: web-application, Android-app, crmtool. Travel Frequency: Bi-weekly. Preferred Class: Business/First.",
+            "leadNotes": [],
+            "engagement": "High",
+            "travelBudget": "$0K",
+            "decisionMaker": true,
+            "urgency": "high",
+            "aiSuggestion": "AI Score: 99. High priority lead - contact immediately",
+            "tags": [
+                "finance",
+                "qualified"
+            ],
+            "contractReady": true,
+            "lastActivity": "08-09-2025",
+            "followUpDate": "10-09-2025",
+            "assignedAgent": null,
+            "campaignCount": 4,
+            "history_entries": [],
+            "has_opportunity": true
+        }
+    ],
+    "target_leads": [
+        72
+    ],
+    "content": {
+        "email": {
+            "subject": "{{company_name}}: Cut travel costs by 35% with SOAR-AI",
+            "body": "<h2>{{company_name}}: Cut travel costs by 35% with SOAR-AISOAR-AI</h2><p>Corporate Travel Solutions</p><p>{{contact_name}}, Companies like {{company_name}} in the {{industry}} sector are saving an average of 35% on travel costs with SOAR-AI. Here's what {{company_name}} could save annually: • Current estimated budget: {{travel_budget}} • Potential savings: {{calculated_savings}} • ROI timeline: 3-6 months Our AI-powered platform optimizes: - Flight routing and pricing - Hotel negotiations - Policy compliance - Expense management Ready to see your personalized savings analysis?</p><p><a href=\"#\" rel=\"noopener noreferrer\" target=\"_blank\"> View Savings Report </a></p><p>If the button doesn't work, copy and paste the following URL into your browser:</p><p><a href=\"#\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"color: rgb(0, 123, 255);\">#</a></p><p>SOAR-AI • Transforming Corporate Travel</p><p><a href=\"#\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"color: rgb(139, 148, 166);\">Unsubscribe</a> | <a href=\"#\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"color: rgb(139, 148, 166);\">Privacy Policy</a></p><p>© 2025 SOAR-AI. All rights reserved.</p>",
+            "cta": "View Savings Reports",
+            "cta_link": "https://soarai.infinitisoftware.net/"
+        },
+        "whatsapp": {
+            "message": "",
+            "cta": ""
+        },
+        "linkedin": {
+            "type": "message",
+            "content": "",
+            "cta": ""
+        }
+    },
+    "settings": {
+        "sendTime": "immediate",
+        "scheduleDate": "",
+        "scheduleTime": "09:00",
+        "followUp": false,
+        "followUpDays": 3,
+        "trackingEnabled": true
+    },
+    "selectedTemplate": {
+        "id": "cost-savings",
+        "name": "Cost Savings Focus",
+        "description": "Emphasizes ROI and cost reduction benefits",
+        "channel_type": "email",
+        "target_industry": "Manufacturing",
+        "subject_line": "{{company_name}}: Cut travel costs by 35% with SOAR-AI",
+        "content": "{{contact_name}},\n\nCompanies like {{company_name}} in the {{industry}} sector are saving an average of 35% on travel costs with SOAR-AI.\n\nHere's what {{company_name}} could save annually:\n• Current estimated budget: {{travel_budget}}\n• Potential savings: {{calculated_savings}}\n• ROI timeline: 3-6 months\n\nOur AI-powered platform optimizes:\n- Flight routing and pricing\n- Hotel negotiations\n- Policy compliance\n- Expense management\n\nReady to see your personalized savings analysis?",
+        "cta": "View Savings Report",
+        "linkedin_type": null,
+        "estimated_open_rate": 52,
+        "estimated_click_rate": 15,
+        "is_custom": false,
+        "created_by": "System",
+        "created_at": "2024-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z"
+    }
+}

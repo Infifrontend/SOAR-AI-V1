@@ -1,0 +1,77 @@
+ const handleLaunchCampaign = async () => {
+    setIsLaunching(true);
+console.log(campaignData,'campaignData')
+    try {
+      // Prepare campaign data for API
+      const campaignPayload = {
+        name: campaignData.name,
+        description: campaignData.selectedTemplate?.description || '',
+        objective: campaignData.objective,
+        channels: campaignData.channels,
+        targetAudience: selectedLeads,
+        target_leads: selectedLeads.map(lead => lead.id),
+        content: campaignData.content,
+        settings: campaignData.settings,
+        selectedTemplate: campaignData.selectedTemplate
+      };
+
+      console.log('Launching campaign with payload:', campaignPayload);
+
+      // Launch the campaign via API
+      const response = await launchCampaign(campaignPayload);
+
+      console.log('Campaign launch response:', response);
+
+      // After successful campaign launch, update lead statuses
+      if (response && response.success) {
+        try {
+          // Update status for leads that were 'new' to 'contacted'
+          const leadsToUpdate = selectedLeads.filter(lead => lead.status === 'new');
+
+          if (leadsToUpdate.length > 0) {
+            console.log(`Updating ${leadsToUpdate.length} leads from 'new' to 'contacted'`);
+
+            // Update each lead's status
+            const updatePromises = leadsToUpdate.map(async (lead) => {
+              try {
+                const updatedLead = await updateLead(lead.id, {
+                  status: 'contacted'
+                });
+                console.log(`Updated lead ${lead.id} status to contacted`);
+                return { leadId: lead.id, success: true, updatedLead };
+              } catch (error) {
+                console.error(`Error updating lead ${lead.id}:`, error);
+                return { leadId: lead.id, success: false, error };
+              }
+            });
+
+            const updateResults = await Promise.all(updatePromises);
+            const successfulUpdates = updateResults.filter(result => result.success);
+
+            console.log(`Successfully updated ${successfulUpdates.length} lead statuses`);
+          }
+        } catch (error) {
+          console.error('Error updating lead statuses:', error);
+          // Don't fail the entire operation if lead updates fail
+        }
+
+        // Show success and complete
+        onComplete({
+          ...campaignData,
+          campaignId: response.campaign_id,
+          launched: true,
+          launchDate: new Date().toISOString(),
+          response: response,
+          emailsSent: response.emails_sent,
+          targetLeadsProcessed: response.target_leads_processed
+        });
+      } else {
+        throw new Error(response?.message || 'Campaign launch failed');
+      }
+    } catch (error: any) {
+      console.error('Failed to launch campaign:', error);
+      alert(`Failed to launch campaign: ${error.response?.data?.error || error.message}`);
+    } finally {
+      setIsLaunching(false);
+    }
+  };

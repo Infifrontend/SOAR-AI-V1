@@ -1,0 +1,34 @@
+Warning: validateDOMNesting(...): <div> cannot appear as a descendant of &lt;p&gt;.
+    at div
+    at div
+    at p
+    at div
+    at CardContent (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/card.tsx:122:24)
+    at div
+    at Card (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/card.tsx:18:17)
+    at div
+    at div
+    at EmailCampaigns (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/EmailCampaigns.tsx:39:34)
+    at div
+    at main
+    at main
+    at SidebarInset (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/sidebar.tsx:400:25)
+    at div
+    at div
+    at Provider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-3LEY3UYV.js?v=69a2b389:38:15)
+    at TooltipProvider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=69a2b389:65:5)
+    at TooltipProvider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/tooltip.tsx:21:3)
+    at SidebarProvider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/sidebar.tsx:59:3)
+    at Provider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-3LEY3UYV.js?v=69a2b389:38:15)
+    at TooltipProvider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=69a2b389:65:5)
+    at TooltipProvider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/tooltip.tsx:21:3)
+    at App (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/App.tsx:144:61)
+Failed to load campaigns: 
+AxiosError {message: "Request failed with status code 500", name: "AxiosError", code: "ERR_BAD_RESPONSE", config: {…}, request: XMLHttpRequest, …}
+
+at t.value (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+Failed to load campaigns: 
+AxiosError {message: "Request failed with status code 500", name: "AxiosError", code: "ERR_BAD_RESPONSE", config: {…}, request: XMLHttpRequest, …}

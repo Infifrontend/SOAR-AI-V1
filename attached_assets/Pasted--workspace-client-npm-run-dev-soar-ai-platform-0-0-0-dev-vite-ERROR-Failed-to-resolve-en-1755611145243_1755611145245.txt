@@ -1,0 +1,98 @@
+~/workspace/client$ npm run dev
+
+> soar-ai-platform@0.0.0 dev
+> vite
+
+✘ [ERROR] Failed to resolve entry for package "vite". The package may have incorrect main/module/exports specified in its package.json. [plugin externalize-deps]
+
+    ../node_modules/esbuild/lib/main.js:1217:27:
+      1217 │         let result = await callback({
+           ╵                            ^
+
+    at packageEntryFailure (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:16198:15)
+    at resolvePackageEntry (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:16195:3)
+    at tryNodeResolve (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:16060:18)
+    at resolveByViteResolver (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:49300:20)
+    at file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:49334:28
+    at requestCallbacks.on-resolve (/home/runner/workspace/node_modules/esbuild/lib/main.js:1217:28)
+    at handleRequest (/home/runner/workspace/node_modules/esbuild/lib/main.js:628:17)
+    at handleIncomingPacket (/home/runner/workspace/node_modules/esbuild/lib/main.js:653:7)
+    at Socket.readFromStdout (/home/runner/workspace/node_modules/esbuild/lib/main.js:581:7)
+    at Socket.emit (node:events:524:28)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../node_modules/esbuild/lib/main.js:1141:20:
+      1141 │       let promise = setup({
+           ╵                     ^
+
+    at setup (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:49322:18)
+    at handlePlugins (/home/runner/workspace/node_modules/esbuild/lib/main.js:1141:21)
+    at buildOrContextImpl (/home/runner/workspace/node_modules/esbuild/lib/main.js:854:5)
+    at Object.buildOrContext (/home/runner/workspace/node_modules/esbuild/lib/main.js:680:5)
+    at /home/runner/workspace/node_modules/esbuild/lib/main.js:2026:15
+    at new Promise (<anonymous>)
+    at Object.build (/home/runner/workspace/node_modules/esbuild/lib/main.js:2025:25)
+    at build (/home/runner/workspace/node_modules/esbuild/lib/main.js:1876:51)
+    at bundleConfigFile (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:49274:24)
+
+  The plugin "externalize-deps" was triggered by this import
+
+    vite.config.js:1:294:
+      1 │ ...ginal_import_meta_url = "file:///home/runner/workspace/client/vite.config.js";import { defineConfig } from 'vite';
+        ╵                                                                                                               ~~~~~~
+
+✘ [ERROR] Failed to resolve entry for package "@vitejs/plugin-react". The package may have incorrect main/module/exports specified in its package.json. [plugin externalize-deps]
+
+    ../node_modules/esbuild/lib/main.js:1217:27:
+      1217 │         let result = await callback({
+           ╵                            ^
+
+    at packageEntryFailure (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:16198:15)
+    at resolvePackageEntry (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:16195:3)
+    at tryNodeResolve (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:16060:18)
+    at resolveByViteResolver (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:49300:20)
+    at file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:49334:28
+    at requestCallbacks.on-resolve (/home/runner/workspace/node_modules/esbuild/lib/main.js:1217:28)
+    at handleRequest (/home/runner/workspace/node_modules/esbuild/lib/main.js:628:17)
+    at handleIncomingPacket (/home/runner/workspace/node_modules/esbuild/lib/main.js:653:7)
+    at Socket.readFromStdout (/home/runner/workspace/node_modules/esbuild/lib/main.js:581:7)
+    at Socket.emit (node:events:524:28)
+
+  This error came from the "onResolve" callback registered here:
+
+    ../node_modules/esbuild/lib/main.js:1141:20:
+      1141 │       let promise = setup({
+           ╵                     ^
+
+    at setup (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:49322:18)
+    at handlePlugins (/home/runner/workspace/node_modules/esbuild/lib/main.js:1141:21)
+    at buildOrContextImpl (/home/runner/workspace/node_modules/esbuild/lib/main.js:854:5)
+    at Object.buildOrContext (/home/runner/workspace/node_modules/esbuild/lib/main.js:680:5)
+    at /home/runner/workspace/node_modules/esbuild/lib/main.js:2026:15
+    at new Promise (<anonymous>)
+    at Object.build (/home/runner/workspace/node_modules/esbuild/lib/main.js:2025:25)
+    at build (/home/runner/workspace/node_modules/esbuild/lib/main.js:1876:51)
+    at bundleConfigFile (file:///home/runner/workspace/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:49274:24)
+
+  The plugin "externalize-deps" was triggered by this import
+
+    vite.config.js:2:18:
+      2 │ import react from '@vitejs/plugin-react';
+        ╵                   ~~~~~~~~~~~~~~~~~~~~~~
+
+failed to load config from /home/runner/workspace/client/vite.config.js
+error when starting dev server:
+Error: Build failed with 2 errors:
+../node_modules/esbuild/lib/main.js:1217:27: ERROR: [plugin: externalize-deps] Failed to resolve entry for package "@vitejs/plugin-react". The package may have incorrect main/module/exports specified in its package.json.
+../node_modules/esbuild/lib/main.js:1217:27: ERROR: [plugin: externalize-deps] Failed to resolve entry for package "vite". The package may have incorrect main/module/exports specified in its package.json.
+    at failureErrorWithLog (/home/runner/workspace/node_modules/esbuild/lib/main.js:1467:15)
+    at /home/runner/workspace/node_modules/esbuild/lib/main.js:926:25
+    at runOnEndCallbacks (/home/runner/workspace/node_modules/esbuild/lib/main.js:1307:45)
+    at buildResponseToResult (/home/runner/workspace/node_modules/esbuild/lib/main.js:924:7)
+    at /home/runner/workspace/node_modules/esbuild/lib/main.js:951:16
+    at responseCallbacks.<computed> (/home/runner/workspace/node_modules/esbuild/lib/main.js:603:9)
+    at handleIncomingPacket (/home/runner/workspace/node_modules/esbuild/lib/main.js:658:12)
+    at Socket.readFromStdout (/home/runner/workspace/node_modules/esbuild/lib/main.js:581:7)
+    at Socket.emit (node:events:524:28)
+    at addChunk (node:internal/streams/readable:561:12)

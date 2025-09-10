@@ -1,0 +1,102 @@
+{
+    "name": "new template creation",
+    "description": "Multi-touch welcome sequence for new leads",
+    "objective": "Lead Nurturing",
+    "channels": [
+        "email"
+    ],
+    "targetAudience": [
+        {
+            "id": 72,
+            "company": "nagendran",
+            "contact": "Person",
+            "title": "Decision Maker",
+            "email": "nagendran.g@infinitisoftware.net",
+            "phone": "9845984598",
+            "website": "https://wwwwww. nagendran.com",
+            "industry": "finance",
+            "employees": "medium",
+            "revenue": "$0K",
+            "location": "chennai",
+            "status": "qualified",
+            "score": 99,
+            "source": "corporate_search",
+            "lastContact": "25-08-2025",
+            "nextAction": "Follow up",
+            "notes": "Moved from corporate search. AI Score: 99. Established company with consistent business patterns. Good candidate for long-term contracts.. Specialties: web-application, Android-app, crmtool. Travel Frequency: Bi-weekly. Preferred Class: Business/First.",
+            "leadNotes": [],
+            "engagement": "High",
+            "travelBudget": "$0K",
+            "decisionMaker": false,
+            "urgency": "high",
+            "aiSuggestion": "AI Score: 99. High priority lead - contact immediately",
+            "tags": [
+                "finance",
+                "qualified"
+            ],
+            "contractReady": true,
+            "lastActivity": "08-09-2025",
+            "followUpDate": "10-09-2025",
+            "assignedAgent": null,
+            "campaignCount": 6,
+            "history_entries": [],
+            "has_opportunity": true
+        }
+    ],
+    "target_leads": [
+        72
+    ],
+    "content": {
+        "email": {
+            "subject": "Welcome to the future of corporate travel - {{company_name}}",
+            "body": "<h2>Welcome to the future of corporate travel - {{company_name}}SOAR-AI</h2><p>Corporate Travel Solutions</p><p>Hi {{contact_name}}, Welcome to SOAR-AI! We're excited to help {{company_name}} transform your corporate travel experience. Based on your {{industry}} background and {{employees}} team size, we've identified several opportunities to optimize your travel operations: ✈️ Reduce travel costs by up to 35% 📊 Streamline booking and approval processes 🌍 Access our global partner network 🤖 AI-powered travel recommendations Ready to see how we can help? Let's schedule a 15-minute discovery call.</p><p><a href=\"https://soarai.infinitisoftware.net/\" rel=\"noopener noreferrer\" target=\"_blank\"> Schedule Discovery Call </a></p><p>If the button doesn't work, copy and paste the following URL into your browser:</p><p><a href=\"https://soarai.infinitisoftware.net/\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"color: rgb(0, 123, 255);\">https://soarai.infinitisoftware.net/</a></p><p>SOAR-AI • Transforming Corporate Travel</p><p><a href=\"#\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"color: rgb(139, 148, 166);\">Unsubscribe</a> | <a href=\"#\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"color: rgb(139, 148, 166);\">Privacy Policy</a></p><p>© 2025 SOAR-AI. All rights reserved.</p>",
+            "cta": "Schedule Discovery Call",
+            "cta_link": "https://soarai.infinitisoftware.net/"
+        },
+        "whatsapp": {
+            "message": "",
+            "cta": ""
+        },
+        "linkedin": {
+            "type": "message",
+            "content": "",
+            "cta": ""
+        }
+    },
+    "settings": {
+        "sendTime": "immediate",
+        "scheduleDate": "",
+        "scheduleTime": "09:00",
+        "followUp": false,
+        "followUpDays": 3,
+        "trackingEnabled": true
+    },
+    "selectedTemplate": {
+        "id": "welcome-series",
+        "name": "Welcome Series",
+        "description": "Multi-touch welcome sequence for new leads",
+        "channel_type": "email",
+        "target_industry": "All",
+        "subject_line": "Welcome to the future of corporate travel - {{company_name}}",
+        "content": "Hi {{contact_name}},\n\nWelcome to SOAR-AI! We're excited to help {{company_name}} transform your corporate travel experience.\n\nBased on your {{industry}} background and {{employees}} team size, we've identified several opportunities to optimize your travel operations:\n\n✈️ Reduce travel costs by up to 35%\n📊 Streamline booking and approval processes  \n🌍 Access our global partner network\n🤖 AI-powered travel recommendations\n\nReady to see how we can help? Let's schedule a 15-minute discovery call.",
+        "cta": "Schedule Discovery Call",
+        "linkedin_type": null,
+        "estimated_open_rate": 45,
+        "estimated_click_rate": 12,
+        "is_custom": false,
+        "created_by": "System",
+        "created_at": "2024-01-01-01T00:00:00Z",
+        "updated_at": "2024-01-01T00:00:00Z"
+    },
+    "templateId": "welcome-series",
+    "templateName": "Welcome Series",
+    "subjectLine": "Welcome to the future of corporate travel - {{company_name}}",
+    "messageContent": "<h2>Welcome to the future of corporate travel - {{company_name}}SOAR-AI</h2><p>Corporate Travel Solutions</p><p>Hi {{contact_name}}, Welcome to SOAR-AI! We're excited to help {{company_name}} transform your corporate travel experience. Based on your {{industry}} background and {{employees}} team size, we've identified several opportunities to optimize your travel operations: ✈️ Reduce travel costs by up to 35% 📊 Streamline booking and approval processes 🌍 Access our global partner network 🤖 AI-powered travel recommendations Ready to see how we can help? Let's schedule a 15-minute discovery call.</p><p><a href=\"https://soarai.infinitisoftware.net/\" rel=\"noopener noreferrer\" target=\"_blank\"> Schedule Discovery Call </a></p><p>If the button doesn't work, copy and paste the following URL into your browser:</p><p><a href=\"https://soarai.infinitisoftware.net/\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"color: rgb(0, 123, 255);\">https://soarai.infinitisoftware.net/</a></p><p>SOAR-AI • Transforming Corporate Travel</p><p><a href=\"#\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"color: rgb(139, 148, 166);\">Unsubscribe</a> | <a href=\"#\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"color: rgb(139, 148, 166);\">Privacy Policy</a></p><p>© 2025 SOAR-AI. All rights reserved.</p>",
+    "cta": "Schedule Discovery Call",
+    "cta_link": "https://soarai.infinitisoftware.net/",
+    "campaign_type": "Lead Nurturing",
+    "template_type": "email",
+    "is_custom_template": false,
+    "expected_open_rate": 45,
+    "expected_click_rate": 12
+}

@@ -1,0 +1,27 @@
+LeadsList.tsx:3393 Uncaught ReferenceError: showInitiateCallModal is not defined
+    at LeadsList (LeadsList.tsx:3393:21)
+
+LeadsList.tsx:3393 Uncaught ReferenceError: showInitiateCallModal is not defined
+    at LeadsList (LeadsList.tsx:3393:21)
+chunk-KDCVS43I.js?v=69a2b389:14080 The above error occurred in the <LeadsList> component:
+
+    at LeadsList (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/LeadsList.tsx:445:29)
+    at div
+    at main
+    at main
+    at SidebarInset (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/sidebar.tsx:400:25)
+    at div
+    at div
+    at Provider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-3LEY3UYV.js?v=69a2b389:38:15)
+    at TooltipProvider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=69a2b389:65:5)
+    at TooltipProvider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/tooltip.tsx:21:3)
+    at SidebarProvider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/sidebar.tsx:59:3)
+    at Provider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-3LEY3UYV.js?v=69a2b389:38:15)
+    at TooltipProvider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=69a2b389:65:5)
+    at TooltipProvider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/tooltip.tsx:21:3)
+    at App (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/App.tsx:144:61)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+chunk-KDCVS43I.js?v=69a2b389:9176 Uncaught ReferenceError: showInitiateCallModal is not defined
+    at LeadsList (LeadsList.tsx:3393:21)

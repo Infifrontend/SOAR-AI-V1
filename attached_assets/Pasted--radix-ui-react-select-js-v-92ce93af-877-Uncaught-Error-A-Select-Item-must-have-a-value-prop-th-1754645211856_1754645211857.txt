@@ -1,0 +1,50 @@
+@radix-ui_react-select.js?v=92ce93af:877 Uncaught Error: A <Select.Item /> must have a value prop that is not an empty string. This is because the Select value can be set to an empty string to clear the selection and show the placeholder.
+    at @radix-ui_react-sele…s?v=92ce93af:877:13
+    at renderWithHooks (chunk-KDCVS43I.js?v=92ce93af:11596:26)
+    at updateForwardRef (chunk-KDCVS43I.js?v=92ce93af:14373:28)
+    at beginWork (chunk-KDCVS43I.js?v=92ce93af:15994:22)
+    at HTMLUnknownElement.callCallback2 (chunk-KDCVS43I.js?v=92ce93af:3680:22)
+    at Object.invokeGuardedCallbackDev (chunk-KDCVS43I.js?v=92ce93af:3705:24)
+    at invokeGuardedCallback (chunk-KDCVS43I.js?v=92ce93af:3739:39)
+    at beginWork$1 (chunk-KDCVS43I.js?v=92ce93af:19818:15)
+    at performUnitOfWork (chunk-KDCVS43I.js?v=92ce93af:19251:20)
+    at workLoopSync (chunk-KDCVS43I.js?v=92ce93af:19190:13)
+
+4
+@radix-ui_react-select.js?v=92ce93af:877 Uncaught Error: A <Select.Item /> must have a value prop that is not an empty string. This is because the Select value can be set to an empty string to clear the selection and show the placeholder.
+    at @radix-ui_react-sele…s?v=92ce93af:877:13
+    at renderWithHooks (chunk-KDCVS43I.js?v=92ce93af:11596:26)
+    at updateForwardRef (chunk-KDCVS43I.js?v=92ce93af:14373:28)
+    at beginWork (chunk-KDCVS43I.js?v=92ce93af:15994:22)
+    at beginWork$1 (chunk-KDCVS43I.js?v=92ce93af:19806:22)
+    at performUnitOfWork (chunk-KDCVS43I.js?v=92ce93af:19251:20)
+    at workLoopSync (chunk-KDCVS43I.js?v=92ce93af:19190:13)
+    at renderRootSync (chunk-KDCVS43I.js?v=92ce93af:19169:15)
+    at performSyncWorkOnRoot (chunk-KDCVS43I.js?v=92ce93af:18927:28)
+    at flushSyncCallbacks (chunk-KDCVS43I.js?v=92ce93af:9166:30)
+AllLeads.tsx:147 Uncaught TypeError: leads.filter is not a function
+    at AllLeads (AllLeads.tsx:147:31)
+AllLeads.tsx:147 Uncaught TypeError: leads.filter is not a function
+    at AllLeads (AllLeads.tsx:147:31)
+chunk-KDCVS43I.js?v=92ce93af:14080 The above error occurred in the <AllLeads> component:
+
+    at AllLeads (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5000/components/AllLeads.tsx:81:28)
+    at div
+    at main
+    at main
+    at SidebarInset (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5000/components/ui/sidebar.tsx:400:25)
+    at div
+    at div
+    at Provider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5000/node_modules/.vite/deps/chunk-3LEY3UYV.js?v=92ce93af:38:15)
+    at TooltipProvider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5000/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=92ce93af:65:5)
+    at TooltipProvider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5000/components/ui/tooltip.tsx:21:3)
+    at SidebarProvider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5000/components/ui/sidebar.tsx:59:3)
+    at Provider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5000/node_modules/.vite/deps/chunk-3LEY3UYV.js?v=92ce93af:38:15)
+    at TooltipProvider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5000/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=92ce93af:65:5)
+    at TooltipProvider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5000/components/ui/tooltip.tsx:21:3)
+    at App (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5000/App.tsx?t=1754645129699:97:45)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+chunk-KDCVS43I.js?v=92ce93af:19466 Uncaught TypeError: leads.filter is not a function
+    at AllLeads (AllLeads.tsx:147:31)

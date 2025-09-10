@@ -1,0 +1,115 @@
+Uncaught TypeError: amount.toFixed is not a function
+    at formatCurrency (Opportunities.tsx:594:25)
+    at Opportunities (Opportunities.tsx:803:66)
+    at renderWithHooks (chunk-KDCVS43I.js?v=e583200d:11596:26)
+    at updateFunctionComponent (chunk-KDCVS43I.js?v=e583200d:14630:28)
+    at beginWork (chunk-KDCVS43I.js?v=e583200d:15972:22)
+    at HTMLUnknownElement.callCallback2 (chunk-KDCVS43I.js?v=e583200d:3680:22)
+    at Object.invokeGuardedCallbackDev (chunk-KDCVS43I.js?v=e583200d:3705:24)
+    at invokeGuardedCallback (chunk-KDCVS43I.js?v=e583200d:3739:39)
+    at beginWork$1 (chunk-KDCVS43I.js?v=e583200d:19818:15)
+    at performUnitOfWork (chunk-KDCVS43I.js?v=e583200d:19251:20)
+formatCurrency @ Opportunities.tsx:594
+Opportunities @ Opportunities.tsx:803
+renderWithHooks @ chunk-KDCVS43I.js?v=e583200d:11596
+updateFunctionComponent @ chunk-KDCVS43I.js?v=e583200d:14630
+beginWork @ chunk-KDCVS43I.js?v=e583200d:15972
+callCallback2 @ chunk-KDCVS43I.js?v=e583200d:3680
+invokeGuardedCallbackDev @ chunk-KDCVS43I.js?v=e583200d:3705
+invokeGuardedCallback @ chunk-KDCVS43I.js?v=e583200d:3739
+beginWork$1 @ chunk-KDCVS43I.js?v=e583200d:19818
+performUnitOfWork @ chunk-KDCVS43I.js?v=e583200d:19251
+workLoopSync @ chunk-KDCVS43I.js?v=e583200d:19190
+renderRootSync @ chunk-KDCVS43I.js?v=e583200d:19169
+performConcurrentWorkOnRoot @ chunk-KDCVS43I.js?v=e583200d:18728
+workLoop @ chunk-KDCVS43I.js?v=e583200d:197
+flushWork @ chunk-KDCVS43I.js?v=e583200d:176
+performWorkUntilDeadline @ chunk-KDCVS43I.js?v=e583200d:384Understand this error
+Opportunities.tsx:594 Uncaught TypeError: amount.toFixed is not a function
+    at formatCurrency (Opportunities.tsx:594:25)
+    at Opportunities (Opportunities.tsx:803:66)
+    at renderWithHooks (chunk-KDCVS43I.js?v=e583200d:11596:26)
+    at updateFunctionComponent (chunk-KDCVS43I.js?v=e583200d:14630:28)
+    at beginWork (chunk-KDCVS43I.js?v=e583200d:15972:22)
+    at HTMLUnknownElement.callCallback2 (chunk-KDCVS43I.js?v=e583200d:3680:22)
+    at Object.invokeGuardedCallbackDev (chunk-KDCVS43I.js?v=e583200d:3705:24)
+    at invokeGuardedCallback (chunk-KDCVS43I.js?v=e583200d:3739:39)
+    at beginWork$1 (chunk-KDCVS43I.js?v=e583200d:19818:15)
+    at performUnitOfWork (chunk-KDCVS43I.js?v=e583200d:19251:20)
+formatCurrency @ Opportunities.tsx:594
+Opportunities @ Opportunities.tsx:803
+renderWithHooks @ chunk-KDCVS43I.js?v=e583200d:11596
+updateFunctionComponent @ chunk-KDCVS43I.js?v=e583200d:14630
+beginWork @ chunk-KDCVS43I.js?v=e583200d:15972
+callCallback2 @ chunk-KDCVS43I.js?v=e583200d:3680
+invokeGuardedCallbackDev @ chunk-KDCVS43I.js?v=e583200d:3705
+invokeGuardedCallback @ chunk-KDCVS43I.js?v=e583200d:3739
+beginWork$1 @ chunk-KDCVS43I.js?v=e583200d:19818
+performUnitOfWork @ chunk-KDCVS43I.js?v=e583200d:19251
+workLoopSync @ chunk-KDCVS43I.js?v=e583200d:19190
+renderRootSync @ chunk-KDCVS43I.js?v=e583200d:19169
+recoverFromConcurrentError @ chunk-KDCVS43I.js?v=e583200d:18786
+performConcurrentWorkOnRoot @ chunk-KDCVS43I.js?v=e583200d:18734
+workLoop @ chunk-KDCVS43I.js?v=e583200d:197
+flushWork @ chunk-KDCVS43I.js?v=e583200d:176
+performWorkUntilDeadline @ chunk-KDCVS43I.js?v=e583200d:384Understand this error
+chunk-KDCVS43I.js?v=e583200d:14080 The above error occurred in the <Opportunities> component:
+
+    at Opportunities (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/Opportunities.tsx?t=1755177891654:724:33)
+    at div
+    at main
+    at main
+    at SidebarInset (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/sidebar.tsx:400:25)
+    at div
+    at div
+    at Provider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-3LEY3UYV.js?v=e583200d:38:15)
+    at TooltipProvider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=e583200d:65:5)
+    at TooltipProvider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/tooltip.tsx:21:3)
+    at SidebarProvider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/sidebar.tsx:59:3)
+    at Provider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-3LEY3UYV.js?v=e583200d:38:15)
+    at TooltipProvider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=e583200d:65:5)
+    at TooltipProvider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/tooltip.tsx:21:3)
+    at App (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/App.tsx:96:45)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-KDCVS43I.js?v=e583200d:14080
+update.callback @ chunk-KDCVS43I.js?v=e583200d:14100
+callCallback @ chunk-KDCVS43I.js?v=e583200d:11296
+commitUpdateQueue @ chunk-KDCVS43I.js?v=e583200d:11313
+commitLayoutEffectOnFiber @ chunk-KDCVS43I.js?v=e583200d:17141
+commitLayoutMountEffects_complete @ chunk-KDCVS43I.js?v=e583200d:18030
+commitLayoutEffects_begin @ chunk-KDCVS43I.js?v=e583200d:18019
+commitLayoutEffects @ chunk-KDCVS43I.js?v=e583200d:17970
+commitRootImpl @ chunk-KDCVS43I.js?v=e583200d:19406
+commitRoot @ chunk-KDCVS43I.js?v=e583200d:19330
+finishConcurrentRender @ chunk-KDCVS43I.js?v=e583200d:18813
+performConcurrentWorkOnRoot @ chunk-KDCVS43I.js?v=e583200d:18768
+workLoop @ chunk-KDCVS43I.js?v=e583200d:197
+flushWork @ chunk-KDCVS43I.js?v=e583200d:176
+performWorkUntilDeadline @ chunk-KDCVS43I.js?v=e583200d:384Understand this error
+chunk-KDCVS43I.js?v=e583200d:19466 Uncaught TypeError: amount.toFixed is not a function
+    at formatCurrency (Opportunities.tsx:594:25)
+    at Opportunities (Opportunities.tsx:803:66)
+    at renderWithHooks (chunk-KDCVS43I.js?v=e583200d:11596:26)
+    at updateFunctionComponent (chunk-KDCVS43I.js?v=e583200d:14630:28)
+    at beginWork (chunk-KDCVS43I.js?v=e583200d:15972:22)
+    at beginWork$1 (chunk-KDCVS43I.js?v=e583200d:19806:22)
+    at performUnitOfWork (chunk-KDCVS43I.js?v=e583200d:19251:20)
+    at workLoopSync (chunk-KDCVS43I.js?v=e583200d:19190:13)
+    at renderRootSync (chunk-KDCVS43I.js?v=e583200d:19169:15)
+    at recoverFromConcurrentError (chunk-KDCVS43I.js?v=e583200d:18786:28)
+formatCurrency @ Opportunities.tsx:594
+Opportunities @ Opportunities.tsx:803
+renderWithHooks @ chunk-KDCVS43I.js?v=e583200d:11596
+updateFunctionComponent @ chunk-KDCVS43I.js?v=e583200d:14630
+beginWork @ chunk-KDCVS43I.js?v=e583200d:15972
+beginWork$1 @ chunk-KDCVS43I.js?v=e583200d:19806
+performUnitOfWork @ chunk-KDCVS43I.js?v=e583200d:19251
+workLoopSync @ chunk-KDCVS43I.js?v=e583200d:19190
+renderRootSync @ chunk-KDCVS43I.js?v=e583200d:19169
+recoverFromConcurrentError @ chunk-KDCVS43I.js?v=e583200d:18786
+performConcurrentWorkOnRoot @ chunk-KDCVS43I.js?v=e583200d:18734
+workLoop @ chunk-KDCVS43I.js?v=e583200d:197
+flushWork @ chunk-KDCVS43I.js?v=e583200d:176
+performWorkUntilDeadline @ chunk-KDCVS43I.js?v=e583200d:384Understand this error

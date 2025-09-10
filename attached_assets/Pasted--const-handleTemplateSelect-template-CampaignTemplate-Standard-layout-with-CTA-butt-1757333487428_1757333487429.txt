@@ -1,0 +1,73 @@
+ const handleTemplateSelect = (template: CampaignTemplate) => {
+    // Standard layout with CTA button
+    const standardLayout = (content: string, cta: string, ctaLink: string) => `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>${template.subject_line || `Partnership Opportunity - ${template.name}`}</title>
+      </head>
+      <body style="margin:0; padding:0; font-family: Arial, sans-serif; background-color:#f9f9f9;">
+        <!-- Header -->
+        <table width="100%" bgcolor="#007bff" cellpadding="0" cellspacing="0" style="padding:20px; text-align:center; color:#fff;">
+          <tr>
+            <td>
+              <h2 style="margin:0;">Your Company</h2>
+            </td>
+          </tr>
+        </table>
+
+        <!-- Body -->
+        <table width="100%" cellpadding="20" cellspacing="0" style="background-color:#ffffff; margin:20px auto; max-width:600px; border-radius:8px;">
+          <tr>
+            <td style="font-size:16px; line-height:1.5; color:#333;">
+              ${content} <!-- ✅ Dynamic template content -->
+            </td>
+          </tr>
+          ${
+            cta && ctaLink
+              ? `
+          <tr>
+            <td align="center" style="padding:20px 0;">
+              <a href="${ctaLink}" target="_blank"
+                style="background-color:#007bff; color:#fff; padding:12px 24px; 
+                       text-decoration:none; font-size:16px; font-weight:bold; 
+                       border-radius:5px; display:inline-block;">
+                ${cta}
+              </a>
+            </td>
+          </tr>` 
+              : ""
+          }
+        </table>
+
+        <!-- Footer -->
+        <table width="100%" bgcolor="#f1f1f1" cellpadding="10" cellspacing="0" style="text-align:center; color:#666; font-size:12px;">
+          <tr>
+            <td>
+              © ${new Date().getFullYear()} Your Company. All rights reserved.
+            </td>
+          </tr>
+        </table>
+      </body>
+      </html>
+    `;
+
+    setCampaignData(prev => ({
+      ...prev,
+      selectedTemplate: template,
+      channels: template.channel_type === 'mixed'
+        ? ['email', 'whatsapp', 'linkedin']
+        : [template.channel_type],
+      content: {
+        ...prev.content,
+        email: {
+          subject: template.subject_line || `Partnership Opportunity - ${template.name}`,
+          body: standardLayout(template.content, template.cta, template.cta_link), // ✅ content + CTA
+          cta: template.cta,
+          cta_link: template.cta_link || ''
+        }
+      }
+    }));
+  };

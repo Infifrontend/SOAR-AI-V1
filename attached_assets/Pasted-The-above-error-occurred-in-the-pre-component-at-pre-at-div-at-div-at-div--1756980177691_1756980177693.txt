@@ -1,0 +1,94 @@
+The above error occurred in the <pre> component:
+
+    at pre
+    at div
+    at div
+    at div
+    at div
+    at CardContent (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/card.tsx:122:24)
+    at div
+    at Card (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/card.tsx:18:17)
+    at div
+    at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-DATTJLAU.js?v=a294274b:43:13
+    at Presence (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-4DVTPE7D.js?v=a294274b:24:11)
+    at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/@radix-ui_react-tabs.js?v=a294274b:178:13
+    at TabsContent (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/tabs.tsx:106:3)
+    at div
+    at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-DATTJLAU.js?v=a294274b:43:13
+    at Provider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-3LEY3UYV.js?v=a294274b:38:15)
+    at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/@radix-ui_react-tabs.js?v=a294274b:55:7
+    at Tabs (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/tabs.tsx:21:3)
+    at div
+    at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-DATTJLAU.js?v=a294274b:43:13
+    at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-5HDY4IXO.js?v=a294274b:63:7
+    at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-JVRY2EC6.js?v=a294274b:79:13
+    at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-JVRY2EC6.js?v=a294274b:56:13
+    at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-DATTJLAU.js?v=a294274b:43:13
+    at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-RHEVAD3Q.js?v=a294274b:29:5
+    at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=a294274b:240:13
+    at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=a294274b:163:58
+    at Presence (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-4DVTPE7D.js?v=a294274b:24:11)
+    at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=a294274b:154:64
+    at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-JVRY2EC6.js?v=a294274b:79:13
+    at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-JVRY2EC6.js?v=a294274b:56:13
+    at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-DATTJLAU.js?v=a294274b:43:13
+    at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-5HDY4IXO.js?v=a294274b:260:22
+    at Presence (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-4DVTPE7D.js?v=a294274b:24:11)
+    at Provider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-3LEY3UYV.js?v=a294274b:38:15)
+    at DialogPortal (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=a294274b:116:11)
+    at DialogPortal (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/dialog.tsx:43:6)
+    at _c7 (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/dialog.tsx:88:12)
+    at Provider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-3LEY3UYV.js?v=a294274b:38:15)
+    at Dialog (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=a294274b:56:5)
+    at Dialog (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/dialog.tsx:23:6)
+    at div
+    at EmailCampaigns…
+
+at pre
+at div
+at div
+at div
+at div
+at CardContent (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/card.tsx:122:24)
+at div
+at Card (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/card.tsx:18:17)
+at div
+at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-DATTJLAU.js?v=a294274b:43:13
+at Presence (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-4DVTPE7D.js?v=a294274b:24:11)
+at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/@radix-ui_react-tabs.js?v=a294274b:178:13
+at TabsContent (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/tabs.tsx:106:3)
+at div
+at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-DATTJLAU.js?v=a294274b:43:13
+at Provider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-3LEY3UYV.js?v=a294274b:38:15)
+at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/@radix-ui_react-tabs.js?v=a294274b:55:7
+at Tabs (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/tabs.tsx:21:3)
+at div
+at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-DATTJLAU.js?v=a294274b:43:13
+at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-5HDY4IXO.js?v=a294274b:63:7
+at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-JVRY2EC6.js?v=a294274b:79:13
+at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-JVRY2EC6.js?v=a294274b:56:13
+at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-DATTJLAU.js?v=a294274b:43:13
+at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-RHEVAD3Q.js?v=a294274b:29:5
+at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=a294274b:240:13
+at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=a294274b:163:58
+at Presence (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-4DVTPE7D.js?v=a294274b:24:11)
+at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=a294274b:154:64
+at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-JVRY2EC6.js?v=a294274b:79:13
+at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-JVRY2EC6.js?v=a294274b:56:13
+at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-DATTJLAU.js?v=a294274b:43:13
+at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-5HDY4IXO.js?v=a294274b:260:22
+at Presence (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-4DVTPE7D.js?v=a294274b:24:11)
+at Provider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-3LEY3UYV.js?v=a294274b:38:15)
+at DialogPortal (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=a294274b:116:11)
+at DialogPortal (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/dialog.tsx:43:6)
+at _c7 (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/dialog.tsx:88:12)
+at Provider (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/chunk-3LEY3UYV.js?v=a294274b:38:15)
+at Dialog (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/node_modules/.vite/deps/@radix-ui_react-dialog.js?v=a294274b:56:5)
+at Dialog (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/components/ui/dialog.tsx:23:6)
+at div
+at EmailCampaigns…
+at t.value (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+Objects are not valid as a React child (found: object with keys {__html}). If you meant to render a collection of children, use an array instead.
