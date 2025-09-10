@@ -3116,13 +3116,13 @@ export function CorporateSearch({
                 Message
               </Label>
               <Textarea
-                value={contactForm.message}
+                value={EmailTemplateService.stripHtmlTags(contactForm.message)}
                 onChange={(e) =>
                   setContactForm({ ...contactForm, message: e.target.value })
                 }
-                placeholder="Enter your message..."
-                className="min-h-[200px] resize-none border-gray-300 focus:border-orange-500 focus:ring-orange-500"
-                rows={10}
+                placeholder="Enter your message here..."
+                rows={6}
+                className="resize-none border-gray-300 focus:border-orange-500 focus:ring-orange-500"
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">

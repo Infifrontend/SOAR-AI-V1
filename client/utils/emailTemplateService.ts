@@ -572,6 +572,20 @@ export class EmailTemplateService {
 //     `;
 //   }
 
+  static stripHtmlTags(html: string): string {
+    // Remove HTML tags and decode HTML entities
+    return html
+      .replace(/<[^>]*>/g, '') // Remove HTML tags
+      .replace(/&nbsp;/g, ' ') // Replace &nbsp; with space
+      .replace(/&amp;/g, '&') // Replace &amp; with &
+      .replace(/&lt;/g, '<') // Replace &lt; with <
+      .replace(/&gt;/g, '>') // Replace &gt; with >
+      .replace(/&quot;/g, '"') // Replace &quot; with "
+      .replace(/&#39;/g, "'") // Replace &#39; with '
+      .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+      .trim(); // Remove leading/trailing whitespace
+  }
+
   static validateTemplate(template: EmailTemplate): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
 
