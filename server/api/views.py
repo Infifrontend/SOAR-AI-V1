@@ -1925,7 +1925,7 @@ class LeadViewSet(viewsets.ModelViewSet):
 
             # Always use standard template layout design like test_email
             from django.utils.html import strip_tags
-            from django.core.mail import EmailMultiAlternatives
+            from django.core.mail import send_mail
             from django.conf import settings
             from .email_template_service import EmailTemplateService
 
@@ -1947,23 +1947,15 @@ class LeadViewSet(viewsets.ModelViewSet):
                     template_type="lead"
                 )
 
-            # Create multipart email with proper MIME types
-            email = EmailMultiAlternatives(
+            # Use simple send_mail with html_message parameter for proper HTML rendering
+            send_mail(
                 subject=subject,
-                body=plain_text_message,  # Plain text as primary body
+                message=plain_text_message,  # Plain text version
                 from_email=settings.DEFAULT_FROM_EMAIL,
-                to=[recipient_email],
-                bcc=[
-                    'nagendran.g@infinitisoftware.net',
-                    'muniraj@infinitisoftware.net'
-                ],
+                recipient_list=[recipient_email],
+                html_message=html_message,  # HTML version
+                fail_silently=False,
             )
-
-            # Attach HTML version as alternative
-            email.attach_alternative(html_message, "text/html")
-
-            # Send the email
-            email.send(fail_silently=False)
 
             return Response({
                 "success": True,
@@ -2011,7 +2003,7 @@ class LeadViewSet(viewsets.ModelViewSet):
                 )
 
             if method == 'Email':
-                from django.core.mail import EmailMultiAlternatives
+                from django.core.mail import send_mail
                 from django.conf import settings
                 from django.utils.html import strip_tags
                 from .email_template_service import EmailTemplateService
@@ -2033,22 +2025,15 @@ class LeadViewSet(viewsets.ModelViewSet):
                             template_type="corporate"
                         )
 
-                    # Create multipart email with proper MIME types
-                    email = EmailMultiAlternatives(
+                    # Use simple send_mail with html_message parameter for proper HTML rendering
+                    send_mail(
                         subject=subject,
-                        body=plain_text_message,  # Plain text as primary body
+                        message=plain_text_message,  # Plain text version
                         from_email=settings.DEFAULT_FROM_EMAIL,
-                        to=[recipient_email],
-                        bcc=[
-                            "nagendran.g@infinitisoftware.net",
-                            "muniraj@infinitisoftware.net",
-                        ],
+                        recipient_list=[recipient_email],
+                        html_message=html_content,  # HTML version
+                        fail_silently=False,
                     )
-
-                    # Attach HTML version as alternative
-                    email.attach_alternative(html_content, "text/html")
-
-                    email.send(fail_silently=False)
 
                     return Response(
                         {
@@ -2396,7 +2381,7 @@ class OpportunityViewSet(viewsets.ModelViewSet):
 
             # Send email via SMTP if delivery method is email
             if delivery_method == 'email':
-                from django.core.mail import EmailMultiAlternatives
+                from django.core.mail import send_mail
                 from django.conf import settings
                 from django.utils.html import strip_tags
 
@@ -2404,25 +2389,15 @@ class OpportunityViewSet(viewsets.ModelViewSet):
                     # Create plain text version
                     plain_text_content = strip_tags(email_content)
 
-                    email = EmailMultiAlternatives(
+                    # Use simple send_mail with html_message parameter for proper HTML rendering
+                    send_mail(
                         subject=subject,
-                        body=email_content,  # Use HTML as primary body
+                        message=plain_text_content,  # Plain text version
                         from_email=settings.DEFAULT_FROM_EMAIL,
-                        to=[recipient_email],
-                        bcc=[
-                            'nagendran.g@infinitisoftware.net',
-                            'muniraj@infinitisoftware.net'
-                        ],
+                        recipient_list=[recipient_email],
+                        html_message=email_content,  # HTML version
+                        fail_silently=False,
                     )
-
-                    # Set HTML as primary content type
-                    email.content_subtype = "html"
-
-                    # Add plain text as alternative
-                    email.attach_alternative(plain_text_content, "text/plain")
-
-                    # Send the email
-                    email.send(fail_silently=False)
 
                     # Create activity record for the proposal
                     OpportunityActivity.objects.create(

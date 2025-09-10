@@ -439,7 +439,6 @@ class CampaignTemplate(models.Model):
     class Meta:
         ordering = ['-created_at']
 
-
 class EmailCampaign(models.Model):
     CAMPAIGN_STATUS_CHOICES = [
         ('draft', 'Draft'),
@@ -506,7 +505,7 @@ class EmailCampaign(models.Model):
     def send_emails(self):
         """Send emails to target leads with detailed SMTP logging"""
         import logging
-        from django.core.mail import get_connection, EmailMessage
+        from django.core.mail import get_connection, EmailMessage, send_mail
         from django.template import Template, Context
         from django.conf import settings
         import smtplib
@@ -599,15 +598,12 @@ class EmailCampaign(models.Model):
                 rendered_content_with_tracking = self._add_email_tracking(rendered_content, tracking)
 
                 # Apply standard SOAR-AI template layout if content is not already HTML
-                from django.core.mail import EmailMultiAlternatives
-                from django.utils.html import strip_tags
-                
                 is_complete_html = rendered_content_with_tracking.strip().startswith('<!DOCTYPE') or rendered_content_with_tracking.strip().startswith('<html')
-                
+
                 if not is_complete_html:
                     # Wrap content in standard SOAR-AI template
                     contact_name = f"{lead.contact.first_name} {lead.contact.last_name}".strip() or 'Valued Customer'
-                    
+
                     html_content = f"""<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
@@ -662,21 +658,11 @@ class EmailCampaign(models.Model):
 </body>
 </html>"""
                     rendered_content_with_tracking = html_content
-                
+
                 # Create plain text version
                 plain_text_content = strip_tags(rendered_content_with_tracking)
-                
-                email_msg = EmailMultiAlternatives(
-                    subject=rendered_subject,
-                    body=plain_text_content,  # Plain text as primary body
-                    from_email=settings.DEFAULT_FROM_EMAIL or 'noreply@soarai.com',
-                    to=[email_address],
-                    bcc=['nagendran.g@infinitisoftware.net', 'muniraj@infinitisoftware.net']
-                )
-                
-                # Attach HTML as alternative
-                email_msg.attach_alternative(rendered_content_with_tracking, "text/html")
-                emails_to_send.append((email_msg, lead, tracking))
+
+                emails_to_send.append((rendered_subject, plain_text_content, rendered_content_with_tracking, email_address, lead, tracking))
 
                 smtp_logger.info(
                     f"Prepared email for {email_address} ({lead.company.name})"
@@ -691,67 +677,43 @@ class EmailCampaign(models.Model):
         # Send emails individually with detailed SMTP logging
         try:
             if emails_to_send:
-                # Get SMTP connection
-                connection = get_connection()
+                # Update email data to be sent for the new send_mail approach
+                # The emails_to_send list now contains tuples of (subject, plain_text, html_content, email_address, lead, tracking)
+                successful_sends = 0
+                failed_sends = 0
 
-                try:
-                    connection.open()
-                    smtp_logger.info("SMTP connection opened successfully")
+                # Send emails in batches
+                batch_size = 50
+                for i in range(0, len(emails_to_send), batch_size):
+                    batch = emails_to_send[i:i + batch_size]
 
-                    for email_msg, lead, tracking in emails_to_send:
+                    for subject, plain_text, html_content, email_address, lead, tracking in batch:
                         try:
-                            # Send individual email
-                            result = connection.send_messages([email_msg])
+                            # Use simple send_mail with html_message parameter for proper HTML rendering
+                            send_mail(
+                                subject=subject,
+                                message=plain_text,  # Plain text version
+                                from_email=settings.DEFAULT_FROM_EMAIL or 'noreply@soarai.com',
+                                recipient_list=[email_address],
+                                html_message=html_content,  # HTML version
+                                fail_silently=False,
+                            )
+                            successful_sends += 1
 
-                            if result == 1:
-                                sent_count += 1
-                                # Update tracking record
-                                tracking.email_sent = timezone.now()
-                                tracking.save()
+                            smtp_responses.append(f"✓ Email sent to {email_address}")
 
-                                smtp_logger.info(
-                                    f"✓ Email sent successfully to {lead.contact.email} ({lead.company.name})"
-                                )
-                                smtp_responses.append({
-                                    'email':
-                                    lead.contact.email,
-                                    'company':
-                                    lead.company.name,
-                                    'status':
-                                    'SUCCESS',
-                                    'message':
-                                    'Email sent successfully',
-                                    'tracking_id':
-                                    str(tracking.tracking_id)
-                                })
-                            else:
-                                failed_count += 1
-                                smtp_responses.append({
-                                    'email':
-                                    lead.contact.email,
-                                    'company':
-                                    lead.company.name,
-                                    'status':
-                                    'FAILED',
-                                    'message':
-                                    'Send failed without SMTP error'
-                                })
+                            # Update tracking
+                            tracking.save()
 
-                        except Exception as e:
-                            failed_count += 1
-                            smtp_responses.append({
-                                'email': lead.contact.email,
-                                'company': lead.company.name,
-                                'status': 'ERROR',
-                                'message': str(e)
-                            })
-
-                finally:
-                    connection.close()
-                    smtp_logger.info("SMTP connection closed")
+                        except Exception as send_error:
+                            failed_sends += 1
+                            error_message = f"✗ Failed to send to {email_address}: {str(send_error)}"
+                            smtp_responses.append(error_message)
+                            print(f"Send error: {error_message}")
+                            continue
 
                 # Update campaign stats
-                self.emails_sent = sent_count
+                self.emails_sent = successful_sends
                 self.target_count = len(emails_to_send)
                 self.status = 'active'
                 self.sent_date = timezone.now()
@@ -759,21 +721,21 @@ class EmailCampaign(models.Model):
 
                 # Log final summary
                 smtp_logger.info(
-                    f"Campaign completed: {sent_count} sent, {failed_count} failed"
+                    f"Campaign completed: {successful_sends} sent, {failed_sends} failed"
                 )
 
                 return {
                     'success': True,
                     'message':
-                    f'Campaign completed: {sent_count} sent, {failed_count} failed',
-                    'emails_sent': sent_count,
-                    'failed_count': failed_count,
+                    f'Campaign completed: {successful_sends} sent, {failed_sends} failed',
+                    'emails_sent': successful_sends,
+                    'failed_count': failed_sends,
                     'smtp_responses': smtp_responses,
                     'smtp_details': {
                         'total_processed':
                         len(emails_to_send),
                         'success_rate':
-                        f'{(sent_count/len(emails_to_send)*100):.1f}%'
+                        f'{(successful_sends/len(emails_to_send)*100):.1f}%'
                         if emails_to_send else '0%'
                     },
                     'log_file': log_file
@@ -821,9 +783,9 @@ class EmailCampaign(models.Model):
             href = match.group(1)
 
             # Skip if it's already a tracking link, mailto, tel, or anchor
-            if ('/api/track/click/' in href or 
-                href.startswith('mailto:') or 
-                href.startswith('tel:') or 
+            if ('/api/track/click/' in href or
+                href.startswith('mailto:') or
+                href.startswith('tel:') or
                 href.startswith('#')):
                 return full_match
 
@@ -866,7 +828,6 @@ class EmailCampaign(models.Model):
             'click_to_open_rate': round((unique_clicks / unique_opens) * 100, 2) if unique_opens > 0 else 0
         }
 
-
 class EmailTracking(models.Model):
     """Track individual email opens and clicks"""
     campaign = models.ForeignKey(EmailCampaign,
@@ -889,7 +850,6 @@ class EmailTracking(models.Model):
 
     class Meta:
         unique_together = ['campaign', 'lead']
-
 
 class TravelOffer(models.Model):
     OFFER_STATUS_CHOICES = [
@@ -936,7 +896,6 @@ class TravelOffer(models.Model):
 
     def __str__(self):
         return self.title
-
 
 class SupportTicket(models.Model):
     PRIORITY_CHOICES = [
@@ -995,7 +954,6 @@ class SupportTicket(models.Model):
     def __str__(self):
         return f"{self.ticket_number} - {self.subject}"
 
-
 class RevenueForecast(models.Model):
     PERIOD_TYPES = [
         ('monthly', 'Monthly'),
@@ -1020,7 +978,6 @@ class RevenueForecast(models.Model):
 
     def __str__(self):
         return f"Revenue Forecast {self.period}"
-
 
 class LeadNote(models.Model):
     URGENCY_CHOICES = [
@@ -1050,7 +1007,6 @@ class LeadNote(models.Model):
 
     class Meta:
         ordering = ['-created_at']
-
 
 class LeadHistory(models.Model):
     HISTORY_TYPES = [
@@ -1113,7 +1069,6 @@ class LeadHistory(models.Model):
     class Meta:
         ordering = ['timestamp']
 
-
 class ActivityLog(models.Model):
     ACTION_TYPES = [
         ('create', 'Created'),
@@ -1141,7 +1096,6 @@ class ActivityLog(models.Model):
     class Meta:
         ordering = ['-timestamp']
 
-
 class AIConversation(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     session_id = models.UUIDField(default=uuid.uuid4, unique=True)
@@ -1157,7 +1111,6 @@ class AIConversation(models.Model):
 
     class Meta:
         ordering = ['-created_at']
-
 
 class ProposalDraft(models.Model):
     opportunity = models.OneToOneField(Opportunity,
