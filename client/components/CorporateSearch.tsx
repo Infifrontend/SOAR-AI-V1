@@ -465,7 +465,7 @@ export function CorporateSearch({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
   const [uploadSuccess, setUploadSuccess] = useState("");
-  
+
   // File input ref for clearing after upload
   const fileInputRef = useRef(null);
 
@@ -1087,7 +1087,7 @@ export function CorporateSearch({
     setIsSendingMessage(true); // Start spinner
 
     try {
-      // Generate professional HTML email using the new branded template
+      // Generate professional HTML email using the template service
       const htmlMessage = EmailTemplateService.renderCorporateContactTemplate(
         contactForm.corporateData.name,
         contactForm.corporateData.name,
@@ -2203,7 +2203,7 @@ export function CorporateSearch({
       </Dialog>
 
       {/* Add Company Dialog */}
-      <Dialog 
+      <Dialog
         open={showAddCompanyDialog}
         onOpenChange={setShowAddCompanyDialog}
       >

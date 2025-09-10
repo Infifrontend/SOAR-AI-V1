@@ -718,6 +718,18 @@ export class EmailTemplateService {
     ctaText?: string,
     ctaLink?: string
   ): string {
+    // Clean and properly format the content
+    const cleanContent = content
+      .replace(/\n/g, '</p><p class="content-text">')
+      .replace(/<p class="content-text"><\/p>/g, '') // Remove empty paragraphs
+      .replace(/<p class="content-text"><p>/g, '<p>') // Fix nested paragraphs
+      .replace(/<\/p><\/p>/g, '</p>') // Fix double closing tags
+      .replace(/<p class="content-text"><ul>/g, '<ul>') // Fix list formatting
+      .replace(/<\/ul><\/p>/g, '</ul>') // Fix list closing
+      .replace(/<p class="content-text"><li>/g, '<li>') // Fix list items
+      .replace(/<\/li><\/p>/g, '</li>') // Fix list item closing
+      .trim();
+
     return `
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
@@ -791,6 +803,8 @@ export class EmailTemplateService {
       left:0; 
       top:8px;
     }
+    ul { margin:16px 0; padding-left:20px; }
+    ul li { margin:8px 0; color:#4a5568; line-height:1.5; }
     
     /* CTA Button */
     .cta-container { text-align:center; margin:35px 0; }
@@ -895,7 +909,7 @@ export class EmailTemplateService {
           <h2 class="greeting">Dear ${recipientName} Team,</h2>
           
           <div class="content-text">
-            ${content.replace(/\n/g, '</p><p class="content-text">')}
+            ${cleanContent.startsWith('<p>') ? cleanContent : `<p class="content-text">${cleanContent}</p>`}
           </div>
 
           <div class="highlight-box">
