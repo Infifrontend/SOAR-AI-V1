@@ -1053,16 +1053,35 @@ export function CorporateSearch({
     setContactForm({
       method: "Email",
       subject: `Partnership Opportunity - ${corporate.name}`,
-      message: `Hi ,
+      message: `SOAR-AI Corporate Travel Solutions
+========================================
 
-        I hope this message finds you well. I wanted to follow up regarding our corporate travel solutions that could benefit ${corporate.name}.
+Dear ${corporate.name} Team,
 
-        Based on your organization's profile, I believe we can help optimize your travel operations and reduce costs.
+I hope this message finds you well. I wanted to follow up regarding our corporate travel solutions that could benefit ${corporate.name}.
 
-        Would you be available for a brief call this week to discuss how we can support your travel needs?
+Based on your organization's profile, I believe we can help optimize your travel operations and reduce costs. Our AI-powered platform specializes in:
 
-        Best regards,
-        SOAR-AI Team`,
+• Streamlined booking and approval processes
+• Cost reduction strategies for corporate travel
+• Comprehensive travel policy management
+• Real-time expense tracking and reporting
+• 24/7 traveler support services
+
+Given your company's ${corporate.industry} background and ${corporate.employees?.toLocaleString()} team members, we see significant opportunities for partnership.
+
+Would you be available for a brief call this week to discuss how we can support your travel needs?
+
+Best regards,
+
+The SOAR-AI Team
+Corporate Travel Solutions
+Email: corporate@soar-ai.com
+Phone: +1 (555) 123-4567
+Website: www.soar-ai.com
+
+This email was sent regarding partnership opportunities for ${corporate.name}.
+If you would prefer not to receive future communications, please reply with "UNSUBSCRIBE".`,
       followUpDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
         .toISOString()
         .split("T")[0], // 7 days from now
@@ -1082,26 +1101,21 @@ export function CorporateSearch({
     setIsSendingMessage(true); // Start spinner
 
     try {
-      // Format the message content with standard email template
-      const formattedMessage = EmailTemplateService.renderTemplateWithBaseLayout(
-        `<p>${contactForm.message.replace(/\n/g, '</p><p>')}</p>`,
-        contactForm.subject,
-        undefined, // No CTA button
-        undefined, // No CTA link
-        'SOAR-AI'
-      );
+      // Send plain text message instead of HTML to avoid raw HTML in emails
+      const plainTextMessage = contactForm.message;
 
       // Use the leadApi to send message (we'll use company data to create a temporary lead-like structure)
       const response = await leadApi.sendMessage(contactForm.corporateData.id, {
         method: contactForm.method,
         subject: contactForm.subject,
-        message: formattedMessage,
+        message: plainTextMessage,
         followUpDate: contactForm.followUpDate,
         followUpMode: contactForm.followUpMode,
         // Add corporate-specific data
         recipient_email: contactForm.corporateData.email,
         recipient_name: contactForm.corporateData.name,
         contact_type: "corporate",
+        is_html: false, // Explicitly specify this is plain text
       });
 
       if (response && response.success) {

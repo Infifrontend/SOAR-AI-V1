@@ -1773,6 +1773,8 @@ class LeadViewSet(viewsets.ModelViewSet):
             message = request.data.get('message', '')
             follow_up_date = request.data.get('followUpDate', '')
             follow_up_mode = request.data.get('followUpMode', '')
+            is_html = request.data.get('is_html', True) # Added to check if content is HTML
+            data = request.data # Added to pass data to email sending logic
 
             if not subject or not message:
                 return Response(
@@ -1786,62 +1788,75 @@ class LeadViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            # Send email via SMTP if method is Email
+            # Send email based on method
             if method == 'Email':
-                from django.core.mail import EmailMessage
-                from django.conf import settings
-
                 try:
-                    # Create email message
-                    email = EmailMessage(
-                        subject=subject,
-                        body=message,
-                        from_email=settings.DEFAULT_FROM_EMAIL,
-                        to=[lead.contact.email],
-                        bcc=['nagendran.g@infinitisoftware.net','muniraj@infinitisoftware.net'],
-                    )
+                    # Import Django email utilities
+                    from django.core.mail import EmailMultiAlternatives
+                    from django.conf import settings
 
-                    # Send the email
-                    email.send(fail_silently=False)
+                    # Get recipient email from request or lead contact
+                    recipient_email = data.get('recipient_email')
+                    if not recipient_email and hasattr(lead, 'contact') and lead.contact:
+                        recipient_email = lead.contact.email
 
-                    # Update lead status to 'contacted' if it was 'new'
-                    old_status = lead.status
-                    if lead.status == 'new':
-                        lead.status = 'contacted'
-                        lead.save()
+                    if not recipient_email:
+                        return Response({
+                            'success': False,
+                            'error': 'No recipient email address found'
+                        }, status=400)
 
-                    # Create history entry for contact made
-                    create_lead_history(
-                        lead=lead,
-                        history_type='contact_made',
-                        action=f'Email sent: "{subject}"',
-                        details=f'Email sent to {lead.contact.email}. Subject: {subject}. Follow-up scheduled for {follow_up_date or "not specified"}.',
-                        icon='mail',
-                        user=request.user if request.user.is_authenticated else None
-                    )
+                    # Check if this is HTML content
+                    is_html = data.get('is_html', True)
 
-                    # Create history entry for status change if applicable
-                    if old_status != lead.status:
+                    if is_html and '<html>' in message:
+                        # Send HTML email
+                        email = EmailMultiAlternatives(
+                            subject=subject,
+                            body=message.replace('<html>', '').replace('</html>', '').replace('<body>', '').replace('</body>', ''),  # Plain text fallback
+                            from_email=settings.DEFAULT_FROM_EMAIL,
+                            to=[recipient_email]
+                        )
+                        email.attach_alternative(message, "text/html")
+                        email.send()
+                    else:
+                        # Send plain text email
+                        from django.core.mail import send_mail
+                        send_mail(
+                            subject=subject,
+                            message=message,
+                            from_email=settings.DEFAULT_FROM_EMAIL,
+                            recipient_list=[recipient_email],
+                            fail_silently=False,
+                        )
+
+                    # Create interaction record
+                    # Note: LeadInteraction model might not exist, using LeadHistory as fallback
+                    try:
+                        from .models import LeadInteraction
+                        interaction = LeadInteraction.objects.create(
+                            lead=lead,
+                            interaction_type='email',
+                            content=message,
+                            subject=subject,
+                            date=timezone.now()
+                        )
+                    except ImportError:
                         create_lead_history(
                             lead=lead,
-                            history_type='status_change',
-                            action=f'Status changed to {lead.get_status_display()}',
-                            details=f'Lead status updated from {old_status} to {lead.status} after email contact.',
+                            history_type='email_sent',
+                            action=f'Email sent: "{subject}"',
+                            details=f'Email sent to {lead.contact.email}. Subject: {subject}. Follow-up scheduled for {follow_up_date or "not specified"}.',
                             icon='mail',
                             user=request.user if request.user.is_authenticated else None
                         )
 
-                    return Response({
-                        'success': True,
-                        'message': f'Email sent successfully to {lead.contact.email}',
-                        'lead_status': lead.status
-                    }, status=status.HTTP_200_OK)
 
                 except Exception as email_error:
                     return Response({
                         'success': False,
                         'error': f'Failed to send email: {str(email_error)}'
-                    }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    }, status=500)
 
             else:
                 # For non-email methods, just create a history entry
@@ -1854,11 +1869,28 @@ class LeadViewSet(viewsets.ModelViewSet):
                     user=request.user if request.user.is_authenticated else None
                 )
 
-                return Response({
-                    'success': True,
-                    'message': f'{method} message logged successfully',
-                    'lead_status': lead.status
-                }, status=status.HTTP_200_OK)
+            # Update lead status to 'contacted' if it was 'new' and email was sent
+            old_status = lead.status
+            if method == 'Email' and lead.status == 'new':
+                lead.status = 'contacted'
+                lead.save()
+
+                # Create history entry for status change if applicable
+                if old_status != lead.status:
+                    create_lead_history(
+                        lead=lead,
+                        history_type='status_change',
+                        action=f'Status changed to {lead.get_status_display()}',
+                        details=f'Lead status updated from {old_status} to {lead.status} after email contact.',
+                        icon='mail',
+                        user=request.user if request.user.is_authenticated else None
+                    )
+
+            return Response({
+                'success': True,
+                'message': f'Email sent successfully to {lead.contact.email}',
+                'lead_status': lead.status
+            }, status=status.HTTP_200_OK)
 
         except Exception as e:
             return Response(
@@ -3476,7 +3508,7 @@ class EmailCampaignViewSet(viewsets.ModelViewSet):
         """Override list method to handle database connection issues"""
         from django.db import connection
         from django.db.utils import OperationalError
-        
+
         try:
             # Ensure database connection is alive
             connection.ensure_connection()
