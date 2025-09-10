@@ -1,11 +1,13 @@
+
 Django==4.2
 djangorestframework==3.14.0
 django-cors-headers==4.0.0
 python-decouple==3.8
-pandas==1.5.3
-numpy==1.24.3
+pandas==2.0.3
+numpy==1.25.2
 openpyxl==3.1.2
 psycopg2-binary==2.9.9
 python-dotenv==1.0.1
 dj-database-url==2.3.0
 gunicorn==21.2.0
+setuptools>=65.0.0
