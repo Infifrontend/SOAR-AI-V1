@@ -1810,7 +1810,7 @@ class LeadViewSet(viewsets.ModelViewSet):
                     # Check if this is HTML content
                     is_html = data.get('is_html', True)
 
-                    if is_html and ('<html>' in message or '<p>' in message or '<div>' in message):
+                    # if is_html and ('<html>' in message or '<p>' in message or '<div>' in message):
                         # Send HTML email
                         from django.utils.html import strip_tags
 
