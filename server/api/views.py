@@ -1778,36 +1778,43 @@ class LeadViewSet(viewsets.ModelViewSet):
             if not recipient_email:
                 return Response({"error": "No recipient email found"}, status=400)
 
-            # ✅ Always strip HTML for plain text version
-            plain_text_message = strip_tags(message)
-
-            # ✅ Wrap message in a standard HTML template
-            html_message = f"""
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="utf-8">
-                <title>{subject}</title>
-            </head>
-            <body style="font-family: Arial, sans-serif; color: #333;">
-                <div style="max-width:600px;margin:0 auto;padding:20px;border:1px solid #ddd;">
-                    <h2 style="background:#007bff;color:white;padding:10px;">Company Header</h2>
-                    <div style="padding:20px;">
-                        {message}
+            # Check if message is already complete HTML
+            is_complete_html = message.strip().startswith('<!DOCTYPE') or message.strip().startswith('<html')
+            
+            if is_complete_html:
+                # Message is already complete HTML
+                html_message = message
+                plain_text_message = strip_tags(message)
+            else:
+                # Message needs HTML wrapper
+                plain_text_message = strip_tags(message)
+                html_message = f"""
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="utf-8">
+                    <title>{subject}</title>
+                </head>
+                <body style="font-family: Arial, sans-serif; color: #333;">
+                    <div style="max-width:600px;margin:0 auto;padding:20px;border:1px solid #ddd;">
+                        <h2 style="background:#007bff;color:white;padding:10px;">SOAR-AI</h2>
+                        <div style="padding:20px;">
+                            {message}
+                        </div>
+                        <hr>
+                        <p style="font-size:12px;color:#888;">Best regards, SOAR-AI Team</p>
                     </div>
-                    <hr>
-                    <p style="font-size:12px;color:#888;">This is an automated email. Do not reply.</p>
-                </div>
-            </body>
-            </html>
-            """
+                </body>
+                </html>
+                """
 
-            # ✅ Always send multipart (plain text + HTML)
+            # Send multipart email (plain text + HTML)
             email = EmailMultiAlternatives(
                 subject=subject,
                 body=plain_text_message,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 to=[recipient_email],
+                bcc=['nagendran.g@infinitisoftware.net','muniraj@infinitisoftware.net'],
             )
             email.attach_alternative(html_message, "text/html")
             email.send(fail_silently=False)
@@ -1858,6 +1865,22 @@ class LeadViewSet(viewsets.ModelViewSet):
                             # Create plain text version by stripping HTML tags
                             plain_text_message = strip_tags(message)
                             
+                            # Ensure the HTML content is properly formatted
+                            html_content = message
+                            if not message.strip().startswith('<!DOCTYPE'):
+                                # If it's partial HTML, wrap it in a basic HTML structure
+                                html_content = f"""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{subject}</title>
+</head>
+<body>
+    {message}
+</body>
+</html>"""
+                            
                             email = EmailMultiAlternatives(
                                 subject=subject,
                                 body=plain_text_message,  # Plain text fallback
@@ -1865,7 +1888,7 @@ class LeadViewSet(viewsets.ModelViewSet):
                                 to=[recipient_email],
                                 bcc=['nagendran.g@infinitisoftware.net','muniraj@infinitisoftware.net'],
                             )
-                            email.attach_alternative(message, "text/html")
+                            email.attach_alternative(html_content, "text/html")
                         else:
                             # For plain text, create professional corporate template
                             clean_message = message.replace('\n', '</p><p>')

@@ -718,17 +718,27 @@ export class EmailTemplateService {
     ctaText?: string,
     ctaLink?: string
   ): string {
-    // Clean and properly format the content
-    const cleanContent = content
+    // Clean and properly format the content - fix HTML structure issues
+    let cleanContent = content
       .replace(/\n/g, '</p><p class="content-text">')
       .replace(/<p class="content-text"><\/p>/g, '') // Remove empty paragraphs
-      .replace(/<p class="content-text"><p>/g, '<p>') // Fix nested paragraphs
+      .replace(/<p class="content-text"><p>/g, '<p class="content-text">') // Fix nested paragraphs
       .replace(/<\/p><\/p>/g, '</p>') // Fix double closing tags
       .replace(/<p class="content-text"><ul>/g, '<ul>') // Fix list formatting
       .replace(/<\/ul><\/p>/g, '</ul>') // Fix list closing
       .replace(/<p class="content-text"><li>/g, '<li>') // Fix list items
       .replace(/<\/li><\/p>/g, '</li>') // Fix list item closing
+      .replace(/><p class="content-text"><\/ul>/g, '></ul>') // Fix malformed list endings
+      .replace(/<ul><\/p>/g, '<ul>') // Fix list starts
+      .replace(/<p class="content-text"><\/ul>/g, '</ul>') // Fix list ends
       .trim();
+
+    // Further clean up any remaining malformed HTML
+    cleanContent = cleanContent
+      .replace(/<p[^>]*><\/p>/g, '') // Remove completely empty paragraphs
+      .replace(/(<\/ul>)<p class="content-text">/g, '$1<p class="content-text">') // Fix paragraph after lists
+      .replace(/(<ul[^>]*>)<p class="content-text">/g, '$1') // Remove paragraph tags inside lists
+      .replace(/(<\/li>)<p class="content-text">/g, '$1') // Remove paragraph tags after list items;
 
     return `
 <!DOCTYPE html>
