@@ -2477,7 +2477,7 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
                 <ul className="text-xs text-gray-600 space-y-1">
                   <li>• CSV files should include headers in the first row</li>
                   <li>• Excel files (.xlsx, .xls) are supported</li>
-                  <li>• Maximum file size: 50MB</li>
+                  <li>• Maximum file size: 100MB</li>
                   <li>
                     • Files will be stored in the revenue_prediction folder
                   </li>
