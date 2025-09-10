@@ -96,7 +96,7 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd server && python manage.py migrate --run-syncdb"
+args = "cd server && python manage.py migrate"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
