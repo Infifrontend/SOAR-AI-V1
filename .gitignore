@@ -1,0 +1,9 @@
+# Ignore environment variables
+.env
+
+# Ignore local dev files
+*.log
+node_modules/
+__pycache__/
+# Ignore Python virtual environment
+venv/
