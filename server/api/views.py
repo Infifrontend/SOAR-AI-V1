@@ -4753,7 +4753,7 @@ class ContractViewSet(viewsets.ModelViewSet):
                 response['Content-Disposition'] = f'inline; filename="{smart_str(original_name or os.path.basename(file_path))}"'
 
                 # Add headers to prevent caching issues
-                response[''Cache-Control': 'no-cache, no-store, must-revalidate'
+                response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
                 response['Pragma'] = 'no-cache'
                 response['Expires'] = '0'
 
