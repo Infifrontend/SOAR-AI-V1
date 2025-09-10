@@ -1053,35 +1053,21 @@ export function CorporateSearch({
     setContactForm({
       method: "Email",
       subject: `Partnership Opportunity - ${corporate.name}`,
-      message: `SOAR-AI Corporate Travel Solutions
-========================================
+      message: `<p>I hope this message finds you well. I wanted to follow up regarding our corporate travel solutions that could benefit ${corporate.name}.</p>
 
-Dear ${corporate.name} Team,
+<p>Based on your organization's profile in the ${corporate.industry} sector with ${corporate.employees?.toLocaleString()} team members, I believe we can help optimize your travel operations and significantly reduce costs.</p>
 
-I hope this message finds you well. I wanted to follow up regarding our corporate travel solutions that could benefit ${corporate.name}.
+<p>Our AI-powered platform has helped similar companies achieve:</p>
+<ul>
+<li><strong>35% reduction</strong> in travel expenses</li>
+<li><strong>50% faster</strong> booking processes</li>
+<li><strong>90% compliance</strong> with travel policies</li>
+<li><strong>24/7 support</strong> for all travelers</li>
+</ul>
 
-Based on your organization's profile, I believe we can help optimize your travel operations and reduce costs. Our AI-powered platform specializes in:
+<p>Given your current travel budget of ${corporate.travelBudget} and ${corporate.annualTravelVolume}, we see significant opportunities for partnership and cost optimization.</p>
 
-• Streamlined booking and approval processes
-• Cost reduction strategies for corporate travel
-• Comprehensive travel policy management
-• Real-time expense tracking and reporting
-• 24/7 traveler support services
-
-Given your company's ${corporate.industry} background and ${corporate.employees?.toLocaleString()} team members, we see significant opportunities for partnership.
-
-Would you be available for a brief call this week to discuss how we can support your travel needs?
-
-Best regards,
-
-The SOAR-AI Team
-Corporate Travel Solutions
-Email: corporate@soar-ai.com
-Phone: +1 (555) 123-4567
-Website: www.soar-ai.com
-
-This email was sent regarding partnership opportunities for ${corporate.name}.
-If you would prefer not to receive future communications, please reply with "UNSUBSCRIBE".`,
+<p>Would you be available for a brief 15-minute call this week to discuss how we can support ${corporate.name}'s travel needs and show you personalized savings projections?</p>`,
       followUpDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
         .toISOString()
         .split("T")[0], // 7 days from now
@@ -1101,21 +1087,28 @@ If you would prefer not to receive future communications, please reply with "UNS
     setIsSendingMessage(true); // Start spinner
 
     try {
-      // Send plain text message instead of HTML to avoid raw HTML in emails
-      const plainTextMessage = contactForm.message;
+      // Generate professional HTML email using the new branded template
+      const htmlMessage = EmailTemplateService.renderCorporateContactTemplate(
+        contactForm.corporateData.name,
+        contactForm.corporateData.name,
+        contactForm.message,
+        contactForm.subject,
+        "Schedule a Call",
+        "https://calendly.com/soar-ai/partnership-discussion"
+      );
 
       // Use the leadApi to send message (we'll use company data to create a temporary lead-like structure)
       const response = await leadApi.sendMessage(contactForm.corporateData.id, {
         method: contactForm.method,
         subject: contactForm.subject,
-        message: plainTextMessage,
+        message: htmlMessage,
         followUpDate: contactForm.followUpDate,
         followUpMode: contactForm.followUpMode,
         // Add corporate-specific data
         recipient_email: contactForm.corporateData.email,
         recipient_name: contactForm.corporateData.name,
         contact_type: "corporate",
-        is_html: false, // Explicitly specify this is plain text
+        is_html: true, // Specify this is HTML content
       });
 
       if (response && response.success) {

@@ -1794,6 +1794,7 @@ class LeadViewSet(viewsets.ModelViewSet):
                     # Import Django email utilities
                     from django.core.mail import EmailMultiAlternatives
                     from django.conf import settings
+                    from django.utils.html import strip_tags
 
                     # Get recipient email from request or lead contact
                     recipient_email = data.get('recipient_email')
@@ -1809,11 +1810,16 @@ class LeadViewSet(viewsets.ModelViewSet):
                     # Check if this is HTML content
                     is_html = data.get('is_html', True)
 
-                    if is_html and '<html>' in message:
+                    if is_html and ('<html>' in message or '<p>' in message or '<div>' in message):
                         # Send HTML email
+                        from django.utils.html import strip_tags
+
+                        # Create plain text version by stripping HTML tags
+                        plain_text_message = strip_tags(message)
+
                         email = EmailMultiAlternatives(
                             subject=subject,
-                            body=message.replace('<html>', '').replace('</html>', '').replace('<body>', '').replace('</body>', ''),  # Plain text fallback
+                            body=plain_text_message,  # Plain text fallback
                             from_email=settings.DEFAULT_FROM_EMAIL,
                             to=[recipient_email]
                         )
