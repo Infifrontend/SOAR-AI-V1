@@ -1923,11 +1923,11 @@ class LeadViewSet(viewsets.ModelViewSet):
                 return Response({"error": "No recipient email found"},
                                 status=400)
 
-            # Always use standard template layout design
+            # Always use standard template layout design like test_email
             from django.utils.html import strip_tags
             from django.core.mail import EmailMultiAlternatives
             from django.conf import settings
-            from datetime import datetime
+            from .email_template_service import EmailTemplateService
 
             # Check if message is already complete HTML (standard template)
             is_complete_html = message.strip().startswith(
@@ -1939,93 +1939,13 @@ class LeadViewSet(viewsets.ModelViewSet):
                 plain_text_message = strip_tags(message)
                 print(f"Using pre-formatted standard template: {template_used}")
             else:
-                # Apply standard SOAR-AI template layout
-                plain_text_message = strip_tags(message)
-
-                # Standard SOAR-AI Email Template with professional design
-                html_message = f"""<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{subject}</title>
-    <style>
-        /* Email client compatibility styles */
-        body {{ margin:0; padding:0; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; }}
-        table {{ border-spacing:0; }}
-        img {{ border:0; display:block; }}
-        a {{ color:inherit; text-decoration:none; }}
-
-        /* Main wrapper */
-        .wrapper {{ width:100%; background-color:#f5f7fb; padding:20px 0; }}
-        .content {{ max-width:600px; margin:0 auto; background:#ffffff; border-radius:6px; overflow:hidden; }}
-
-        /* Header styles */
-        .header {{ padding:20px; text-align:center; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); }}
-        .logo {{ max-width:160px; height:auto; color:#ffffff; font-size:28px; font-weight:700; margin:0; }}
-        .tagline {{ color:#e0e7ff; font-size:14px; margin:8px 0 0 0; }}
-
-        /* Main content */
-        .main-content {{ padding:30px 20px; }}
-        .greeting {{ font-size:18px; color:#1f2937; margin:0 0 20px 0; font-weight:600; }}
-        .content-text {{ font-size:16px; color:#374151; line-height:1.6; margin:0 0 16px 0; }}
-        .content-text p {{ margin:0 0 16px 0; }}
-        .content-text ul {{ margin:16px 0; padding-left:20px; }}
-        .content-text li {{ margin:6px 0; }}
-
-        /* CTA Button */
-        .cta-button {{ display:inline-block; background:#2563eb; color:#ffffff; padding:12px 24px; text-decoration:none; border-radius:6px; font-weight:600; margin:20px 0; }}
-        .cta-button:hover {{ background:#1d4ed8; }}
-
-        /* Footer */
-        .footer {{ background:#f9fafb; border-top:1px solid #e5e7eb; padding:20px; text-align:center; }}
-        .footer-logo {{ color:#374151; font-size:20px; font-weight:700; margin:0 0 8px 0; }}
-        .footer-text {{ color:#6b7280; font-size:14px; margin:4px 0; }}
-        .footer-links {{ margin:16px 0; }}
-        .footer-links a {{ color:#2563eb; text-decoration:none; margin:0 10px; }}
-        .footer-links a:hover {{ text-decoration:underline; }}
-
-        /* Responsive design */
-        @media only screen and (max-width: 600px) {{
-            .wrapper {{ padding:10px; }}
-            .main-content {{ padding:20px 15px; }}
-            .header {{ padding:15px; }}
-        }}
-    </style>
-</head>
-<body>
-    <div class="wrapper">
-        <div class="content">
-            <div class="header">
-                <h1 class="logo">SOAR-AI</h1>
-                <p class="tagline">Corporate Travel Solutions</p>
-            </div>
-            <div class="main-content">
-                <h2 class="greeting">Dear {recipient_name or 'Valued Partner'},</h2>
-                <div class="content-text">
-                    {message}
-                </div>
-                <div class="content-text">
-                    <p>We're committed to transforming your corporate travel experience with innovative solutions tailored to your business needs.</p>
-                    <p>Best regards,<br><strong>The SOAR-AI Team</strong></p>
-                </div>
-            </div>
-            <div class="footer">
-                <h3 class="footer-logo">SOAR-AI</h3>
-                <p class="footer-text">Transforming Corporate Travel Through Innovation</p>
-                <div class="footer-links">
-                    <a href="#privacy">Privacy Policy</a>
-                    <a href="#terms">Terms of Service</a>
-                    <a href="#unsubscribe">Unsubscribe</a>
-                </div>
-                <p class="footer-text" style="font-size:12px; margin-top:16px;">
-                    © {datetime.now().year} SOAR-AI Corporation. All rights reserved.
-                </p>
-            </div>
-        </div>
-    </div>
-</body>
-</html>"""
+                # Apply standard SOAR-AI template layout using EmailTemplateService
+                html_message, plain_text_message = EmailTemplateService.get_standard_template(
+                    subject=subject,
+                    content=message,
+                    recipient_name=recipient_name or "Valued Partner",
+                    template_type="lead"
+                )
 
             # Create multipart email with proper MIME types
             email = EmailMultiAlternatives(
@@ -2094,31 +2014,29 @@ class LeadViewSet(viewsets.ModelViewSet):
                 from django.core.mail import EmailMultiAlternatives
                 from django.conf import settings
                 from django.utils.html import strip_tags
+                from .email_template_service import EmailTemplateService
 
                 try:
-                    # Plain-text fallback by stripping HTML
-                    plain_text_message = strip_tags(message)
-
-                    # If message is not a full HTML doc, wrap it
-                    if not message.strip().lower().startswith("<!doctype"):
-                        html_content = f"""<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{subject}</title>
-</head>
-<body>
-    {message}
-</body>
-</html>"""
-                    else:
+                    # Check if message is already complete HTML (standard template)
+                    is_complete_html = message.strip().startswith('<!DOCTYPE') or message.strip().startswith('<html')
+                    
+                    if is_complete_html:
+                        # Message is already complete HTML (from standard template)
                         html_content = message
+                        plain_text_message = strip_tags(message)
+                    else:
+                        # Apply standard SOAR-AI template layout like test_email
+                        html_content, plain_text_message = EmailTemplateService.get_standard_template(
+                            subject=subject,
+                            content=message,
+                            recipient_name=recipient_name or "Valued Partner",
+                            template_type="corporate"
+                        )
 
-                    # Build the email with proper HTML content type
+                    # Create multipart email with proper MIME types
                     email = EmailMultiAlternatives(
                         subject=subject,
-                        body=html_content,  # Use HTML as primary body
+                        body=plain_text_message,  # Plain text as primary body
                         from_email=settings.DEFAULT_FROM_EMAIL,
                         to=[recipient_email],
                         bcc=[
@@ -2127,11 +2045,8 @@ class LeadViewSet(viewsets.ModelViewSet):
                         ],
                     )
 
-                    # Set HTML as primary content type
-                    email.content_subtype = "html"
-
-                    # Add plain text as alternative
-                    email.attach_alternative(plain_text_message, "text/plain")
+                    # Attach HTML version as alternative
+                    email.attach_alternative(html_content, "text/html")
 
                     email.send(fail_silently=False)
 
