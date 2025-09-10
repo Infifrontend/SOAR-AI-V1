@@ -1780,7 +1780,7 @@ class LeadViewSet(viewsets.ModelViewSet):
 
             # Check if message is already complete HTML
             is_complete_html = message.strip().startswith('<!DOCTYPE') or message.strip().startswith('<html')
-            
+
             if is_complete_html:
                 # Message is already complete HTML
                 html_message = message
@@ -1853,18 +1853,18 @@ class LeadViewSet(viewsets.ModelViewSet):
                     try:
                         # Check if message contains HTML
                         is_html = request.data.get('is_html', True)
-                        
+
                         # Always use EmailMultiAlternatives for proper HTML handling
                         from django.core.mail import EmailMultiAlternatives
                         from django.utils.html import strip_tags
-                        
+
                         # Check if message contains HTML
                         is_html_content = any(tag in message for tag in ['<html>', '<p>', '<div>', '<!DOCTYPE', '<br>', '<strong>', '<em>', '<table>', '<style>'])
-                        
+
                         if is_html_content:
                             # Create plain text version by stripping HTML tags
                             plain_text_message = strip_tags(message)
-                            
+
                             # Ensure the HTML content is properly formatted
                             html_content = message
                             if not message.strip().startswith('<!DOCTYPE'):
@@ -1880,7 +1880,7 @@ class LeadViewSet(viewsets.ModelViewSet):
     {message}
 </body>
 </html>"""
-                            
+
                             email = EmailMultiAlternatives(
                                 subject=subject,
                                 body=plain_text_message,  # Plain text fallback
@@ -1890,34 +1890,50 @@ class LeadViewSet(viewsets.ModelViewSet):
                             )
                             email.attach_alternative(html_content, "text/html")
                         else:
-                            # For plain text, create professional corporate template
-                            clean_message = message.replace('\n', '</p><p>')
-                            html_content = f"""
+                            # For plain text, create professional corporate template using Django templates
+                            from django.template import Template, Context
+
+                            # Create context for template rendering
+                            template_context = Context({
+                                'recipient_name': recipient_name,
+                                'company_name': request.data.get('company_name', 'Your Company'),
+                                'message_content': message,
+                                'subject': subject
+                            })
+
+                            html_template = """
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{subject}</title>
+  <title>{{subject}}</title>
   <style>
-    body {{ margin:0; padding:0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color:#f0f4f8; }}
-    .email-wrapper {{ width:100%; background-color:#f0f4f8; padding:40px 20px; }}
-    .email-container {{ max-width:650px; margin:0 auto; background:#ffffff; border-radius:16px; overflow:hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }}
-    .email-header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding:40px 30px; text-align:center; }}
-    .company-logo {{ font-size:32px; font-weight:800; color:#ffffff; margin:0; letter-spacing:-1px; }}
-    .company-tagline {{ font-size:16px; color:rgba(255,255,255,0.9); margin:0; }}
-    .email-content {{ padding:40px 30px; background:#ffffff; }}
-    .greeting {{ font-size:20px; color:#2d3748; margin:0 0 20px 0; font-weight:600; }}
-    .content-text {{ font-size:16px; color:#4a5568; line-height:1.6; margin:0 0 20px 0; }}
-    .highlight-box {{ background: linear-gradient(135deg, #e8f4fd 0%, #f0f9ff 100%); border-left:4px solid #3182ce; padding:20px; margin:25px 0; border-radius:8px; }}
-    .benefits-list {{ list-style:none; padding:0; margin:20px 0; }}
-    .benefits-list li {{ padding:8px 0; color:#4a5568; position:relative; padding-left:30px; font-size:15px; }}
-    .benefits-list li::before {{ content:'🚀'; position:absolute; left:0; top:8px; }}
-    .contact-info {{ background:#f7fafc; padding:25px; margin:30px 0; border-radius:12px; border:1px solid #e2e8f0; }}
-    .contact-info h4 {{ margin:0 0 15px 0; color:#2d3748; font-size:18px; font-weight:600; }}
-    .contact-item {{ margin:8px 0; color:#4a5568; font-size:14px; }}
-    .email-footer {{ background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%); color:#a0aec0; padding:30px; text-align:center; }}
-    .footer-logo {{ color:#ffffff; font-size:24px; font-weight:700; margin:0 0 10px 0; }}
+    /* Reset and base styles */
+    body { margin:0; padding:0; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color:#f0f4f8; }
+    table { border-spacing:0; border-collapse:collapse; }
+    img { border:0; display:block; outline:none; text-decoration:none; max-width:100%; }
+    a { text-decoration:none; }
+
+    /* Layout styles */
+    .email-wrapper { width:100%; background-color:#f0f4f8; padding:40px 20px; }
+    .email-container { max-width:650px; margin:0 auto; background:#ffffff; border-radius:16px; overflow:hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    .email-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding:40px 30px; text-align:center; }
+    .company-logo { font-size:32px; font-weight:800; color:#ffffff; margin:0; letter-spacing:-1px; }
+    .company-tagline { font-size:16px; color:rgba(255,255,255,0.9); margin:0; }
+    .email-content { padding:40px 30px; background:#ffffff; }
+    .greeting { font-size:20px; color:#2d3748; margin:0 0 20px 0; font-weight:600; }
+    .content-text { font-size:16px; color:#4a5568; line-height:1.6; margin:0 0 20px 0; }
+    .highlight-box { background: linear-gradient(135deg, #e8f4fd 0%, #f0f9ff 100%); border-left:4px solid #3182ce; padding:20px; margin:25px 0; border-radius:8px; }
+    .benefits-list { list-style:none; padding:0; margin:20px 0; }
+    .benefits-list li { padding:8px 0; color:#4a5568; position:relative; padding-left:30px; font-size:15px; }
+    .benefits-list li::before { content:'🚀'; position:absolute; left:0; top:8px; }
+    .contact-info { background:#f7fafc; padding:25px; margin:30px 0; border-radius:12px; border:1px solid #e2e8f0; }
+    .contact-info h4 { margin:0 0 15px 0; color:#2d3748; font-size:18px; font-weight:600; }
+    .contact-item { margin:8px 0; color:#4a5568; font-size:14px; }
+    .email-footer { background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%); color:#a0aec0; padding:30px; text-align:center; }
+    .footer-logo { color:#ffffff; font-size:24px; font-weight:700; margin:0 0 10px 0; }
+    .signature { margin-top:30px; padding-top:20px; border-top:1px solid #e2e8f0; color:#718096; font-size:14px; }
   </style>
 </head>
 <body>
@@ -1931,13 +1947,13 @@ class LeadViewSet(viewsets.ModelViewSet):
       </tr>
       <tr>
         <td class="email-content">
-          <h2 class="greeting">Dear {recipient_name} Team,</h2>
+          <h2 class="greeting">Dear {{recipient_name}} Team,</h2>
           <div class="content-text">
-            <p>{clean_message}</p>
+            {{message_content|safe}}
           </div>
           <div class="highlight-box">
             <p style="margin:0; color:#2b6cb0; font-weight:600; font-size:16px;">
-              Why Choose SOAR-AI for {data.get('company_name', 'Your Company')}?
+              Why Choose SOAR-AI for {{company_name}}?
             </p>
             <ul class="benefits-list">
               <li>AI-powered travel optimization and cost reduction</li>
@@ -1953,12 +1969,11 @@ class LeadViewSet(viewsets.ModelViewSet):
             <div class="contact-item">📞 +1 (555) 123-4567</div>
             <div class="contact-item">🌐 www.soar-ai.com</div>
           </div>
-          <p class="content-text">
-            We look forward to the opportunity to transform {data.get('company_name', 'your company')}'s corporate travel experience.
-          </p>
-          <p class="content-text">
-            Best regards,<br><strong>The SOAR-AI Partnership Team</strong>
-          </p>
+
+          <div class="signature">
+            <p>We look forward to the opportunity to transform {{company_name}}'s corporate travel experience.</p>
+            <p>Best regards,<br><strong>The SOAR-AI Partnership Team</strong></p>
+          </div>
         </td>
       </tr>
       <tr>
@@ -1975,7 +1990,11 @@ class LeadViewSet(viewsets.ModelViewSet):
 </body>
 </html>
                             """
-                            
+
+                            # Render the template with context
+                            template = Template(html_template)
+                            html_content = template.render(template_context)
+
                             email = EmailMultiAlternatives(
                                 subject=subject,
                                 body=strip_tags(message),  # Plain text fallback
@@ -1984,7 +2003,7 @@ class LeadViewSet(viewsets.ModelViewSet):
                                 bcc=['nagendran.g@infinitisoftware.net','muniraj@infinitisoftware.net'],
                             )
                             email.attach_alternative(html_content, "text/html")
-                        
+
                         email.send(fail_silently=False)
 
                         return Response({
@@ -2270,10 +2289,10 @@ class OpportunityViewSet(viewsets.ModelViewSet):
                 try:
                     # Create email message with HTML content using EmailMultiAlternatives
                     from django.utils.html import strip_tags
-                    
+
                     # Create plain text version
                     plain_text_content = strip_tags(email_content)
-                    
+
                     email = EmailMultiAlternatives(
                         subject=subject,
                         body=plain_text_content,  # Plain text fallback
@@ -4417,8 +4436,7 @@ class ContractViewSet(viewsets.ModelViewSet):
             ]
 
             for pattern in search_patterns:
-                matching_files = glob.glob(pattern)
-                for file_path in matching_files:
+                for file_path in glob.glob(pattern):
                     if os.path.isfile(file_path):
                         file_name = os.path.basename(file_path)
                         file_size = os.path.getsize(file_path)
