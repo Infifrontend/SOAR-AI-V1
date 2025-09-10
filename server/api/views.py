@@ -2006,12 +2006,6 @@ class LeadViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-    except Exception as e:
-        return Response(
-            {'error': f'Failed to send message: {str(e)}'},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
-
 class OpportunityViewSet(viewsets.ModelViewSet):
     queryset = Opportunity.objects.prefetch_related('activities').all()
     serializer_class = OpportunitySerializer
