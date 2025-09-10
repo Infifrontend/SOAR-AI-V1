@@ -26,7 +26,7 @@ export default defineConfig({
     port: 5173,
     strictPort: false,
     allowedHosts: [
-      "f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev",
+      "51f54198-a9a2-4b01-b85b-23549e0b6e1c-00-385i2ayjj8nal.pike.replit.dev",
       "localhost",
     ],
     cors: {
