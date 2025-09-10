@@ -1807,34 +1807,53 @@ class LeadViewSet(viewsets.ModelViewSet):
                             'error': 'No recipient email address found'
                         }, status=400)
 
-                    # Check if this is HTML content
-                    is_html = data.get('is_html', True)
+                    # Always send as HTML email since we're dealing with templated content
+                    from django.core.mail import EmailMultiAlternatives
+                    from django.utils.html import strip_tags
 
-                    if is_html and ('<html>' in message or '<p>' in message or '<div>' in message or '<!DOCTYPE' in message):
-                        # Send HTML email
-                        from django.utils.html import strip_tags
+                    # Check if message contains HTML
+                    is_html_content = any(tag in message for tag in ['<html>', '<p>', '<div>', '<!DOCTYPE', '<br>', '<strong>', '<em>'])
 
+                    if is_html_content:
                         # Create plain text version by stripping HTML tags
                         plain_text_message = strip_tags(message)
-
+                        
+                        # Create multipart email
                         email = EmailMultiAlternatives(
                             subject=subject,
                             body=plain_text_message,  # Plain text fallback
                             from_email=settings.DEFAULT_FROM_EMAIL,
                             to=[recipient_email]
                         )
+                        # Attach HTML version
                         email.attach_alternative(message, "text/html")
-                        email.send()
                     else:
-                        # Send plain text email
-                        from django.core.mail import send_mail
-                        send_mail(
+                        # For plain text content, wrap in basic HTML template
+                        html_content = f"""
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <meta charset="utf-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                            <title>{subject}</title>
+                        </head>
+                        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                                {message.replace(chr(10), '<br>')}
+                            </div>
+                        </body>
+                        </html>
+                        """
+                        
+                        email = EmailMultiAlternatives(
                             subject=subject,
-                            message=message,
+                            body=message,  # Plain text fallback
                             from_email=settings.DEFAULT_FROM_EMAIL,
-                            recipient_list=[recipient_email],
-                            fail_silently=False,
+                            to=[recipient_email]
                         )
+                        email.attach_alternative(html_content, "text/html")
+                    
+                    email.send(fail_silently=False)
 
                     # Create interaction record
                     # Note: LeadInteraction model might not exist, using LeadHistory as fallback
@@ -1933,10 +1952,14 @@ class LeadViewSet(viewsets.ModelViewSet):
                         # Check if message contains HTML
                         is_html = request.data.get('is_html', True)
                         
-                        if is_html and ('<html>' in message or '<p>' in message or '<div>' in message or '<!DOCTYPE' in message):
-                            # Send HTML email
-                            from django.utils.html import strip_tags
-                            
+                        # Always use EmailMultiAlternatives for proper HTML handling
+                        from django.core.mail import EmailMultiAlternatives
+                        from django.utils.html import strip_tags
+                        
+                        # Check if message contains HTML
+                        is_html_content = any(tag in message for tag in ['<html>', '<p>', '<div>', '<!DOCTYPE', '<br>', '<strong>', '<em>', '<table>', '<style>'])
+                        
+                        if is_html_content:
                             # Create plain text version by stripping HTML tags
                             plain_text_message = strip_tags(message)
                             
@@ -1948,17 +1971,34 @@ class LeadViewSet(viewsets.ModelViewSet):
                                 bcc=['nagendran.g@infinitisoftware.net','muniraj@infinitisoftware.net'],
                             )
                             email.attach_alternative(message, "text/html")
-                            email.send(fail_silently=False)
                         else:
-                            # Send plain text email
-                            email = EmailMessage(
+                            # For plain text, create a simple HTML wrapper
+                            html_content = f"""
+                            <!DOCTYPE html>
+                            <html>
+                            <head>
+                                <meta charset="utf-8">
+                                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                                <title>{subject}</title>
+                            </head>
+                            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                                <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                                    {message.replace(chr(10), '<br>')}
+                                </div>
+                            </body>
+                            </html>
+                            """
+                            
+                            email = EmailMultiAlternatives(
                                 subject=subject,
-                                body=message,
+                                body=message,  # Plain text fallback
                                 from_email=settings.DEFAULT_FROM_EMAIL,
                                 to=[recipient_email],
                                 bcc=['nagendran.g@infinitisoftware.net','muniraj@infinitisoftware.net'],
                             )
-                            email.send(fail_silently=False)
+                            email.attach_alternative(html_content, "text/html")
+                        
+                        email.send(fail_silently=False)
 
                         return Response({
                             'success': True,
@@ -2241,17 +2281,22 @@ class OpportunityViewSet(viewsets.ModelViewSet):
                 from django.conf import settings
 
                 try:
-                    # Create email message with HTML content
-                    email = EmailMessage(
+                    # Create email message with HTML content using EmailMultiAlternatives
+                    from django.utils.html import strip_tags
+                    
+                    # Create plain text version
+                    plain_text_content = strip_tags(email_content)
+                    
+                    email = EmailMultiAlternatives(
                         subject=subject,
-                        body=email_content,
+                        body=plain_text_content,  # Plain text fallback
                         from_email=settings.DEFAULT_FROM_EMAIL,
                         to=[recipient_email],
                         bcc=['nagendran.g@infinitisoftware.net', 'muniraj@infinitisoftware.net'],
                     )
 
-                    # Set content type to HTML
-                    email.content_subtype = 'html'
+                    # Attach HTML version
+                    email.attach_alternative(email_content, "text/html")
 
                     # Send the email
                     email.send(fail_silently=False)

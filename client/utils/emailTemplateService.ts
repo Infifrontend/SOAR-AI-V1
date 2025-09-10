@@ -163,23 +163,26 @@ export class EmailTemplateService {
     const defaultVariables: StandardLayoutVariables = {
       subject: variables.subject || 'SOAR-AI Email',
       preheader: variables.preheader || 'Your corporate travel solution',
-      logo_url: variables.logo_url || 'https://via.placeholder.com/160x60/2563eb/ffffff?text=SOAR-AI',
+      logo_url: variables.logo_url || 'https://soarai.infinitisoftware.net/assets/SOAR%20Logo-Bnqz16_i.svg',
       company_name: variables.company_name || 'SOAR-AI',
       main_heading: variables.main_heading || 'Welcome to SOAR-AI',
       intro_paragraph: variables.intro_paragraph || 'We\'re excited to help transform your corporate travel experience.',
       body_content: variables.body_content || '<p>Your content goes here...</p>',
-      cta_url: variables.cta_url || '#',
+      cta_url: variables.cta_url || 'https://soarai.infinitisoftware.net/',
       cta_text: variables.cta_text || 'Get Started',
       company_address: variables.company_address || '123 Business Ave, City, State 12345',
-      unsubscribe_url: variables.unsubscribe_url || '#',
+      unsubscribe_url: variables.unsubscribe_url || 'https://soarai.infinitisoftware.net/unsubscribe',
       year: variables.year || new Date().getFullYear().toString()
     };
 
     // Replace all variables
     Object.entries(defaultVariables).forEach(([key, value]) => {
       const regex = new RegExp(`{{${key}}}`, 'g');
-      html = html.replace(regex, value || '');
+      html = html.replace(regex, String(value || ''));
     });
+    
+    // Clean up any remaining placeholder variables
+    html = html.replace(/{{[^}]+}}/g, '');
     
     return html;
   }

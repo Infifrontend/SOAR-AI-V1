@@ -731,59 +731,59 @@ class EmailCampaign(models.Model):
         """Add tracking pixel and wrap links for click tracking"""
         import re
         from django.conf import settings
-        
+
         # Get base URL for tracking
         base_url = getattr(settings, 'BASE_URL', 'https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173')
-        
+
         # Add tracking pixel before closing body tag
         tracking_pixel = f'<img src="{base_url}/api/track/open/{tracking.tracking_id}/" width="1" height="1" style="display:none;" alt="" />'
-        
+
         # Insert tracking pixel before </body> or at the end if no </body>
         if '</body>' in content.lower():
             content = content.replace('</body>', f'{tracking_pixel}</body>')
         else:
             content += tracking_pixel
-        
+
         # Wrap all links for click tracking (excluding mailto and tel links)
         def wrap_link(match):
             full_match = match.group(0)
             href = match.group(1)
-            
+
             # Skip if it's already a tracking link, mailto, tel, or anchor
             if ('/api/track/click/' in href or 
                 href.startswith('mailto:') or 
                 href.startswith('tel:') or 
                 href.startswith('#')):
                 return full_match
-            
+
             # Create tracking URL
             import urllib.parse
             encoded_url = urllib.parse.quote(href, safe='')
             tracking_url = f"{base_url}/api/track/click/{tracking.tracking_id}/?url={encoded_url}"
-            
+
             # Replace the href
             return full_match.replace(f'href="{href}"', f'href="{tracking_url}"')
-        
+
         # Find and replace all href attributes
         content = re.sub(r'href="([^"]*)"', wrap_link, content)
-        
+
         return content
 
     def get_real_time_stats(self):
         """Get real-time statistics from tracking data"""
         tracking_records = self.email_tracking.all()
-        
+
         total_sent = self.emails_sent
         unique_opens = tracking_records.filter(open_count__gt=0).count()
         unique_clicks = tracking_records.filter(click_count__gt=0).count()
         total_opens = tracking_records.aggregate(total=models.Sum('open_count'))['total'] or 0
         total_clicks = tracking_records.aggregate(total=models.Sum('click_count'))['total'] or 0
-        
+
         # Update campaign stats
         self.emails_opened = unique_opens
         self.emails_clicked = unique_clicks
         self.save(update_fields=['emails_opened', 'emails_clicked'])
-        
+
         return {
             'emails_sent': total_sent,
             'unique_opens': unique_opens,
