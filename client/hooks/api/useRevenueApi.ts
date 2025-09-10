@@ -1,6 +1,16 @@
 
 import { useBaseApi } from './useBaseApi';
+import { useCallback } from 'react';
+
+import axios from 'axios';
 const API_BASE_URL = (import.meta.env?.VITE_API_URL) || '/api';
+
+const baseApi = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
 export const useRevenueApi = () => {
   const { post, ...rest } = useBaseApi();
@@ -63,9 +73,42 @@ export const useRevenueApi = () => {
     }
   };
 
+
+
+  // Get all airport codes
+  const getAirportCodes = useCallback(async () => {
+  
+
+    try {
+      const response = await baseApi.get(`/airport-codes/all_codes/`);
+      return response.data;
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.detail || error.message || 'Failed to fetch airport codes';
+      throw error;
+    } 
+  }, []);
+
+  // Lookup airport by code
+  const lookupAirport = useCallback(async (code: string) => {
+    try {
+      const response = await baseApi.get(`/airport-codes/lookup/?code=${code}`);
+      return response.data;
+    } catch (error: any) {
+      console.error(`Failed to lookup airport code ${code}:`, error);
+      return {
+        code: code,
+        name: `${code} Airport`,
+        city: code,
+        country: 'Unknown'
+      };
+    }
+  }, []);
+
   return {
     ...rest,
     uploadRevenueData,
     getRevenuePredictionData,
+    getAirportCodes,
+    lookupAirport,
   };
 };

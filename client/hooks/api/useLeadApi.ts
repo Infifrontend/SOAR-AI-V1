@@ -501,39 +501,6 @@ export const useLeadApi = () => {
     }
   }, [setLoading, setError, setData]);
 
-  // Get all airport codes
-  const getAirportCodes = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await baseApi.get(`/airport-codes/all_codes/`);
-      setData(response.data);
-      return response.data;
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.detail || error.message || 'Failed to fetch airport codes';
-      setError(errorMessage);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  }, [setLoading, setError, setData]);
-
-  // Lookup airport by code
-  const lookupAirport = useCallback(async (code: string) => {
-    try {
-      const response = await baseApi.get(`/airport-codes/lookup/?code=${code}`);
-      return response.data;
-    } catch (error: any) {
-      console.error(`Failed to lookup airport code ${code}:`, error);
-      return {
-        code: code,
-        name: `${code} Airport`,
-        city: code,
-        country: 'Unknown'
-      };
-    }
-  }, []);
 
   // Send message function
   const sendMessage = useCallback(async (leadId: number, messageData: any) => {
