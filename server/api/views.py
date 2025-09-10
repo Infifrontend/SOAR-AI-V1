@@ -1810,7 +1810,7 @@ class LeadViewSet(viewsets.ModelViewSet):
                     # Check if this is HTML content
                     is_html = data.get('is_html', True)
 
-                    # if is_html and ('<html>' in message or '<p>' in message or '<div>' in message):
+                    if is_html and ('<html>' in message or '<p>' in message or '<div>' in message or '<!DOCTYPE' in message):
                         # Send HTML email
                         from django.utils.html import strip_tags
 
@@ -1930,17 +1930,35 @@ class LeadViewSet(viewsets.ModelViewSet):
                     from django.conf import settings
 
                     try:
-                        # Create email message
-                        email = EmailMessage(
-                            subject=subject,
-                            body=message,
-                            from_email=settings.DEFAULT_FROM_EMAIL,
-                            to=[recipient_email],
-                            bcc=['nagendran.g@infinitisoftware.net','muniraj@infinitisoftware.net'],
-                        )
-
-                        # Send the email
-                        email.send(fail_silently=False)
+                        # Check if message contains HTML
+                        is_html = request.data.get('is_html', True)
+                        
+                        if is_html and ('<html>' in message or '<p>' in message or '<div>' in message or '<!DOCTYPE' in message):
+                            # Send HTML email
+                            from django.utils.html import strip_tags
+                            
+                            # Create plain text version by stripping HTML tags
+                            plain_text_message = strip_tags(message)
+                            
+                            email = EmailMultiAlternatives(
+                                subject=subject,
+                                body=plain_text_message,  # Plain text fallback
+                                from_email=settings.DEFAULT_FROM_EMAIL,
+                                to=[recipient_email],
+                                bcc=['nagendran.g@infinitisoftware.net','muniraj@infinitisoftware.net'],
+                            )
+                            email.attach_alternative(message, "text/html")
+                            email.send(fail_silently=False)
+                        else:
+                            # Send plain text email
+                            email = EmailMessage(
+                                subject=subject,
+                                body=message,
+                                from_email=settings.DEFAULT_FROM_EMAIL,
+                                to=[recipient_email],
+                                bcc=['nagendran.g@infinitisoftware.net','muniraj@infinitisoftware.net'],
+                            )
+                            email.send(fail_silently=False)
 
                         return Response({
                             'success': True,
