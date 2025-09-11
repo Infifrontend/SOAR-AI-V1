@@ -2461,50 +2461,28 @@ class OpportunityViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response({'error': f'Failed to send proposal: {str(e)}'},
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+            
     @action(detail=False, methods=['get'], url_path='closed-won-opportunities')
     def closed_won_opportunities(self, request):
         """
-        Get company names from closed-won opportunities for contract creation
+        Get list of closed won opportunities for contract creation
         """
         try:
-            # Get all closed-won opportunities with company information
-            closed_won_opps = self.queryset.filter(stage='closed_won').select_related('lead__company')
-            
-            # Extract unique company names
-            company_names = []
-            for opp in closed_won_opps:
-                if opp.lead and opp.lead.company and opp.lead.company.name:
-                    company_name = opp.lead.company.name
-                    if company_name not in company_names:
-                        company_names.append(company_name)
-            
-            # If no closed-won opportunities, provide some default vendor names
-            if not company_names:
-                company_names = [
-                    "Global Travel Solutions",
-                    "Corporate Journey Ltd", 
-                    "Elite Business Travel",
-                    "Premier Voyage Group",
-                    "Business Travel Partners",
-                    "Executive Travel Services"
-                ]
-            
-            return Response(company_names, status=status.HTTP_200_OK)
-            
-        except Exception as e:
-            print(f"Error fetching closed-won opportunities: {str(e)}")
-            # Return fallback data on error
-            fallback_vendors = [
-                "Global Travel Solutions",
-                "Corporate Journey Ltd", 
-                "Elite Business Travel",
-                "Premier Voyage Group",
-                "Business Travel Partners",
-                "Executive Travel Services"
-            ]
-            return Response(fallback_vendors, status=status.HTTP_200_OK)
+            # Get all closed won opportunities with related data
+            closed_won_opps = Opportunity.objects.filter(stage='closed_won').select_related(
+                'lead__company', 'lead__contact'
+            ).prefetch_related('activities').order_by('-created_at')
 
+            # Use the optimized serializer to return full opportunity data
+            from .serializers import OptimizedOpportunitySerializer
+            serializer = OptimizedOpportunitySerializer(closed_won_opps, many=True)
+
+            return Response(serializer.data, status=200)
+
+        except Exception as e:
+            logger.error(f"Error fetching closed won opportunities: {str(e)}")
+            return Response({'error': str(e)}, status=500)
+    
     @action(detail=False, methods=['post'])
     def search(self, request):
         """
