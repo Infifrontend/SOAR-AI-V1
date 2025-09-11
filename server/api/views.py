@@ -3320,12 +3320,19 @@ def process_revenue_data(df, filename):
             by="bookings", ascending=False).head(5).to_dict(orient="records"))
 
     # --- Monthly Booking Trends ---
-    monthly_trends = (df.groupby(df["Booking_Month"].dt.strftime("%b %Y")).agg(
+    # Group by month and create a proper date column for sorting
+    monthly_data = df.groupby(df["Booking_Month"].dt.to_period("M")).agg(
         bookings=("Booking_ID", "count"),
-        revenue=("Total_Fare_Amount",
-                 "sum")).reset_index().rename(columns={
-                     "Booking_Month": "month"
-                 }).sort_values("month").to_dict(orient="records"))
+        revenue=("Total_Fare_Amount", "sum")
+    ).reset_index()
+
+    # Convert period to string format and sort in descending order (latest first)
+    monthly_data["month"] = monthly_data["Booking_Month"].dt.strftime("%b %Y")
+    monthly_trends = (
+        monthly_data
+        .sort_values("Booking_Month", ascending=False)  # Latest first
+        .drop("Booking_Month", axis=1).to_dict(orient="records")
+    )
 
     # --- Yearly Forecast ---
     # Calculate yearly forecast by summing monthly revenues

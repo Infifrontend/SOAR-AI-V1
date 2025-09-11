@@ -578,7 +578,10 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
     return new Intl.NumberFormat("en-US").format(num);
   };
 
-  const formatPercentage = (value: number) => {
+  const formatPercentage = (value?: number) => {
+    if (typeof value !== "number" || isNaN(value)) {
+      return "0%"; // or return "" if you prefer blank
+    }
     return `${value.toFixed(1)}%`;
   };
 
