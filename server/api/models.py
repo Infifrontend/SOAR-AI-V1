@@ -791,17 +791,19 @@ class EmailCampaign(models.Model):
         import re
         from django.conf import settings
 
-        # Get base URL for tracking
-        base_url = getattr(settings, 'BASE_URL', 'https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173')
+        # Get base URL for tracking - use the current server URL
+        base_url = getattr(settings, 'BASE_URL', 'https://51f54198-a9a2-4b01-b85b-23549e0b6e1c-00-385i2ayjj8nal.pike.replit.dev:8000')
 
-        # Add tracking pixel before closing body tag
-        tracking_pixel = f'<img src="{base_url}/api/track/open/{tracking.tracking_id}/" width="1" height="1" style="display:none;" alt="" />'
+        # Add tracking pixel for open tracking
+        tracking_pixel = f'<img src="{base_url}/api/track/open/{tracking.tracking_id}/" width="1" height="1" style="display:none;border:0;outline:0;" alt="" />'
 
         # Insert tracking pixel before </body> or at the end if no </body>
         if '</body>' in content.lower():
-            content = content.replace('</body>', f'{tracking_pixel}</body>')
+            content = content.replace('</body>', f'{tracking_pixel}\n</body>', 1)
+        elif '</html>' in content.lower():
+            content = content.replace('</html>', f'{tracking_pixel}\n</html>', 1)
         else:
-            content += tracking_pixel
+            content += f'\n{tracking_pixel}'
 
         # Wrap all links for click tracking (excluding mailto and tel links)
         def wrap_link(match):
@@ -812,7 +814,9 @@ class EmailCampaign(models.Model):
             if ('/api/track/click/' in href or
                 href.startswith('mailto:') or
                 href.startswith('tel:') or
-                href.startswith('#')):
+                href.startswith('#') or
+                href.startswith('javascript:') or
+                not href.strip()):
                 return full_match
 
             # Create tracking URL

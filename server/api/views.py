@@ -3948,31 +3948,27 @@ class EmailCampaignViewSet(viewsets.ModelViewSet):
             total_opened = tracking_records.filter(open_count__gt=0).count()
             total_clicked = tracking_records.filter(click_count__gt=0).count()
 
+            # Update campaign stats in real-time
+            campaign.emails_opened = total_opened
+            campaign.emails_clicked = total_clicked
+            campaign.save(update_fields=['emails_opened', 'emails_clicked'])
+
             # Calculate rates
-            open_rate = (total_opened / total_sent *
-                         100) if total_sent > 0 else 0
-            click_rate = (total_clicked / total_sent *
-                          100) if total_sent > 0 else 0
+            open_rate = (total_opened / total_sent * 100) if total_sent > 0 else 0
+            click_rate = (total_clicked / total_sent * 100) if total_sent > 0 else 0
 
             stats = {
-                'campaign_id':
-                campaign.id,
-                'campaign_name':
-                campaign.name,
-                'emails_sent':
-                total_sent,
-                'emails_opened':
-                total_opened,
-                'emails_clicked':
-                total_clicked,
-                'open_rate':
-                round(open_rate, 2),
-                'click_rate':
-                round(click_rate, 2),
-                'status':
-                campaign.status,
-                'sent_date':
-                campaign.sent_date.isoformat() if campaign.sent_date else None
+                'campaign_id': campaign.id,
+                'campaign_name': campaign.name,
+                'emails_sent': total_sent,
+                'emails_opened': total_opened,
+                'emails_clicked': total_clicked,
+                'open_rate': round(open_rate, 2),
+                'click_rate': round(click_rate, 2),
+                'status': campaign.status,
+                'sent_date': campaign.sent_date.isoformat() if campaign.sent_date else None,
+                'total_opens': tracking_records.aggregate(total=models.Sum('open_count'))['total'] or 0,
+                'total_clicks': tracking_records.aggregate(total=models.Sum('click_count'))['total'] or 0
             }
 
             return Response(stats)
@@ -4101,6 +4097,130 @@ def get_history(request):
     except Exception as e:
         return Response({'error': str(e)},
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def track_email_open(request, tracking_id):
+    """Track email opens via tracking pixel"""
+    try:
+        tracking = get_object_or_404(EmailTracking, tracking_id=tracking_id)
+        
+        # Update open tracking
+        now = timezone.now()
+        if not tracking.first_opened:
+            tracking.first_opened = now
+        tracking.last_opened = now
+        tracking.open_count += 1
+        
+        # Get user agent and IP
+        tracking.user_agent = request.META.get('HTTP_USER_AGENT', '')[:500]  # Limit length
+        tracking.ip_address = request.META.get('HTTP_X_FORWARDED_FOR', 
+                                             request.META.get('REMOTE_ADDR', ''))
+        
+        tracking.save()
+        
+        # Update campaign stats
+        campaign = tracking.campaign
+        campaign.emails_opened = campaign.email_tracking.filter(open_count__gt=0).count()
+        campaign.save(update_fields=['emails_opened'])
+        
+        logger.info(f"Email open tracked: {tracking_id} for campaign {campaign.name}")
+        
+        # Return 1x1 transparent pixel
+        from django.http import HttpResponse
+        pixel_data = b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x21\xF9\x04\x01\x00\x00\x00\x00\x2C\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02\x04\x01\x00\x3B'
+        response = HttpResponse(pixel_data, content_type='image/gif')
+        response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response['Pragma'] = 'no-cache'
+        response['Expires'] = '0'
+        return response
+        
+    except EmailTracking.DoesNotExist:
+        logger.error(f"Email tracking not found: {tracking_id}")
+        # Still return pixel to avoid broken images
+        from django.http import HttpResponse
+        pixel_data = b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\x21\xF9\x04\x01\x00\x00\x00\x00\x2C\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02\x04\x01\x00\x3B'
+        return HttpResponse(pixel_data, content_type='image/gif')
+    except Exception as e:
+        logger.error(f"Error tracking email open: {str(e)}")
+        from django.http import HttpResponse
+        pixel_data = b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\x21\xF9\x04\x01\x00\x00\x00\x00\x2C\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02\x04\x01\x00\x3B'
+        return HttpResponse(pixel_data, content_type='image/gif')
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def track_email_click(request, tracking_id):
+    """Track email clicks and redirect to target URL"""
+    try:
+        tracking = get_object_or_404(EmailTracking, tracking_id=tracking_id)
+        target_url = request.GET.get('url', '')
+        
+        if not target_url:
+            return HttpResponseRedirect('https://soarai.com')
+        
+        # Decode the URL
+        import urllib.parse
+        decoded_url = urllib.parse.unquote(target_url)
+        
+        # Update click tracking
+        now = timezone.now()
+        if not tracking.first_clicked:
+            tracking.first_clicked = now
+        tracking.last_clicked = now
+        tracking.click_count += 1
+        
+        # Update user agent and IP if not already set
+        if not tracking.user_agent:
+            tracking.user_agent = request.META.get('HTTP_USER_AGENT', '')[:500]
+        if not tracking.ip_address:
+            tracking.ip_address = request.META.get('HTTP_X_FORWARDED_FOR', 
+                                                 request.META.get('REMOTE_ADDR', ''))
+        
+        tracking.save()
+        
+        # Update campaign stats
+        campaign = tracking.campaign
+        campaign.emails_clicked = campaign.email_tracking.filter(click_count__gt=0).count()
+        campaign.save(update_fields=['emails_clicked'])
+        
+        logger.info(f"Email click tracked: {tracking_id} -> {decoded_url}")
+        
+        # Redirect to target URL
+        return HttpResponseRedirect(decoded_url)
+        
+    except EmailTracking.DoesNotExist:
+        logger.error(f"Email tracking not found: {tracking_id}")
+        return HttpResponseRedirect('https://soarai.com')
+    except Exception as e:
+        logger.error(f"Error tracking email click: {str(e)}")
+        return HttpResponseRedirect('https://soarai.com')
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def check_smtp_status(request):
+    """Check SMTP server status"""
+    try:
+        from django.core.mail import get_connection
+        from django.conf import settings
+        
+        connection = get_connection()
+        connection.open()
+        connection.close()
+        
+        return Response({
+            'status': 'connected',
+            'message': 'SMTP server is reachable',
+            'smtp_host': getattr(settings, 'EMAIL_HOST', 'Not configured'),
+            'smtp_port': getattr(settings, 'EMAIL_PORT', 'Not configured')
+        })
+    except Exception as e:
+        return Response({
+            'status': 'error',
+            'message': f'SMTP connection failed: {str(e)}'
+        }, status=500)
 
 
 @api_view(['GET'])
