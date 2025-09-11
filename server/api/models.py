@@ -533,6 +533,7 @@ class EmailCampaign(models.Model):
         from django.core.mail import get_connection, EmailMessage, send_mail
         from django.template import Template, Context
         from django.conf import settings
+        from django.utils.html import strip_tags
         import smtplib
 
         # Configure logging for SMTP operations
