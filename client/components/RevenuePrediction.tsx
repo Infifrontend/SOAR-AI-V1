@@ -555,7 +555,9 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [dynamicData, setDynamicData] = useState<any>(null);
   const [dataSource, setDataSource] = useState<string>("static");
-  const [airportCodes, setAirportCodes] = useState<{[key: string]: {name: string, city: string, country: string}}>({});
+  const [airportCodes, setAirportCodes] = useState<{
+    [key: string]: { name: string; city: string; country: string };
+  }>({});
   const [filters, setFilters] = useState({
     region: "all",
     industry: "all",
@@ -954,17 +956,21 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
       dynamicData.monthlyBookingTrends
     ) {
       // Transform monthly booking trends to monthly predictions format and sort by date (latest first)
-      const transformedData = dynamicData.monthlyBookingTrends.map((trend, index) => ({
-        month: trend.month,
-        actualRevenue: trend.revenue,
-        predictedRevenue: Math.round(trend.revenue * 1.1), // 10% prediction boost
-        deals: Math.round(trend.bookings / 2), // Estimate deals as half of bookings
-        confidence: 92 - index * 2, // Decreasing confidence over time
-        sortDate: new Date(trend.month.replace(' ', ' 1, ')) // Convert "Apr 2025" to "Apr 1, 2025" for sorting
-      }));
+      const transformedData = dynamicData.monthlyBookingTrends.map(
+        (trend, index) => ({
+          month: trend.month,
+          actualRevenue: trend.revenue,
+          predictedRevenue: Math.round(trend.revenue * 1.1), // 10% prediction boost
+          deals: Math.round(trend.bookings / 2), // Estimate deals as half of bookings
+          confidence: 92 - index * 2, // Decreasing confidence over time
+          sortDate: new Date(trend.month.replace(" ", " 1, ")), // Convert "Apr 2025" to "Apr 1, 2025" for sorting
+        }),
+      );
 
       // Sort by date in descending order (latest first)
-      return transformedData.sort((a, b) => b.sortDate.getTime() - a.sortDate.getTime());
+      return transformedData.sort(
+        (a, b) => b.sortDate.getTime() - a.sortDate.getTime(),
+      );
     }
     return monthlyPredictions;
   };
@@ -975,9 +981,11 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
       dynamicData &&
       dynamicData.topDestinations
     ) {
-      console.log(airportCodes,"dynamicData")
+      console.log(airportCodes, "dynamicData");
       return dynamicData.topDestinations.map((dest) => ({
-        city: airportCodes[dest.Destination_Airport_Code]?.name || dest.Destination_Airport_Code, // Use airport name if found, else code
+        city:
+          airportCodes[dest.Destination_Airport_Code]?.name ||
+          dest.Destination_Airport_Code, // Use airport name if found, else code
         bookings: dest.bookings,
         revenue: dest.revenue,
       }));
@@ -1089,7 +1097,12 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
                   </p>
                   <ul className="text-xs text-green-600 ml-2">
                     {dynamicData.insights.slice(0, 2).map((insight, index) => (
-                      <li key={index}>• {typeof insight === 'string' ? insight : JSON.stringify(insight)}</li>
+                      <li key={index}>
+                        •{" "}
+                        {typeof insight === "string"
+                          ? insight
+                          : JSON.stringify(insight)}
+                      </li>
                     ))}
                   </ul>
                 </div>
@@ -1581,7 +1594,7 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="max-h-96 overflow-y-auto space-y-4 pr-2">
                 {(dataSource === "dynamic" && dynamicData?.monthlyBookingTrends
                   ? dynamicData.monthlyBookingTrends
                   : businessStats.bookingTrends
@@ -1750,7 +1763,7 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
                   </CardDescription>
                 </div>
                 <div className="flex gap-2">
-                  <Select
+                  {/* <Select
                     value={selectedModel}
                     onValueChange={setSelectedModel}
                   >
@@ -1764,7 +1777,7 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
                         </SelectItem>
                       ))}
                     </SelectContent>
-                  </Select>
+                  </Select> */}
                 </div>
               </div>
             </CardHeader>
@@ -2537,11 +2550,15 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
                             <span>{formatFileSize(file.size)}</span>
                             <span>•</span>
                             <span>
-                              Uploaded {new Date(file.uploadDate).toLocaleDateString("en-GB", {
-                                day: "2-digit",
-                                month: "2-digit",
-                                year: "numeric"
-                              })}
+                              Uploaded{" "}
+                              {new Date(file.uploadDate).toLocaleDateString(
+                                "en-GB",
+                                {
+                                  day: "2-digit",
+                                  month: "2-digit",
+                                  year: "numeric",
+                                },
+                              )}
                             </span>
                           </div>
                         </div>
@@ -2765,7 +2782,7 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="overflow-x-auto">
+                      <div className="overflow-x-auto clsss">
                         <Table>
                           <TableHeader>
                             <TableRow>
