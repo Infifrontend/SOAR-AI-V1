@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import axios, { AxiosResponse } from 'axios';
 
 // Use the correct API base URL - check if environment variable exists, otherwise use local
-const API_BASE_URL = '/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 interface ApiState<T> {
   data: T | null;
@@ -107,7 +107,7 @@ export const useLeadApi = () => {
       return responseData;
     } catch (error: any) {
       console.error('API Error Details:', error);
-      
+
       if (error.code === 'ERR_NETWORK') {
         const errorMessage = `Network error: Cannot connect to server at ${API_BASE_URL}. Please check if the Django server is running.`;
         setError(errorMessage);
@@ -248,9 +248,9 @@ export const useLeadApi = () => {
       const response = await baseApi.post(`/leads/${id}/disqualify/`, requestData);
       return response.data;
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 
-                          error.response?.data?.detail || 
-                          error.message || 
+      const errorMessage = error.response?.data?.error ||
+                          error.response?.data?.detail ||
+                          error.message ||
                           'Failed to disqualify lead';
       setError(errorMessage);
       throw error;
@@ -509,7 +509,7 @@ export const useLeadApi = () => {
 
     try {
       let response;
-      
+
       // Handle corporate contact messages differently
       if (messageData.contact_type === 'corporate') {
         // For corporate contacts, use the dedicated corporate message endpoint
@@ -528,13 +528,13 @@ export const useLeadApi = () => {
         // Regular lead message
         response = await baseApi.post(`/leads/${leadId}/send_message/`, messageData);
       }
-      
+
       setData(response.data);
       return response.data;
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 
-                          error.response?.data?.detail || 
-                          error.message || 
+      const errorMessage = error.response?.data?.error ||
+                          error.response?.data?.detail ||
+                          error.message ||
                           'Failed to send message';
       setError(errorMessage);
       throw error;
@@ -606,9 +606,9 @@ export const useLeadApi = () => {
       setData(response.data);
       return response.data;
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 
-                          error.response?.data?.detail || 
-                          error.message || 
+      const errorMessage = error.response?.data?.error ||
+                          error.response?.data?.detail ||
+                          error.message ||
                           'Failed to move lead to opportunity';
       setError(errorMessage);
       throw error;
@@ -626,9 +626,9 @@ export const useLeadApi = () => {
       setData(response.data);
       return response.data;
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 
-                          error.response?.data?.detail || 
-                          error.message || 
+      const errorMessage = error.response?.data?.error ||
+                          error.response?.data?.detail ||
+                          error.message ||
                           'Failed to assign agent';
       setError(errorMessage);
       throw error;

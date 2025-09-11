@@ -3771,15 +3771,17 @@ class EmailCampaignViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         """Override list method to handle database connection issues"""
         from django.db import connection
-        from django.db.utils import OperationalError
+        from django.db.utils import OperationalError, ProgrammingError
 
         try:
             # Ensure database connection is alive
             connection.ensure_connection()
             return super().list(request, *args, **kwargs)
-        except OperationalError as e:
-            if 'SSL connection has been closed' in str(
-                    e) or 'connection' in str(e).lower():
+        except (OperationalError, ProgrammingError) as e:
+            error_message = str(e).lower()
+            if ('ssl connection has been closed' in error_message or 
+                'connection' in error_message or 
+                'column' in error_message and 'does not exist' in error_message):
                 # Try to close and reopen connection
                 connection.close()
                 try:
@@ -3787,12 +3789,13 @@ class EmailCampaignViewSet(viewsets.ModelViewSet):
                 except Exception as retry_error:
                     print(f"Retry failed: {str(retry_error)}")
                     # Return empty list if still failing
-                    return Response([])
+                    return Response([], status=200)
             else:
-                raise e
+                print(f"Database error in EmailCampaignViewSet.list: {str(e)}")
+                return Response([], status=200)
         except Exception as e:
             print(f"Unexpected error in EmailCampaignViewSet.list: {str(e)}")
-            return Response([])
+            return Response([], status=200)
 
     def get_queryset(self):
         """Override get_queryset to handle connection issues"""

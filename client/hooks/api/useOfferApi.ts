@@ -1,8 +1,7 @@
-
 import { useState, useCallback } from 'react';
 import axios, { AxiosResponse } from 'axios';
 
-const API_BASE_URL = '/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 interface ApiState<T> {
   data: T | null;
@@ -63,7 +62,7 @@ export const useOfferApi = () => {
         `${API_BASE_URL}/offers/`,
         { params: filters }
       );
-      
+
       setData(response.data);
       return response.data;
     } catch (error: any) {
@@ -84,7 +83,7 @@ export const useOfferApi = () => {
       const response: AxiosResponse<Offer> = await axios.get(
         `${API_BASE_URL}/offers/${id}/`
       );
-      
+
       setData(response.data);
       return response.data;
     } catch (error: any) {
@@ -111,7 +110,7 @@ export const useOfferApi = () => {
           },
         }
       );
-      
+
       setData(response.data);
       return response.data;
     } catch (error: any) {
@@ -138,7 +137,7 @@ export const useOfferApi = () => {
           },
         }
       );
-      
+
       setData(response.data);
       return response.data;
     } catch (error: any) {
@@ -177,7 +176,7 @@ export const useOfferApi = () => {
       const response: AxiosResponse<any> = await axios.post(
         `${API_BASE_URL}/offers/${id}/file-atpco/`
       );
-      
+
       setData(response.data);
       return response.data;
     } catch (error: any) {

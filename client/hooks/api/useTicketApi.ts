@@ -1,8 +1,7 @@
-
 import { useState, useCallback } from 'react';
 import axios, { AxiosResponse } from 'axios';
 
-const API_BASE_URL = '/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 interface ApiState<T> {
   data: T | null;
@@ -56,7 +55,7 @@ export const useTicketApi = () => {
         `${API_BASE_URL}/tickets/`,
         { params: filters }
       );
-      
+
       setData(response.data);
       return response.data;
     } catch (error: any) {
@@ -77,7 +76,7 @@ export const useTicketApi = () => {
       const response: AxiosResponse<Ticket> = await axios.get(
         `${API_BASE_URL}/tickets/${id}/`
       );
-      
+
       setData(response.data);
       return response.data;
     } catch (error: any) {
@@ -104,7 +103,7 @@ export const useTicketApi = () => {
           },
         }
       );
-      
+
       setData(response.data);
       return response.data;
     } catch (error: any) {
@@ -131,7 +130,7 @@ export const useTicketApi = () => {
           },
         }
       );
-      
+
       setData(response.data);
       return response.data;
     } catch (error: any) {
@@ -158,7 +157,7 @@ export const useTicketApi = () => {
           },
         }
       );
-      
+
       setData(response.data);
       return response.data;
     } catch (error: any) {
@@ -185,7 +184,7 @@ export const useTicketApi = () => {
           },
         }
       );
-      
+
       setData(response.data);
       return response.data;
     } catch (error: any) {

@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import axios, { AxiosResponse } from 'axios';
 
-const API_BASE_URL = 'https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:8000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 interface ApiState<T> {
   data: T | null;
@@ -300,7 +300,7 @@ export const useCampaignApi = () => {
   const checkSmtpStatus = async (campaignId?: string) => {
     try {
       setLoading(true);
-      const url = campaignId 
+      const url = campaignId
         ? `${API_BASE_URL}/api/campaigns/${campaignId}/smtp-logs/`
         : `${API_BASE_URL}/api/campaigns/smtp-status/`;
 
