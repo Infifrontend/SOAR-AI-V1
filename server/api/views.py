@@ -3308,11 +3308,17 @@ def process_revenue_data(df, filename):
 
     # ================= REAL DATA INSIGHTS =================
 
+    # Calculate active clients from unique Corporate_Account_Code values
+    # Filter out empty/null values
+    active_clients_count = int(df[df["Corporate_Account_Code"].notna() & 
+                                 (df["Corporate_Account_Code"] != '') & 
+                                 (df["Corporate_Account_Code"].astype(str).str.strip() != '')]["Corporate_Account_Code"].nunique())
+
     # --- Business Performance Overview ---
     business_performance = {
         "totalBookings": int(df["Booking_ID"].nunique()),
         "totalRevenue": float(df["Total_Fare_Amount"].sum()),
-        "activeClients": int(df["Corporate_Account_Code"].nunique()),
+        "activeClients": active_clients_count,
         "avgBookingValue": round(float(df["Total_Fare_Amount"].mean()), 2)
     }
 
@@ -3380,9 +3386,10 @@ def process_revenue_data(df, filename):
         business_stats,
         "keyMetrics":
         key_metrics,
+        "rawData": df.to_dict('records'),  # Include raw data for client-side processing
         "insights": [
             f"Processed {total_rows} rows from {filename}",
-            f"Detected {business_performance['activeClients']} active clients",
+            f"Detected {business_performance['activeClients']} active clients from unique Corporate_Account_Code values",
             f"Total revenue of {business_performance['totalRevenue']:.2f}",
             f"Growth rate simulated at {growth_rate:.1f}%"
         ]
