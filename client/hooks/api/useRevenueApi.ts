@@ -3,7 +3,7 @@ import { useBaseApi } from './useBaseApi';
 import { useCallback } from 'react';
 
 import axios from 'axios';
-const API_BASE_URL = (import.meta.env?.VITE_API_URL) || '/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 const baseApi = axios.create({
   baseURL: API_BASE_URL,
