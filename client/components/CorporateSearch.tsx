@@ -113,6 +113,7 @@ const transformCompanyData = (company) => {
   return {
     id: company.id,
     name: company.name,
+    corporate_code: company.corporate_code,
     move_as_lead: company.move_as_lead || false,
     type: getCompanyTypeDisplay(company.company_type || company.size),
     industry: getIndustryDisplay(company.industry),
@@ -1522,6 +1523,14 @@ export function CorporateSearch({
                             <h3 className="text-lg font-semibold text-gray-900">
                               {corporate.name}
                             </h3>
+                            {corporate.corporate_code && (
+                              <Badge
+                                variant="outline"
+                                className="text-xs border-gray-300 text-gray-600"
+                              >
+                                {corporate.corporate_code}
+                              </Badge>
+                            )}
                             <Badge
                               variant="secondary"
                               className="bg-orange-500 hover:bg-orange-600 text-white text-xs"

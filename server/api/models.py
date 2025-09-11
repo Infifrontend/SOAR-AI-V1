@@ -162,8 +162,33 @@ class Company(models.Model):
 
     is_active = models.BooleanField(default=True)
     move_as_lead = models.BooleanField(default=False)
+    corporate_code = models.CharField(max_length=10, unique=True, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    
+    def save(self, *args, **kwargs):
+        if not self.corporate_code:
+            self.corporate_code = self._generate_corporate_code()
+        super().save(*args, **kwargs)
+
+    def _generate_corporate_code(self):
+        """Generate a unique corporate code like CORP0023 and expand digits dynamically"""
+        last_company = Company.objects.filter(
+            corporate_code__startswith='CORP'
+        ).order_by('corporate_code').last()
+
+        if last_company and last_company.corporate_code:
+            try:
+                last_number = int(last_company.corporate_code[4:])
+                new_number = last_number + 1
+            except (ValueError, IndexError):
+                new_number = 1
+        else:
+            new_number = 1
+
+        # Always keep at least 4 digits, but allow it to grow if larger
+        return f"CORP{new_number:0{max(4, len(str(new_number)))}d}"
 
     def __str__(self):
         return self.name

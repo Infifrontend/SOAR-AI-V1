@@ -953,14 +953,18 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
       dynamicData &&
       dynamicData.monthlyBookingTrends
     ) {
-      // Transform monthly booking trends to monthly predictions format
-      return dynamicData.monthlyBookingTrends.map((trend, index) => ({
+      // Transform monthly booking trends to monthly predictions format and sort by date (latest first)
+      const transformedData = dynamicData.monthlyBookingTrends.map((trend, index) => ({
         month: trend.month,
         actualRevenue: trend.revenue,
         predictedRevenue: Math.round(trend.revenue * 1.1), // 10% prediction boost
         deals: Math.round(trend.bookings / 2), // Estimate deals as half of bookings
         confidence: 92 - index * 2, // Decreasing confidence over time
+        sortDate: new Date(trend.month.replace(' ', ' 1, ')) // Convert "Apr 2025" to "Apr 1, 2025" for sorting
       }));
+
+      // Sort by date in descending order (latest first)
+      return transformedData.sort((a, b) => b.sortDate.getTime() - a.sortDate.getTime());
     }
     return monthlyPredictions;
   };
@@ -1357,7 +1361,7 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
           </Card>
 
           {/* Travel Services Breakdown */}
-          <Card>
+          {/* <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Plane className="h-5 w-5" />
@@ -1451,7 +1455,7 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
                 </div>
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
 
           {/* Performance Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
