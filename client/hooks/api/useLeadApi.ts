@@ -489,7 +489,7 @@ export const useLeadApi = () => {
     setError(null);
 
     try {
-      const response = await baseApi.post(`/campaigns/launch/`, campaignData);
+      const response = await baseApi.post(`/email-campaigns/launch/`, campaignData);
       setData(response.data);
       return response.data;
     } catch (error: any) {

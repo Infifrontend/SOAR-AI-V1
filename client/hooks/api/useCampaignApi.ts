@@ -255,15 +255,12 @@ export const useCampaignApi = () => {
   }, [setLoading, setError, setData]);
 
   // Launch campaign and send emails
-  const launchCampaign = useCallback(async (id: string) => {
+  const launchCampaign = useCallback(async (campaignData: any) => {
     setLoading(true);
     setError(null);
 
     try {
-      const response: AxiosResponse<any> = await axios.post(
-        `${API_BASE_URL}/email-campaigns/${id}/launch/`
-      );
-
+      const response = await axios.post(`${API_BASE_URL}/email-campaigns/launch/`, campaignData);
       setData(response.data);
       return response.data;
     } catch (error: any) {
