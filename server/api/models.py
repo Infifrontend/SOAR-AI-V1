@@ -794,27 +794,40 @@ class EmailCampaign(models.Model):
         # Get base URL for tracking - use the current server URL
         base_url = getattr(settings, 'BASE_URL', 'https://51f54198-a9a2-4b01-b85b-23549e0b6e1c-00-385i2ayjj8nal.pike.replit.dev:8000')
 
-        # Add tracking pixel for open tracking - make it more visible for debugging
-        tracking_pixel = f'<img src="{base_url}/api/track/open/{tracking.tracking_id}/" width="1" height="1" style="display:block !important;position:absolute;top:-9999px;left:-9999px;border:0;outline:0;background:transparent;" alt="" />'
+        # Add multiple tracking pixels for better reliability
+        # Primary tracking pixel (positioned absolutely)
+        tracking_pixel_1 = f'<img src="{base_url}/api/track/open/{tracking.tracking_id}/" width="1" height="1" style="display:block !important;position:absolute;top:-9999px;left:-9999px;border:0;outline:0;background:transparent;" alt="" />'
+        
+        # Secondary tracking pixel (hidden but not positioned)
+        tracking_pixel_2 = f'<img src="{base_url}/api/track/open/{tracking.tracking_id}/" width="1" height="1" style="display:none !important;border:0;outline:0;" alt="" />'
+        
+        # Backup tracking pixel as div with background image
+        tracking_pixel_3 = f'<div style="width:1px;height:1px;background-image:url({base_url}/api/track/open/{tracking.tracking_id}/);display:block;position:absolute;top:-9999px;left:-9999px;"></div>'
 
-        # Insert tracking pixel in multiple places to ensure it loads
+        # Insert tracking pixels in multiple places to ensure they load
         # 1. Right after <body> tag if it exists
         if '<body' in content.lower():
             body_pattern = r'(<body[^>]*>)'
-            content = re.sub(body_pattern, f'\\1\n{tracking_pixel}\n', content, count=1, flags=re.IGNORECASE)
+            content = re.sub(body_pattern, f'\\1\n{tracking_pixel_1}\n{tracking_pixel_2}\n', content, count=1, flags=re.IGNORECASE)
         
         # 2. Also add before closing tags as backup
         if '</body>' in content.lower():
-            content = content.replace('</body>', f'\n{tracking_pixel}\n</body>', 1)
+            content = content.replace('</body>', f'\n{tracking_pixel_3}\n</body>', 1)
         elif '</html>' in content.lower():
-            content = content.replace('</html>', f'\n{tracking_pixel}\n</html>', 1)
+            content = content.replace('</html>', f'\n{tracking_pixel_1}\n{tracking_pixel_2}\n</html>', 1)
         else:
-            # If no HTML structure, add at the beginning
-            content = f'{tracking_pixel}\n{content}'
+            # If no HTML structure, add at the beginning and end
+            content = f'{tracking_pixel_1}\n{tracking_pixel_2}\n{content}\n{tracking_pixel_3}'
 
-        # Add a second tracking pixel as HTML comment for debugging
-        debug_pixel = f'<!-- Tracking Pixel: {base_url}/api/track/open/{tracking.tracking_id}/ -->\n'
-        content = debug_pixel + content
+        # Add debug comments for troubleshooting
+        debug_info = f'''<!-- 
+SOAR-AI Email Tracking Debug Info:
+Campaign ID: {tracking.campaign.id}
+Tracking ID: {tracking.tracking_id}
+Tracking URL: {base_url}/api/track/open/{tracking.tracking_id}/
+Lead: {tracking.lead.company.name if tracking.lead and tracking.lead.company else 'Unknown'}
+-->\n'''
+        content = debug_info + content
 
         # Wrap all links for click tracking (excluding mailto and tel links)
         def wrap_link(match):

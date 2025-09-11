@@ -1597,8 +1597,7 @@ class LeadViewSet(viewsets.ModelViewSet):
             if Opportunity.objects.filter(lead=lead).exists():
                 return Response(
                     {'error': 'This lead has already been moved to opportunities'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                    status=status.HTTP_400_BAD_REQUEST)
 
             from django.db import transaction
             try:
@@ -1610,8 +1609,7 @@ class LeadViewSet(viewsets.ModelViewSet):
                     if Opportunity.objects.filter(lead=locked_lead).exists():
                         return Response(
                             {'error': 'This lead has already been moved to opportunities'},
-                            status=status.HTTP_400_BAD_REQUEST
-                        )
+                            status=status.HTTP_400_BAD_REQUEST)
 
                     # Get opportunity data
                     opportunity_data = request.data
@@ -1723,8 +1721,7 @@ class LeadViewSet(viewsets.ModelViewSet):
             print(f"Error in move_to_opportunity: {str(e)}")
             return Response(
                 {'error': f'Failed to move lead to opportunity: {str(e)}'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=False, methods=['post'])
     def create_lead_from_company(self, request):
@@ -2022,7 +2019,7 @@ class LeadViewSet(viewsets.ModelViewSet):
                 try:
                     # Check if message is already complete HTML (standard template)
                     is_complete_html = message.strip().startswith('<!DOCTYPE') or message.strip().startswith('<html')
-                    
+
                     if is_complete_html:
                         # Message is already complete HTML (from standard template)
                         html_content = message
@@ -2461,7 +2458,7 @@ class OpportunityViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response({'error': f'Failed to send proposal: {str(e)}'},
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            
+
     @action(detail=False, methods=['get'], url_path='closed-won-opportunities')
     def closed_won_opportunities(self, request):
         """
@@ -2482,7 +2479,7 @@ class OpportunityViewSet(viewsets.ModelViewSet):
         except Exception as e:
             logger.error(f"Error fetching closed won opportunities: {str(e)}")
             return Response({'error': str(e)}, status=500)
-    
+
     @action(detail=False, methods=['post'])
     def search(self, request):
         """
@@ -3800,8 +3797,8 @@ class EmailCampaignViewSet(viewsets.ModelViewSet):
             return super().list(request, *args, **kwargs)
         except (OperationalError, ProgrammingError) as e:
             error_message = str(e).lower()
-            if ('ssl connection has been closed' in error_message or 
-                'connection' in error_message or 
+            if ('ssl connection has been closed' in error_message or
+                'connection' in error_message or
                 'column' in error_message and 'does not exist' in error_message):
                 # Try to close and reopen connection
                 connection.close()
@@ -3940,22 +3937,23 @@ class EmailCampaignViewSet(viewsets.ModelViewSet):
         """Get real-time stats for a campaign"""
         try:
             from django.db import connection
-            
+
             # Ensure database connection is alive
             connection.ensure_connection()
-            
+
             campaign = self.get_object()
 
             # Get tracking data from EmailTracking model with connection handling
             try:
+                from django.db import models as db_models
                 tracking_records = EmailTracking.objects.filter(campaign=campaign)
                 total_opened = tracking_records.filter(open_count__gt=0).count()
                 total_clicked = tracking_records.filter(click_count__gt=0).count()
-                
+
                 # Get aggregate data safely
-                open_sum = tracking_records.aggregate(total=models.Sum('open_count'))['total'] or 0
-                click_sum = tracking_records.aggregate(total=models.Sum('click_count'))['total'] or 0
-                
+                open_sum = tracking_records.aggregate(total=db_models.Sum('open_count'))['total'] or 0
+                click_sum = tracking_records.aggregate(total=db_models.Sum('click_count'))['total'] or 0
+
             except Exception as db_error:
                 print(f"Database error in real_time_stats: {str(db_error)}")
                 # Use campaign stored values as fallback
@@ -4126,36 +4124,41 @@ def get_history(request):
 def track_email_open(request, tracking_id):
     """Track email opens via tracking pixel"""
     try:
-        print(f"Open tracking request received for: {tracking_id}")
-        print(f"Request headers: {dict(request.META)}")
-        
+        print(f"🔵 OPEN TRACKING: Request received for {tracking_id}")
+        print(f"🔵 OPEN TRACKING: User-Agent: {request.META.get('HTTP_USER_AGENT', 'None')}")
+        print(f"🔵 OPEN TRACKING: IP: {request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', 'None'))}")
+
         tracking = get_object_or_404(EmailTracking, tracking_id=tracking_id)
-        
+
         # Update open tracking
         now = timezone.now()
+        was_first_open = not tracking.first_opened
+
         if not tracking.first_opened:
             tracking.first_opened = now
         tracking.last_opened = now
         tracking.open_count += 1
-        
+
         # Get user agent and IP
         tracking.user_agent = request.META.get('HTTP_USER_AGENT', '')[:500]  # Limit length
         tracking.ip_address = request.META.get('HTTP_X_FORWARDED_FOR', 
                                              request.META.get('REMOTE_ADDR', ''))
-        
+
         tracking.save()
-        
+
         # Update campaign stats
         campaign = tracking.campaign
-        campaign.emails_opened = campaign.email_tracking.filter(open_count__gt=0).count()
+        unique_opens = campaign.email_tracking.filter(open_count__gt=0).count()
+        campaign.emails_opened = unique_opens
         campaign.save(update_fields=['emails_opened'])
-        
-        print(f"Email open tracked successfully: {tracking_id} for campaign {campaign.name}")
-        logger.info(f"Email open tracked: {tracking_id} for campaign {campaign.name}")
-        
+
+        print(f"🟢 OPEN TRACKING SUCCESS: {tracking_id} for campaign {campaign.name}")
+        print(f"🟢 OPEN TRACKING: Open count: {tracking.open_count}, Campaign opens: {campaign.emails_opened}")
+        logger.info(f"Email open tracked: {tracking_id} for campaign {campaign.name} (first={was_first_open})")
+
         # Return 1x1 transparent pixel
         from django.http import HttpResponse
-        pixel_data = b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\x00\x00\x00\x21\xF9\x04\x01\x00\x00\x00\x00\x2C\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02\x04\x01\x00\x3B'
+        pixel_data = b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\x21\xF9\x04\x01\x00\x00\x00\x00\x2C\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02\x04\x01\x00\x3B'
         response = HttpResponse(pixel_data, content_type='image/gif')
         response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         response['Pragma'] = 'no-cache'
@@ -4164,19 +4167,19 @@ def track_email_open(request, tracking_id):
         response['Access-Control-Allow-Methods'] = 'GET'
         response['Access-Control-Allow-Headers'] = '*'
         return response
-        
+
     except EmailTracking.DoesNotExist:
-        print(f"Email tracking not found: {tracking_id}")
+        print(f"🔴 OPEN TRACKING ERROR: Tracking not found for {tracking_id}")
         logger.error(f"Email tracking not found: {tracking_id}")
         # Still return pixel to avoid broken images
         from django.http import HttpResponse
         pixel_data = b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\x21\xF9\x04\x01\x00\x00\x00\x00\x2C\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02\x04\x01\x00\x3B'
         return HttpResponse(pixel_data, content_type='image/gif')
     except Exception as e:
-        print(f"Error tracking email open: {str(e)}")
+        print(f"🔴 OPEN TRACKING ERROR: {str(e)}")
         logger.error(f"Error tracking email open: {str(e)}")
         from django.http import HttpResponse
-        pixel_data = b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\x21\xF9\x04\x01\x00\x00\x00\x00\x2C\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02\x04\x01\x00\x3B'
+        pixel_data = b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x00\x00\x21\xF9\x04\x01\x00\x00\x00\x00\x2C\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02\x04\x01\x00\x3B'
         return HttpResponse(pixel_data, content_type='image/gif')
 
 
@@ -4187,71 +4190,72 @@ def track_email_click(request, tracking_id):
     try:
         tracking = get_object_or_404(EmailTracking, tracking_id=tracking_id)
         target_url = request.GET.get('url', '')
-        
+
         if not target_url:
-            return HttpResponseRedirect('https://soarai.com')
-        
+            return HttpResponseRedirect('https://soarai.com')  # Default redirect
+
         # Decode the URL
-        import urllib.parse
-        decoded_url = urllib.parse.unquote(target_url)
-        
-        # Update click tracking
-        now = timezone.now()
-        if not tracking.first_clicked:
-            tracking.first_clicked = now
-        tracking.last_clicked = now
-        tracking.click_count += 1
-        
-        # Update user agent and IP if not already set
-        if not tracking.user_agent:
-            tracking.user_agent = request.META.get('HTTP_USER_AGENT', '')[:500]
-        if not tracking.ip_address:
-            tracking.ip_address = request.META.get('HTTP_X_FORWARDED_FOR', 
-                                                 request.META.get('REMOTE_ADDR', ''))
-        
-        tracking.save()
-        
-        # Update campaign stats
-        campaign = tracking.campaign
-        campaign.emails_clicked = campaign.email_tracking.filter(click_count__gt=0).count()
-        campaign.save(update_fields=['emails_clicked'])
-        
-        logger.info(f"Email click tracked: {tracking_id} -> {decoded_url}")
-        
-        # Redirect to target URL
-        return HttpResponseRedirect(decoded_url)
-        
-    except EmailTracking.DoesNotExist:
-        logger.error(f"Email tracking not found: {tracking_id}")
-        return HttpResponseRedirect('https://soarai.com')
+        original_url = urllib.parse.unquote(target_url)
+
+        # Find and update tracking record
+        try:
+            tracking = EmailTracking.objects.get(tracking_id=tracking_id)
+            tracking.click_count += 1
+            tracking.last_clicked = timezone.now()
+            if not tracking.first_clicked:
+                tracking.first_clicked = timezone.now()
+
+            # Capture user agent and IP
+            tracking.user_agent = request.META.get('HTTP_USER_AGENT',
+                                                   '')[:500]  # Limit length
+            tracking.ip_address = request.META.get('REMOTE_ADDR')
+            tracking.save()
+
+            logger.info(
+                f"Email click tracked: {tracking_id} -> {original_url}")
+        except EmailTracking.DoesNotExist:
+            logger.warning(f"Tracking record not found: {tracking_id}")
+
+        # Redirect to original URL
+        return HttpResponseRedirect(original_url)
+
     except Exception as e:
         logger.error(f"Error tracking email click: {str(e)}")
-        return HttpResponseRedirect('https://soarai.com')
+        return HttpResponseRedirect('https://soarai.com')  # Safe fallback
 
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def check_smtp_status(request):
-    """Check SMTP server status"""
+    """Check SMTP server connection status"""
     try:
         from django.core.mail import get_connection
         from django.conf import settings
-        
+
+        # Test SMTP connection
         connection = get_connection()
         connection.open()
         connection.close()
-        
+
         return Response({
             'status': 'connected',
-            'message': 'SMTP server is reachable',
-            'smtp_host': getattr(settings, 'EMAIL_HOST', 'Not configured'),
-            'smtp_port': getattr(settings, 'EMAIL_PORT', 'Not configured')
+            'message': f'SMTP server ({settings.EMAIL_HOST}) is accessible',
+            'backend': settings.EMAIL_BACKEND,
+            'host': settings.EMAIL_HOST,
+            'port': settings.EMAIL_PORT,
+            'use_tls': settings.EMAIL_USE_TLS,
         })
+
     except Exception as e:
-        return Response({
-            'status': 'error',
-            'message': f'SMTP connection failed: {str(e)}'
-        }, status=500)
+        return Response(
+            {
+                'status': 'error',
+                'message': f'SMTP connection failed: {str(e)}',
+                'backend': getattr(settings, 'EMAIL_BACKEND', 'unknown'),
+                'host': getattr(settings, 'EMAIL_HOST', 'unknown'),
+                'port': getattr(settings, 'EMAIL_PORT', 'unknown'),
+            },
+            status=500)
 
 
 @api_view(['GET'])
