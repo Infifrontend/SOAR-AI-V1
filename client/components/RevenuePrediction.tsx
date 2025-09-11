@@ -1048,6 +1048,22 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
     return predictions.sort((a, b) => a.year - b.year);
   };
 
+  // Function to get dynamic corporate predictions
+  const getCurrentCorporatePredictions = () => {
+    if (dataSource === "dynamic" && dynamicData && dynamicData.corporateRevenue) {
+      return dynamicData.corporateRevenue.map((corp) => ({
+        company: corp.CompanyName,
+        currentRevenue: corp.CurrentRevenue,
+        predictedRevenue: corp.PredictedRevenue,
+        growth: corp.GrowthRate,
+        confidence: corp.Confidence,
+        deals: corp.ActiveDeals,
+        probability: corp.Probability,
+      }));
+    }
+    return corporatePredictions; // Fallback to static data
+  };
+
   // Load revenue prediction data on component mount
   useEffect(() => {
     const loadInitialData = async () => {
@@ -2243,7 +2259,7 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {corporatePredictions.map((corporate) => (
+                      {getCurrentCorporatePredictions().map((corporate) => (
                         <TableRow key={corporate.company}>
                           <TableCell>
                             <div className="flex items-center gap-2">
