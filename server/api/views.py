@@ -1589,55 +1589,64 @@ class LeadViewSet(viewsets.ModelViewSet):
             # Check if lead is qualified
             if lead.status != 'qualified':
                 return Response(
-                    {
-                        'error':
-                        'Only qualified leads can be moved to opportunities'
-                    },
-                    status=status.HTTP_400_BAD_REQUEST)
+                    {'error': 'Only qualified leads can be moved to opportunities'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
-            # Check if lead has already been moved to opportunity using database as source of truth
+            # Check if lead has already been moved to opportunity
             if Opportunity.objects.filter(lead=lead).exists():
                 return Response(
-                    {
-                        'error':
-                        'This lead has already been moved to opportunities'
-                    },
-                    status=status.HTTP_400_BAD_REQUEST)
+                    {'error': 'This lead has already been moved to opportunities'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
-            # Double-check to prevent race conditions - use select_for_update to lock the lead record
             from django.db import transaction
             try:
                 with transaction.atomic():
-                    # Lock the lead record to prevent concurrent modifications
-                    locked_lead = Lead.objects.select_for_update().get(
-                        id=lead.id)
+                    # Lock the lead record
+                    locked_lead = Lead.objects.select_for_update().get(id=lead.id)
 
-                    # Final check after acquiring lock
+                    # Final check inside transaction
                     if Opportunity.objects.filter(lead=locked_lead).exists():
                         return Response(
-                            {
-                                'error':
-                                'This lead has already been moved to opportunities'
-                            },
-                            status=status.HTTP_400_BAD_REQUEST)
+                            {'error': 'This lead has already been moved to opportunities'},
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
 
-                    # Get opportunity data from request
+                    # Get opportunity data
                     opportunity_data = request.data
 
-                    # Validate and process opportunity value
+                    # Validate and process value
                     try:
-                        opp_value = opportunity_data.get(
-                            'value', locked_lead.estimated_value or 250000)
+                        opp_value = opportunity_data.get('value', locked_lead.estimated_value or 250000)
                         if isinstance(opp_value, str):
-                            # Remove any non-numeric characters except decimal point
                             import re
                             opp_value = re.sub(r'[^\d.]', '', str(opp_value))
-                            opp_value = float(
-                                opp_value) if opp_value else 250000
+                            opp_value = float(opp_value) if opp_value else 250000
                     except (ValueError, TypeError):
                         opp_value = 250000
 
-                    # Create the opportunity within the transaction
+                    # ✅ Handle estimated_close_date safely
+                    est_close_raw = opportunity_data.get(
+                        'estimated_close_date',
+                        (timezone.now().date() + timedelta(days=30))
+                    )
+
+                    if isinstance(est_close_raw, str):
+                        try:
+                            # Try YYYY-MM-DD first
+                            est_close_date = datetime.strptime(est_close_raw, "%Y-%m-%d").date()
+                        except ValueError:
+                            try:
+                                # Try DD-MM-YYYY if first fails
+                                est_close_date = datetime.strptime(est_close_raw, "%d-%m-%Y").date()
+                            except ValueError:
+                                # Fallback: 30 days from now
+                                est_close_date = timezone.now().date() + timedelta(days=30)
+                    else:
+                        est_close_date = est_close_raw
+
+                    # Create the opportunity
                     opportunity = Opportunity.objects.create(
                         lead=locked_lead,
                         name=opportunity_data.get(
@@ -1645,11 +1654,8 @@ class LeadViewSet(viewsets.ModelViewSet):
                             f"{locked_lead.company.name} - Corporate Travel Solution"
                         ),
                         stage=opportunity_data.get('stage', 'discovery'),
-                        probability=int(opportunity_data.get(
-                            'probability', 65)),
-                        estimated_close_date=opportunity_data.get(
-                            'estimated_close_date',
-                            (timezone.now().date() + timedelta(days=30))),
+                        probability=int(opportunity_data.get('probability', 65)),
+                        estimated_close_date=est_close_date,
                         value=opp_value,
                         description=opportunity_data.get(
                             'description',
@@ -1657,9 +1663,11 @@ class LeadViewSet(viewsets.ModelViewSet):
                         ),
                         next_steps=opportunity_data.get(
                             'next_steps',
-                            'Send initial proposal and schedule presentation'))
+                            'Send initial proposal and schedule presentation'
+                        )
+                    )
 
-                    # Mark lead as moved to opportunity and add note
+                    # Update lead
                     locked_lead.moved_to_opportunity = True
                     timestamp = timezone.now().strftime('%Y-%m-%d %H:%M')
                     move_note = f"[{timestamp}] Lead moved to opportunities - {opportunity.name}"
@@ -1669,22 +1677,24 @@ class LeadViewSet(viewsets.ModelViewSet):
                     else:
                         locked_lead.notes = move_note
 
-                    # Don't change the lead status - keep it as qualified
                     locked_lead.save()
 
-                    # Create history entry for the conversion using try-catch to handle any LeadHistory issues
+                    # Create history entry
                     try:
                         from .models import LeadHistory
                         LeadHistory.objects.create(
                             lead=locked_lead,
                             history_type='opportunity_created',
                             action='Lead moved to opportunity',
-                            details=
-                            f'Lead successfully moved to sales opportunity: {opportunity.name}. Deal value: ${opp_value:,.0f}. Lead remains in leads table for tracking.',
+                            details=(
+                                f'Lead successfully moved to sales opportunity: '
+                                f'{opportunity.name}. Deal value: ${opp_value:,.0f}. '
+                                'Lead remains in leads table for tracking.'
+                            ),
                             icon='briefcase',
-                            user=request.user
-                            if request.user.is_authenticated else None,
-                            timestamp=timezone.now())
+                            user=request.user if request.user.is_authenticated else None,
+                            timestamp=timezone.now()
+                        )
                     except Exception as history_error:
                         print(f"Error creating lead history: {history_error}")
                         # Continue even if history creation fails
@@ -1693,27 +1703,28 @@ class LeadViewSet(viewsets.ModelViewSet):
                 print(f"Error in transaction: {str(e)}")
                 return Response(
                     {'error': f'Failed to create opportunity: {str(e)}'},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
 
-            # Serialize the created opportunity
+            # Serialize and return
             opportunity_serializer = OpportunitySerializer(opportunity)
-
             return Response(
                 {
                     'success': True,
-                    'message':
-                    f'{lead.company.name} has been successfully moved to opportunities',
+                    'message': f'{lead.company.name} has been successfully moved to opportunities',
                     'opportunity': opportunity_serializer.data,
                     'lead_id': lead.id,
                     'has_opportunity': True
                 },
-                status=status.HTTP_201_CREATED)
+                status=status.HTTP_201_CREATED
+            )
 
         except Exception as e:
             print(f"Error in move_to_opportunity: {str(e)}")
             return Response(
                 {'error': f'Failed to move lead to opportunity: {str(e)}'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     @action(detail=False, methods=['post'])
     def create_lead_from_company(self, request):

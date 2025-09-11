@@ -1767,7 +1767,9 @@ SOAR-AI Team`,
         name: `${selectedLeadForOpportunity.company} - Corporate Travel Solution`,
         stage: "discovery",
         probability: 65,
-        estimated_close_date: formatDate(new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)),
+        estimated_close_date: formatDate(
+          new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+        ),
         value: parseInt(selectedLeadForOpportunity.travelBudget.replace(/[^0-9]/g, "")) || 250000,
         description: `Opportunity created from qualified lead. ${selectedLeadForOpportunity.notes}`,
         next_steps: "Send initial proposal and schedule presentation",
