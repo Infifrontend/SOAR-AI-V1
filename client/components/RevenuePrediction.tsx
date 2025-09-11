@@ -997,6 +997,17 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
     }));
   };
 
+  const getCurrentYearlyPredictions = () => {
+    if (
+      dataSource === "dynamic" &&
+      dynamicData &&
+      dynamicData.yearlyForecast
+    ) {
+      return dynamicData.yearlyForecast;
+    }
+    return yearlyPredictions;
+  };
+
   // Load revenue prediction data on component mount
   useEffect(() => {
     const loadInitialData = async () => {
@@ -1957,14 +1968,14 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {yearlyPredictions.map((prediction) => (
+                      {getCurrentYearlyPredictions().map((prediction) => (
                         <TableRow key={prediction.year}>
                           <TableCell className="font-medium">
                             {prediction.year}
                           </TableCell>
                           <TableCell>
-                            {prediction.actualRevenue ? (
-                              formatCurrency(prediction.actualRevenue)
+                            {prediction.actual_revenue || prediction.actualRevenue ? (
+                              formatCurrency(prediction.actual_revenue || prediction.actualRevenue)
                             ) : (
                               <span className="text-muted-foreground">
                                 Projected
@@ -1972,7 +1983,7 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
                             )}
                           </TableCell>
                           <TableCell className="font-medium">
-                            {formatCurrency(prediction.predictedRevenue)}
+                            {formatCurrency(prediction.predicted_revenue || prediction.predictedRevenue)}
                           </TableCell>
                           <TableCell>{prediction.deals}</TableCell>
                           <TableCell>
@@ -1981,7 +1992,7 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
                             </span>
                           </TableCell>
                           <TableCell>
-                            {prediction.actualRevenue ? (
+                            {prediction.actual_revenue || prediction.actualRevenue ? (
                               <Badge
                                 variant="outline"
                                 className="text-green-600"

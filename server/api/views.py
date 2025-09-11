@@ -3327,6 +3327,21 @@ def process_revenue_data(df, filename):
                      "Booking_Month": "month"
                  }).sort_values("month").to_dict(orient="records"))
 
+    # --- Yearly Forecast ---
+    # Calculate yearly forecast by summing monthly revenues
+    yearly_revenue = df.groupby(
+        df['Booking_Month'].dt.year).agg(
+            total_revenue=('Total_Fare_Amount', 'sum'),
+            total_bookings=('Booking_ID', 'count')).reset_index()
+
+    yearly_forecast = []
+    for index, row in yearly_revenue.iterrows():
+        yearly_forecast.append({
+            'year': int(row['Booking_Month']),
+            'totalRevenue': float(row['total_revenue']),
+            'totalBookings': int(row['total_bookings'])
+        })
+
     # ================= SIMULATED KPI METRICS =================
 
     total_rows = len(df)
@@ -3361,28 +3376,36 @@ def process_revenue_data(df, filename):
         "yearOverYearGrowth": round(abs(growth_rate), 1)
     }
 
+    # Simulated predicted growth data
+    predicted_growth = {
+        "nextQuarter": round(current_revenue * (1 + random.uniform(0.05, 0.15)),
+                             2),
+        "nextYear": round(current_revenue * (1 + random.uniform(0.10, 0.25)),
+                          2)
+    }
+
+    # Simulated insights
+    insights = [
+        f"Processed {total_rows} rows from {filename}",
+        f"Detected {business_performance['activeClients']} active clients",
+        f"Total revenue of {business_performance['totalRevenue']:.2f}",
+        f"Growth rate simulated at {growth_rate:.1f}%"
+    ]
+
     return {
         "dataSource": {
             "filename": filename,
             "totalRows": total_rows,
-            "totalRevenue": float(current_revenue)
+            "totalRevenue": current_revenue,
         },
-        "businessPerformanceOverview":
-        business_performance,
-        "topDestinations":
-        top_destinations,
-        "monthlyBookingTrends":
-        monthly_trends,
-        "businessStats":
-        business_stats,
-        "keyMetrics":
-        key_metrics,
-        "insights": [
-            f"Processed {total_rows} rows from {filename}",
-            f"Detected {business_performance['activeClients']} active clients",
-            f"Total revenue of {business_performance['totalRevenue']:.2f}",
-            f"Growth rate simulated at {growth_rate:.1f}%"
-        ]
+        "businessPerformanceOverview": business_performance,
+        "topDestinations": top_destinations,
+        "monthlyBookingTrends": monthly_trends,
+        "yearlyForecast": yearly_forecast,
+        "businessStats": business_stats,
+        "keyMetrics": key_metrics,
+        "insights": insights,
+        "predictedGrowth": predicted_growth,
     }
 
 
