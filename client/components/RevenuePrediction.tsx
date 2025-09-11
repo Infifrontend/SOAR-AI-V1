@@ -1001,21 +1001,51 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
   };
 
   const getCurrentYearlyPredictions = () => {
-    if (
-      dataSource === "dynamic" &&
-      dynamicData &&
-      dynamicData.yearlyForecast
-    ) {
-      // Ensure the dynamic data has the correct structure
-      return dynamicData.yearlyForecast.map(prediction => ({
-        year: prediction.year,
-        actualRevenue: prediction.actual_revenue || prediction.actualRevenue,
-        predictedRevenue: prediction.predicted_revenue || prediction.predictedRevenue,
-        deals: prediction.deals || 0,
-        growth: prediction.growth || 0
-      }));
+    let predictions: any[] = [];
+
+    if (dataSource === "dynamic" && dynamicData && dynamicData.yearlyForecast) {
+      predictions = dynamicData.yearlyForecast.map((item, index, arr) => {
+        const prev = arr[index - 1];
+        const growth = prev
+          ? ((item.totalRevenue - prev.totalRevenue) / prev.totalRevenue) * 100
+          : 0;
+
+        return {
+          year: item.year,
+          actualRevenue:
+            item.year <= new Date().getFullYear() ? item.totalRevenue : null,
+          predictedRevenue: item.totalRevenue,
+          deals: item.totalBookings || 0,
+          growth: growth,
+        };
+      });
+    } else {
+      predictions = yearlyPredictions;
     }
-    return yearlyPredictions;
+
+    // Find the last available year from data
+    const lastEntry = predictions[predictions.length - 1];
+    const lastYear = lastEntry?.year || new Date().getFullYear();
+    let lastRevenue = lastEntry?.predictedRevenue || 0;
+
+    // 🔹 Add two more projection years
+    for (let i = 1; i <= 2; i++) {
+      const newYear = lastYear + i;
+      const projectedRevenue = lastRevenue * 1.1; // Example: +10% growth
+      const growth = ((projectedRevenue - lastRevenue) / lastRevenue) * 100;
+
+      predictions.push({
+        year: newYear,
+        actualRevenue: null, // future = forecast only
+        predictedRevenue: projectedRevenue,
+        deals: 0,
+        growth: growth,
+      });
+
+      lastRevenue = projectedRevenue; // carry forward for next loop
+    }
+
+    return predictions.sort((a, b) => a.year - b.year);
   };
 
   // Load revenue prediction data on component mount
@@ -1917,6 +1947,77 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
             <CardContent>
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {(() => {
+                    const predictions = getCurrentYearlyPredictions();
+                    const currentYear = new Date().getFullYear();
+
+                    // Pick current, next, and long-term years
+                    const displayYears = [
+                      currentYear,
+                      currentYear + 1,
+                      currentYear + 2,
+                    ];
+
+                    return displayYears.map((year, idx) => {
+                      const prediction = predictions.find(
+                        (p) => p.year === year,
+                      );
+
+                      const colors = [
+                        {
+                          border: "border-blue-200",
+                          bg: "bg-blue-50",
+                          text: "text-blue-600",
+                        },
+                        {
+                          border: "border-green-200",
+                          bg: "bg-green-50",
+                          text: "text-green-600",
+                        },
+                        {
+                          border: "border-purple-200",
+                          bg: "bg-purple-50",
+                          text: "text-purple-600",
+                        },
+                      ];
+
+                      const style = colors[idx % colors.length];
+
+                      return (
+                        <Card
+                          key={year}
+                          className={`border-2 ${style.border} ${style.bg}`}
+                        >
+                          <CardContent className="p-4 text-center">
+                            <div className={`text-2xl font-bold ${style.text}`}>
+                              {year}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              {idx === 0
+                                ? "Current Year"
+                                : idx === 1
+                                  ? "Next Year"
+                                  : "Long-term"}
+                            </div>
+                            <div className="text-lg font-medium mt-2">
+                              {prediction
+                                ? formatCurrency(prediction.predictedRevenue)
+                                : formatCurrency(0)}
+                            </div>
+                            <div className="text-sm text-green-600">
+                              +
+                              {prediction
+                                ? formatPercentage(prediction.growth)
+                                : "0%"}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    });
+                  })()}
+                </div>
+
+                {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <Card className="border-2 border-blue-200 bg-blue-50">
                     <CardContent className="p-4 text-center">
                       <div className="text-2xl font-bold text-blue-600">
@@ -1964,7 +2065,7 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
                     </CardContent>
                   </Card>
                 </div>
-
+ */}
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
@@ -1988,7 +2089,7 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
                               formatCurrency(prediction.actualRevenue)
                             ) : (
                               <span className="text-muted-foreground">
-                                Projected
+                                Pending
                               </span>
                             )}
                           </TableCell>
