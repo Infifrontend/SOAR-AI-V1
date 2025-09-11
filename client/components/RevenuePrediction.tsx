@@ -1006,7 +1006,14 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
       dynamicData &&
       dynamicData.yearlyForecast
     ) {
-      return dynamicData.yearlyForecast;
+      // Ensure the dynamic data has the correct structure
+      return dynamicData.yearlyForecast.map(prediction => ({
+        year: prediction.year,
+        actualRevenue: prediction.actual_revenue || prediction.actualRevenue,
+        predictedRevenue: prediction.predicted_revenue || prediction.predictedRevenue,
+        deals: prediction.deals || 0,
+        growth: prediction.growth || 0
+      }));
     }
     return yearlyPredictions;
   };
@@ -1977,8 +1984,8 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
                             {prediction.year}
                           </TableCell>
                           <TableCell>
-                            {prediction.actual_revenue || prediction.actualRevenue ? (
-                              formatCurrency(prediction.actual_revenue || prediction.actualRevenue)
+                            {prediction.actualRevenue ? (
+                              formatCurrency(prediction.actualRevenue)
                             ) : (
                               <span className="text-muted-foreground">
                                 Projected
@@ -1986,7 +1993,7 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
                             )}
                           </TableCell>
                           <TableCell className="font-medium">
-                            {formatCurrency(prediction.predicted_revenue || prediction.predictedRevenue)}
+                            {formatCurrency(prediction.predictedRevenue)}
                           </TableCell>
                           <TableCell>{prediction.deals}</TableCell>
                           <TableCell>
@@ -1995,7 +2002,7 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
                             </span>
                           </TableCell>
                           <TableCell>
-                            {prediction.actual_revenue || prediction.actualRevenue ? (
+                            {prediction.actualRevenue ? (
                               <Badge
                                 variant="outline"
                                 className="text-green-600"
