@@ -3322,19 +3322,13 @@ def process_revenue_data(df, filename):
         revenue=("Total_Fare_Amount", "sum")).reset_index().sort_values(
             by="bookings", ascending=False).head(5).to_dict(orient="records"))
 
-    # Group by month and create a proper date column for sorting
-    monthly_data = df.groupby(df["Booking_Month"].dt.to_period("M")).agg(
+    # --- Monthly Booking Trends ---
+    monthly_trends = (df.groupby(df["Booking_Month"].dt.strftime("%b %Y")).agg(
         bookings=("Booking_ID", "count"),
-        revenue=("Total_Fare_Amount", "sum")
-    ).reset_index()
-
-    # Convert period to string format and sort in descending order (latest first)
-    monthly_data["month"] = monthly_data["Booking_Month"].dt.strftime("%b %Y")
-    monthly_trends = (
-        monthly_data
-        .sort_values("Booking_Month", ascending=False)  # Latest first
-        .drop("Booking_Month", axis=1).to_dict(orient="records")
-    )
+        revenue=("Total_Fare_Amount",
+                 "sum")).reset_index().rename(columns={
+                     "Booking_Month": "month"
+                 }).sort_values("month").to_dict(orient="records"))
 
     # ================= SIMULATED KPI METRICS =================
 
@@ -3945,19 +3939,40 @@ class EmailCampaignViewSet(viewsets.ModelViewSet):
     def real_time_stats(self, request, pk=None):
         """Get real-time stats for a campaign"""
         try:
+            from django.db import connection
+            
+            # Ensure database connection is alive
+            connection.ensure_connection()
+            
             campaign = self.get_object()
 
-            # Get tracking data from EmailTracking model
-            tracking_records = EmailTracking.objects.filter(campaign=campaign)
+            # Get tracking data from EmailTracking model with connection handling
+            try:
+                tracking_records = EmailTracking.objects.filter(campaign=campaign)
+                total_opened = tracking_records.filter(open_count__gt=0).count()
+                total_clicked = tracking_records.filter(click_count__gt=0).count()
+                
+                # Get aggregate data safely
+                open_sum = tracking_records.aggregate(total=models.Sum('open_count'))['total'] or 0
+                click_sum = tracking_records.aggregate(total=models.Sum('click_count'))['total'] or 0
+                
+            except Exception as db_error:
+                print(f"Database error in real_time_stats: {str(db_error)}")
+                # Use campaign stored values as fallback
+                total_opened = campaign.emails_opened or 0
+                total_clicked = campaign.emails_clicked or 0
+                open_sum = total_opened
+                click_sum = total_clicked
 
             total_sent = campaign.emails_sent or 0
-            total_opened = tracking_records.filter(open_count__gt=0).count()
-            total_clicked = tracking_records.filter(click_count__gt=0).count()
 
             # Update campaign stats in real-time
-            campaign.emails_opened = total_opened
-            campaign.emails_clicked = total_clicked
-            campaign.save(update_fields=['emails_opened', 'emails_clicked'])
+            try:
+                campaign.emails_opened = total_opened
+                campaign.emails_clicked = total_clicked
+                campaign.save(update_fields=['emails_opened', 'emails_clicked'])
+            except Exception as save_error:
+                print(f"Error saving campaign stats: {str(save_error)}")
 
             # Calculate rates
             open_rate = (total_opened / total_sent * 100) if total_sent > 0 else 0
@@ -3973,13 +3988,14 @@ class EmailCampaignViewSet(viewsets.ModelViewSet):
                 'click_rate': round(click_rate, 2),
                 'status': campaign.status,
                 'sent_date': campaign.sent_date.isoformat() if campaign.sent_date else None,
-                'total_opens': tracking_records.aggregate(total=models.Sum('open_count'))['total'] or 0,
-                'total_clicks': tracking_records.aggregate(total=models.Sum('click_count'))['total'] or 0
+                'total_opens': open_sum,
+                'total_clicks': click_sum
             }
 
             return Response(stats)
 
         except Exception as e:
+            print(f"Error in real_time_stats: {str(e)}")
             return Response(
                 {'error': f'Failed to get campaign stats: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -4110,6 +4126,9 @@ def get_history(request):
 def track_email_open(request, tracking_id):
     """Track email opens via tracking pixel"""
     try:
+        print(f"Open tracking request received for: {tracking_id}")
+        print(f"Request headers: {dict(request.META)}")
+        
         tracking = get_object_or_404(EmailTracking, tracking_id=tracking_id)
         
         # Update open tracking
@@ -4131,6 +4150,7 @@ def track_email_open(request, tracking_id):
         campaign.emails_opened = campaign.email_tracking.filter(open_count__gt=0).count()
         campaign.save(update_fields=['emails_opened'])
         
+        print(f"Email open tracked successfully: {tracking_id} for campaign {campaign.name}")
         logger.info(f"Email open tracked: {tracking_id} for campaign {campaign.name}")
         
         # Return 1x1 transparent pixel
@@ -4140,15 +4160,20 @@ def track_email_open(request, tracking_id):
         response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
         response['Pragma'] = 'no-cache'
         response['Expires'] = '0'
+        response['Access-Control-Allow-Origin'] = '*'
+        response['Access-Control-Allow-Methods'] = 'GET'
+        response['Access-Control-Allow-Headers'] = '*'
         return response
         
     except EmailTracking.DoesNotExist:
+        print(f"Email tracking not found: {tracking_id}")
         logger.error(f"Email tracking not found: {tracking_id}")
         # Still return pixel to avoid broken images
         from django.http import HttpResponse
         pixel_data = b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\x21\xF9\x04\x01\x00\x00\x00\x00\x2C\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02\x04\x01\x00\x3B'
         return HttpResponse(pixel_data, content_type='image/gif')
     except Exception as e:
+        print(f"Error tracking email open: {str(e)}")
         logger.error(f"Error tracking email open: {str(e)}")
         from django.http import HttpResponse
         pixel_data = b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\x21\xF9\x04\x01\x00\x00\x00\x00\x2C\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02\x04\x01\x00\x3B'

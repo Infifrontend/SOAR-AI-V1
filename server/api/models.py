@@ -794,16 +794,27 @@ class EmailCampaign(models.Model):
         # Get base URL for tracking - use the current server URL
         base_url = getattr(settings, 'BASE_URL', 'https://51f54198-a9a2-4b01-b85b-23549e0b6e1c-00-385i2ayjj8nal.pike.replit.dev:8000')
 
-        # Add tracking pixel for open tracking
-        tracking_pixel = f'<img src="{base_url}/api/track/open/{tracking.tracking_id}/" width="1" height="1" style="display:none;border:0;outline:0;" alt="" />'
+        # Add tracking pixel for open tracking - make it more visible for debugging
+        tracking_pixel = f'<img src="{base_url}/api/track/open/{tracking.tracking_id}/" width="1" height="1" style="display:block !important;position:absolute;top:-9999px;left:-9999px;border:0;outline:0;background:transparent;" alt="" />'
 
-        # Insert tracking pixel before </body> or at the end if no </body>
+        # Insert tracking pixel in multiple places to ensure it loads
+        # 1. Right after <body> tag if it exists
+        if '<body' in content.lower():
+            body_pattern = r'(<body[^>]*>)'
+            content = re.sub(body_pattern, f'\\1\n{tracking_pixel}\n', content, count=1, flags=re.IGNORECASE)
+        
+        # 2. Also add before closing tags as backup
         if '</body>' in content.lower():
-            content = content.replace('</body>', f'{tracking_pixel}\n</body>', 1)
+            content = content.replace('</body>', f'\n{tracking_pixel}\n</body>', 1)
         elif '</html>' in content.lower():
-            content = content.replace('</html>', f'{tracking_pixel}\n</html>', 1)
+            content = content.replace('</html>', f'\n{tracking_pixel}\n</html>', 1)
         else:
-            content += f'\n{tracking_pixel}'
+            # If no HTML structure, add at the beginning
+            content = f'{tracking_pixel}\n{content}'
+
+        # Add a second tracking pixel as HTML comment for debugging
+        debug_pixel = f'<!-- Tracking Pixel: {base_url}/api/track/open/{tracking.tracking_id}/ -->\n'
+        content = debug_pixel + content
 
         # Wrap all links for click tracking (excluding mailto and tel links)
         def wrap_link(match):
