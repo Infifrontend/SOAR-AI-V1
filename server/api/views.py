@@ -3349,6 +3349,61 @@ def process_revenue_data(df, filename):
             'totalBookings': int(row['total_bookings'])
         })
 
+    # --- Corporate Analysis ---
+    # Group by Corporate_Account_Code and calculate metrics for each corporate client
+    corporate_analysis = df.groupby("Corporate_Account_Code").agg(
+        current_revenue=("Total_Fare_Amount", "sum"),
+        total_bookings=("Booking_ID", "count"),
+        unique_destinations=("Destination_Airport_Code", "nunique"),
+        avg_booking_value=("Total_Fare_Amount", "mean")
+    ).reset_index()
+
+    # Calculate predictions and metrics for each corporate client
+    corporate_revenue_data = []
+    for index, corp in corporate_analysis.iterrows():
+        corp_code = corp["Corporate_Account_Code"]
+        current_rev = float(corp["current_revenue"])
+        total_bookings = int(corp["total_bookings"])
+        
+        # Calculate growth rate based on booking patterns
+        growth_multiplier = min(1.5, 1 + (total_bookings / 100) * 0.1)  # Higher bookings = higher growth potential
+        base_growth = random.uniform(8, 25)
+        
+        # Calculate predicted revenue with growth
+        predicted_revenue = current_rev * growth_multiplier * (1 + base_growth / 100)
+        
+        # Calculate growth percentage
+        growth_rate = ((predicted_revenue - current_rev) / current_rev * 100) if current_rev > 0 else 0
+        
+        # Calculate confidence based on booking volume and revenue stability
+        confidence_score = min(95, 60 + (total_bookings / 10) + random.uniform(-5, 10))
+        
+        # Calculate active deals (simulate based on booking frequency)
+        active_deals = max(1, int(total_bookings * random.uniform(0.1, 0.3)))
+        
+        # Calculate probability based on current performance
+        if current_rev > 1000000:
+            probability = random.uniform(75, 95)
+        elif current_rev > 500000:
+            probability = random.uniform(60, 85)
+        else:
+            probability = random.uniform(45, 75)
+
+        corporate_revenue_data.append({
+            "CompanyName": f"Corporate Client {corp_code}",
+            "CurrentRevenue": round(current_rev, 2),
+            "PredictedRevenue": round(predicted_revenue, 2),
+            "GrowthRate": round(growth_rate, 1),
+            "Confidence": round(confidence_score, 1),
+            "ActiveDeals": active_deals,
+            "Probability": round(probability, 1),
+            "TotalBookings": total_bookings,
+            "AvgBookingValue": round(float(corp["avg_booking_value"]), 2)
+        })
+
+    # Sort by current revenue (highest first)
+    corporate_revenue_data.sort(key=lambda x: x["CurrentRevenue"], reverse=True)
+
     # ================= SIMULATED KPI METRICS =================
 
     total_rows = len(df)
@@ -3396,7 +3451,8 @@ def process_revenue_data(df, filename):
         f"Processed {total_rows} rows from {filename}",
         f"Detected {business_performance['activeClients']} active clients",
         f"Total revenue of {business_performance['totalRevenue']:.2f}",
-        f"Growth rate simulated at {growth_rate:.1f}%"
+        f"Growth rate simulated at {growth_rate:.1f}%",
+        f"Corporate analysis generated for {len(corporate_revenue_data)} clients"
     ]
 
     return {
@@ -3409,6 +3465,7 @@ def process_revenue_data(df, filename):
         "topDestinations": top_destinations,
         "monthlyBookingTrends": monthly_trends,
         "yearlyForecast": yearly_forecast,
+        "corporateRevenue": corporate_revenue_data,  # New corporate analysis data
         "businessStats": business_stats,
         "keyMetrics": key_metrics,
         "insights": insights,
