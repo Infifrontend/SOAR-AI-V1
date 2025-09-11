@@ -1,8 +1,7 @@
-
 import { useState, useCallback } from 'react';
 import axios, { AxiosResponse } from 'axios';
 
-const API_BASE_URL = '/api';
+const API_BASE_URL = 'https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:8000/api';
 
 interface ApiState<T> {
   data: T | null;
@@ -88,7 +87,7 @@ export const useTemplateApi = () => {
           },
         }
       );
-      
+
       setData(response.data);
       return response.data;
     } catch (error: any) {
@@ -115,7 +114,7 @@ export const useTemplateApi = () => {
           },
         }
       );
-      
+
       setData(response.data);
       return response.data;
     } catch (error: any) {
@@ -153,7 +152,7 @@ export const useTemplateApi = () => {
       const response: AxiosResponse<CampaignTemplate> = await axios.get(
         `${API_BASE_URL}/campaign-templates/${id}/`
       );
-      
+
       setData(response.data);
       return response.data;
     } catch (error: any) {

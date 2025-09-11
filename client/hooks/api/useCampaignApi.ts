@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import axios, { AxiosResponse } from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+const API_BASE_URL = 'https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:8000/api';
 
 interface ApiState<T> {
   data: T | null;
@@ -115,20 +115,20 @@ export const useCampaignApi = () => {
         // Paginated response - collect all pages
         let allCampaigns = [...response.data.results];
         let nextUrl = response.data.next;
-        
+
         // Fetch remaining pages if they exist
         while (nextUrl) {
           const nextResponse = await axios.get(nextUrl);
           allCampaigns = [...allCampaigns, ...nextResponse.data.results];
           nextUrl = nextResponse.data.next;
         }
-        
+
         campaignsData = allCampaigns;
       } else {
         // Non-paginated response
         campaignsData = response.data;
       }
-      
+
       if (!Array.isArray(campaignsData)) {
         console.error('Invalid campaigns data format:', response.data);
         setData([]);

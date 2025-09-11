@@ -1,9 +1,8 @@
-
 import { useState, useCallback } from 'react';
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 
 // Base API configuration
-export const API_BASE_URL = '/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:8000/api';
 
 // Axios instance with default configuration
 export const apiClient = axios.create({
@@ -154,7 +153,7 @@ export const useFileUpload = () => {
   ) => {
     const formData = new FormData();
     formData.append('file', file);
-    
+
     if (additionalData) {
       Object.entries(additionalData).forEach(([key, value]) => {
         formData.append(key, value);
