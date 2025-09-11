@@ -3359,7 +3359,7 @@ def process_revenue_data(df, filename):
             'totalBookings': int(row['total_bookings'])
         })
 
-    # --- Corporate Analysis ---
+    # --- Enhanced Corporate Analysis ---
     # Group by Corporate_Account_Code and calculate metrics for each corporate client
     corporate_analysis = df.groupby("Corporate_Account_Code").agg(
         current_revenue=("Total_Fare_Amount", "sum"),
@@ -3373,6 +3373,33 @@ def process_revenue_data(df, filename):
         corp_code = corp["Corporate_Account_Code"]
         current_rev = float(corp["current_revenue"])
         total_bookings = int(corp["total_bookings"])
+
+        # Filter data for this specific corporate client
+        corp_data = df[df["Corporate_Account_Code"] == corp_code].copy()
+
+        # Generate monthly data for this corporate client
+        monthly_corp_data = corp_data.groupby(corp_data["Booking_Month"].dt.to_period("M")).agg(
+            revenue=("Total_Fare_Amount", "sum"),
+            bookings=("Booking_ID", "count")
+        ).reset_index()
+        monthly_corp_data["month"] = monthly_corp_data["Booking_Month"].dt.strftime("%b %Y")
+        monthly_breakdown = monthly_corp_data.sort_values("Booking_Month", ascending=False).drop("Booking_Month", axis=1).to_dict(orient="records")
+
+        # Generate yearly data for this corporate client
+        yearly_corp_data = corp_data.groupby(corp_data["Booking_Month"].dt.year).agg(
+            revenue=("Total_Fare_Amount", "sum"),
+            bookings=("Booking_ID", "count")
+        ).reset_index()
+        yearly_corp_data.rename(columns={"Booking_Month": "year"}, inplace=True)
+        yearly_breakdown = yearly_corp_data.to_dict(orient="records")
+
+        # Generate quarterly data for this corporate client
+        quarterly_corp_data = corp_data.groupby(corp_data["Booking_Month"].dt.to_period("Q")).agg(
+            revenue=("Total_Fare_Amount", "sum"),
+            bookings=("Booking_ID", "count")
+        ).reset_index()
+        quarterly_corp_data["quarter"] = quarterly_corp_data["Booking_Month"].dt.strftime("Q%q %Y")
+        quarterly_breakdown = quarterly_corp_data.sort_values("Booking_Month", ascending=False).drop("Booking_Month", axis=1).to_dict(orient="records")
 
         # Calculate growth rate based on booking patterns
         growth_multiplier = min(
@@ -3421,7 +3448,13 @@ def process_revenue_data(df, filename):
             "TotalBookings":
             total_bookings,
             "AvgBookingValue":
-            round(float(corp["avg_booking_value"]), 2)
+            round(float(corp["avg_booking_value"]), 2),
+            "MonthlyData":
+            monthly_breakdown,
+            "YearlyData":
+            yearly_breakdown,
+            "QuarterlyData":
+            quarterly_breakdown
         })
 
     # Sort by current revenue (highest first)
