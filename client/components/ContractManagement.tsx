@@ -1269,7 +1269,7 @@ export function ContractManagement({
     const aiRec = aiRecommendations[contract.id];
 
     // Create CSV headers and data
-    const csvHeaders = [
+    const csvHeaders =  [
       "Contract ID",
       "Vendor",
       "Client",
