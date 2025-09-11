@@ -1589,26 +1589,35 @@ class LeadViewSet(viewsets.ModelViewSet):
             # Check if lead is qualified
             if lead.status != 'qualified':
                 return Response(
-                    {'error': 'Only qualified leads can be moved to opportunities'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                    {
+                        'error':
+                        'Only qualified leads can be moved to opportunities'
+                    },
+                    status=status.HTTP_400_BAD_REQUEST)
 
             # Check if lead has already been moved to opportunity
             if Opportunity.objects.filter(lead=lead).exists():
                 return Response(
-                    {'error': 'This lead has already been moved to opportunities'},
+                    {
+                        'error':
+                        'This lead has already been moved to opportunities'
+                    },
                     status=status.HTTP_400_BAD_REQUEST)
 
             from django.db import transaction
             try:
                 with transaction.atomic():
                     # Lock the lead record
-                    locked_lead = Lead.objects.select_for_update().get(id=lead.id)
+                    locked_lead = Lead.objects.select_for_update().get(
+                        id=lead.id)
 
                     # Final check inside transaction
                     if Opportunity.objects.filter(lead=locked_lead).exists():
                         return Response(
-                            {'error': 'This lead has already been moved to opportunities'},
+                            {
+                                'error':
+                                'This lead has already been moved to opportunities'
+                            },
                             status=status.HTTP_400_BAD_REQUEST)
 
                     # Get opportunity data
@@ -1616,31 +1625,35 @@ class LeadViewSet(viewsets.ModelViewSet):
 
                     # Validate and process value
                     try:
-                        opp_value = opportunity_data.get('value', locked_lead.estimated_value or 250000)
+                        opp_value = opportunity_data.get(
+                            'value', locked_lead.estimated_value or 250000)
                         if isinstance(opp_value, str):
                             import re
                             opp_value = re.sub(r'[^\d.]', '', str(opp_value))
-                            opp_value = float(opp_value) if opp_value else 250000
+                            opp_value = float(
+                                opp_value) if opp_value else 250000
                     except (ValueError, TypeError):
                         opp_value = 250000
 
                     # ✅ Handle estimated_close_date safely
                     est_close_raw = opportunity_data.get(
                         'estimated_close_date',
-                        (timezone.now().date() + timedelta(days=30))
-                    )
+                        (timezone.now().date() + timedelta(days=30)))
 
                     if isinstance(est_close_raw, str):
                         try:
                             # Try YYYY-MM-DD first
-                            est_close_date = datetime.strptime(est_close_raw, "%Y-%m-%d").date()
+                            est_close_date = datetime.strptime(
+                                est_close_raw, "%Y-%m-%d").date()
                         except ValueError:
                             try:
                                 # Try DD-MM-YYYY if first fails
-                                est_close_date = datetime.strptime(est_close_raw, "%d-%m-%Y").date()
+                                est_close_date = datetime.strptime(
+                                    est_close_raw, "%d-%m-%Y").date()
                             except ValueError:
                                 # Fallback: 30 days from now
-                                est_close_date = timezone.now().date() + timedelta(days=30)
+                                est_close_date = timezone.now().date(
+                                ) + timedelta(days=30)
                     else:
                         est_close_date = est_close_raw
 
@@ -1652,7 +1665,8 @@ class LeadViewSet(viewsets.ModelViewSet):
                             f"{locked_lead.company.name} - Corporate Travel Solution"
                         ),
                         stage=opportunity_data.get('stage', 'discovery'),
-                        probability=int(opportunity_data.get('probability', 65)),
+                        probability=int(opportunity_data.get(
+                            'probability', 65)),
                         estimated_close_date=est_close_date,
                         value=opp_value,
                         description=opportunity_data.get(
@@ -1661,9 +1675,7 @@ class LeadViewSet(viewsets.ModelViewSet):
                         ),
                         next_steps=opportunity_data.get(
                             'next_steps',
-                            'Send initial proposal and schedule presentation'
-                        )
-                    )
+                            'Send initial proposal and schedule presentation'))
 
                     # Update lead
                     locked_lead.moved_to_opportunity = True
@@ -1684,15 +1696,14 @@ class LeadViewSet(viewsets.ModelViewSet):
                             lead=locked_lead,
                             history_type='opportunity_created',
                             action='Lead moved to opportunity',
-                            details=(
-                                f'Lead successfully moved to sales opportunity: '
-                                f'{opportunity.name}. Deal value: ${opp_value:,.0f}. '
-                                'Lead remains in leads table for tracking.'
-                            ),
+                            details=
+                            (f'Lead successfully moved to sales opportunity: '
+                             f'{opportunity.name}. Deal value: ${opp_value:,.0f}. '
+                             'Lead remains in leads table for tracking.'),
                             icon='briefcase',
-                            user=request.user if request.user.is_authenticated else None,
-                            timestamp=timezone.now()
-                        )
+                            user=request.user
+                            if request.user.is_authenticated else None,
+                            timestamp=timezone.now())
                     except Exception as history_error:
                         print(f"Error creating lead history: {history_error}")
                         # Continue even if history creation fails
@@ -1701,21 +1712,20 @@ class LeadViewSet(viewsets.ModelViewSet):
                 print(f"Error in transaction: {str(e)}")
                 return Response(
                     {'error': f'Failed to create opportunity: {str(e)}'},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
             # Serialize and return
             opportunity_serializer = OpportunitySerializer(opportunity)
             return Response(
                 {
                     'success': True,
-                    'message': f'{lead.company.name} has been successfully moved to opportunities',
+                    'message':
+                    f'{lead.company.name} has been successfully moved to opportunities',
                     'opportunity': opportunity_serializer.data,
                     'lead_id': lead.id,
                     'has_opportunity': True
                 },
-                status=status.HTTP_201_CREATED
-            )
+                status=status.HTTP_201_CREATED)
 
         except Exception as e:
             print(f"Error in move_to_opportunity: {str(e)}")
@@ -1945,15 +1955,15 @@ class LeadViewSet(viewsets.ModelViewSet):
                 # Message is already complete HTML (from standard template)
                 html_message = message
                 plain_text_message = strip_tags(message)
-                print(f"Using pre-formatted standard template: {template_used}")
+                print(
+                    f"Using pre-formatted standard template: {template_used}")
             else:
                 # Apply standard SOAR-AI template layout using EmailTemplateService
                 html_message, plain_text_message = EmailTemplateService.get_standard_template(
                     subject=subject,
                     content=message,
                     recipient_name=recipient_name or "Valued Partner",
-                    template_type="lead"
-                )
+                    template_type="lead")
 
             # Use simple send_mail with html_message parameter for proper HTML rendering
             send_mail(
@@ -1967,7 +1977,8 @@ class LeadViewSet(viewsets.ModelViewSet):
 
             return Response({
                 "success": True,
-                "message": f"Email sent to {recipient_email} using standard SOAR-AI template",
+                "message":
+                f"Email sent to {recipient_email} using standard SOAR-AI template",
                 "subject": subject,
                 "recipient": recipient_email,
                 "recipient_name": recipient_name,
@@ -2018,7 +2029,8 @@ class LeadViewSet(viewsets.ModelViewSet):
 
                 try:
                     # Check if message is already complete HTML (standard template)
-                    is_complete_html = message.strip().startswith('<!DOCTYPE') or message.strip().startswith('<html')
+                    is_complete_html = message.strip().startswith(
+                        '<!DOCTYPE') or message.strip().startswith('<html')
 
                     if is_complete_html:
                         # Message is already complete HTML (from standard template)
@@ -2030,8 +2042,7 @@ class LeadViewSet(viewsets.ModelViewSet):
                             subject=subject,
                             content=message,
                             recipient_name=recipient_name or "Valued Partner",
-                            template_type="corporate"
-                        )
+                            template_type="corporate")
 
                     # Use simple send_mail with html_message parameter for proper HTML rendering
                     send_mail(
@@ -2466,13 +2477,15 @@ class OpportunityViewSet(viewsets.ModelViewSet):
         """
         try:
             # Get all closed won opportunities with related data
-            closed_won_opps = Opportunity.objects.filter(stage='closed_won').select_related(
-                'lead__company', 'lead__contact'
-            ).prefetch_related('activities').order_by('-created_at')
+            closed_won_opps = Opportunity.objects.filter(
+                stage='closed_won').select_related(
+                    'lead__company', 'lead__contact').prefetch_related(
+                        'activities').order_by('-created_at')
 
             # Use the optimized serializer to return full opportunity data
             from .serializers import OptimizedOpportunitySerializer
-            serializer = OptimizedOpportunitySerializer(closed_won_opps, many=True)
+            serializer = OptimizedOpportunitySerializer(closed_won_opps,
+                                                        many=True)
 
             return Response(serializer.data, status=200)
 
@@ -3323,23 +3336,20 @@ def process_revenue_data(df, filename):
     # Group by month and create a proper date column for sorting
     monthly_data = df.groupby(df["Booking_Month"].dt.to_period("M")).agg(
         bookings=("Booking_ID", "count"),
-        revenue=("Total_Fare_Amount", "sum")
-    ).reset_index()
+        revenue=("Total_Fare_Amount", "sum")).reset_index()
 
     # Convert period to string format and sort in descending order (latest first)
     monthly_data["month"] = monthly_data["Booking_Month"].dt.strftime("%b %Y")
     monthly_trends = (
-        monthly_data
-        .sort_values("Booking_Month", ascending=False)  # Latest first
-        .drop("Booking_Month", axis=1).to_dict(orient="records")
-    )
+        monthly_data.sort_values("Booking_Month",
+                                 ascending=False)  # Latest first
+        .drop("Booking_Month", axis=1).to_dict(orient="records"))
 
     # --- Yearly Forecast ---
     # Calculate yearly forecast by summing monthly revenues
-    yearly_revenue = df.groupby(
-        df['Booking_Month'].dt.year).agg(
-            total_revenue=('Total_Fare_Amount', 'sum'),
-            total_bookings=('Booking_ID', 'count')).reset_index()
+    yearly_revenue = df.groupby(df['Booking_Month'].dt.year).agg(
+        total_revenue=('Total_Fare_Amount', 'sum'),
+        total_bookings=('Booking_ID', 'count')).reset_index()
 
     yearly_forecast = []
     for index, row in yearly_revenue.iterrows():
@@ -3355,8 +3365,7 @@ def process_revenue_data(df, filename):
         current_revenue=("Total_Fare_Amount", "sum"),
         total_bookings=("Booking_ID", "count"),
         unique_destinations=("Destination_Airport_Code", "nunique"),
-        avg_booking_value=("Total_Fare_Amount", "mean")
-    ).reset_index()
+        avg_booking_value=("Total_Fare_Amount", "mean")).reset_index()
 
     # Calculate predictions and metrics for each corporate client
     corporate_revenue_data = []
@@ -3364,23 +3373,28 @@ def process_revenue_data(df, filename):
         corp_code = corp["Corporate_Account_Code"]
         current_rev = float(corp["current_revenue"])
         total_bookings = int(corp["total_bookings"])
-        
+
         # Calculate growth rate based on booking patterns
-        growth_multiplier = min(1.5, 1 + (total_bookings / 100) * 0.1)  # Higher bookings = higher growth potential
+        growth_multiplier = min(
+            1.5, 1 + (total_bookings / 100) *
+            0.1)  # Higher bookings = higher growth potential
         base_growth = random.uniform(8, 25)
-        
+
         # Calculate predicted revenue with growth
-        predicted_revenue = current_rev * growth_multiplier * (1 + base_growth / 100)
-        
+        predicted_revenue = current_rev * growth_multiplier * (
+            1 + base_growth / 100)
+
         # Calculate growth percentage
-        growth_rate = ((predicted_revenue - current_rev) / current_rev * 100) if current_rev > 0 else 0
-        
+        growth_rate = ((predicted_revenue - current_rev) / current_rev *
+                       100) if current_rev > 0 else 0
+
         # Calculate confidence based on booking volume and revenue stability
-        confidence_score = min(95, 60 + (total_bookings / 10) + random.uniform(-5, 10))
-        
+        confidence_score = min(
+            95, 60 + (total_bookings / 10) + random.uniform(-5, 10))
+
         # Calculate active deals (simulate based on booking frequency)
         active_deals = max(1, int(total_bookings * random.uniform(0.1, 0.3)))
-        
+
         # Calculate probability based on current performance
         if current_rev > 1000000:
             probability = random.uniform(75, 95)
@@ -3390,19 +3404,29 @@ def process_revenue_data(df, filename):
             probability = random.uniform(45, 75)
 
         corporate_revenue_data.append({
-            "CompanyName": f"Corporate Client {corp_code}",
-            "CurrentRevenue": round(current_rev, 2),
-            "PredictedRevenue": round(predicted_revenue, 2),
-            "GrowthRate": round(growth_rate, 1),
-            "Confidence": round(confidence_score, 1),
-            "ActiveDeals": active_deals,
-            "Probability": round(probability, 1),
-            "TotalBookings": total_bookings,
-            "AvgBookingValue": round(float(corp["avg_booking_value"]), 2)
+            "CompanyName":
+            f"{corp_code}",
+            "CurrentRevenue":
+            round(current_rev, 2),
+            "PredictedRevenue":
+            round(predicted_revenue, 2),
+            "GrowthRate":
+            round(growth_rate, 1),
+            "Confidence":
+            round(confidence_score, 1),
+            "ActiveDeals":
+            active_deals,
+            "Probability":
+            round(probability, 1),
+            "TotalBookings":
+            total_bookings,
+            "AvgBookingValue":
+            round(float(corp["avg_booking_value"]), 2)
         })
 
     # Sort by current revenue (highest first)
-    corporate_revenue_data.sort(key=lambda x: x["CurrentRevenue"], reverse=True)
+    corporate_revenue_data.sort(key=lambda x: x["CurrentRevenue"],
+                                reverse=True)
 
     # ================= SIMULATED KPI METRICS =================
 
@@ -3440,8 +3464,8 @@ def process_revenue_data(df, filename):
 
     # Simulated predicted growth data
     predicted_growth = {
-        "nextQuarter": round(current_revenue * (1 + random.uniform(0.05, 0.15)),
-                             2),
+        "nextQuarter":
+        round(current_revenue * (1 + random.uniform(0.05, 0.15)), 2),
         "nextYear": round(current_revenue * (1 + random.uniform(0.10, 0.25)),
                           2)
     }
@@ -3465,7 +3489,7 @@ def process_revenue_data(df, filename):
         "topDestinations": top_destinations,
         "monthlyBookingTrends": monthly_trends,
         "yearlyForecast": yearly_forecast,
-        "corporateRevenue": corporate_revenue_data,  # New corporate analysis data
+        "corporateRevenue":corporate_revenue_data,  # New corporate analysis data
         "businessStats": business_stats,
         "keyMetrics": key_metrics,
         "insights": insights,
@@ -3682,7 +3706,7 @@ def top_qualified_leads(request):
 
         # Get top qualified leads ordered by score and estimated value
         top_leads = Lead.objects.select_related('company', 'contact').filter(
-            status='qualified').order_by('-score','-estimated_value')[:limit]
+            status='qualified').order_by('-score', '-estimated_value')[:limit]
 
         leads_data = []
         for lead in top_leads:
@@ -3884,9 +3908,10 @@ class EmailCampaignViewSet(viewsets.ModelViewSet):
             return super().list(request, *args, **kwargs)
         except (OperationalError, ProgrammingError) as e:
             error_message = str(e).lower()
-            if ('ssl connection has been closed' in error_message or
-                'connection' in error_message or
-                'column' in error_message and 'does not exist' in error_message):
+            if ('ssl connection has been closed' in error_message
+                    or 'connection' in error_message
+                    or 'column' in error_message
+                    and 'does not exist' in error_message):
                 # Try to close and reopen connection
                 connection.close()
                 try:
@@ -4033,13 +4058,18 @@ class EmailCampaignViewSet(viewsets.ModelViewSet):
             # Get tracking data from EmailTracking model with connection handling
             try:
                 from django.db import models as db_models
-                tracking_records = EmailTracking.objects.filter(campaign=campaign)
-                total_opened = tracking_records.filter(open_count__gt=0).count()
-                total_clicked = tracking_records.filter(click_count__gt=0).count()
+                tracking_records = EmailTracking.objects.filter(
+                    campaign=campaign)
+                total_opened = tracking_records.filter(
+                    open_count__gt=0).count()
+                total_clicked = tracking_records.filter(
+                    click_count__gt=0).count()
 
                 # Get aggregate data safely
-                open_sum = tracking_records.aggregate(total=db_models.Sum('open_count'))['total'] or 0
-                click_sum = tracking_records.aggregate(total=db_models.Sum('click_count'))['total'] or 0
+                open_sum = tracking_records.aggregate(
+                    total=db_models.Sum('open_count'))['total'] or 0
+                click_sum = tracking_records.aggregate(
+                    total=db_models.Sum('click_count'))['total'] or 0
 
             except Exception as db_error:
                 print(f"Database error in real_time_stats: {str(db_error)}")
@@ -4055,26 +4085,40 @@ class EmailCampaignViewSet(viewsets.ModelViewSet):
             try:
                 campaign.emails_opened = total_opened
                 campaign.emails_clicked = total_clicked
-                campaign.save(update_fields=['emails_opened', 'emails_clicked'])
+                campaign.save(
+                    update_fields=['emails_opened', 'emails_clicked'])
             except Exception as save_error:
                 print(f"Error saving campaign stats: {str(save_error)}")
 
             # Calculate rates
-            open_rate = (total_opened / total_sent * 100) if total_sent > 0 else 0
-            click_rate = (total_clicked / total_sent * 100) if total_sent > 0 else 0
+            open_rate = (total_opened / total_sent *
+                         100) if total_sent > 0 else 0
+            click_rate = (total_clicked / total_sent *
+                          100) if total_sent > 0 else 0
 
             stats = {
-                'campaign_id': campaign.id,
-                'campaign_name': campaign.name,
-                'emails_sent': total_sent,
-                'emails_opened': total_opened,
-                'emails_clicked': total_clicked,
-                'open_rate': round(open_rate, 2),
-                'click_rate': round(click_rate, 2),
-                'status': campaign.status,
-                'sent_date': campaign.sent_date.isoformat() if campaign.sent_date else None,
-                'total_opens': open_sum,
-                'total_clicks': click_sum
+                'campaign_id':
+                campaign.id,
+                'campaign_name':
+                campaign.name,
+                'emails_sent':
+                total_sent,
+                'emails_opened':
+                total_opened,
+                'emails_clicked':
+                total_clicked,
+                'open_rate':
+                round(open_rate, 2),
+                'click_rate':
+                round(click_rate, 2),
+                'status':
+                campaign.status,
+                'sent_date':
+                campaign.sent_date.isoformat() if campaign.sent_date else None,
+                'total_opens':
+                open_sum,
+                'total_clicks':
+                click_sum
             }
 
             return Response(stats)
@@ -4212,8 +4256,12 @@ def track_email_open(request, tracking_id):
     """Track email opens via tracking pixel"""
     try:
         print(f"🔵 OPEN TRACKING: Request received for {tracking_id}")
-        print(f"🔵 OPEN TRACKING: User-Agent: {request.META.get('HTTP_USER_AGENT', 'None')}")
-        print(f"🔵 OPEN TRACKING: IP: {request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', 'None'))}")
+        print(
+            f"🔵 OPEN TRACKING: User-Agent: {request.META.get('HTTP_USER_AGENT', 'None')}"
+        )
+        print(
+            f"🔵 OPEN TRACKING: IP: {request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', 'None'))}"
+        )
 
         tracking = get_object_or_404(EmailTracking, tracking_id=tracking_id)
 
@@ -4227,9 +4275,10 @@ def track_email_open(request, tracking_id):
         tracking.open_count += 1
 
         # Get user agent and IP
-        tracking.user_agent = request.META.get('HTTP_USER_AGENT', '')[:500]  # Limit length
-        tracking.ip_address = request.META.get('HTTP_X_FORWARDED_FOR', 
-                                             request.META.get('REMOTE_ADDR', ''))
+        tracking.user_agent = request.META.get('HTTP_USER_AGENT',
+                                               '')[:500]  # Limit length
+        tracking.ip_address = request.META.get(
+            'HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', ''))
 
         tracking.save()
 
@@ -4239,9 +4288,15 @@ def track_email_open(request, tracking_id):
         campaign.emails_opened = unique_opens
         campaign.save(update_fields=['emails_opened'])
 
-        print(f"🟢 OPEN TRACKING SUCCESS: {tracking_id} for campaign {campaign.name}")
-        print(f"🟢 OPEN TRACKING: Open count: {tracking.open_count}, Campaign opens: {campaign.emails_opened}")
-        logger.info(f"Email open tracked: {tracking_id} for campaign {campaign.name} (first={was_first_open})")
+        print(
+            f"🟢 OPEN TRACKING SUCCESS: {tracking_id} for campaign {campaign.name}"
+        )
+        print(
+            f"🟢 OPEN TRACKING: Open count: {tracking.open_count}, Campaign opens: {campaign.emails_opened}"
+        )
+        logger.info(
+            f"Email open tracked: {tracking_id} for campaign {campaign.name} (first={was_first_open})"
+        )
 
         # Return 1x1 transparent pixel
         from django.http import HttpResponse
@@ -4279,7 +4334,8 @@ def track_email_click(request, tracking_id):
         target_url = request.GET.get('url', '')
 
         if not target_url:
-            return HttpResponseRedirect('https://soarai.com')  # Default redirect
+            return HttpResponseRedirect(
+                'https://soarai.com')  # Default redirect
 
         # Decode the URL
         original_url = urllib.parse.unquote(target_url)
