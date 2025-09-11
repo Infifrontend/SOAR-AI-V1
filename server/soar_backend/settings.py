@@ -217,8 +217,8 @@ LOGGING = {
 }
 
 
-# Domain URL for email tracking
-DOMAIN_URL = 'https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev'
+# Domain URL for email tracking - using current Replit deployment URL
+DOMAIN_URL = 'https://51f54198-a9a2-4b01-b85b-23549e0b6e1c-00-385i2ayjj8nal.pike.replit.dev'
 
 # CSRF exemption for API endpoints to avoid CORS issues
 CSRF_EXEMPT_URLS = [r'^/api/.*$']

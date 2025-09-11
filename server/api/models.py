@@ -791,8 +791,8 @@ class EmailCampaign(models.Model):
         import re
         from django.conf import settings
 
-        # Get base URL for tracking - use the current server URL
-        base_url = getattr(settings, 'BASE_URL', 'https://51f54198-a9a2-4b01-b85b-23549e0b6e1c-00-385i2ayjj8nal.pike.replit.dev:8000')
+        # Get base URL for tracking - use the domain URL from settings
+        base_url = getattr(settings, 'DOMAIN_URL', 'https://51f54198-a9a2-4b01-b85b-23549e0b6e1c-00-385i2ayjj8nal.pike.replit.dev')
 
         # Add multiple tracking pixels for better reliability
         # Primary tracking pixel (positioned absolutely)
