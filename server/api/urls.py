@@ -91,7 +91,6 @@ urlpatterns = [
     # Email tracking endpoints
     path('track/open/<uuid:tracking_id>/', views.track_email_open, name='track_email_open'),
     path('track/click/<uuid:tracking_id>/', views.track_email_click, name='track_email_click'),
-    path('track/test/', views.test_tracking_system, name='test_tracking_system'),
 
     # SMTP status check
     path('campaigns/smtp-status/', views.check_smtp_status, name='check_smtp_status'),
