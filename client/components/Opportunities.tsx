@@ -2560,7 +2560,7 @@ const getRandomRiskLevel = () => {
             <Button
               variant="outline"
               className="flex items-center gap-2 cls-addcomapany"
-              onClick={() => window.location.reload()}
+              onClick={() => getOpportunities()}
             >
               <RefreshCw className="h-4 w-4" />
               Refresh

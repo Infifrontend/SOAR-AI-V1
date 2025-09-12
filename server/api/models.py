@@ -1,3 +1,4 @@
+import os
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -792,7 +793,7 @@ class EmailCampaign(models.Model):
         from django.conf import settings
 
         # Get base URL for tracking - use the domain URL from settings
-        base_url = getattr(settings, 'DOMAIN_URL', 'https://51f54198-a9a2-4b01-b85b-23549e0b6e1c-00-385i2ayjj8nal.pike.replit.dev:8000')
+        base_url =os.getenv('DOMAIN_URL')
 
         # Add multiple tracking pixels for better reliability
         # Primary tracking pixel (positioned absolutely)

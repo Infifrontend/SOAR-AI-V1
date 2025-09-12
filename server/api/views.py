@@ -4220,7 +4220,7 @@ class EmailCampaignViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@api_view(['GET'])
+@api_view(['GET','POST'])
 @permission_classes([AllowAny])
 def get_history(request):
     """Get history for leads or opportunities"""
