@@ -622,7 +622,7 @@ class ProposalDraftSerializer(serializers.ModelSerializer):
 class AirportCodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = AirportCode
-        fields = '__all__'
+        fields = ['code', 'name', 'city', 'country_code', 'country']
 
 
 class RevenuePredictionDataSerializer(serializers.ModelSerializer):
