@@ -1,0 +1,111 @@
+~/workspace/server$ python manage.py migrate --fake
+Using SMTP email backend for actual email sending
+Operations to perform:
+  Apply all migrations: admin, api, auth, contenttypes, sessions
+Running migrations:
+  Applying api.0004_company_annual_travel_volume_company_company_type_and_more... FAKED
+  Applying api.0005_create_leadnote_table... FAKED
+  Applying api.0006_create_leadhistory_table... FAKED
+  Applying api.0007_create_leadnote_table... FAKED
+  Applying api.0008_create_leadhistory_table... FAKED
+  Applying api.0009_lead_assigned_agent... FAKED
+  Applying api.0010_opportunityactivity... FAKED
+  Applying api.0011_add_move_as_lead_to_company... FAKED
+  Applying api.0012_campaigntemplate_emailcampaign_template... FAKED
+  Applying api.0013_proposaldraft... FAKED
+  Applying api.0014_proposaldraft_attachment_original_name_and_more... FAKED
+  Applying api.0015_fix_duplicate_column... FAKED
+  Applying api.0016_add_target_count_to_emailcampaign... FAKED
+  Applying api.0017_remove_emailcampaign_target_leads_and_more... FAKED
+  Applying api.0018_emailcampaign_target_leads... FAKED
+  Applying api.0019_add_performance_indexes... FAKED
+  Applying api.0020_add_cta_link_to_emailcampaign... FAKED
+  Applying api.0021_airportcode... FAKED
+  Applying api.0022_add_moved_to_opportunity_field... FAKED
+  Applying api.0023_alter_leadhistory_timestamp... FAKED
+  Applying api.0024_add_is_standard_layout_field... FAKED
+  Applying api.0025_add_corporate_code_to_company... FAKED
+  Applying contenttypes.0002_remove_content_type_name... FAKED
+  Applying auth.0002_alter_permission_name_max_length... FAKED
+  Applying auth.0003_alter_user_email_max_length... FAKED
+  Applying auth.0004_alter_user_username_opts... FAKED
+  Applying auth.0005_alter_user_last_login_null... FAKED
+  Applying auth.0006_require_contenttypes_0002... FAKED
+  Applying auth.0007_alter_validators_add_error_messages... FAKED
+  Applying auth.0008_alter_user_username_max_length... FAKED
+  Applying auth.0009_alter_user_last_name_max_length... FAKED
+  Applying auth.0010_alter_group_name_max_length... FAKED
+  Applying auth.0011_update_proxy_permissions... FAKED
+  Applying auth.0012_alter_user_first_name_max_length... FAKED
+  Applying sessions.0001_initial... FAKED
+Traceback (most recent call last):
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedColumn: column django_content_type.name does not exist
+LINE 1: SELECT "django_content_type"."id", "django_content_type"."na...
+                                           ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/runner/workspace/server/manage.py", line 16, in <module>
+    execute_from_command_line(sys.argv)
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/django/core/management/__init__.py", line 442, in execute_from_command_line
+    utility.execute()
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/django/core/management/__init__.py", line 436, in execute
+    self.fetch_command(subcommand).run_from_argv(self.argv)
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/django/core/management/base.py", line 416, in run_from_argv
+    self.execute(*args, **cmd_options)
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/django/core/management/base.py", line 460, in execute
+    output = self.handle(*args, **options)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/django/core/management/base.py", line 107, in wrapper
+    res = handle_func(*args, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/django/core/management/commands/migrate.py", line 380, in handle
+    emit_post_migrate_signal(
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/django/core/management/sql.py", line 52, in emit_post_migrate_signal
+    models.signals.post_migrate.send(
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/django/dispatch/dispatcher.py", line 189, in send
+    response = receiver(signal=self, sender=sender, **named)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/django/contrib/auth/management/__init__.py", line 59, in create_permissions
+    create_contenttypes(
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/django/contrib/contenttypes/management/__init__.py", line 127, in create_contenttypes
+    content_types, app_models = get_contenttypes_and_models(
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/django/contrib/contenttypes/management/__init__.py", line 100, in get_contenttypes_and_models
+    for ct in ContentType.objects.using(using).filter(app_label=app_config.label)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/django/db/models/query.py", line 384, in __iter__
+    self._fetch_all()
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/django/db/models/query.py", line 1949, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/django/db/models/query.py", line 91, in __iter__
+    results = compiler.execute_sql(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/django/db/models/sql/compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/django/db/backends/utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/django/db/backends/utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/django/db/backends/utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/django/db/backends/utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/django/db/utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/django/db/backends/utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: column django_content_type.name does not exist
+LINE 1: SELECT "django_content_type"."id", "django_content_type"."na...
+                                           ^

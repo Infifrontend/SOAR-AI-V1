@@ -167,7 +167,7 @@ class Company(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    
+
     def save(self, *args, **kwargs):
         if not self.corporate_code:
             self.corporate_code = self._generate_corporate_code()
@@ -798,10 +798,10 @@ class EmailCampaign(models.Model):
         # Add multiple tracking pixels for better reliability
         # Primary tracking pixel (positioned absolutely)
         tracking_pixel_1 = f'<img src="{base_url}/api/track/open/{tracking.tracking_id}/" width="1" height="1" style="display:block !important;position:absolute;top:-9999px;left:-9999px;border:0;outline:0;background:transparent;" alt="" />'
-        
+
         # Secondary tracking pixel (hidden but not positioned)
         tracking_pixel_2 = f'<img src="{base_url}/api/track/open/{tracking.tracking_id}/" width="1" height="1" style="display:none !important;border:0;outline:0;" alt="" />'
-        
+
         # Backup tracking pixel as div with background image
         tracking_pixel_3 = f'<div style="width:1px;height:1px;background-image:url({base_url}/api/track/open/{tracking.tracking_id}/);display:block;position:absolute;top:-9999px;left:-9999px;"></div>'
 
@@ -810,7 +810,7 @@ class EmailCampaign(models.Model):
         if '<body' in content.lower():
             body_pattern = r'(<body[^>]*>)'
             content = re.sub(body_pattern, f'\\1\n{tracking_pixel_1}\n{tracking_pixel_2}\n', content, count=1, flags=re.IGNORECASE)
-        
+
         # 2. Also add before closing tags as backup
         if '</body>' in content.lower():
             content = content.replace('</body>', f'\n{tracking_pixel_3}\n</body>', 1)
@@ -1033,31 +1033,6 @@ class RevenueForecast(models.Model):
 
     def __str__(self):
         return f"Revenue Forecast {self.period}"
-
-
-class RevenuePredictionData(models.Model):
-    """Model to store processed revenue prediction data"""
-    source_filename = models.CharField(max_length=255)
-    total_rows = models.IntegerField()
-    total_revenue = models.DecimalField(max_digits=15, decimal_places=2)
-    data_source = models.JSONField()
-    business_performance_overview = models.JSONField()
-    top_destinations = models.JSONField()
-    monthly_booking_trends = models.JSONField()
-    yearly_forecast = models.JSONField()
-    corporate_revenue = models.JSONField()
-    business_stats = models.JSONField()
-    key_metrics = models.JSONField()
-    insights = models.JSONField()
-    predicted_growth = models.JSONField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return f"Revenue Prediction Data - {self.source_filename}"
-
-    class Meta:
-        ordering = ['-created_at']
 
 class LeadNote(models.Model):
     URGENCY_CHOICES = [

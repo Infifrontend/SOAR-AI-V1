@@ -22,7 +22,7 @@ export const useRevenueApi = () => {
 
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
-      
+
       xhr.upload.addEventListener('progress', (event) => {
         if (event.lengthComputable && onProgress) {
           const progress = Math.round((event.loaded / event.total) * 100);
@@ -61,11 +61,11 @@ export const useRevenueApi = () => {
     try {
       const response = await fetch(`${API_BASE_URL}/get-revenue-prediction-data/`);
       const data = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(data.error || 'Failed to fetch revenue prediction data');
       }
-      
+
       return data;
     } catch (error) {
       console.error('Error fetching revenue prediction data:', error);
@@ -77,7 +77,7 @@ export const useRevenueApi = () => {
 
   // Get all airport codes
   const getAirportCodes = useCallback(async () => {
-  
+
 
     try {
       const response = await baseApi.get(`/airport-codes/all_codes/`);

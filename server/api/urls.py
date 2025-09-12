@@ -3,12 +3,11 @@ from rest_framework.routers import DefaultRouter
 from . import views
 from .views import (
     CompanyViewSet, ContactViewSet, LeadViewSet, OpportunityViewSet,
-    ContractViewSet, ContractBreachViewSet, CampaignTemplateViewSet,
-    EmailCampaignViewSet, TravelOfferViewSet, SupportTicketViewSet,
-    RevenueForecastViewSet, LeadNoteViewSet, LeadHistoryViewSet,
-    ActivityLogViewSet, AIConversationViewSet, ProposalDraftViewSet,
-    track_email_open, track_email_click, get_airport_codes,
-    get_revenue_prediction_data, upload_revenue_data
+    OpportunityActivityViewSet, ContractViewSet, ContractBreachViewSet,
+    CampaignTemplateViewSet, EmailCampaignViewSet, TravelOfferViewSet,
+    SupportTicketViewSet, RevenueForecastViewSet, LeadNoteViewSet,
+    LeadHistoryViewSet, ActivityLogViewSet, AIConversationViewSet,
+    ProposalDraftViewSet, AirportCodeViewSet
 )
 
 # Define a router for ViewSets
@@ -95,11 +94,4 @@ urlpatterns = [
 
     # SMTP status check
     path('campaigns/smtp-status/', views.check_smtp_status, name='check_smtp_status'),
-
-    # Airport codes endpoint
-    path('airport-codes/all_codes/', get_airport_codes, name='get_airport_codes'),
-
-    # Revenue prediction endpoints
-    path('get-revenue-prediction-data/', get_revenue_prediction_data, name='get_revenue_prediction_data'),
-    path('upload-revenue-data/', upload_revenue_data, name='upload_revenue_data'),
 ]

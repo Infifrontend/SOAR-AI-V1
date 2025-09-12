@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import (
     Company, Contact, Lead, Opportunity, OpportunityActivity, Contract, ContractBreach,
     CampaignTemplate, EmailCampaign, TravelOffer, SupportTicket, RevenueForecast,
-    ActivityLog, AIConversation, LeadNote, LeadHistory, ProposalDraft, EmailTracking, AirportCode, RevenuePredictionData
+    ActivityLog, AIConversation, LeadNote, LeadHistory, ProposalDraft, EmailTracking, AirportCode
 )
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -452,8 +452,8 @@ class EmailCampaignSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = EmailCampaign
-        fields = ['id', 'name', 'description', 'campaign_type', 'status', 'subject_line',
-                 'email_content', 'cta_link', 'scheduled_date', 'sent_date', 'emails_sent', 'emails_opened',
+        fields = ['id', 'name', 'description', 'campaign_type', 'status', 'subject_line', 
+                 'email_content', 'cta_link', 'scheduled_date', 'sent_date', 'emails_sent', 'emails_opened', 
                  'emails_clicked', 'target_leads', 'created_at', 'updated_at',
                  'target_leads_count', 'open_rate', 'click_rate', 'click_to_open_rate', 'engagement_metrics']
 
@@ -587,8 +587,8 @@ class CampaignTemplateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CampaignTemplate
-        fields = ['id', 'name', 'description', 'channel_type', 'target_industry',
-                 'subject_line', 'content', 'cta', 'linkedin_type', 'estimated_open_rate',
+        fields = ['id', 'name', 'description', 'channel_type', 'target_industry', 
+                 'subject_line', 'content', 'cta', 'linkedin_type', 'estimated_open_rate', 
                  'estimated_click_rate', 'is_custom', 'created_by', 'created_at', 'updated_at', 'is_standard_layout']
         extra_kwargs = {
             'linkedin_type': {'required': False, 'read_only': True},
@@ -622,10 +622,4 @@ class ProposalDraftSerializer(serializers.ModelSerializer):
 class AirportCodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = AirportCode
-        fields = ['code', 'name', 'city', 'country_code', 'country']
-
-
-class RevenuePredictionDataSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = RevenuePredictionData
-        fields = '__all__'
+        fields = ['code', 'name', 'city', 'country']
