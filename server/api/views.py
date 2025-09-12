@@ -30,7 +30,7 @@ from .models import (Company, Contact, Lead, Opportunity, OpportunityActivity,
                      Contract, ContractBreach, CampaignTemplate, EmailCampaign,
                      TravelOffer, SupportTicket, RevenueForecast, LeadNote,
                      LeadHistory, ActivityLog, AIConversation, ProposalDraft,
-                     AirportCode)
+                     AirportCode, RevenuePredictionData)
 from .serializers import (CompanySerializer, ContactSerializer, LeadSerializer,
                           OpportunitySerializer, OpportunityActivitySerializer,
                           ContractSerializer, ContractBreachSerializer,
@@ -39,7 +39,7 @@ from .serializers import (CompanySerializer, ContactSerializer, LeadSerializer,
                           RevenueForecastSerializer, LeadNoteSerializer,
                           LeadHistorySerializer, ActivityLogSerializer,
                           AIConversationSerializer, ProposalDraftSerializer,
-                          AirportCodeSerializer)
+                          AirportCodeSerializer, RevenuePredictionDataSerializer)
 
 
 # Helper function to create lead history entries
@@ -3241,65 +3241,123 @@ def list_revenue_files(request):
 @permission_classes([AllowAny])
 def get_revenue_prediction_data(request):
     """
-    Process XLSX/CSV files from revenue_prediction folder and return structured + simulated KPIs
+    Get revenue prediction data from database or process new file if refresh requested
     """
     import os
     import pandas as pd
     from datetime import datetime
 
     try:
-        # Get the revenue_prediction folder path
-        revenue_folder = os.path.join(
-            os.path.dirname(os.path.dirname(__file__)), 'revenue_prediction')
+        # Check if this is a refresh request
+        is_refresh = request.GET.get('refresh', 'false').lower() == 'true'
 
-        if not os.path.exists(revenue_folder):
-            return Response(
-                {
-                    'success': False,
-                    'error': 'Revenue prediction folder does not exist'
-                },
-                status=status.HTTP_404_NOT_FOUND)
+        if is_refresh:
+            # Process new file and store in database
+            revenue_folder = os.path.join(
+                os.path.dirname(os.path.dirname(__file__)), 'revenue_prediction')
 
-        # Get all XLSX/CSV files
-        xlsx_files = [
-            f for f in os.listdir(revenue_folder)
-            if f.endswith(('.xlsx', '.xls', '.csv'))
-        ]
+            if not os.path.exists(revenue_folder):
+                return Response(
+                    {
+                        'success': False,
+                        'error': 'Revenue prediction folder does not exist'
+                    },
+                    status=status.HTTP_404_NOT_FOUND)
 
-        if not xlsx_files:
-            return Response(
-                {
-                    'success': False,
-                    'error': 'No data files found in revenue_prediction folder'
-                },
-                status=status.HTTP_404_NOT_FOUND)
+            # Get all XLSX/CSV files
+            xlsx_files = [
+                f for f in os.listdir(revenue_folder)
+                if f.endswith(('.xlsx', '.xls', '.csv'))
+            ]
 
-        # Use the most recent file
-        latest_file = max(
-            xlsx_files,
-            key=lambda f: os.path.getmtime(os.path.join(revenue_folder, f)))
-        file_path = os.path.join(revenue_folder, latest_file)
+            if not xlsx_files:
+                return Response(
+                    {
+                        'success': False,
+                        'error': 'No data files found in revenue_prediction folder'
+                    },
+                    status=status.HTTP_404_NOT_FOUND)
 
-        # Read the file
-        if latest_file.endswith('.csv'):
-            df = pd.read_csv(file_path)
+            # Use the most recent file
+            latest_file = max(
+                xlsx_files,
+                key=lambda f: os.path.getmtime(os.path.join(revenue_folder, f)))
+            file_path = os.path.join(revenue_folder, latest_file)
+
+            # Read the file
+            if latest_file.endswith('.csv'):
+                df = pd.read_csv(file_path)
+            else:
+                df = pd.read_excel(file_path)
+
+            # Ensure Booking_Month is in datetime format
+            if "Booking_Month" in df.columns:
+                df["Booking_Month"] = pd.to_datetime(df["Booking_Month"],
+                                                     errors="coerce")
+
+            # Process structured revenue insights
+            processed_data = process_revenue_data(df, latest_file)
+
+            # Clear existing data and store new data in database
+            RevenuePredictionData.objects.all().delete()
+            
+            revenue_prediction_record = RevenuePredictionData.objects.create(
+                source_filename=latest_file,
+                total_rows=len(df),
+                total_revenue=processed_data['dataSource']['totalRevenue'],
+                data_source=processed_data['dataSource'],
+                business_performance_overview=processed_data['businessPerformanceOverview'],
+                top_destinations=processed_data['topDestinations'],
+                monthly_booking_trends=processed_data['monthlyBookingTrends'],
+                yearly_forecast=processed_data['yearlyForecast'],
+                corporate_revenue=processed_data['corporateRevenue'],
+                business_stats=processed_data['businessStats'],
+                key_metrics=processed_data['keyMetrics'],
+                insights=processed_data['insights'],
+                predicted_growth=processed_data['predictedGrowth']
+            )
+
+            return Response({
+                'success': True,
+                'data': processed_data,
+                'source_file': latest_file,
+                'last_updated': revenue_prediction_record.updated_at.isoformat(),
+                'refreshed': True
+            })
+
         else:
-            df = pd.read_excel(file_path)
+            # Retrieve existing data from database
+            try:
+                latest_record = RevenuePredictionData.objects.latest('created_at')
+                
+                processed_data = {
+                    'dataSource': latest_record.data_source,
+                    'businessPerformanceOverview': latest_record.business_performance_overview,
+                    'topDestinations': latest_record.top_destinations,
+                    'monthlyBookingTrends': latest_record.monthly_booking_trends,
+                    'yearlyForecast': latest_record.yearly_forecast,
+                    'corporateRevenue': latest_record.corporate_revenue,
+                    'businessStats': latest_record.business_stats,
+                    'keyMetrics': latest_record.key_metrics,
+                    'insights': latest_record.insights,
+                    'predictedGrowth': latest_record.predicted_growth
+                }
 
-        # Ensure Booking_Month is in datetime format
-        if "Booking_Month" in df.columns:
-            df["Booking_Month"] = pd.to_datetime(df["Booking_Month"],
-                                                 errors="coerce")
+                return Response({
+                    'success': True,
+                    'data': processed_data,
+                    'source_file': latest_record.source_filename,
+                    'last_updated': latest_record.updated_at.isoformat(),
+                    'refreshed': False
+                })
 
-        # Process structured revenue insights
-        processed_data = process_revenue_data(df, latest_file)
-
-        return Response({
-            'success': True,
-            'data': processed_data,
-            'source_file': latest_file,
-            'last_updated': datetime.now().isoformat()
-        })
+            except RevenuePredictionData.DoesNotExist:
+                # No data in database, trigger refresh automatically
+                return Response({
+                    'success': False,
+                    'error': 'No revenue prediction data found. Please refresh to load data.',
+                    'require_refresh': True
+                }, status=status.HTTP_404_NOT_FOUND)
 
     except Exception as e:
         return Response(

@@ -1034,6 +1034,31 @@ class RevenueForecast(models.Model):
     def __str__(self):
         return f"Revenue Forecast {self.period}"
 
+
+class RevenuePredictionData(models.Model):
+    """Model to store processed revenue prediction data"""
+    source_filename = models.CharField(max_length=255)
+    total_rows = models.IntegerField()
+    total_revenue = models.DecimalField(max_digits=15, decimal_places=2)
+    data_source = models.JSONField()
+    business_performance_overview = models.JSONField()
+    top_destinations = models.JSONField()
+    monthly_booking_trends = models.JSONField()
+    yearly_forecast = models.JSONField()
+    corporate_revenue = models.JSONField()
+    business_stats = models.JSONField()
+    key_metrics = models.JSONField()
+    insights = models.JSONField()
+    predicted_growth = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Revenue Prediction Data - {self.source_filename}"
+
+    class Meta:
+        ordering = ['-created_at']
+
 class LeadNote(models.Model):
     URGENCY_CHOICES = [
         ('Low', 'Low'),

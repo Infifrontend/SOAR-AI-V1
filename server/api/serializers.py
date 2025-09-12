@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import (
     Company, Contact, Lead, Opportunity, OpportunityActivity, Contract, ContractBreach,
     CampaignTemplate, EmailCampaign, TravelOffer, SupportTicket, RevenueForecast,
-    ActivityLog, AIConversation, LeadNote, LeadHistory, ProposalDraft, EmailTracking, AirportCode
+    ActivityLog, AIConversation, LeadNote, LeadHistory, ProposalDraft, EmailTracking, AirportCode, RevenuePredictionData
 )
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -283,7 +283,7 @@ class OptimizedLeadSerializer(serializers.ModelSerializer):
     company = serializers.SerializerMethodField()
     contact = serializers.SerializerMethodField()
     assigned_to = serializers.CharField(source='assigned_agent', read_only=True)
-    
+
     class Meta:
         model = Lead
         fields = [
@@ -452,8 +452,8 @@ class EmailCampaignSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = EmailCampaign
-        fields = ['id', 'name', 'description', 'campaign_type', 'status', 'subject_line', 
-                 'email_content', 'cta_link', 'scheduled_date', 'sent_date', 'emails_sent', 'emails_opened', 
+        fields = ['id', 'name', 'description', 'campaign_type', 'status', 'subject_line',
+                 'email_content', 'cta_link', 'scheduled_date', 'sent_date', 'emails_sent', 'emails_opened',
                  'emails_clicked', 'target_leads', 'created_at', 'updated_at',
                  'target_leads_count', 'open_rate', 'click_rate', 'click_to_open_rate', 'engagement_metrics']
 
@@ -478,11 +478,11 @@ class EmailCampaignSerializer(serializers.ModelSerializer):
     def get_engagement_metrics(self, obj):
         from django.db import models as django_models
         from django.db import connection
-        
+
         try:
             # Check if connection is alive, if not reconnect
             connection.ensure_connection()
-            
+
             tracking_records = obj.email_tracking.all()
             total_opens = tracking_records.aggregate(total=django_models.Sum('open_count'))['total'] or 0
             total_clicks = tracking_records.aggregate(total=django_models.Sum('click_count'))['total'] or 0
@@ -584,18 +584,18 @@ class CampaignTemplateSerializer(serializers.ModelSerializer):
     linkedin_type = serializers.CharField(required=False, allow_blank=True, allow_null=True, read_only=True)
     is_custom = serializers.BooleanField(default=False, read_only=True)
     created_by = serializers.CharField(default='System', read_only=True)
-    
+
     class Meta:
         model = CampaignTemplate
-        fields = ['id', 'name', 'description', 'channel_type', 'target_industry', 
-                 'subject_line', 'content', 'cta', 'linkedin_type', 'estimated_open_rate', 
+        fields = ['id', 'name', 'description', 'channel_type', 'target_industry',
+                 'subject_line', 'content', 'cta', 'linkedin_type', 'estimated_open_rate',
                  'estimated_click_rate', 'is_custom', 'created_by', 'created_at', 'updated_at', 'is_standard_layout']
         extra_kwargs = {
             'linkedin_type': {'required': False, 'read_only': True},
             'is_custom': {'default': False, 'read_only': True},
             'created_by': {'default': 'System', 'read_only': True}
         }
-    
+
     def to_internal_value(self, data):
         # Remove fields that don't exist in the model or are read-only
         data = data.copy() if hasattr(data, 'copy') else dict(data)
@@ -603,7 +603,7 @@ class CampaignTemplateSerializer(serializers.ModelSerializer):
         data.pop('is_custom', None)
         data.pop('created_by', None)
         return super().to_internal_value(data)
-    
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         # Add linkedin_type as None for compatibility with frontend
@@ -622,4 +622,10 @@ class ProposalDraftSerializer(serializers.ModelSerializer):
 class AirportCodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = AirportCode
-        fields = ['code', 'name', 'city', 'country']
+        fields = '__all__'
+
+
+class RevenuePredictionDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RevenuePredictionData
+        fields = '__all__'
