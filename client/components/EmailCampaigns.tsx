@@ -1321,7 +1321,7 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
                     )}
 
                     <div className="flex gap-2 mt-4">
-                      <Button 
+                      <Button  className='bg-orange-500 hover:bg-orange-600 text-white hover:text-white'
                         variant="outline" 
                         size="sm"
                         onClick={() => {
@@ -1336,14 +1336,14 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
                         <Eye className="h-4 w-4 mr-1" />
                         Preview
                       </Button>
-                      <Button 
+                      {/* <Button 
                         size="sm"
                         onClick={() => handleUseTemplate(template)}
                         className='bg-orange-500 hover:bg-orange-600 text-white'
                       >
                         <Send className="h-4 w-4 mr-1" />
                         Use Template
-                      </Button>
+                      </Button> */}
                     </div>
                   </div>
                 </CardContent>
@@ -1724,7 +1724,7 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
 
       {/* Template Preview Dialog */}
       <Dialog open={showTemplatePreview} onOpenChange={setShowTemplatePreview}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" style={{ 
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden" style={{ 
           fontFamily: 'var(--font-family)',
           backgroundColor: 'var(--color-background)',
           border: '1px solid #C9C9C9'
@@ -1747,7 +1747,7 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-4 ">
             {selectedTemplate && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Template Structure */}
@@ -1852,7 +1852,7 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
             >
               Close
             </Button>
-            {selectedTemplate && (
+            {/* {selectedTemplate && (
               <Button 
                 onClick={() => {
                   handleUseTemplate(selectedTemplate);
@@ -1866,7 +1866,7 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
               >
                 Use This Template
               </Button>
-            )}
+            )} */}
           </DialogFooter>
         </DialogContent>
       </Dialog>

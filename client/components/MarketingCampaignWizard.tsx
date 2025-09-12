@@ -241,18 +241,6 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData, editM
           <tr>
             <td class="main">
               <div>${content}</div>
-
-              ${cta && ctaLink && ctaLink !== '#' ? `
-              <div class="cta-container">
-                <a href="${ctaLink}" class="button" target="_blank">
-                  ${cta}
-                </a>
-              </div>
-              <p class="p" style="font-size:13px;color:#6b7280;">
-                If the button doesn't work, copy and paste the following URL into your browser: <br />
-                <a href="${ctaLink}" style="color:#007bff;">${ctaLink}</a>
-              </p>
-              ` : ''}
             </td>
           </tr>
 
@@ -260,10 +248,6 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData, editM
           <tr>
             <td class="footer">
               <p style="margin:0 0 8px 0;">SOAR-AI • Transforming Corporate Travel</p>
-              <p style="margin:0 0 8px 0;">
-                <a href="#" style="color:#8b94a6;">Unsubscribe</a> | 
-                <a href="#" style="color:#8b94a6;">Privacy Policy</a>
-              </p>
               <p style="margin:0;">&copy; ${new Date().getFullYear()} SOAR-AI. All rights reserved.</p>
             </td>
           </tr>
