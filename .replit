@@ -25,7 +25,7 @@ localPort = 8000
 externalPort = 8000
 
 [workflows]
-runButton = "Full Stack Development"
+runButton = "Fixed Development Server"
 
 [[workflows.workflow]]
 name = "Run"
@@ -93,6 +93,31 @@ args = "cd client && npm run dev"
 name = "Development Server"
 author = 42993393
 mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd server && python manage.py migrate"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd server && python manage.py runserver 0.0.0.0:8000 &"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd client && npm run dev"
+
+[[workflows.workflow]]
+name = "Fixed Development Server"
+author = 42993393
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd server && python fix_database.py"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd server && python manage.py migrate --fake-initial"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
