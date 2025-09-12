@@ -3934,7 +3934,7 @@ class EmailCampaignViewSet(viewsets.ModelViewSet):
         """Override list method to handle database connection issues"""
         from django.db import connection
         from django.db.utils import OperationalError, ProgrammingError
-from django.db import IntegrityError
+        from django.db import IntegrityError
 
         try:
             # Ensure database connection is alive
