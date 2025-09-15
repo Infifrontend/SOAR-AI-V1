@@ -458,7 +458,7 @@ export function ContractManagement({
             return;
           }
         } else {
-          console.warn("Failed to fetch closed won opportunities:", response.status);
+          console.warn("Failed to fetch closed won opportunities:", response.error);
         }
       } catch (fetchError) {
         console.warn("Could not fetch from dedicated endpoint:", fetchError);
@@ -468,25 +468,25 @@ export function ContractManagement({
       // const result = await getClosedWonOpportunities();
       // console.log(result,)
 
-      if (
-        result.success &&
-        Array.isArray(result.data) &&
-        result.data.length > 0
-      ) {
-        console.log(result)
-        setAvailableVendors(result.data);
-        console.log("✓ Vendor names loaded from fallback endpoint:", result.data.length, "vendors");
+      // if (
+      //   result.success &&
+      //   Array.isArray(result.data) &&
+      //   result.data.length > 0
+      // ) {
+      //   console.log(result)
+      //   setAvailableVendors(result.data);
+      //   console.log("✓ Vendor names loaded from fallback endpoint:", result.data.length, "vendors");
 
-        // Show info message if using fallback data
-        if (result.error) {
-          console.info("Note:", result.error);
-        }
-      } else {
-        console.warn("No vendor names returned from any API, using default list");
-        // Fallback to some default vendors if all APIs fail
+      //   // Show info message if using fallback data
+      //   if (result.error) {
+      //     console.info("Note:", result.error);
+      //   }
+      // } else {
+      //   console.warn("No vendor names returned from any API, using default list");
+      //   // Fallback to some default vendors if all APIs fail
       
-        setAvailableVendors([]);
-      }
+      //   setAvailableVendors([]);
+      // }
     } catch (error) {
       console.error("Error fetching vendor names:", error);
       // Fallback to default vendors
