@@ -435,37 +435,38 @@ export function ContractManagement({
       console.log("Fetching vendor names from closed won opportunities...");
       
       // Get closed won opportunities from the dedicated endpoint
-      // try {
-      //   const response = await fetch('/api/opportunities/closed-won-opportunities/');
+      try {
+        const response = await getClosedWonOpportunities();
+        console.log(response, "closed won opps response");
         
-      //   if (response.ok) {
-      //     const closedWonOpportunities = await response.json();
+        if (response.success) {
+          const closedWonOpportunities = response.data;
           
-      //     // Extract vendor/company names from closed won opportunities
-      //     let vendorNames = [];
-      //     if (Array.isArray(closedWonOpportunities)) {
-      //       vendorNames = closedWonOpportunities
-      //         .map(opp => opp.lead_info?.company?.name)
-      //         .filter(name => name && name.trim() !== '')
-      //         .filter((name, index, self) => self.indexOf(name) === index); // Remove duplicates
-      //     }
+          // Extract vendor/company names from closed won opportunities
+          let vendorNames = [];
+          if (Array.isArray(closedWonOpportunities)) {
+            vendorNames = closedWonOpportunities
+              .map(opp => opp.lead_info?.company?.name)
+              .filter(name => name && name.trim() !== '')
+              .filter((name, index, self) => self.indexOf(name) === index); // Remove duplicates
+          }
 
-      //   if (vendorNames.length > 0) {
-      //       setAvailableVendors(vendorNames);
-      //       console.log("✓ Vendor names loaded from closed won opportunities:", vendorNames.length, "vendors");
-      //       console.log("Vendor names:", vendorNames);
-      //       return;
-      //     }
-      //   } else {
-      //     console.warn("Failed to fetch closed won opportunities:", response.status);
-      //   }
-      // } catch (fetchError) {
-      //   console.warn("Could not fetch from dedicated endpoint:", fetchError);
-      // }
+        if (vendorNames.length > 0) {
+            setAvailableVendors(vendorNames);
+            console.log("✓ Vendor names loaded from closed won opportunities:", vendorNames.length, "vendors");
+            console.log("Vendor names:", vendorNames);
+            return;
+          }
+        } else {
+          console.warn("Failed to fetch closed won opportunities:", response.status);
+        }
+      } catch (fetchError) {
+        console.warn("Could not fetch from dedicated endpoint:", fetchError);
+      }
 
       // Fallback to the hook-based API call
-      const result = await getClosedWonOpportunities();
-      console.log(result,)
+      // const result = await getClosedWonOpportunities();
+      // console.log(result,)
 
       if (
         result.success &&
