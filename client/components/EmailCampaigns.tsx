@@ -1914,7 +1914,7 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
               <div className="grid grid-cols-4 gap-4">
                 <Card>
                   <CardContent className="p-4">
-                    <div className="text-2xl font-bold">{trackingDetails.total_records}</div>
+                    <div className="text-2xl font-bold">{trackingDetails.total_tracking_records}</div>
                     <div className="text-sm text-gray-600">Total Recipients</div>
                   </CardContent>
                 </Card>
@@ -1959,7 +1959,7 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
                   <TableBody>
                     {trackingDetails.tracking_details.map((tracking: any, index: number) => (
                       <TableRow key={index}>
-                        <TableCell className="font-medium">{tracking.company_name}</TableCell>
+                        <TableCell className="font-medium">{tracking.lead_name}</TableCell>
                         <TableCell>
                           <div>
                             <div className="font-medium">{tracking.contact_name}</div>

@@ -230,27 +230,34 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData, editM
       <div class="wrapper">
         <table class="content" width="600" cellpadding="0" cellspacing="0" role="presentation">
           <!-- Header -->
-          <tr>
+          <!--<tr>
             <td class="header">
               <h2 style="margin:0; font-size:24px;">SOAR-AI</h2>
               <p style="margin:8px 0 0 0; font-size:14px; opacity:0.9;">Corporate Travel Solutions</p>
             </td>
-          </tr>
+          </tr> -->
 
           <!-- Main Content -->
           <tr>
             <td class="main">
               <div>${content}</div>
+                ${cta && ctaLink && ctaLink !== '#' ? `
+              <div class="cta-container">
+                <a href="${ctaLink}" class="button" target="_blank">
+                  ${cta}
+                </a>
+              </div>
+              ` : ''}
             </td>
           </tr>
 
           <!-- Footer -->
-          <tr>
+          <!-- <tr>
             <td class="footer">
               <p style="margin:0 0 8px 0;">SOAR-AI • Transforming Corporate Travel</p>
               <p style="margin:0;">&copy; ${new Date().getFullYear()} SOAR-AI. All rights reserved.</p>
             </td>
-          </tr>
+          </tr> -->
         </table>
       </div>
     </body>

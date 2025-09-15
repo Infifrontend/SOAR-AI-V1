@@ -385,10 +385,10 @@ export class EmailTemplateService {
         layout: 'custom',
         variables: ['company_name', 'contact_name', 'industry', 'employees'],
         sections: [
-          {
-            type: 'header',
-            content: 'Welcome to SOAR-AI!'
-          },
+          // {
+          //   type: 'header',
+          //   content: 'Welcome to SOAR-AI!'
+          // },
           {
             type: 'body',
             content: `
@@ -408,20 +408,20 @@ export class EmailTemplateService {
               <p>Ready to see how we can help? Let's schedule a 15-minute discovery call.</p>
             `
           },
-          {
-            type: 'cta',
-            content: '<a href="{{cta_link}}" class="cta-button">Schedule Discovery Call</a>'
-          },
-          {
-            type: 'footer',
-            content: `
-              <p>Best regards,<br>
-              The SOAR-AI Team</p>
+          // {
+          //   type: 'cta',
+          //   content: '<a href="{{cta_link}}" class="cta-button">Schedule Discovery Call</a>'
+          // },
+          // {
+          //   type: 'footer',
+          //   content: `
+          //     <p>Best regards,<br>
+          //     The SOAR-AI Team</p>
               
-              <p>© 2024 SOAR-AI. All rights reserved.<br>
-             <a href="#" style="color: #64748b;">Privacy Policy</a></p>
-            `
-          }
+          //     <p>© 2024 SOAR-AI. All rights reserved.<br>
+          //    <a href="#" style="color: #64748b;">Privacy Policy</a></p>
+          //   `
+          // }
         ]
       }
     ];
