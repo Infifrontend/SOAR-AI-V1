@@ -4316,11 +4316,13 @@ def track_email_open(request, tracking_id):
 
         tracking.save()
 
-        # Update campaign stats
-        campaign = tracking.campaign
-        unique_opens = campaign.email_tracking.filter(open_count__gt=0).count()
-        campaign.emails_opened = unique_opens
-        campaign.save(update_fields=['emails_opened'])
+        # Update campaign stats only if this is the first open for this lead
+        if was_first_open:
+            campaign = tracking.campaign
+            # Count unique recipients who have opened at least once
+            unique_opens = campaign.email_tracking.filter(first_opened__isnull=False).count()
+            campaign.emails_opened = unique_opens
+            campaign.save(update_fields=['emails_opened'])
 
         print(
             f"🟢 OPEN TRACKING SUCCESS: {tracking_id} for campaign {campaign.name}"
