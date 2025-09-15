@@ -1,0 +1,47 @@
+client:1035 WebSocket connection to 'wss://51f54198-a9a2-4b01-b85b-23549e0b6e1c-00-385i2ayjj8nal.pike.replit.dev:5173/' failed: 
+ping @ client:1035
+waitForSuccessfulPing @ client:1060Understand this error
+useCompanyApi.ts:51  POST https://51f54198-a9a2-4b01-b85b-23549e0b6e1c-00-385i2ayjj8nal.pike.replit.dev:5173/api/companies/search/ 502 (Bad Gateway)
+dispatchXhrRequest @ axios.js?v=a294274b:1672
+xhr @ axios.js?v=a294274b:1552
+dispatchRequest @ axios.js?v=a294274b:2027
+_request @ axios.js?v=a294274b:2248
+request @ axios.js?v=a294274b:2139
+httpMethod @ axios.js?v=a294274b:2277
+wrap @ axios.js?v=a294274b:8
+(anonymous) @ useCompanyApi.ts:51
+(anonymous) @ :5173/components/Cor…t=1757938825185:496
+callCallback2 @ chunk-KDCVS43I.js?v=a294274b:3680
+invokeGuardedCallbackDev @ chunk-KDCVS43I.js?v=a294274b:3705
+invokeGuardedCallback @ chunk-KDCVS43I.js?v=a294274b:3739
+invokeGuardedCallbackAndCatchFirstError @ chunk-KDCVS43I.js?v=a294274b:3742
+executeDispatch @ chunk-KDCVS43I.js?v=a294274b:7046
+processDispatchQueueItemsInOrder @ chunk-KDCVS43I.js?v=a294274b:7066
+processDispatchQueue @ chunk-KDCVS43I.js?v=a294274b:7075
+dispatchEventsForPlugins @ chunk-KDCVS43I.js?v=a294274b:7083
+(anonymous) @ chunk-KDCVS43I.js?v=a294274b:7206
+batchedUpdates$1 @ chunk-KDCVS43I.js?v=a294274b:18966
+batchedUpdates @ chunk-KDCVS43I.js?v=a294274b:3585
+dispatchEventForPluginEventSystem @ chunk-KDCVS43I.js?v=a294274b:7205
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-KDCVS43I.js?v=a294274b:5484
+dispatchEvent @ chunk-KDCVS43I.js?v=a294274b:5478
+dispatchDiscreteEvent @ chunk-KDCVS43I.js?v=a294274b:5455Understand this error
+ Error searching companies: AxiosError {message: 'Request failed with status code 502', name: 'AxiosError', code: 'ERR_BAD_RESPONSE', config: {…}, request: XMLHttpRequest, …}
+(anonymous) @ :5173/components/Cor…t=1757938825185:504
+await in (anonymous)
+callCallback2 @ chunk-KDCVS43I.js?v=a294274b:3680
+invokeGuardedCallbackDev @ chunk-KDCVS43I.js?v=a294274b:3705
+invokeGuardedCallback @ chunk-KDCVS43I.js?v=a294274b:3739
+invokeGuardedCallbackAndCatchFirstError @ chunk-KDCVS43I.js?v=a294274b:3742
+executeDispatch @ chunk-KDCVS43I.js?v=a294274b:7046
+processDispatchQueueItemsInOrder @ chunk-KDCVS43I.js?v=a294274b:7066
+processDispatchQueue @ chunk-KDCVS43I.js?v=a294274b:7075
+dispatchEventsForPlugins @ chunk-KDCVS43I.js?v=a294274b:7083
+(anonymous) @ chunk-KDCVS43I.js?v=a294274b:7206
+batchedUpdates$1 @ chunk-KDCVS43I.js?v=a294274b:18966
+batchedUpdates @ chunk-KDCVS43I.js?v=a294274b:3585
+dispatchEventForPluginEventSystem @ chunk-KDCVS43I.js?v=a294274b:7205
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-KDCVS43I.js?v=a294274b:5484
+dispatchEvent @ chunk-KDCVS43I.js?v=a294274b:5478
+dispatchDiscreteEvent @ chunk-KDCVS43I.js?v=a294274b:5455Understand this error
+client:1035 WebSocket connection to 'wss://51f54198-a9a2-4b01-b85b-23549e0b6e1c-00-385i2ayjj8nal.pike.replit.dev:5173/' failed: 
