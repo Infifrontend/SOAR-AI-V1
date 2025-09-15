@@ -527,7 +527,7 @@ const scenarioPlanning = [
 ];
 
 export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
-  const { uploadRevenueData, getRevenuePredictionData } = useRevenueApi();
+  const { uploadRevenueData, getRevenuePredictionData ,fetchUploadedFilesList,handleDeleteFileInList } = useRevenueApi();
   const { getAirportCodes } = useRevenueApi();
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedTimeframe, setSelectedTimeframe] = useState("yearly");
@@ -736,13 +736,12 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
     setIsLoadingFiles(true);
     try {
       // Call API to get real files from revenue_prediction folder
-      const response = await fetch("/api/list-revenue-files/");
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        setUploadedFiles(data.files || []);
+      const response = await fetchUploadedFilesList();
+      console.log("Fetched uploaded filesxxxxxxxxxxxx:", response);
+      if (response.files) {
+        setUploadedFiles(response.files || []);
       } else {
-        throw new Error(data.error || "Failed to fetch files");
+        throw new Error(response.error || "Failed to fetch files");
       }
     } catch (error) {
       console.error("Error fetching uploaded files:", error);
@@ -764,16 +763,10 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
 
     setIsDeleting(true);
     try {
-      const response = await fetch(
-        `/api/delete-revenue-file/${encodeURIComponent(fileName)}/`,
-        {
-          method: "DELETE",
-        },
-      );
+      const response = await handleDeleteFileInList(fileName);
 
-      const data = await response.json();
-
-      if (response.ok && data.success) {
+      console.log(response, "delete response");
+      if (response.success) {
         setUploadedFiles((prev) =>
           prev.filter((file) => file.name !== fileName),
         );
@@ -783,7 +776,7 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
           setUploadSuccess("");
         }, 2000);
       } else {
-        throw new Error(data.error || "Failed to delete file");
+        throw new Error(response.error || "Failed to delete file");
       }
     } catch (error) {
       console.error("Error deleting file:", error);

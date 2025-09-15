@@ -717,7 +717,7 @@ export const useContractApi = () => {
       console.log("Closed won opportunities response:", response);
 
       // Handle the response from new endpoint
-      if (response && response.success && Array.isArray(response.data)) {
+      if (response && Array.isArray(response.data)) {
         console.log(
           "✓ Closed won vendor names loaded:",
           response.data.length,

@@ -104,11 +104,37 @@ export const useRevenueApi = () => {
     }
   }, []);
 
+  const fetchUploadedFilesList = async () => {    
+    try {
+      // Call API to get real files from revenue_prediction folder
+      const response = await baseApi.get(`/list-revenue-files/`);
+      console.log("Fetched uploaded files:", response);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error fetching uploaded files:", error);   
+    }
+  };
+
+  const handleDeleteFileInList = async (fileName: string) => {
+    try {
+      const response = await baseApi.delete(
+        `/delete-revenue-file/${encodeURIComponent(fileName)}/`
+      );
+      console.log("File deleted:", response);
+      return response.data;
+    } catch (error: any) {
+      console.error("Error deleting file:", error);
+    }
+  };
+  
+
   return {
     ...rest,
     uploadRevenueData,
     getRevenuePredictionData,
     getAirportCodes,
     lookupAirport,
+    fetchUploadedFilesList,
+    handleDeleteFileInList
   };
 };
