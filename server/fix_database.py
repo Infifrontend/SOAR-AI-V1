@@ -35,14 +35,28 @@ def fix_database():
             else:
                 print("✓ Name column already exists")
             
-            # Clear problematic migration records
+            # Clear problematic migration records that cause dependency issues
+            print("🔧 Fixing migration dependency issues...")
+            
+            # First, remove the problematic auth migration that depends on contenttypes.0002
             cursor.execute("""
                 DELETE FROM django_migrations 
-                WHERE (app = 'contenttypes' AND name = '0002_remove_content_type_name') 
-                   OR (app = 'auth' AND name IN ('0011_update_proxy_permissions', '0012_alter_user_first_name_max_length'))
+                WHERE app = 'auth' AND name = '0006_require_contenttypes_0002'
+            """)
+            
+            # Remove the contenttypes migration if it exists
+            cursor.execute("""
+                DELETE FROM django_migrations 
+                WHERE app = 'contenttypes' AND name = '0002_remove_content_type_name'
+            """)
+            
+            # Clear other problematic migration records
+            cursor.execute("""
+                DELETE FROM django_migrations 
+                WHERE (app = 'auth' AND name IN ('0011_update_proxy_permissions', '0012_alter_user_first_name_max_length'))
                    OR (app = 'api' AND name LIKE '%0026%')
             """)
-            print("✓ Cleared problematic migration records")
+            print("✓ Cleared problematic migration records and dependencies")
             
             # Check if RevenueForecast table exists
             cursor.execute("""
