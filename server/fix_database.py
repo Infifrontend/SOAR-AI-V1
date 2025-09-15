@@ -38,25 +38,33 @@ def fix_database():
             # Clear problematic migration records that cause dependency issues
             print("🔧 Fixing migration dependency issues...")
             
-            # First, remove the problematic auth migration that depends on contenttypes.0002
+            # Remove all problematic auth migrations that have dependency issues
             cursor.execute("""
                 DELETE FROM django_migrations 
-                WHERE app = 'auth' AND name = '0006_require_contenttypes_0002'
+                WHERE app = 'auth' AND name IN (
+                    '0006_require_contenttypes_0002',
+                    '0007_alter_validators_add_error_messages',
+                    '0008_alter_user_username_max_length',
+                    '0009_alter_user_last_name_max_length',
+                    '0010_alter_group_name_max_length',
+                    '0011_update_proxy_permissions',
+                    '0012_alter_user_first_name_max_length'
+                )
             """)
             
-            # Remove the contenttypes migration if it exists
+            # Remove the contenttypes migration that causes the dependency chain issue
             cursor.execute("""
                 DELETE FROM django_migrations 
                 WHERE app = 'contenttypes' AND name = '0002_remove_content_type_name'
             """)
             
-            # Clear other problematic migration records
+            # Clear problematic API migrations
             cursor.execute("""
                 DELETE FROM django_migrations 
-                WHERE (app = 'auth' AND name IN ('0011_update_proxy_permissions', '0012_alter_user_first_name_max_length'))
-                   OR (app = 'api' AND name LIKE '%0026%')
+                WHERE app = 'api' AND name LIKE '%0026%'
             """)
-            print("✓ Cleared problematic migration records and dependencies")
+            
+            print("✓ Cleared all problematic migration records and broken dependency chains")
             
             # Check if RevenueForecast table exists
             cursor.execute("""
