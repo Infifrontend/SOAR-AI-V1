@@ -27,7 +27,9 @@ interface Role {
 
 interface CreateRoleData {
   name: string;
-  permissions: number[];
+  description?: string;
+  permissions?: number[];
+  menu_permissions?: string[];
 }
 
 export const useRoleApi = () => {

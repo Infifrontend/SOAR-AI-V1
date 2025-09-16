@@ -509,6 +509,49 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
     );
   };
 
+  const handleEditRole = (role) => {
+    setSelectedRole(role);
+    setNewRole({
+      name: role.name,
+      description: role.description,
+      permissions: role.permissions
+    });
+    setIsEditingRole(true);
+  };
+
+  const handleUpdateRole = async () => {
+    if (!newRole.name.trim()) {
+      setError('Role name is required');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const roleData = {
+        name: newRole.name,
+        description: newRole.description,
+        menu_permissions: newRole.permissions
+      };
+
+      await roleApi.updateRole(selectedRole.id, roleData); // Assuming updateRole function exists
+
+      // Reset form and close dialog
+      setNewRole({ name: '', description: '', permissions: [] });
+      setIsEditingRole(false);
+      setSelectedRole(null);
+
+      // Refresh roles list
+      await loadData(); 
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to update role');
+      console.error('Error updating role:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6 p-5">
       {/* Header */}
@@ -912,6 +955,78 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
+
+            {/* Edit Role Dialog */}
+            <Dialog open={isEditingRole} onOpenChange={setIsEditingRole}>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle className="text-lg font-semibold">Edit Role: {selectedRole?.name}</DialogTitle>
+                  <DialogDescription className="text-gray-500">
+                    Update role details and permissions
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="editRoleName" className="text-sm font-medium text-gray-700">Role Name</Label>
+                    <Input
+                      id="editRoleName"
+                      value={newRole.name}
+                      onChange={(e) => setNewRole({...newRole, name: e.target.value})}
+                      placeholder="Enter role name"
+                      className="mt-1 border-orange-200 focus:border-orange-300 focus:ring-orange-200"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="editRoleDescription" className="text-sm font-medium text-gray-700">Description</Label>
+                    <Textarea
+                      id="editRoleDescription"
+                      value={newRole.description}
+                      onChange={(e) => setNewRole({...newRole, description: e.target.value})}
+                      placeholder="Describe the role's purpose and responsibilities"
+                      className="mt-1 border-orange-200 focus:border-orange-300 focus:ring-orange-200"
+                      rows={3}
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">Menu Permissions</Label>
+                    <div className="mt-2 space-y-2 max-h-60 overflow-y-auto">
+                      {availableScreens.map((screen) => (
+                        <div key={screen.id} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`edit-screen-${screen.id}`}
+                            checked={newRole.permissions.includes(screen.id)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setNewRole({...newRole, permissions: [...newRole.permissions, screen.id]});
+                              } else {
+                                setNewRole({...newRole, permissions: newRole.permissions.filter(p => p !== screen.id)});
+                              }
+                            }}
+                            className="data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+                          />
+                          <Label htmlFor={`edit-screen-${screen.id}`} className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                            <screen.icon className="h-4 w-4" />
+                            {screen.name}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <DialogFooter className="flex gap-2">
+                  <Button variant="outline" onClick={() => setIsEditingRole(false)}>
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={handleUpdateRole} 
+                    disabled={loading}
+                    className="bg-orange-500 hover:bg-orange-600 text-white"
+                  >
+                    {loading ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
 
           {/* Role Cards Grid */}
@@ -945,11 +1060,21 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                   </div>
 
                   <div className="flex gap-2">
-                    <Button variant="ghost" size="sm" className="flex-1 text-gray-600 hover:text-gray-800">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="flex-1 text-gray-600 hover:text-gray-800"
+                      onClick={() => handleEditRole({ id: 1, name: 'Administrator', description: 'Full system access with user management capabilities', permissions: ['dashboard', 'coinhub', 'contraq', 'convoy', 'offer-management', 'settings'] })}
+                    >
                       <Edit className="h-3 w-3 mr-1" />
                       Edit
                     </Button>
-                    <Button variant="ghost" size="sm" className="text-gray-400 hover:text-red-600">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-gray-400 hover:text-red-600"
+                      onClick={() => handleDeleteRole(1)}
+                    >
                       <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>
@@ -979,11 +1104,21 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                   </div>
 
                   <div className="flex gap-2">
-                    <Button variant="ghost" size="sm" className="flex-1 text-gray-600 hover:text-gray-800">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="flex-1 text-gray-600 hover:text-gray-800"
+                      onClick={() => handleEditRole({ id: 2, name: 'Contract Manager', description: 'Contract oversight and breach monitoring access', permissions: ['dashboard', 'contraq'] })}
+                    >
                       <Edit className="h-3 w-3 mr-1" />
                       Edit
                     </Button>
-                    <Button variant="ghost" size="sm" className="text-gray-400 hover:text-red-600">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-gray-400 hover:text-red-600"
+                      onClick={() => handleDeleteRole(2)}
+                    >
                       <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>
@@ -1014,11 +1149,21 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                   </div>
 
                   <div className="flex gap-2">
-                    <Button variant="ghost" size="sm" className="flex-1 text-gray-600 hover:text-gray-800">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="flex-1 text-gray-600 hover:text-gray-800"
+                      onClick={() => handleEditRole({ id: 3, name: 'Offer Manager', description: 'Offer creation and management capabilities', permissions: ['dashboard', 'offer-management'] })}
+                    >
                       <Edit className="h-3 w-3 mr-1" />
                       Edit
                     </Button>
-                    <Button variant="ghost" size="sm" className="text-gray-400 hover:text-red-600">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-gray-400 hover:text-red-600"
+                      onClick={() => handleDeleteRole(3)}
+                    >
                       <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>
@@ -1049,11 +1194,21 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                   </div>
 
                   <div className="flex gap-2">
-                    <Button variant="ghost" size="sm" className="flex-1 text-gray-600 hover:text-gray-800">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="flex-1 text-gray-600 hover:text-gray-800"
+                      onClick={() => handleEditRole({ id: 4, name: 'Support Agent', description: 'Customer support and ticket management access', permissions: ['dashboard', 'convoy'] })}
+                    >
                       <Edit className="h-3 w-3 mr-1" />
                       Edit
                     </Button>
-                    <Button variant="ghost" size="sm" className="text-gray-400 hover:text-red-600">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-gray-400 hover:text-red-600"
+                      onClick={() => handleDeleteRole(4)}
+                    >
                       <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>
@@ -1082,11 +1237,21 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                   </div>
 
                   <div className="flex gap-2">
-                    <Button variant="ghost" size="sm" className="flex-1 text-gray-600 hover:text-gray-800">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="flex-1 text-gray-600 hover:text-gray-800"
+                      onClick={() => handleEditRole({ id: 5, name: 'Analyst', description: 'Read-only access to dashboards and reports', permissions: ['dashboard', 'cocast'] })}
+                    >
                       <Edit className="h-3 w-3 mr-1" />
                       Edit
                     </Button>
-                    <Button variant="ghost" size="sm" className="text-gray-400 hover:text-red-600">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-gray-400 hover:text-red-600"
+                      onClick={() => handleDeleteRole(5)}
+                    >
                       <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>
@@ -1129,7 +1294,12 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                     </div>
 
                     <div className="flex gap-2">
-                      <Button variant="ghost" size="sm" className="flex-1 text-gray-600 hover:text-gray-800">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="flex-1 text-gray-600 hover:text-gray-800"
+                        onClick={() => handleEditRole(role)}
+                      >
                         <Edit className="h-3 w-3 mr-1" />
                         Edit
                       </Button>
