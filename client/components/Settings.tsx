@@ -692,7 +692,7 @@ export function Settings({
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <Button
+          {/* <Button
             variant="outline"
             onClick={() => {
               setActiveTab("template-creation");
@@ -702,7 +702,7 @@ export function Settings({
           >
             <Plus className="h-4 w-4" />
             Create Template
-          </Button>
+          </Button> */}
           <Button
             onClick={handleSaveSettings}
             className="flex items-center gap-2"
@@ -767,9 +767,9 @@ export function Settings({
         </TabsList>
 
         {/* Users Tab */}
-        <TabsContent value="users" className="space-y-6">
+        <TabsContent value="users" className="space-y-6 bg-white p-4">
           {/* Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between ">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-gray-100 rounded-lg">
                 <Users className="h-5 w-5 text-gray-600" />
@@ -1387,7 +1387,7 @@ export function Settings({
         </TabsContent>
 
         {/* Roles & Access Tab */}
-        <TabsContent value="roles" className="space-y-6">
+        <TabsContent value="roles" className="space-y-6  bg-white p-4">
           {/* Header */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">

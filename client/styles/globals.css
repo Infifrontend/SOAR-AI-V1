@@ -1206,6 +1206,11 @@ html {
     color: #717182 !important;
   }
 
+  .cls-custompop{
+    width: 90%;
+    max-width: 90% !important;
+  }
+
   .cls-cancel {
     border: 1px solid #e5e7eb !important;
     background-color: #eceef2 !important;

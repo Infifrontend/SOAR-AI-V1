@@ -746,7 +746,7 @@ export function TemplateCreation() {
 
       {/* Preview Dialog */}
       <Dialog open={showPreviewDialog} onOpenChange={setShowPreviewDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-7xl max-h-[90vh] cls-custompopup">
           <DialogHeader>
             <DialogTitle>Template Preview</DialogTitle>
             <DialogDescription>
@@ -755,7 +755,7 @@ export function TemplateCreation() {
           </DialogHeader>
           
           {previewData && (
-            <div className="space-y-4">
+            <div className="space-y-4 max-h-[50vh] overflow-y-auto">
               {previewData.subject && (
                 <div>
                   <Label className="text-sm font-medium">Subject Line</Label>
@@ -772,24 +772,18 @@ export function TemplateCreation() {
                 </div>
                 <div className="border rounded overflow-hidden bg-gray-100">
                   {previewData.isCompleteLayout ? (
-                    <iframe
-                      srcDoc={previewData.content}
-                      style={{
-                        width: '100%',
-                        height: '600px',
-                        border: 'none',
-                        borderRadius: '4px',
-                        backgroundColor: 'white'
-                      }}
-                      title="Complete Email Preview"
+                    <div
+                      className="w-full min-h-[600px] bg-white p-4 overflow-auto rounded"
+                      dangerouslySetInnerHTML={{ __html: previewData.content }}
                     />
                   ) : (
-                    <div 
-                      className="p-4 min-h-96 bg-white"
+                    <div
+                      className="p-4 min-h-96 bg-white overflow-hidden"
                       dangerouslySetInnerHTML={{ __html: previewData.content }}
                     />
                   )}
                 </div>
+
               </div>
 
               {previewData.variables_used && previewData.variables_used.length > 0 && (
