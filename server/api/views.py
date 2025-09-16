@@ -66,6 +66,69 @@ def create_lead_history(lead,
         pass
 
 
+@csrf_exempt
+def track_email_open(request, tracking_id):
+    """Track email opens with a 1x1 pixel"""
+    try:
+        from .models import EmailTracking
+        tracking = get_object_or_404(EmailTracking, tracking_id=tracking_id)
+        
+        # Update tracking record
+        if not tracking.first_opened:
+            tracking.first_opened = timezone.now()
+        tracking.last_opened = timezone.now()
+        tracking.open_count += 1
+        tracking.user_agent = request.META.get('HTTP_USER_AGENT', '')
+        tracking.ip_address = request.META.get('REMOTE_ADDR')
+        tracking.save()
+
+        # Return 1x1 transparent pixel
+        from django.http import HttpResponse
+        # Create a 1x1 transparent PNG
+        pixel_data = b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x01\x03\x00\x00\x00%\xdbV\xca\x00\x00\x00\x03PLTE\x00\x00\x00\xa7z=\xda\x00\x00\x00\x01tRNS\x00@\xe6\xd8f\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xdb\x00\x00\x00\x00IEND\xaeB`\x82'
+        response = HttpResponse(pixel_data, content_type='image/png')
+        response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response['Pragma'] = 'no-cache'
+        response['Expires'] = '0'
+        return response
+    except Exception as e:
+        # Return empty pixel even if tracking fails
+        from django.http import HttpResponse
+        pixel_data = b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x01\x03\x00\x00\x00%\xdbV\xca\x00\x00\x00\x03PLTE\x00\x00\x00\xa7z=\xda\x00\x00\x00\x01tRNS\x00@\xe6\xd8f\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xdb\x00\x00\x00\x00IEND\xaeB`\x82'
+        response = HttpResponse(pixel_data, content_type='image/png')
+        return response
+
+
+@csrf_exempt
+def track_email_click(request, tracking_id):
+    """Track email clicks and redirect to target URL"""
+    try:
+        from .models import EmailTracking
+        tracking = get_object_or_404(EmailTracking, tracking_id=tracking_id)
+        
+        # Get target URL from query params
+        target_url = request.GET.get('url', 'https://soar-ai.com')
+        
+        # Decode URL if it's encoded
+        import urllib.parse
+        target_url = urllib.parse.unquote(target_url)
+        
+        # Update tracking record
+        if not tracking.first_clicked:
+            tracking.first_clicked = timezone.now()
+        tracking.last_clicked = timezone.now()
+        tracking.click_count += 1
+        tracking.user_agent = request.META.get('HTTP_USER_AGENT', '')
+        tracking.ip_address = request.META.get('REMOTE_ADDR')
+        tracking.save()
+
+        # Redirect to target URL
+        return HttpResponseRedirect(target_url)
+    except Exception as e:
+        # Redirect to default URL if tracking fails
+        return HttpResponseRedirect('https://soar-ai.com')
+
+
 class CompanyViewSet(viewsets.ModelViewSet):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer

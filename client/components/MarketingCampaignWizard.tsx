@@ -268,7 +268,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData, editM
     if (!template) return;
 
     const subject = template.subject_line || `Partnership Opportunity - ${template.name}`;
-    const ctaLink = campaignData.content?.email?.cta_link || template.cta_link || 'https://soarai.infinitisoftware.net/';
+    const ctaLink = template.cta_link || 'https://calendly.com/soar-ai/demo';
     
     let renderedContent = '';
     
@@ -290,7 +290,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData, editM
           intro_paragraph: templateVariables.intro_paragraph || 'We\'re excited to help {{company_name}} transform your corporate travel experience.',
           body_content: templateVariables.body_content || '',
           cta_url: templateVariables.cta_url || ctaLink,
-          cta_text: templateVariables.cta_text || template.cta || 'Learn More',
+          cta_text: templateVariables.cta_text || template.cta || 'Schedule Demo',
           company_address: templateVariables.company_address || '123 Business Ave, City, State 12345',
           unsubscribe_url: templateVariables.unsubscribe_url || 'https://soar-ai.com/unsubscribe',
           year: templateVariables.year || new Date().getFullYear().toString()
@@ -300,7 +300,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData, editM
         // Fallback to custom template rendering
         renderedContent = renderEmailTemplate(
           template.content || '', 
-          template.cta || 'Learn More', 
+          template.cta || 'Schedule Demo', 
           ctaLink,
           subject
         );
@@ -309,7 +309,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData, editM
       // For custom templates, use the existing rendering method
       renderedContent = renderEmailTemplate(
         template.content || '', 
-        template.cta || 'Learn More', 
+        template.cta || 'Schedule Demo', 
         ctaLink,
         subject
       );
@@ -326,7 +326,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData, editM
         email: {
           subject: subject,
           body: renderedContent,
-          cta: template.cta || 'Learn More',
+          cta: template.cta || 'Schedule Demo',
           cta_link: ctaLink
         }
       }

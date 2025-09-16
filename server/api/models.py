@@ -630,6 +630,19 @@ class EmailCampaign(models.Model):
                 if not is_complete_html:
                     # Wrap content in standard SOAR-AI template
                     contact_name = f"{lead.contact.first_name} {lead.contact.last_name}".strip() or 'Valued Customer'
+                    
+                    # Get CTA link from campaign or use default
+                    cta_link = self.cta_link or 'https://calendly.com/soar-ai/demo'
+                    cta_text = 'Schedule Demo'
+                    
+                    # Create CTA button HTML
+                    cta_button_html = f"""
+                    <div style="text-align:center; margin:24px 0;">
+                        <a href="{cta_link}" style="display:inline-block; padding:14px 28px; background:#2563eb; color:#ffffff; text-decoration:none; border-radius:6px; font-weight:600; font-size:16px;">
+                            {cta_text}
+                        </a>
+                    </div>
+                    """
 
                     html_content = f"""<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
@@ -647,6 +660,8 @@ class EmailCampaign(models.Model):
         .main-content {{ padding:30px 20px; }}
         .greeting {{ font-size:18px; color:#1f2937; margin:0 0 20px 0; font-weight:600; }}
         .content-text {{ font-size:16px; color:#374151; line-height:1.6; margin:0 0 16px 0; }}
+        .cta-section {{ text-align:center; margin:24px 0; }}
+        .cta-button {{ display:inline-block; padding:14px 28px; background:#2563eb; color:#ffffff; text-decoration:none; border-radius:6px; font-weight:600; font-size:16px; }}
         .footer {{ background:#f9fafb; border-top:1px solid #e5e7eb; padding:20px; text-align:center; }}
         .footer-logo {{ color:#374151; font-size:20px; font-weight:700; margin:0 0 8px 0; }}
         .footer-text {{ color:#6b7280; font-size:14px; margin:4px 0; }}
@@ -665,6 +680,7 @@ class EmailCampaign(models.Model):
                 <div class="content-text">
                     {rendered_content_with_tracking}
                 </div>
+                {cta_button_html}
                 <div class="content-text">
                     <p>Thank you for your interest in SOAR-AI's corporate travel solutions.</p>
                     <p>Best regards,<br><strong>The SOAR-AI Team</strong></p>
@@ -792,8 +808,11 @@ class EmailCampaign(models.Model):
         import re
         from django.conf import settings
 
-        # Get base URL for tracking - use the domain URL from settings
-        base_url =os.getenv('DOMAIN_URL')
+        # Get base URL for tracking - use environment variable or construct from request
+        base_url = os.getenv('DOMAIN_URL')
+        if not base_url:
+            # Fallback to constructed URL
+            base_url = 'https://51f54198-a9a2-4b01-b85b-23549e0b6e1c-00-385i2ayjj8nal.pike.replit.dev:8000'
 
         # Add multiple tracking pixels for better reliability
         # Primary tracking pixel (positioned absolutely)
