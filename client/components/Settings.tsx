@@ -981,25 +981,30 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                   <div>
                     <Label className="text-sm font-medium text-gray-700">Permissions</Label>
                     <div className="mt-2 space-y-2 max-h-40 overflow-y-auto">
-                      {['Dashboard', 'COINHUB', 'CONTRAQ', 'CONVOY', 'Offer Management', 'Settings'].map((permission) => (
-                        <div key={permission} className="flex items-center space-x-2">
+                      {permissions.slice(0, 10).map((permission) => (
+                        <div key={permission.id} className="flex items-center space-x-2">
                           <Checkbox
-                            id={`permission-${permission}`}
-                            checked={newRole.permissions.includes(permission)}
+                            id={`permission-${permission.id}`}
+                            checked={newRole.permissions.includes(permission.id)}
                             onCheckedChange={(checked) => {
                               if (checked) {
-                                setNewRole({...newRole, permissions: [...newRole.permissions, permission]});
+                                setNewRole({...newRole, permissions: [...newRole.permissions, permission.id]});
                               } else {
-                                setNewRole({...newRole, permissions: newRole.permissions.filter(p => p !== permission)});
+                                setNewRole({...newRole, permissions: newRole.permissions.filter(p => p !== permission.id)});
                               }
                             }}
                             className="data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
                           />
-                          <Label htmlFor={`permission-${permission}`} className="text-sm text-gray-700">
-                            {permission}
+                          <Label htmlFor={`permission-${permission.id}`} className="text-sm text-gray-700">
+                            {permission.name}
                           </Label>
                         </div>
                       ))}
+                      {permissions.length > 10 && (
+                        <p className="text-xs text-gray-500 mt-2">
+                          Showing first 10 permissions. More available after creation.
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>

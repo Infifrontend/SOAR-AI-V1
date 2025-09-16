@@ -92,6 +92,27 @@ class RoleViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = RoleSerializer
 
+    def create(self, request, *args, **kwargs):
+        """Create a new role with proper validation"""
+        try:
+            serializer = self.get_serializer(data=request.data)
+            if serializer.is_valid():
+                role = serializer.save()
+                return Response(
+                    RoleSerializer(role).data,
+                    status=status.HTTP_201_CREATED
+                )
+            else:
+                return Response(
+                    {'error': 'Invalid data', 'details': serializer.errors},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        except Exception as e:
+            return Response(
+                {'error': f'Failed to create role: {str(e)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
     @action(detail=True, methods=['post'])
     def assign_permissions(self, request, pk=None):
         """Assign permissions to role"""

@@ -701,6 +701,29 @@ class RoleSerializer(serializers.ModelSerializer):
     def get_user_count(self, obj):
         return obj.user_set.count()
 
+    def create(self, validated_data):
+        permissions_data = validated_data.pop('permissions', [])
+        group = Group.objects.create(**validated_data)
+        
+        if permissions_data:
+            group.permissions.set(permissions_data)
+        
+        return group
+
+    def update(self, instance, validated_data):
+        permissions_data = validated_data.pop('permissions', None)
+        
+        # Update group fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        
+        # Update permissions if provided
+        if permissions_data is not None:
+            instance.permissions.set(permissions_data)
+        
+        return instance
+
 
 class CreateUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=6)
