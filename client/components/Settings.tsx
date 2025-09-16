@@ -321,7 +321,8 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
 
   const [newRole, setNewRole] = useState({
     name: '',
-    permissions: []
+    description: '',
+    permissions: [] // Will store screen IDs instead of database permission IDs
   });
 
   const [systemSettings, setSystemSettings] = useState({
@@ -479,7 +480,7 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
       await roleApi.createRole(newRole);
       await loadData();
       setIsCreatingRole(false);
-      setNewRole({ name: '', permissions: [] });
+      setNewRole({ name: '', description: '', permissions: [] });
     } catch (error) {
       console.error('Error creating role:', error);
     } finally {
@@ -973,38 +974,64 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                     <Label htmlFor="roleDescription" className="text-sm font-medium text-gray-700">Description</Label>
                     <Textarea
                       id="roleDescription"
+                      value={newRole.description}
+                      onChange={(e) => setNewRole({...newRole, description: e.target.value})}
                       placeholder="Describe the role's purpose and responsibilities"
                       className="mt-1 border-orange-200 focus:border-orange-300 focus:ring-orange-200"
                       rows={3}
                     />
                   </div>
                   <div>
-                    <Label className="text-sm font-medium text-gray-700">Permissions</Label>
-                    <div className="mt-2 space-y-2 max-h-40 overflow-y-auto">
-                      {permissions.slice(0, 10).map((permission) => (
-                        <div key={permission.id} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`permission-${permission.id}`}
-                            checked={newRole.permissions.includes(permission.id)}
-                            onCheckedChange={(checked) => {
-                              if (checked) {
-                                setNewRole({...newRole, permissions: [...newRole.permissions, permission.id]});
-                              } else {
-                                setNewRole({...newRole, permissions: newRole.permissions.filter(p => p !== permission.id)});
-                              }
-                            }}
-                            className="data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
-                          />
-                          <Label htmlFor={`permission-${permission.id}`} className="text-sm text-gray-700">
-                            {permission.name}
-                          </Label>
+                    <Label className="text-sm font-medium text-gray-700">Menu Permissions</Label>
+                    <div className="mt-2 space-y-3 max-h-60 overflow-y-auto">
+                      {availableScreens.map((screen) => (
+                        <div key={screen.id} className="space-y-1">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`screen-${screen.id}`}
+                              checked={newRole.permissions.includes(screen.id)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setNewRole({...newRole, permissions: [...newRole.permissions, screen.id]});
+                                } else {
+                                  setNewRole({...newRole, permissions: newRole.permissions.filter(p => p !== screen.id)});
+                                }
+                              }}
+                              className="data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+                            />
+                            <Label htmlFor={`screen-${screen.id}`} className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                              <screen.icon className="h-4 w-4" />
+                              {screen.name}
+                            </Label>
+                          </div>
+                          
+                          {/* Sub-menu items */}
+                          {screen.children && (
+                            <div className="ml-6 space-y-1">
+                              {screen.children.map((subScreen) => (
+                                <div key={subScreen.id} className="flex items-center space-x-2">
+                                  <Checkbox
+                                    id={`screen-${subScreen.id}`}
+                                    checked={newRole.permissions.includes(subScreen.id)}
+                                    onCheckedChange={(checked) => {
+                                      if (checked) {
+                                        setNewRole({...newRole, permissions: [...newRole.permissions, subScreen.id]});
+                                      } else {
+                                        setNewRole({...newRole, permissions: newRole.permissions.filter(p => p !== subScreen.id)});
+                                      }
+                                    }}
+                                    className="data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+                                  />
+                                  <Label htmlFor={`screen-${subScreen.id}`} className="text-xs text-gray-600 flex items-center gap-2">
+                                    <subScreen.icon className="h-3 w-3" />
+                                    {subScreen.name}
+                                  </Label>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       ))}
-                      {permissions.length > 10 && (
-                        <p className="text-xs text-gray-500 mt-2">
-                          Showing first 10 permissions. More available after creation.
-                        </p>
-                      )}
                     </div>
                   </div>
                 </div>
@@ -1045,7 +1072,7 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                   </div>
 
                   <div className="mb-4">
-                    <Label className="text-xs font-medium text-gray-600">Permissions:</Label>
+                    <Label className="text-xs font-medium text-gray-600">Menu Access:</Label>
                     <div className="flex flex-wrap gap-1 mt-1">
                       <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">Dashboard</Badge>
                       <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">COINHUB</Badge>
@@ -1080,7 +1107,7 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                   </div>
 
                   <div className="mb-4">
-                    <Label className="text-xs font-medium text-gray-600">Permissions:</Label>
+                    <Label className="text-xs font-medium text-gray-600">Menu Access:</Label>
                     <div className="flex flex-wrap gap-1 mt-1">
                       <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">Dashboard</Badge>
                       <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">CONTRAQ</Badge>
@@ -1114,7 +1141,7 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                   </div>
 
                   <div className="mb-4">
-                    <Label className="text-xs font-medium text-gray-600">Permissions:</Label>
+                    <Label className="text-xs font-medium text-gray-600">Menu Access:</Label>
                     <div className="flex flex-wrap gap-1 mt-1">
                       <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">Dashboard</Badge>
                       <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">Offer Management</Badge>
@@ -1149,7 +1176,7 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                   </div>
 
                   <div className="mb-4">
-                    <Label className="text-xs font-medium text-gray-600">Permissions:</Label>
+                    <Label className="text-xs font-medium text-gray-600">Menu Access:</Label>
                     <div className="flex flex-wrap gap-1 mt-1">
                       <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">Dashboard</Badge>
                       <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">CONVOY</Badge>
@@ -1184,10 +1211,10 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                   </div>
 
                   <div className="mb-4">
-                    <Label className="text-xs font-medium text-gray-600">Permissions:</Label>
+                    <Label className="text-xs font-medium text-gray-600">Menu Access:</Label>
                     <div className="flex flex-wrap gap-1 mt-1">
                       <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">Dashboard</Badge>
-                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">Reports</Badge>
+                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">Revenue Prediction</Badge>
                     </div>
                   </div>
 
@@ -1218,16 +1245,21 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                     </div>
 
                     <div className="mb-4">
-                      <Label className="text-xs font-medium text-gray-600">Permissions:</Label>
+                      <Label className="text-xs font-medium text-gray-600">Menu Access:</Label>
                       <div className="flex flex-wrap gap-1 mt-1">
-                        {role.permission_details?.slice(0, 3).map((permission) => (
-                          <Badge key={permission.id} variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">
-                            {permission.name}
-                          </Badge>
-                        ))}
-                        {(role.permission_details?.length || 0) > 3 && (
+                        {role.permissions?.slice(0, 3).map((permissionId) => {
+                          // Find the screen by ID
+                          const screen = availableScreens.find(s => s.id === permissionId) || 
+                                       availableScreens.find(s => s.children?.some(c => c.id === permissionId))?.children?.find(c => c.id === permissionId);
+                          return screen ? (
+                            <Badge key={permissionId} variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">
+                              {screen.name}
+                            </Badge>
+                          ) : null;
+                        })}
+                        {(role.permissions?.length || 0) > 3 && (
                           <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">
-                            +{(role.permission_details?.length || 0) - 3} more
+                            +{(role.permissions?.length || 0) - 3} more
                           </Badge>
                         )}
                       </div>
