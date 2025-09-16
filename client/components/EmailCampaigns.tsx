@@ -125,6 +125,7 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
   const [realTimeStats, setRealTimeStats] = useState<Record<number, any>>({});
   const [trackingDetails, setTrackingDetails] = useState<any>(null);
   const [showTrackingDetails, setShowTrackingDetails] = useState(false);
+  const [loadingTrackingDetails, setLoadingTrackingDetails] = useState<number | null>(null);
 
   const { getCampaigns, launchCampaign, checkSmtpStatus: fetchSmtpStatus, getRealTimeStats, getTrackingDetails, loading: campaignsLoading, error: campaignsError } = useCampaignApi();
 
@@ -264,12 +265,15 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
 
   const handleViewTrackingDetails = async (campaignId: number) => {
     try {
+      setLoadingTrackingDetails(campaignId);
       const details = await getTrackingDetails(campaignId.toString());
       setTrackingDetails(details);
       setShowTrackingDetails(true);
     } catch (error) {
       console.error('Failed to fetch tracking details:', error);
       toast.error('Failed to load tracking details');
+    } finally {
+      setLoadingTrackingDetails(null);
     }
   };
 
@@ -1160,9 +1164,14 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
                             e.stopPropagation();
                             handleViewTrackingDetails(campaign.id);
                           }}
+                          disabled={loadingTrackingDetails === campaign.id}
                           className="text-green-600 border-green-200 hover:bg-green-50"
                         >
-                          <Activity className="h-4 w-4 mr-1" />
+                          {loadingTrackingDetails === campaign.id ? (
+                            <RefreshCw className="h-4 w-4 mr-1 animate-spin" />
+                          ) : (
+                            <Activity className="h-4 w-4 mr-1" />
+                          )}
                           Tracking
                         </Button>
                         <Button
