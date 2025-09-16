@@ -740,13 +740,34 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                         onValueChange={(value) => {
                           const roleId = value ? parseInt(value) : null;
                           const selectedRole = roles.find(role => role.id === roleId);
+                          
+                          // Map role names to valid Django model choices
+                          const roleMapping = {
+                            'administrator': 'administrator',
+                            'contract manager': 'manager',
+                            'offer manager': 'manager',
+                            'support agent': 'agent',
+                            'analyst': 'analyst',
+                            'manager': 'manager',
+                            'agent': 'agent',
+                            'specialist': 'specialist',
+                            'coordinator': 'coordinator',
+                            'supervisor': 'supervisor'
+                          };
+                          
+                          let mappedRole = 'agent'; // default
+                          if (selectedRole) {
+                            const roleName = selectedRole.name.toLowerCase();
+                            mappedRole = roleMapping[roleName] || 'other';
+                          }
+                          
                           setNewUser({
                             ...newUser, 
                             selected_role_id: roleId,
                             groups: roleId ? [roleId] : [],
                             profile: {
                               ...newUser.profile, 
-                              role: selectedRole ? selectedRole.name.toLowerCase().replace(' ', '_') : 'agent'
+                              role: mappedRole
                             }
                           });
                         }}
