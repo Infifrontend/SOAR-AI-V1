@@ -230,7 +230,11 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
       const fetchedCampaigns = await getCampaigns();
 
       if (fetchedCampaigns && Array.isArray(fetchedCampaigns)) {
-        setCampaignList(fetchedCampaigns);
+        // Sort campaigns by created_at date in descending order (newest first)
+        const sortedCampaigns = fetchedCampaigns.sort((a, b) => 
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+        setCampaignList(sortedCampaigns);
       } else {
         console.warn('No campaigns data received from API');
         setCampaignList([]);
