@@ -474,8 +474,8 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData, editM
           main_heading: 'Welcome to {{contact_name}}!',
           intro_paragraph: 'We\'re excited to help {{company_name}} transform your corporate travel experience.',
           body_content: campaignData.content?.email?.body || '',
-          cta_url: campaignData.content?.email?.cta_link || 'https://calendly.com/soar-ai/discovery-call',
-          cta_text: campaignData.content?.email?.cta || 'Schedule Discovery Call',
+          // cta_url: campaignData.content?.email?.cta_link || 'https://calendly.com/soar-ai/discovery-call',
+          // cta_text: campaignData.content?.email?.cta || 'Schedule Discovery Call',
           company_address: '123 Business Ave, City, State 12345',
           unsubscribe_url: 'https://soar-ai.com/unsubscribe',
           year: new Date().getFullYear().toString()
