@@ -517,7 +517,7 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
     setNewRole({
       name: role.name,
       description: role.description,
-      permissions: role.permissions
+      permissions: role.menu_permissions || [] // Ensure permissions is an array
     });
     setIsEditingRole(true);
   };
@@ -740,7 +740,7 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                         onValueChange={(value) => {
                           const roleId = value ? parseInt(value) : null;
                           const selectedRole = roles.find(role => role.id === roleId);
-                          
+
                           // Map role names to valid Django model choices
                           const roleMapping = {
                             'administrator': 'administrator',
@@ -754,13 +754,13 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                             'coordinator': 'coordinator',
                             'supervisor': 'supervisor'
                           };
-                          
+
                           let mappedRole = 'agent'; // default
                           if (selectedRole) {
                             const roleName = selectedRole.name.toLowerCase();
                             mappedRole = roleMapping[roleName] || 'other';
                           }
-                          
+
                           setNewUser({
                             ...newUser, 
                             selected_role_id: roleId,
@@ -797,7 +797,7 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                       placeholder="Enter phone number"
                     />
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="isActive"
@@ -1191,286 +1191,104 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Administrator Role */}
-              <Card className="border border-gray-200 hover:shadow-sm transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-1">Administrator</h3>
-                      <p className="text-sm text-gray-500 mb-3">Full system access with user management capabilities</p>
-                    </div>
-                    <Badge variant="destructive" className="bg-red-100 text-red-800 border-red-200">
-                      1 user
-                    </Badge>
-                  </div>
+              {roles.map((role) => {
+                // Get role color based on role name
+                const getRoleColor = (roleName) => {
+                  const name = roleName.toLowerCase();
+                  if (name.includes('administrator')) return 'bg-red-100 text-red-800 border-red-200';
+                  if (name.includes('contract') || name.includes('manager')) return 'bg-orange-100 text-orange-800 border-orange-200';
+                  if (name.includes('offer')) return 'bg-blue-100 text-blue-800 border-blue-200';
+                  if (name.includes('support') || name.includes('agent')) return 'bg-purple-100 text-purple-800 border-purple-200';
+                  if (name.includes('analyst')) return 'bg-green-100 text-green-800 border-green-200';
+                  return 'bg-gray-100 text-gray-800 border-gray-200';
+                };
 
-                  <div className="mb-4">
-                    <Label className="text-xs font-medium text-gray-600">Menu Access:</Label>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">Dashboard</Badge>
-                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">COINHUB</Badge>
-                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">CONTRAQ</Badge>
-                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">+3 more</Badge>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="flex-1 text-gray-600 hover:text-gray-800"
-                      onClick={() => handleEditRole({ id: 1, name: 'Administrator', description: 'Full system access with user management capabilities', permissions: ['dashboard', 'coinhub', 'contraq', 'convoy', 'offer-management', 'settings'] })}
-                    >
-                      <Edit className="h-3 w-3 mr-1" />
-                      Edit
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="text-gray-400 hover:text-red-600"
-                      onClick={() => handleDeleteRole(1)}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Contract Manager Role */}
-              <Card className="border border-gray-200 hover:shadow-sm transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-1">Contract Manager</h3>
-                      <p className="text-sm text-gray-500 mb-3">Contract oversight and breach monitoring access</p>
-                    </div>
-                    <Badge variant="secondary" className="bg-orange-100 text-orange-800 border-orange-200">
-                      3 users
-                    </Badge>
-                  </div>
-
-                  <div className="mb-4">
-                    <Label className="text-xs font-medium text-gray-600">Menu Access:</Label>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">Dashboard</Badge>
-                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">CONTRAQ</Badge>
-                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">Breach Monitoring</Badge>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="flex-1 text-gray-600 hover:text-gray-800"
-                      onClick={() => handleEditRole({ id: 2, name: 'Contract Manager', description: 'Contract oversight and breach monitoring access', permissions: ['dashboard', 'contraq'] })}
-                    >
-                      <Edit className="h-3 w-3 mr-1" />
-                      Edit
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="text-gray-400 hover:text-red-600"
-                      onClick={() => handleDeleteRole(2)}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Offer Manager Role */}
-              <Card className="border border-gray-200 hover:shadow-sm transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-1">Offer Manager</h3>
-                      <p className="text-sm text-gray-500 mb-3">Offer creation and management capabilities</p>
-                    </div>
-                    <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
-                      2 users
-                    </Badge>
-                  </div>
-
-                  <div className="mb-4">
-                    <Label className="text-xs font-medium text-gray-600">Menu Access:</Label>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">Dashboard</Badge>
-                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">Offer Management</Badge>
-                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">Create Offers</Badge>
-                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">+1 more</Badge>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="flex-1 text-gray-600 hover:text-gray-800"
-                      onClick={() => handleEditRole({ id: 3, name: 'Offer Manager', description: 'Offer creation and management capabilities', permissions: ['dashboard', 'offer-management'] })}
-                    >
-                      <Edit className="h-3 w-3 mr-1" />
-                      Edit
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="text-gray-400 hover:text-red-600"
-                      onClick={() => handleDeleteRole(3)}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Support Agent Role */}
-              <Card className="border border-gray-200 hover:shadow-sm transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-1">Support Agent</h3>
-                      <p className="text-sm text-gray-500 mb-3">Customer support and ticket management access</p>
-                    </div>
-                    <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200">
-                      5 users
-                    </Badge>
-                  </div>
-
-                  <div className="mb-4">
-                    <Label className="text-xs font-medium text-gray-600">Menu Access:</Label>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">Dashboard</Badge>
-                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">CONVOY</Badge>
-                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">Support Dashboard</Badge>
-                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">+1 more</Badge>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="flex-1 text-gray-600 hover:text-gray-800"
-                      onClick={() => handleEditRole({ id: 4, name: 'Support Agent', description: 'Customer support and ticket management access', permissions: ['dashboard', 'convoy'] })}
-                    >
-                      <Edit className="h-3 w-3 mr-1" />
-                      Edit
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="text-gray-400 hover:text-red-600"
-                      onClick={() => handleDeleteRole(4)}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Analyst Role */}
-              <Card className="border border-gray-200 hover:shadow-sm transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-1">Analyst</h3>
-                      <p className="text-sm text-gray-500 mb-3">Read-only access to dashboards and reports</p>
-                    </div>
-                    <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
-                      4 users
-                    </Badge>
-                  </div>
-
-                  <div className="mb-4">
-                    <Label className="text-xs font-medium text-gray-600">Menu Access:</Label>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">Dashboard</Badge>
-                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">Revenue Prediction</Badge>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="flex-1 text-gray-600 hover:text-gray-800"
-                      onClick={() => handleEditRole({ id: 5, name: 'Analyst', description: 'Read-only access to dashboards and reports', permissions: ['dashboard', 'cocast'] })}
-                    >
-                      <Edit className="h-3 w-3 mr-1" />
-                      Edit
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="text-gray-400 hover:text-red-600"
-                      onClick={() => handleDeleteRole(5)}
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Display actual roles from API if available */}
-              {roles.filter(role => !['Administrator', 'Contract Manager', 'Offer Manager', 'Support Agent', 'Analyst'].includes(role.name)).map((role) => (
-                <Card key={role.id} className="border border-gray-200 hover:shadow-sm transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-1">{role.name}</h3>
-                        <p className="text-sm text-gray-500 mb-3">Custom role with specific permissions</p>
+                return (
+                  <Card key={role.id} className="border border-gray-200 hover:shadow-sm transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold text-gray-900 mb-1">{role.name}</h3>
+                          <p className="text-sm text-gray-500 mb-3">
+                            {role.description || 'Custom role with specific permissions'}
+                          </p>
+                        </div>
+                        <Badge className={getRoleColor(role.name)}>
+                          {role.user_count || 0} user{(role.user_count || 0) !== 1 ? 's' : ''}
+                        </Badge>
                       </div>
-                      <Badge variant="outline">
-                        {role.user_count || 0} user{(role.user_count || 0) !== 1 ? 's' : ''}
-                      </Badge>
-                    </div>
 
-                    <div className="mb-4">
-                      <Label className="text-xs font-medium text-gray-600">Menu Access:</Label>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {role.permissions?.slice(0, 3).map((permissionId) => {
-                          // Find the screen by ID
-                          const screen = availableScreens.find(s => s.id === permissionId) || 
-                                       availableScreens.find(s => s.children?.some(c => c.id === permissionId))?.children?.find(c => c.id === permissionId);
-                          return screen ? (
-                            <Badge key={permissionId} variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">
-                              {screen.name}
+                      <div className="mb-4">
+                        <Label className="text-xs font-medium text-gray-600">Menu Access:</Label>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {role.menu_permissions && role.menu_permissions.length > 0 ? (
+                            <>
+                              {role.menu_permissions.slice(0, 3).map((permissionId) => {
+                                // Find the screen by ID
+                                const screen = availableScreens.find(s => s.id === permissionId);
+                                return screen ? (
+                                  <Badge key={permissionId} variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">
+                                    {screen.name}
+                                  </Badge>
+                                ) : (
+                                  <Badge key={permissionId} variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">
+                                    {permissionId}
+                                  </Badge>
+                                );
+                              })}
+                              {role.menu_permissions.length > 3 && (
+                                <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">
+                                  +{role.menu_permissions.length - 3} more
+                                </Badge>
+                              )}
+                            </>
+                          ) : (
+                            <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">
+                              No permissions assigned
                             </Badge>
-                          ) : null;
-                        })}
-                        {(role.permissions?.length || 0) > 3 && (
-                          <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">
-                            +{(role.permissions?.length || 0) - 3} more
-                          </Badge>
-                        )}
+                          )}
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="flex gap-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="flex-1 text-gray-600 hover:text-gray-800"
-                        onClick={() => handleEditRole(role)}
-                      >
-                        <Edit className="h-3 w-3 mr-1" />
-                        Edit
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => handleDeleteRole(role.id)}
-                        disabled={loading}
-                        className="text-gray-400 hover:text-red-600"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="flex-1 text-gray-600 hover:text-gray-800"
+                          onClick={() => handleEditRole({
+                            ...role,
+                            permissions: role.menu_permissions || []
+                          })}
+                        >
+                          <Edit className="h-3 w-3 mr-1" />
+                          Edit
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleDeleteRole(role.id)}
+                          disabled={loading}
+                          className="text-gray-400 hover:text-red-600"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+
+              {roles.length === 0 && (
+                <div className="col-span-2 text-center py-12">
+                  <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Roles Found</h3>
+                  <p className="text-gray-500 mb-4">Create your first role to get started with access management.</p>
+                  <Button onClick={() => setIsCreatingRole(true)} className="bg-orange-500 hover:bg-orange-600 text-white">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Role
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </TabsContent>
