@@ -576,9 +576,9 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
   const handleEditRole = (role) => {
     setSelectedRole(role);
     setNewRole({
-      name: role.name,
-      description: role.description,
-      permissions: role.menu_permissions || [] // Ensure permissions is an array
+      name: role.name || '',
+      description: role.description || '',
+      permissions: role.allowed_menus || role.menu_permissions || [] // Use allowed_menus first, fallback to menu_permissions
     });
     setIsEditingRole(true);
   };
