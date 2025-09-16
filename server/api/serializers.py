@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User, Group, Permission
 from .models import (
     Company, Contact, Lead, Opportunity, Contract, ContractBreach, EmailCampaign, TravelOffer, SupportTicket, RevenueForecast, ActivityLog, AIConversation, LeadNote, LeadHistory, CampaignTemplate,
-    EmailTracking, OpportunityActivity, ProposalDraft, AirportCode, UserProfile
+    EmailTracking, OpportunityActivity, ProposalDraft, AirportCode, UserProfile, RoleMenuPermission
 )
 
 class CompanySerializer(serializers.ModelSerializer):
