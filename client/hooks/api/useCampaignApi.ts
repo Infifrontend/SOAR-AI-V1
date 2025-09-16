@@ -235,7 +235,7 @@ export const useCampaignApi = () => {
 
   // Get campaign analytics
   const getCampaignAnalytics = useCallback(async (id: string) => {
-    setLoading(true);
+    setLoading(true);  
     setError(null);
 
     try {
@@ -339,7 +339,7 @@ export const useCampaignApi = () => {
   };
 
   const getTrackingDetails = async (campaignId: string) => {
-    setLoading(true);
+    // setLoading(true);
     setError(null);
     try {
       const response = await fetch(`${API_BASE_URL}/email-campaigns/${campaignId}/tracking_details/`);
