@@ -242,14 +242,44 @@ export function TemplateCreation() {
         },
         body: JSON.stringify({
           sample_data: {
-            // Add any custom sample data if needed
+            // Add comprehensive sample data for preview
+            company_name: 'TechCorp Solutions',
+            contact_name: 'John Smith',
+            job_title: 'Travel Manager',
+            industry: 'Technology',
+            employees: '2,500',
+            travel_budget: '$750,000',
+            annual_revenue: '$50M',
+            location: 'San Francisco, CA',
+            phone: '+1 (555) 123-4567',
+            email: 'john.smith@techcorp.com',
+            website: 'www.techcorp.com'
           }
         }),
       });
 
       if (response.ok) {
         const preview = await response.json();
-        setPreviewData(preview);
+        
+        // Import EmailTemplateService for complete layout rendering
+        const { EmailTemplateService } = await import('../utils/emailTemplateService');
+        
+        // Create a complete email layout with header and footer
+        const completeEmailHtml = EmailTemplateService.renderCorporateContactTemplate(
+          preview.sample_data?.contact_name || 'John Smith',
+          preview.sample_data?.company_name || 'TechCorp Solutions',
+          preview.content,
+          preview.subject || template.subject_line || 'Email Template Preview',
+          'Schedule Demo',
+          'https://calendly.com/soar-ai/demo'
+        );
+        
+        // Update preview data with complete HTML
+        setPreviewData({
+          ...preview,
+          content: completeEmailHtml,
+          isCompleteLayout: true
+        });
         setSelectedTemplate(template);
         setShowPreviewDialog(true);
       } else {
@@ -736,12 +766,29 @@ export function TemplateCreation() {
               )}
               
               <div>
-                <Label className="text-sm font-medium">Content</Label>
-                <div className="border rounded overflow-hidden">
-                  <div 
-                    className="p-4 min-h-96 bg-white"
-                    dangerouslySetInnerHTML={{ __html: previewData.content }}
-                  />
+                <Label className="text-sm font-medium">Email Preview</Label>
+                <div className="text-sm text-gray-600 mb-2">
+                  Complete email layout with header, content, and footer
+                </div>
+                <div className="border rounded overflow-hidden bg-gray-100">
+                  {previewData.isCompleteLayout ? (
+                    <iframe
+                      srcDoc={previewData.content}
+                      style={{
+                        width: '100%',
+                        height: '600px',
+                        border: 'none',
+                        borderRadius: '4px',
+                        backgroundColor: 'white'
+                      }}
+                      title="Complete Email Preview"
+                    />
+                  ) : (
+                    <div 
+                      className="p-4 min-h-96 bg-white"
+                      dangerouslySetInnerHTML={{ __html: previewData.content }}
+                    />
+                  )}
                 </div>
               </div>
 
@@ -757,6 +804,10 @@ export function TemplateCreation() {
                   </div>
                 </div>
               )}
+
+              <div className="text-xs text-gray-500 bg-blue-50 p-3 rounded">
+                <strong>Preview Note:</strong> This preview shows your template content within a complete SOAR-AI email layout including company header, professional styling, and footer. The actual email will be rendered with recipient-specific data when sent.
+              </div>
             </div>
           )}
 

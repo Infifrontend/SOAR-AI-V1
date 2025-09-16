@@ -94,12 +94,22 @@ export function StandardEmailTemplateCreator({
       contact_name: 'John Smith',
       company_name: 'TechCorp Solutions',
       industry: 'Technology',
-      employees: '500',
-      travel_budget: '$250,000',
-      job_title: 'Travel Manager'
+      employees: '2,500',
+      travel_budget: '$750,000',
+      job_title: 'Travel Manager',
+      location: 'San Francisco, CA',
+      annual_revenue: '$50M'
     };
     
-    return EmailTemplateService.generateStandardLayoutHTML(sampleData);
+    // Generate complete email layout with header and footer
+    return EmailTemplateService.renderCorporateContactTemplate(
+      sampleData.contact_name || 'John Smith',
+      sampleData.company_name || 'TechCorp Solutions',
+      sampleData.body_content || '<p>Your template content will appear here...</p>',
+      sampleData.subject || 'Email Template Preview',
+      sampleData.cta_text || 'Get Started',
+      sampleData.cta_url || 'https://soar-ai.com'
+    );
   };
 
   const insertVariable = (variable: string, field: keyof StandardLayoutVariables) => {
@@ -295,22 +305,27 @@ export function StandardEmailTemplateCreator({
           ) : (
             <div className="space-y-4">
               <div className="text-center">
-                <h3 className="text-lg font-semibold mb-2">Email Preview</h3>
+                <h3 className="text-lg font-semibold mb-2">Complete Email Preview</h3>
                 <p className="text-sm text-muted-foreground">
-                  This preview shows how your email will look with sample data
+                  This preview shows your complete email with SOAR-AI header, footer, and professional styling
                 </p>
               </div>
               
-              <div className="border rounded-lg overflow-hidden">
+              <div className="border rounded-lg overflow-hidden bg-gray-50">
                 <iframe
                   srcDoc={generatePreview()}
                   style={{
                     width: '100%',
-                    height: '600px',
-                    border: 'none'
+                    height: '700px',
+                    border: 'none',
+                    backgroundColor: 'white'
                   }}
-                  title="Email Preview"
+                  title="Complete Email Preview"
                 />
+              </div>
+              
+              <div className="text-xs text-gray-500 bg-blue-50 p-3 rounded">
+                <strong>Preview Note:</strong> This shows your template within the complete SOAR-AI email layout. The header includes the SOAR-AI branding, and the footer contains contact information and legal text.
               </div>
             </div>
           )}
