@@ -145,6 +145,20 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
   const [isEditingUser, setIsEditingUser] = useState(false);
   const [isEditingRole, setIsEditingRole] = useState(false);
   const [error, setError] = useState(''); // State for error messages
+  const [editUser, setEditUser] = useState({
+    username: '',
+    email: '',
+    first_name: '',
+    last_name: '',
+    is_active: true,
+    groups: [],
+    profile: {
+      department: 'other',
+      role: 'agent',
+      phone: ''
+    },
+    selected_role_id: null
+  });
 
   // API hooks
   const userApi = useUserApi();
@@ -377,6 +391,53 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to create role');
       console.error('Error creating role:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditUser = (user) => {
+    setSelectedUser(user);
+    setEditUser({
+      username: user.username || '',
+      email: user.email || '',
+      first_name: user.first_name || '',
+      last_name: user.last_name || '',
+      is_active: user.is_active || true,
+      groups: user.groups || [],
+      profile: {
+        department: user.profile?.department || 'other',
+        role: user.profile?.role || 'agent',
+        phone: user.profile?.phone || ''
+      },
+      selected_role_id: user.groups && user.groups.length > 0 ? user.groups[0] : null
+    });
+    setIsEditingUser(true);
+  };
+
+  const handleUpdateUser = async () => {
+    try {
+      setLoading(true);
+      await userApi.updateUser(selectedUser.id, editUser);
+      await loadData();
+      setIsEditingUser(false);
+      setSelectedUser(null);
+      setEditUser({
+        username: '',
+        email: '',
+        first_name: '',
+        last_name: '',
+        is_active: true,
+        groups: [],
+        profile: {
+          department: 'other',
+          role: 'agent',
+          phone: ''
+        },
+        selected_role_id: null
+      });
+    } catch (error) {
+      console.error('Error updating user:', error);
     } finally {
       setLoading(false);
     }
@@ -838,6 +899,180 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
+
+            {/* Edit User Dialog */}
+            <Dialog open={isEditingUser} onOpenChange={setIsEditingUser}>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Edit User: {selectedUser?.username}</DialogTitle>
+                  <DialogDescription>
+                    Update user information and permissions
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 max-h-96 overflow-y-auto">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="editFirstName">First Name</Label>
+                      <Input
+                        id="editFirstName"
+                        value={editUser.first_name}
+                        onChange={(e) => setEditUser({...editUser, first_name: e.target.value})}
+                        placeholder="Enter first name"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="editLastName">Last Name</Label>
+                      <Input
+                        id="editLastName"
+                        value={editUser.last_name}
+                        onChange={(e) => setEditUser({...editUser, last_name: e.target.value})}
+                        placeholder="Enter last name"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="editUsername">Username</Label>
+                      <Input
+                        id="editUsername"
+                        value={editUser.username}
+                        onChange={(e) => setEditUser({...editUser, username: e.target.value})}
+                        placeholder="Enter username"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="editUserEmail">Email Address</Label>
+                      <Input
+                        id="editUserEmail"
+                        type="email"
+                        value={editUser.email}
+                        onChange={(e) => setEditUser({...editUser, email: e.target.value})}
+                        placeholder="Enter email address"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="editDepartment">Department</Label>
+                      <Select 
+                        value={editUser.profile.department} 
+                        onValueChange={(value) => setEditUser({
+                          ...editUser, 
+                          profile: {...editUser.profile, department: value}
+                        })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="it">IT Operations</SelectItem>
+                          <SelectItem value="legal">Legal & Compliance</SelectItem>
+                          <SelectItem value="sales">Sales & Marketing</SelectItem>
+                          <SelectItem value="analytics">Business Analytics</SelectItem>
+                          <SelectItem value="executive">Executive</SelectItem>
+                          <SelectItem value="finance">Finance</SelectItem>
+                          <SelectItem value="hr">Human Resources</SelectItem>
+                          <SelectItem value="operations">Operations</SelectItem>
+                          <SelectItem value="travel">Travel Management</SelectItem>
+                          <SelectItem value="procurement">Procurement</SelectItem>
+                          <SelectItem value="marketing">Marketing</SelectItem>
+                          <SelectItem value="support">Customer Support</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="editRole">Role</Label>
+                      <Select 
+                        value={editUser.selected_role_id ? editUser.selected_role_id.toString() : ''} 
+                        onValueChange={(value) => {
+                          const roleId = value ? parseInt(value) : null;
+                          const selectedRole = roles.find(role => role.id === roleId);
+
+                          // Map role names to valid Django model choices
+                          const roleMapping = {
+                            'administrator': 'administrator',
+                            'contract manager': 'manager',
+                            'offer manager': 'manager',
+                            'support agent': 'agent',
+                            'analyst': 'analyst',
+                            'manager': 'manager',
+                            'agent': 'agent',
+                            'specialist': 'specialist',
+                            'coordinator': 'coordinator',
+                            'supervisor': 'supervisor'
+                          };
+
+                          let mappedRole = 'agent'; // default
+                          if (selectedRole) {
+                            const roleName = selectedRole.name.toLowerCase();
+                            mappedRole = roleMapping[roleName] || 'other';
+                          }
+
+                          setEditUser({
+                            ...editUser, 
+                            selected_role_id: roleId,
+                            groups: roleId ? [roleId] : [],
+                            profile: {
+                              ...editUser.profile, 
+                              role: mappedRole
+                            }
+                          });
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {roles && roles.length > 0 ? roles.map((role) => (
+                            <SelectItem key={role.id} value={role.id ? role.id.toString() : ''}>
+                              {role.name || 'Unknown Role'}
+                            </SelectItem>
+                          )) : (
+                            <SelectItem value="" disabled>
+                              No roles available
+                            </SelectItem>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="editUserPhone">Phone Number</Label>
+                    <Input
+                      id="editUserPhone"
+                      value={editUser.profile.phone}
+                      onChange={(e) => setEditUser({
+                        ...editUser, 
+                        profile: {...editUser.profile, phone: e.target.value}
+                      })}
+                      placeholder="Enter phone number"
+                    />
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="editIsActive"
+                      checked={editUser.is_active}
+                      onCheckedChange={(checked) => setEditUser({...editUser, is_active: checked})}
+                    />
+                    <Label htmlFor="editIsActive">Active User</Label>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsEditingUser(false)}>
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={handleUpdateUser} 
+                    disabled={loading}
+                    className="bg-orange-500 hover:bg-orange-600 text-white"
+                  >
+                    {loading ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
 
           {/* User Table */}
@@ -908,7 +1143,7 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                           <Button 
                             variant="ghost" 
                             size="sm"
-                            onClick={() => handleToggleUserStatus(user.id)}
+                            onClick={() => handleEditUser(user)}
                             disabled={loading}
                             className="text-gray-400 hover:text-gray-600"
                           >
