@@ -32,7 +32,7 @@ interface User {
 }
 
 interface CreateUserData {
-  username: string;
+  username?: string;
   email: string;
   first_name: string;
   last_name: string;
@@ -115,9 +115,15 @@ export const useUserApi = () => {
     setError(null);
 
     try {
+      // Ensure username is provided - generate from email if not provided
+      const userDataWithUsername = {
+        ...userData,
+        username: userData.username || userData.email.split('@')[0] || `user_${Date.now()}`
+      };
+
       const response: AxiosResponse<User> = await axios.post(
         `${API_BASE_URL}/users/`,
-        userData,
+        userDataWithUsername,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -128,7 +134,7 @@ export const useUserApi = () => {
       setData(response.data);
       return response.data;
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || error.message || 'Failed to create user';
+      const errorMessage = error.response?.data?.error || error.response?.data?.username?.[0] || error.message || 'Failed to create user';
       setError(errorMessage);
       throw error;
     } finally {
@@ -142,9 +148,15 @@ export const useUserApi = () => {
     setError(null);
 
     try {
+      // Ensure username is provided if updating user data
+      const userDataForUpdate = { ...userData };
+      if (userData.email && !userData.username) {
+        userDataForUpdate.username = userData.email.split('@')[0];
+      }
+
       const response: AxiosResponse<User> = await axios.put(
         `${API_BASE_URL}/users/${id}/`,
-        userData,
+        userDataForUpdate,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -155,7 +167,7 @@ export const useUserApi = () => {
       setData(response.data);
       return response.data;
     } catch (error: any) {
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to update user';
+      const errorMessage = error.response?.data?.error || error.response?.data?.username?.[0] || error.response?.data?.message || error.message || 'Failed to update user';
       setError(errorMessage);
       throw error;
     } finally {
