@@ -57,7 +57,7 @@ import {
 import { useUserApi } from '../hooks/api/useUserApi';
 import { useRoleApi } from '../hooks/api/useRoleApi';
 
-// Available screens configuration with hierarchical structure
+// Available main menus for role permissions
 const availableScreens = [
   {
     id: 'dashboard',
@@ -74,178 +74,40 @@ const availableScreens = [
     name: 'COINHUB',
     description: 'Corporate Intelligent Hub - Main vendor management module',
     icon: Building2,
-    type: 'group',
+    type: 'single',
     category: 'Primary Module',
     defaultEnabled: true,
-    canDisable: true,
-    children: [
-      {
-        id: 'vendor-search',
-        name: 'Vendor Search',
-        description: 'AI-powered vendor discovery and evaluation',
-        icon: Search,
-        type: 'single',
-        category: 'COINHUB Sub-module',
-        defaultEnabled: true,
-        canDisable: true
-      },
-      {
-        id: 'contracts',
-        name: 'Contract Management',
-        description: 'Contract lifecycle management with AI recommendations',
-        icon: FileText,
-        type: 'single',
-        category: 'COINHUB Sub-module',
-        defaultEnabled: true,
-        canDisable: true
-      }
-    ]
+    canDisable: true
   },
   {
     id: 'contraq',
     name: 'CONTRAQ',
     description: 'Corporate Oversight for Negotiated Tracking, Renewals, Analytics & Quality',
     icon: Shield,
-    type: 'group',
+    type: 'single',
     category: 'Primary Module',
     defaultEnabled: true,
-    canDisable: true,
-    children: [
-      {
-        id: 'breach-monitoring',
-        name: 'Breach Monitoring',
-        description: 'Contract breach tracking and risk assessment',
-        icon: AlertTriangle,
-        type: 'single',
-        category: 'CONTRAQ Sub-module',
-        defaultEnabled: true,
-        canDisable: true
-      }
-    ]
-  },
-  {
-    id: 'offer-management',
-    name: 'Offer Management',
-    description: 'Comprehensive offer and order management system for airlines',
-    icon: Gift,
-    type: 'group',
-    category: 'Primary Module',
-    defaultEnabled: true,
-    canDisable: true,
-    children: [
-      {
-        id: 'create-offers',
-        name: 'Create Offers',
-        description: 'Create new offers for travel agencies and corporates',
-        icon: Plus,
-        type: 'single',
-        category: 'Offer Management Sub-module',
-        defaultEnabled: true,
-        canDisable: true
-      },
-      {
-        id: 'active-offers',
-        name: 'Active Offers',
-        description: 'Monitor and manage all active offers',
-        icon: Target,
-        type: 'single',
-        category: 'Offer Management Sub-module',
-        defaultEnabled: true,
-        canDisable: true
-      },
-      {
-        id: 'order-management',
-        name: 'Order Management',
-        description: 'Track and fulfill orders from accepted offers',
-        icon: ShoppingCart,
-        type: 'single',
-        category: 'Offer Management Sub-module',
-        defaultEnabled: true,
-        canDisable: true
-      },
-      {
-        id: 'offer-templates',
-        name: 'Offer Templates',
-        description: 'Manage offer templates and presets',
-        icon: Package,
-        type: 'single',
-        category: 'Offer Management Sub-module',
-        defaultEnabled: true,
-        canDisable: true
-      },
-      {
-        id: 'offer-analytics',
-        name: 'Offer Analytics',
-        description: 'Analyze offer performance and success rates',
-        icon: TrendingUp,
-        type: 'single',
-        category: 'Offer Management Sub-module',
-        defaultEnabled: true,
-        canDisable: true
-      }
-    ]
+    canDisable: true
   },
   {
     id: 'convoy',
     name: 'CONVOY',
     description: 'CONnecting Voices Of Your passengers - Customer Support System',
     icon: Headphones,
-    type: 'group',
+    type: 'single',
     category: 'Primary Module',
     defaultEnabled: true,
-    canDisable: true,
-    children: [
-      {
-        id: 'support-dashboard',
-        name: 'Support Dashboard',
-        description: 'Customer support agent dashboard and analytics',
-        icon: BarChart3,
-        type: 'single',
-        category: 'CONVOY Sub-module',
-        defaultEnabled: true,
-        canDisable: true
-      },
-      {
-        id: 'admin-dashboard',
-        name: 'Admin Dashboard',
-        description: 'Comprehensive customer support administration and analytics',
-        icon: Activity,
-        type: 'single',
-        category: 'CONVOY Sub-module',
-        defaultEnabled: true,
-        canDisable: true
-      },
-      {
-        id: 'ticket-list',
-        name: 'Ticket List',
-        description: 'View and manage customer support tickets',
-        icon: List,
-        type: 'single',
-        category: 'CONVOY Sub-module',
-        defaultEnabled: true,
-        canDisable: true
-      },
-      {
-        id: 'ticket-kanban',
-        name: 'Ticket Board',
-        description: 'Drag and drop ticket status management',
-        icon: Target,
-        type: 'single',
-        category: 'CONVOY Sub-module',
-        defaultEnabled: true,
-        canDisable: true
-      },
-      {
-        id: 'ticket-details',
-        name: 'Ticket Details',
-        description: 'Detailed ticket view and conversation history',
-        icon: Eye,
-        type: 'single',
-        category: 'CONVOY Sub-module',
-        defaultEnabled: true,
-        canDisable: true
-      }
-    ]
+    canDisable: true
+  },
+  {
+    id: 'offer-management',
+    name: 'Offer Management',
+    description: 'Comprehensive offer and order management system for airlines',
+    icon: Gift,
+    type: 'single',
+    category: 'Primary Module',
+    defaultEnabled: true,
+    canDisable: true
   },
   {
     id: 'settings',
@@ -256,6 +118,16 @@ const availableScreens = [
     category: 'Administration',
     defaultEnabled: true,
     canDisable: false // Settings cannot be disabled
+  },
+  {
+    id: 'cocast',
+    name: 'COCAST',
+    description: 'Corporate Cost Analytics and Spending Trends',
+    icon: TrendingUp,
+    type: 'single',
+    category: 'Primary Module',
+    defaultEnabled: true,
+    canDisable: true
   }
 ];
 
@@ -983,53 +855,25 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-gray-700">Menu Permissions</Label>
-                    <div className="mt-2 space-y-3 max-h-60 overflow-y-auto">
+                    <div className="mt-2 space-y-2 max-h-60 overflow-y-auto">
                       {availableScreens.map((screen) => (
-                        <div key={screen.id} className="space-y-1">
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              id={`screen-${screen.id}`}
-                              checked={newRole.permissions.includes(screen.id)}
-                              onCheckedChange={(checked) => {
-                                if (checked) {
-                                  setNewRole({...newRole, permissions: [...newRole.permissions, screen.id]});
-                                } else {
-                                  setNewRole({...newRole, permissions: newRole.permissions.filter(p => p !== screen.id)});
-                                }
-                              }}
-                              className="data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
-                            />
-                            <Label htmlFor={`screen-${screen.id}`} className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                              <screen.icon className="h-4 w-4" />
-                              {screen.name}
-                            </Label>
-                          </div>
-                          
-                          {/* Sub-menu items */}
-                          {screen.children && (
-                            <div className="ml-6 space-y-1">
-                              {screen.children.map((subScreen) => (
-                                <div key={subScreen.id} className="flex items-center space-x-2">
-                                  <Checkbox
-                                    id={`screen-${subScreen.id}`}
-                                    checked={newRole.permissions.includes(subScreen.id)}
-                                    onCheckedChange={(checked) => {
-                                      if (checked) {
-                                        setNewRole({...newRole, permissions: [...newRole.permissions, subScreen.id]});
-                                      } else {
-                                        setNewRole({...newRole, permissions: newRole.permissions.filter(p => p !== subScreen.id)});
-                                      }
-                                    }}
-                                    className="data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
-                                  />
-                                  <Label htmlFor={`screen-${subScreen.id}`} className="text-xs text-gray-600 flex items-center gap-2">
-                                    <subScreen.icon className="h-3 w-3" />
-                                    {subScreen.name}
-                                  </Label>
-                                </div>
-                              ))}
-                            </div>
-                          )}
+                        <div key={screen.id} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`screen-${screen.id}`}
+                            checked={newRole.permissions.includes(screen.id)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setNewRole({...newRole, permissions: [...newRole.permissions, screen.id]});
+                              } else {
+                                setNewRole({...newRole, permissions: newRole.permissions.filter(p => p !== screen.id)});
+                              }
+                            }}
+                            className="data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+                          />
+                          <Label htmlFor={`screen-${screen.id}`} className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                            <screen.icon className="h-4 w-4" />
+                            {screen.name}
+                          </Label>
                         </div>
                       ))}
                     </div>

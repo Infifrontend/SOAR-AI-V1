@@ -690,38 +690,86 @@ class PermissionSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'content_type', 'codename']
 
 
+class RoleMenuPermissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RoleMenuPermission
+        fields = ['menu_list']
+
+
 class RoleSerializer(serializers.ModelSerializer):
     permission_details = PermissionSerializer(source='permissions', many=True, read_only=True)
     user_count = serializers.SerializerMethodField()
+    menu_permissions = serializers.ListField(child=serializers.CharField(), required=False, write_only=True)
+    allowed_menus = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Group
-        fields = ['id', 'name', 'permissions', 'permission_details', 'user_count']
+        fields = ['id', 'name', 'permissions', 'permission_details', 'user_count', 'menu_permissions', 'allowed_menus']
 
     def get_user_count(self, obj):
         return obj.user_set.count()
 
+    def get_allowed_menus(self, obj):
+        try:
+            menu_perms = RoleMenuPermission.objects.get(role=obj)
+            return menu_perms.menu_list
+        except RoleMenuPermission.DoesNotExist:
+            return []
+
     def create(self, validated_data):
+        from .models import RoleMenuPermission
+
+        # Extract menu permissions from permissions field (frontend sends as permissions)
+        menu_permissions = validated_data.pop('menu_permissions', [])
         permissions_data = validated_data.pop('permissions', [])
+
+        # If permissions contains string values (menu names), treat them as menu permissions
+        if permissions_data and isinstance(permissions_data[0] if permissions_data else None, str):
+            menu_permissions = permissions_data
+            permissions_data = []
+
+        # Create the group
         group = Group.objects.create(**validated_data)
-        
+
+        # Handle traditional database permissions
         if permissions_data:
             group.permissions.set(permissions_data)
-        
+
+        # Handle menu permissions
+        if menu_permissions:
+            RoleMenuPermission.objects.create(
+                role=group,
+                menu_list=menu_permissions
+            )
+
         return group
 
     def update(self, instance, validated_data):
+        from .models import RoleMenuPermission
+
+        menu_permissions = validated_data.pop('menu_permissions', None)
         permissions_data = validated_data.pop('permissions', None)
-        
+
+        # If permissions contains string values, treat them as menu permissions
+        if permissions_data and isinstance(permissions_data[0] if permissions_data else None, str):
+            menu_permissions = permissions_data
+            permissions_data = None
+
         # Update group fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
-        
-        # Update permissions if provided
+
+        # Update traditional database permissions
         if permissions_data is not None:
             instance.permissions.set(permissions_data)
-        
+
+        # Update menu permissions
+        if menu_permissions is not None:
+            menu_perm, created = RoleMenuPermission.objects.get_or_create(role=instance)
+            menu_perm.menu_list = menu_permissions
+            menu_perm.save()
+
         return instance
 
 

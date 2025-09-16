@@ -44,6 +44,17 @@ class UserProfile(models.Model):
         return f"{self.user.get_full_name()} - {self.get_role_display()}"
 
 
+class RoleMenuPermission(models.Model):
+    """Store menu permissions for roles"""
+    role = models.OneToOneField(Group, on_delete=models.CASCADE, related_name='menu_permissions')
+    menu_list = models.JSONField(default=list, blank=True)  # Store list of allowed menus
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.role.name} - Menu Permissions"
+
+
 class AirportCode(models.Model):
     """Model to store airport codes and their corresponding names"""
     code = models.CharField(max_length=3, unique=True, primary_key=True)
