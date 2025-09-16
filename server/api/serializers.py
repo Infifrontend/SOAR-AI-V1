@@ -299,8 +299,8 @@ class OptimizedLeadSerializer(serializers.ModelSerializer):
             'name': obj.company.name,
             'industry': obj.company.industry,
             'location': obj.company.location,
-            'size': obj.company.size,
-            'employee_count': obj.company.employee_count
+            'employee_count': obj.company.employee_count,
+            'size': obj.company.size
         }
 
     def get_contact(self, obj):
@@ -649,11 +649,19 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         profile_data = validated_data.pop('profile', {})
+        groups_data = validated_data.pop('groups', [])
+        user_permissions_data = validated_data.pop('user_permissions', [])
         password = validated_data.pop('password')
 
         user = User.objects.create_user(**validated_data)
         user.set_password(password)
         user.save()
+
+        # Handle many-to-many relationships separately
+        if groups_data:
+            user.groups.set(groups_data)
+        if user_permissions_data:
+            user.user_permissions.set(user_permissions_data)
 
         UserProfile.objects.create(user=user, **profile_data)
         return user
@@ -705,11 +713,16 @@ class CreateUserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         profile_data = validated_data.pop('profile', {})
+        groups_data = validated_data.pop('groups', [])
         password = validated_data.pop('password')
 
         user = User.objects.create_user(**validated_data)
         user.set_password(password)
         user.save()
+
+        # Handle many-to-many relationships separately
+        if groups_data:
+            user.groups.set(groups_data)
 
         UserProfile.objects.create(user=user, **profile_data)
         return user
