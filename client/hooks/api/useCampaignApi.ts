@@ -298,8 +298,8 @@ export const useCampaignApi = () => {
     try {
       setLoading(true);
       const url = campaignId
-        ? `${API_BASE_URL}/api/campaigns/${campaignId}/smtp-logs/`
-        : `${API_BASE_URL}/api/campaigns/smtp-status/`;
+        ? `${API_BASE_URL}/campaigns/${campaignId}/smtp-logs/`
+        : `${API_BASE_URL}/campaigns/smtp-status/`;
 
       const response = await fetch(url);
 

@@ -269,9 +269,9 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData, editM
 
     const subject = template.subject_line || `Partnership Opportunity - ${template.name}`;
     const ctaLink = template.cta_link || 'https://calendly.com/soar-ai/demo';
-    
+
     let renderedContent = '';
-    
+
     // Check if this is a standard layout template
     if (template.layout === 'standard' || template.is_standard_layout) {
       // For standard layout, parse the JSON content and generate HTML
@@ -279,7 +279,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData, editM
         const templateVariables = typeof template.content === 'string' 
           ? JSON.parse(template.content) 
           : template.content;
-        
+
         // Use EmailTemplateService to generate proper HTML
         renderedContent = EmailTemplateService.generateStandardLayoutHTML({
           subject: templateVariables.subject || subject,

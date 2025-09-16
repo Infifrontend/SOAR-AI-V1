@@ -87,10 +87,7 @@ export class EmailTemplateService {
                 <!-- Content block (use for dynamic HTML/content) -->
                 <div>{{body_content}}</div>
 
-                <!-- CTA -->
-
-
-                <!-- Small note / fallback link -->
+                <!-- CTA functionality is handled in campaign content -->
 
               </td>
             </tr>
