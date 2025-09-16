@@ -26,11 +26,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q, Sum, Count, Avg
 from django.utils import timezone
 from datetime import datetime, timedelta
+from django.contrib.auth.models import User, Group, Permission
 from .models import (Company, Contact, Lead, Opportunity, OpportunityActivity,
                      Contract, ContractBreach, CampaignTemplate, EmailCampaign,
                      TravelOffer, SupportTicket, RevenueForecast, LeadNote,
                      LeadHistory, ActivityLog, AIConversation, ProposalDraft,
-                     AirportCode)
+                     AirportCode, UserProfile)
 from .serializers import (CompanySerializer, ContactSerializer, LeadSerializer,
                           OpportunitySerializer, OpportunityActivitySerializer,
                           ContractSerializer, ContractBreachSerializer,
@@ -39,7 +40,98 @@ from .serializers import (CompanySerializer, ContactSerializer, LeadSerializer,
                           RevenueForecastSerializer, LeadNoteSerializer,
                           LeadHistorySerializer, ActivityLogSerializer,
                           AIConversationSerializer, ProposalDraftSerializer,
-                          AirportCodeSerializer)
+                          AirportCodeSerializer, UserSerializer, RoleSerializer,
+                          PermissionSerializer, CreateUserSerializer)
+
+
+# User Management ViewSets
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return CreateUserSerializer
+        return UserSerializer
+
+    @action(detail=False, methods=['get'])
+    def current(self, request):
+        """Get current user details"""
+        if request.user.is_authenticated:
+            serializer = self.get_serializer(request.user)
+            return Response(serializer.data)
+        return Response({'error': 'Not authenticated'}, status=401)
+
+    @action(detail=True, methods=['post'])
+    def change_password(self, request, pk=None):
+        """Change user password"""
+        user = self.get_object()
+        old_password = request.data.get('old_password')
+        new_password = request.data.get('new_password')
+
+        if not user.check_password(old_password):
+            return Response({'error': 'Invalid old password'}, status=400)
+
+        user.set_password(new_password)
+        user.save()
+        return Response({'message': 'Password changed successfully'})
+
+    @action(detail=True, methods=['post'])
+    def toggle_status(self, request, pk=None):
+        """Toggle user active status"""
+        user = self.get_object()
+        user.is_active = not user.is_active
+        user.save()
+        return Response({
+            'message': f'User {"activated" if user.is_active else "deactivated"}',
+            'is_active': user.is_active
+        })
+
+
+class RoleViewSet(viewsets.ModelViewSet):
+    queryset = Group.objects.all()
+    serializer_class = RoleSerializer
+
+    @action(detail=True, methods=['post'])
+    def assign_permissions(self, request, pk=None):
+        """Assign permissions to role"""
+        role = self.get_object()
+        permission_ids = request.data.get('permission_ids', [])
+        
+        permissions = Permission.objects.filter(id__in=permission_ids)
+        role.permissions.set(permissions)
+        
+        serializer = self.get_serializer(role)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'])
+    def assign_users(self, request, pk=None):
+        """Assign users to role"""
+        role = self.get_object()
+        user_ids = request.data.get('user_ids', [])
+        
+        users = User.objects.filter(id__in=user_ids)
+        role.user_set.set(users)
+        
+        serializer = self.get_serializer(role)
+        return Response(serializer.data)
+
+
+class PermissionViewSet(viewsets.ModelViewSet):
+    queryset = Permission.objects.all()
+    serializer_class = PermissionSerializer
+
+    @action(detail=False, methods=['get'])
+    def by_content_type(self, request):
+        """Get permissions grouped by content type"""
+        content_type = request.query_params.get('content_type')
+        if content_type:
+            permissions = self.queryset.filter(content_type__model=content_type)
+        else:
+            permissions = self.queryset.all()
+        
+        serializer = self.get_serializer(permissions, many=True)
+        return Response(serializer.data)
 
 
 # Helper function to create lead history entries
