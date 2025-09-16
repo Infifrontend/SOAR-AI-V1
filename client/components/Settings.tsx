@@ -271,11 +271,11 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
   const [isCreatingRole, setIsCreatingRole] = useState(false);
   const [isEditingUser, setIsEditingUser] = useState(false);
   const [isEditingRole, setIsEditingRole] = useState(false);
-  
+
   // API hooks
   const userApi = useUserApi();
   const roleApi = useRoleApi();
-  
+
   // State for users and roles data
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
@@ -289,7 +289,7 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
     if (saved) {
       return JSON.parse(saved);
     }
-    
+
     // Create default visibility state
     const defaultState = {};
     const processScreens = (screens) => {
@@ -366,7 +366,7 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
         roleApi.getRoles(),
         roleApi.getPermissions()
       ]);
-      
+
       setUsers(usersData);
       setRoles(rolesData);
       setPermissions(permissionsData);
@@ -379,7 +379,7 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
 
   const handleScreenToggle = (screenId: string, enabled: boolean) => {
     const newVisibility = { ...screenVisibility, [screenId]: enabled };
-    
+
     // If disabling a parent, disable all children
     const findScreen = (screens, id) => {
       for (const screen of screens) {
@@ -401,7 +401,7 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
     }
 
     setScreenVisibility(newVisibility);
-    
+
     // Notify parent component about the change
     if (onScreenVisibilityChange) {
       onScreenVisibilityChange(screenId, enabled);
@@ -569,7 +569,7 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
     const Icon = screen.icon;
     const isEnabled = screenVisibility[screen.id];
     const isDisabled = !screen.canDisable;
-    
+
     return (
       <div key={screen.id} className={`${level > 0 ? 'ml-6 border-l border-border pl-4' : ''}`}>
         <div className="flex items-center justify-between p-4 border rounded-lg">
@@ -606,7 +606,7 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
             />
           </div>
         </div>
-        
+
         {/* Render children if they exist and parent is enabled */}
         {screen.children && isEnabled && (
           <div className="mt-2 space-y-2">
@@ -932,130 +932,322 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
         </TabsContent>
 
         {/* Roles & Access Tab */}
-        <TabsContent value="roles" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <Shield className="h-5 w-5" />
-                    Roles & Access Control
-                  </CardTitle>
-                  <CardDescription>
-                    Manage user roles and their system permissions
-                  </CardDescription>
-                </div>
-                <Dialog open={isCreatingRole} onOpenChange={setIsCreatingRole}>
-                  <DialogTrigger asChild>
-                    <Button disabled={loading}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create Role
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl">
-                    <DialogHeader>
-                      <DialogTitle>Create New Role</DialogTitle>
-                      <DialogDescription>
-                        Define a new role with specific permissions
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="roleName">Role Name</Label>
-                        <Input
-                          id="roleName"
-                          value={newRole.name}
-                          onChange={(e) => setNewRole({...newRole, name: e.target.value})}
-                          placeholder="Enter role name"
-                        />
-                      </div>
-                      <div>
-                        <Label>Permissions</Label>
-                        <div className="grid grid-cols-2 gap-2 mt-2 max-h-64 overflow-y-auto border rounded p-3">
-                          {permissions.map((permission) => (
-                            <div key={permission.id} className="flex items-center space-x-2">
-                              <Checkbox
-                                id={`permission-${permission.id}`}
-                                checked={newRole.permissions.includes(permission.id)}
-                                onCheckedChange={(checked) => handlePermissionChange(permission.id, checked, 'role')}
-                              />
-                              <Label htmlFor={`permission-${permission.id}`} className="text-sm">
-                                {permission.name}
-                              </Label>
-                            </div>
-                          ))}
+        <TabsContent value="roles" className="space-y-6">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gray-100 rounded-lg">
+                <Shield className="h-5 w-5 text-gray-600" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">Roles & Access Control</h2>
+                <p className="text-sm text-gray-500">Manage user roles and their system permissions</p>
+              </div>
+            </div>
+            <Dialog open={isCreatingRole} onOpenChange={setIsCreatingRole}>
+              <DialogTrigger asChild>
+                <Button className="bg-orange-500 hover:bg-orange-600 text-white" disabled={loading}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Role
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle className="text-lg font-semibold">Create New Role</DialogTitle>
+                  <DialogDescription className="text-gray-500">
+                    Define a new role with specific permissions
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="roleName" className="text-sm font-medium text-gray-700">Role Name</Label>
+                    <Input
+                      id="roleName"
+                      value={newRole.name}
+                      onChange={(e) => setNewRole({...newRole, name: e.target.value})}
+                      placeholder="Enter role name"
+                      className="mt-1 border-orange-200 focus:border-orange-300 focus:ring-orange-200"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="roleDescription" className="text-sm font-medium text-gray-700">Description</Label>
+                    <Textarea
+                      id="roleDescription"
+                      placeholder="Describe the role's purpose and responsibilities"
+                      className="mt-1 border-orange-200 focus:border-orange-300 focus:ring-orange-200"
+                      rows={3}
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">Permissions</Label>
+                    <div className="mt-2 space-y-2 max-h-40 overflow-y-auto">
+                      {['Dashboard', 'COINHUB', 'CONTRAQ', 'CONVOY', 'Offer Management', 'Settings'].map((permission) => (
+                        <div key={permission} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`permission-${permission}`}
+                            checked={newRole.permissions.includes(permission)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setNewRole({...newRole, permissions: [...newRole.permissions, permission]});
+                              } else {
+                                setNewRole({...newRole, permissions: newRole.permissions.filter(p => p !== permission)});
+                              }
+                            }}
+                            className="data-[state=checked]:bg-orange-500 data-[state=checked]:border-orange-500"
+                          />
+                          <Label htmlFor={`permission-${permission}`} className="text-sm text-gray-700">
+                            {permission}
+                          </Label>
                         </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <DialogFooter className="flex gap-2">
+                  <Button variant="outline" onClick={() => setIsCreatingRole(false)}>
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={handleCreateRole} 
+                    disabled={loading}
+                    className="bg-orange-500 hover:bg-orange-600 text-white"
+                  >
+                    {loading ? 'Creating...' : 'Create Role'}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          {/* Role Cards Grid */}
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <RefreshCw className="h-8 w-8 animate-spin text-gray-400" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Administrator Role */}
+              <Card className="border border-gray-200 hover:shadow-sm transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-1">Administrator</h3>
+                      <p className="text-sm text-gray-500 mb-3">Full system access with user management capabilities</p>
+                    </div>
+                    <Badge variant="destructive" className="bg-red-100 text-red-800 border-red-200">
+                      1 user
+                    </Badge>
+                  </div>
+
+                  <div className="mb-4">
+                    <Label className="text-xs font-medium text-gray-600">Permissions:</Label>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">Dashboard</Badge>
+                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">COINHUB</Badge>
+                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">CONTRAQ</Badge>
+                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">+3 more</Badge>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button variant="ghost" size="sm" className="flex-1 text-gray-600 hover:text-gray-800">
+                      <Edit className="h-3 w-3 mr-1" />
+                      Edit
+                    </Button>
+                    <Button variant="ghost" size="sm" className="text-gray-400 hover:text-red-600">
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Contract Manager Role */}
+              <Card className="border border-gray-200 hover:shadow-sm transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-1">Contract Manager</h3>
+                      <p className="text-sm text-gray-500 mb-3">Contract oversight and breach monitoring access</p>
+                    </div>
+                    <Badge variant="secondary" className="bg-orange-100 text-orange-800 border-orange-200">
+                      3 users
+                    </Badge>
+                  </div>
+
+                  <div className="mb-4">
+                    <Label className="text-xs font-medium text-gray-600">Permissions:</Label>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">Dashboard</Badge>
+                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">CONTRAQ</Badge>
+                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">Breach Monitoring</Badge>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button variant="ghost" size="sm" className="flex-1 text-gray-600 hover:text-gray-800">
+                      <Edit className="h-3 w-3 mr-1" />
+                      Edit
+                    </Button>
+                    <Button variant="ghost" size="sm" className="text-gray-400 hover:text-red-600">
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Offer Manager Role */}
+              <Card className="border border-gray-200 hover:shadow-sm transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-1">Offer Manager</h3>
+                      <p className="text-sm text-gray-500 mb-3">Offer creation and management capabilities</p>
+                    </div>
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
+                      2 users
+                    </Badge>
+                  </div>
+
+                  <div className="mb-4">
+                    <Label className="text-xs font-medium text-gray-600">Permissions:</Label>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">Dashboard</Badge>
+                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">Offer Management</Badge>
+                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">Create Offers</Badge>
+                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">+1 more</Badge>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button variant="ghost" size="sm" className="flex-1 text-gray-600 hover:text-gray-800">
+                      <Edit className="h-3 w-3 mr-1" />
+                      Edit
+                    </Button>
+                    <Button variant="ghost" size="sm" className="text-gray-400 hover:text-red-600">
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Support Agent Role */}
+              <Card className="border border-gray-200 hover:shadow-sm transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-1">Support Agent</h3>
+                      <p className="text-sm text-gray-500 mb-3">Customer support and ticket management access</p>
+                    </div>
+                    <Badge variant="secondary" className="bg-purple-100 text-purple-800 border-purple-200">
+                      5 users
+                    </Badge>
+                  </div>
+
+                  <div className="mb-4">
+                    <Label className="text-xs font-medium text-gray-600">Permissions:</Label>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">Dashboard</Badge>
+                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">CONVOY</Badge>
+                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">Support Dashboard</Badge>
+                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">+1 more</Badge>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button variant="ghost" size="sm" className="flex-1 text-gray-600 hover:text-gray-800">
+                      <Edit className="h-3 w-3 mr-1" />
+                      Edit
+                    </Button>
+                    <Button variant="ghost" size="sm" className="text-gray-400 hover:text-red-600">
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Analyst Role */}
+              <Card className="border border-gray-200 hover:shadow-sm transition-shadow">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-1">Analyst</h3>
+                      <p className="text-sm text-gray-500 mb-3">Read-only access to dashboards and reports</p>
+                    </div>
+                    <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">
+                      4 users
+                    </Badge>
+                  </div>
+
+                  <div className="mb-4">
+                    <Label className="text-xs font-medium text-gray-600">Permissions:</Label>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">Dashboard</Badge>
+                      <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">Reports</Badge>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button variant="ghost" size="sm" className="flex-1 text-gray-600 hover:text-gray-800">
+                      <Edit className="h-3 w-3 mr-1" />
+                      Edit
+                    </Button>
+                    <Button variant="ghost" size="sm" className="text-gray-400 hover:text-red-600">
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Display actual roles from API if available */}
+              {roles.filter(role => !['Administrator', 'Contract Manager', 'Offer Manager', 'Support Agent', 'Analyst'].includes(role.name)).map((role) => (
+                <Card key={role.id} className="border border-gray-200 hover:shadow-sm transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-1">{role.name}</h3>
+                        <p className="text-sm text-gray-500 mb-3">Custom role with specific permissions</p>
+                      </div>
+                      <Badge variant="outline">
+                        {role.user_count || 0} user{(role.user_count || 0) !== 1 ? 's' : ''}
+                      </Badge>
+                    </div>
+
+                    <div className="mb-4">
+                      <Label className="text-xs font-medium text-gray-600">Permissions:</Label>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {role.permission_details?.slice(0, 3).map((permission) => (
+                          <Badge key={permission.id} variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">
+                            {permission.name}
+                          </Badge>
+                        ))}
+                        {(role.permission_details?.length || 0) > 3 && (
+                          <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">
+                            +{(role.permission_details?.length || 0) - 3} more
+                          </Badge>
+                        )}
                       </div>
                     </div>
-                    <DialogFooter>
-                      <Button variant="outline" onClick={() => setIsCreatingRole(false)}>
-                        Cancel
+
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="sm" className="flex-1 text-gray-600 hover:text-gray-800">
+                        <Edit className="h-3 w-3 mr-1" />
+                        Edit
                       </Button>
-                      <Button onClick={handleCreateRole} disabled={loading}>
-                        {loading ? 'Creating...' : 'Create Role'}
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleDeleteRole(role.id)}
+                        disabled={loading}
+                        className="text-gray-400 hover:text-red-600"
+                      >
+                        <Trash2 className="h-3 w-3" />
                       </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="flex justify-center py-8">
-                  <RefreshCw className="h-8 w-8 animate-spin" />
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {roles.map((role) => (
-                    <Card key={role.id}>
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-medium">{role.name}</h4>
-                          <Badge variant="outline">
-                            {role.user_count || 0} user{(role.user_count || 0) !== 1 ? 's' : ''}
-                          </Badge>
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-xs font-medium">Permissions:</Label>
-                          <div className="flex flex-wrap gap-1">
-                            {role.permission_details?.slice(0, 3).map((permission) => (
-                              <Badge key={permission.id} variant="outline" className="text-xs">
-                                {permission.name}
-                              </Badge>
-                            ))}
-                            {(role.permission_details?.length || 0) > 3 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{(role.permission_details?.length || 0) - 3} more
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex gap-2 mt-3">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="flex-1"
-                            disabled={loading}
-                          >
-                            <Edit className="h-3 w-3 mr-1" />
-                            Edit
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => handleDeleteRole(role.id)}
-                            disabled={loading}
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </TabsContent>
 
         {/* Screen Management Tab */}
@@ -1124,7 +1316,7 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                     Toggle individual screens on or off. Disabled screens will not appear in the navigation.
                   </p>
                 </div>
-                
+
                 <div className="space-y-3">
                   {availableScreens.map(screen => renderScreenItem(screen))}
                 </div>
