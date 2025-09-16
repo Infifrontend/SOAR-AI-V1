@@ -159,6 +159,11 @@ class EmailTemplateViewSet(viewsets.ModelViewSet):
     queryset = EmailTemplate.objects.all()
     serializer_class = EmailTemplateSerializer
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
     def get_queryset(self):
         queryset = self.queryset.filter(is_active=True)
         
@@ -173,9 +178,8 @@ class EmailTemplateViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(
                 models.Q(company_id=company_id) | models.Q(is_global=True)
             )
-        else:
-            # If no company specified, return global templates only
-            queryset = queryset.filter(is_global=True)
+        # If no company filter specified, return all active templates
+        # This allows the frontend to see all templates
         
         return queryset.order_by('-created_at')
 
