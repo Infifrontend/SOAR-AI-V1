@@ -585,7 +585,7 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-7 mb-6 bg-gray-50/50 p-1 rounded-xl border border-gray-200/50 cls-nagu">
+        <TabsList className="grid w-full grid-cols-7 mb-6 bg-gray-50/50 p-1 rounded-xl border border-gray-200/50 flex">
           <TabsTrigger 
             value="users" 
             className="rounded-lg px-6 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-[#FD9646] data-[state=active]:border-b-[#FD9646] font-medium text-gray-600 data-[state=active]:text-gray-900 hover:text-gray-900 transition-all duration-200 flex items-center gap-2 cls-btn"
@@ -860,99 +860,6 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {/* Sample data from the image */}
-                  <TableRow className="border-b border-gray-100 hover:bg-gray-50">
-                    <TableCell className="font-medium text-gray-900">John Smith</TableCell>
-                    <TableCell className="text-gray-600">john.smith@soar-ai.com</TableCell>
-                    <TableCell>
-                      <Badge className="bg-red-500 text-white hover:bg-red-600">Administrator</Badge>
-                    </TableCell>
-                    <TableCell className="text-gray-600">IT Operations</TableCell>
-                    <TableCell>
-                      <Badge className="bg-orange-100 text-orange-800 border-orange-200">Active</Badge>
-                    </TableCell>
-                    <TableCell className="text-gray-600">2024-06-16 09:30</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm" className="text-gray-400 hover:text-gray-600">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" className="text-gray-400 hover:text-red-600">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-
-                  <TableRow className="border-b border-gray-100 hover:bg-gray-50">
-                    <TableCell className="font-medium text-gray-900">Sarah Johnson</TableCell>
-                    <TableCell className="text-gray-600">sarah.johnson@soar-ai.com</TableCell>
-                    <TableCell>
-                      <Badge className="bg-orange-500 text-white hover:bg-orange-600">Contract Manager</Badge>
-                    </TableCell>
-                    <TableCell className="text-gray-600">Legal & Compliance</TableCell>
-                    <TableCell>
-                      <Badge className="bg-orange-100 text-orange-800 border-orange-200">Active</Badge>
-                    </TableCell>
-                    <TableCell className="text-gray-600">2024-06-16 08:45</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm" className="text-gray-400 hover:text-gray-600">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" className="text-gray-400 hover:text-red-600">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-
-                  <TableRow className="border-b border-gray-100 hover:bg-gray-50">
-                    <TableCell className="font-medium text-gray-900">Mike Davis</TableCell>
-                    <TableCell className="text-gray-600">mike.davis@soar-ai.com</TableCell>
-                    <TableCell>
-                      <Badge className="bg-blue-500 text-white hover:bg-blue-600">Offer Manager</Badge>
-                    </TableCell>
-                    <TableCell className="text-gray-600">Sales & Marketing</TableCell>
-                    <TableCell>
-                      <Badge className="bg-orange-100 text-orange-800 border-orange-200">Active</Badge>
-                    </TableCell>
-                    <TableCell className="text-gray-600">2024-06-15 16:22</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm" className="text-gray-400 hover:text-gray-600">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" className="text-gray-400 hover:text-red-600">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-
-                  <TableRow className="border-b border-gray-100 hover:bg-gray-50">
-                    <TableCell className="font-medium text-gray-900">Lisa Wong</TableCell>
-                    <TableCell className="text-gray-600">lisa.wong@soar-ai.com</TableCell>
-                    <TableCell>
-                      <Badge className="bg-gray-500 text-white hover:bg-gray-600">Analyst</Badge>
-                    </TableCell>
-                    <TableCell className="text-gray-600">Business Analytics</TableCell>
-                    <TableCell>
-                      <Badge className="bg-gray-100 text-gray-800 border-gray-200">Inactive</Badge>
-                    </TableCell>
-                    <TableCell className="text-gray-600">2024-06-10 14:15</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm" className="text-gray-400 hover:text-gray-600">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" className="text-gray-400 hover:text-red-600">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-
                   {/* Dynamic users from API */}
                   {users.map((user) => (
                     <TableRow key={user.id} className="border-b border-gray-100 hover:bg-gray-50">
@@ -1238,9 +1145,9 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                       <div className="mb-4">
                         <Label className="text-xs font-medium text-gray-600">Menu Access:</Label>
                         <div className="flex flex-wrap gap-1 mt-1">
-                          {role.menu_permissions && role.menu_permissions.length > 0 ? (
+                          {role.allowed_menus && role.allowed_menus.length > 0 ? (
                             <>
-                              {role.menu_permissions.slice(0, 3).map((permissionId) => {
+                              {role.allowed_menus.slice(0, 3).map((permissionId) => {
                                 // Find the screen by ID
                                 const screen = availableScreens.find(s => s.id === permissionId);
                                 return screen ? (
@@ -1253,9 +1160,9 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                                   </Badge>
                                 );
                               })}
-                              {role.menu_permissions.length > 3 && (
+                              {role.allowed_menus.length > 3 && (
                                 <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200">
-                                  +{role.menu_permissions.length - 3} more
+                                  +{role.allowed_menus.length - 3} more
                                 </Badge>
                               )}
                             </>
@@ -1271,7 +1178,7 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          className="flex-1 text-gray-600 hover:text-gray-800"
+                          className="flex-1 text-gray-600 hover:text-gray-800 border border-gray-200"
                           onClick={() => handleEditRole({
                             ...role,
                             permissions: role.menu_permissions || []
