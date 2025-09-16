@@ -945,7 +945,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData, editM
                                 email: { ...prev.content.email, cta: e.target.value }
                               }
                             }))}
-                            placeholder="See Compliance Demo"
+                            placeholder="Schedule Demo"
                             className="mt-1"
                           />
                         </div>

@@ -44,8 +44,8 @@ export function StandardEmailTemplateCreator({
       
       <p>Ready to see how we can help? Let's schedule a 15-minute discovery call.</p>
     `,
-    cta_url: initialData?.cta_url || 'https://calendly.com/soar-ai/discovery-call',
-    cta_text: initialData?.cta_text || 'Schedule Discovery Call',
+    cta_url: initialData?.cta_url || 'https://calendly.com/soar-ai/demo',
+    cta_text: initialData?.cta_text || 'Schedule Demo',
     company_address: initialData?.company_address || '123 Business Ave, City, State 12345',
     unsubscribe_url: initialData?.unsubscribe_url || 'https://soar-ai.com/unsubscribe',
     year: initialData?.year || new Date().getFullYear().toString()

@@ -674,10 +674,19 @@ class EmailCampaign(models.Model):
                     cta_link = self.cta_link or 'https://calendly.com/soar-ai/demo'
                     cta_text = 'Schedule Demo'
                     
-                    # Create CTA button HTML
+                    # Create CTA button HTML with tracking
+                    base_url = os.getenv('DOMAIN_URL')
+                    if not base_url:
+                        base_url = 'https://51f54198-a9a2-4b01-b85b-23549e0b6e1c-00-385i2ayjj8nal.pike.replit.dev:8000'
+                    
+                    # Encode CTA link for tracking
+                    import urllib.parse
+                    encoded_cta_link = urllib.parse.quote(cta_link, safe='')
+                    tracked_cta_link = f"{base_url}/api/track/click/{tracking.tracking_id}/?url={encoded_cta_link}"
+                    
                     cta_button_html = f"""
                     <div style="text-align:center; margin:24px 0;">
-                        <a href="{cta_link}" style="display:inline-block; padding:14px 28px; background:#2563eb; color:#ffffff; text-decoration:none; border-radius:6px; font-weight:600; font-size:16px;">
+                        <a href="{tracked_cta_link}" style="display:inline-block; padding:14px 28px; background:#2563eb; color:#ffffff; text-decoration:none; border-radius:6px; font-weight:600; font-size:16px;">
                             {cta_text}
                         </a>
                     </div>

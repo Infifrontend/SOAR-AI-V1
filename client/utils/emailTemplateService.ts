@@ -1,4 +1,3 @@
-
 export interface EmailTemplateSection {
   type: 'header' | 'body' | 'footer' | 'cta' | 'spacer' | 'hero' | 'intro';
   content: string;
@@ -158,7 +157,7 @@ export class EmailTemplateService {
 
   static generateStandardLayoutHTML(variables: StandardLayoutVariables): string {
     let html = this.standardLayoutTemplate;
-    
+
     // Set default values with proper HTML encoding
     const defaultVariables: StandardLayoutVariables = {
       subject: variables.subject || 'SOAR-AI Email',
@@ -182,10 +181,10 @@ export class EmailTemplateService {
       const finalValue = (key === 'body_content') ? String(value || '') : this.escapeHtml(String(value || ''));
       html = html.replace(regex, finalValue);
     });
-    
+
     // Clean up any remaining placeholder variables
     html = html.replace(/{{[^}]+}}/g, '');
-    
+
     return html;
   }
 
@@ -202,20 +201,20 @@ export class EmailTemplateService {
 
     // Fallback to old method for custom layouts
     let html = this.getBaseTemplate();
-    
+
     // Replace template sections
     const sectionsHTML = template.sections.map(section => {
       return this.renderSection(section, variables);
     }).join('');
-    
+
     html = html.replace('{{CONTENT}}', sectionsHTML);
-    
+
     // Replace any remaining variables
     Object.entries(variables).forEach(([key, value]) => {
       const regex = new RegExp(`{{${key}}}`, 'g');
       html = html.replace(regex, value);
     });
-    
+
     return html;
   }
 
@@ -301,7 +300,7 @@ export class EmailTemplateService {
 
   private static renderSection(section: EmailTemplateSection, variables: Record<string, string>): string {
     let content = section.content;
-    
+
     // Replace variables in content
     Object.entries(variables).forEach(([key, value]) => {
       const regex = new RegExp(`{{${key}}}`, 'g');
@@ -311,13 +310,13 @@ export class EmailTemplateService {
     switch (section.type) {
       case 'header':
         return `<div class="email-header">${content}</div>`;
-      
+
       case 'body':
         return `<div class="email-body">${content}</div>`;
-      
+
       case 'footer':
         return `<div class="email-footer">${content}</div>`;
-      
+
       case 'cta':
         const isButton = content.includes('<a') || content.includes('href');
         if (isButton) {
@@ -325,10 +324,10 @@ export class EmailTemplateService {
         } else {
           return `<div class="email-cta"><a href="#" class="cta-button">${content}</a></div>`;
         }
-      
+
       case 'spacer':
         return `<div class="spacer"></div>`;
-      
+
       default:
         return `<div>${content}</div>`;
     }
@@ -393,18 +392,18 @@ export class EmailTemplateService {
             type: 'body',
             content: `
               <p>Dear {{contact_name}},</p>
-              
+
               <p>Welcome to SOAR-AI! We're excited to help {{company_name}} transform your corporate travel experience.</p>
-              
+
               <p>Based on your {{industry}} background and {{employees}} team size, we've identified several opportunities to optimize your travel operations:</p>
-              
+
               <ul>
                 <li>✈️ Reduce travel costs by up to 35%</li>
                 <li>📊 Streamline booking and approval processes</li>
                 <li>🌍 Access our global partner network</li>
                 <li>🤖 AI-powered travel recommendations</li>
               </ul>
-              
+
               <p>Ready to see how we can help? Let's schedule a 15-minute discovery call.</p>
             `
           },
@@ -417,7 +416,7 @@ export class EmailTemplateService {
           //   content: `
           //     <p>Best regards,<br>
           //     The SOAR-AI Team</p>
-              
+
           //     <p>© 2024 SOAR-AI. All rights reserved.<br>
           //    <a href="#" style="color: #64748b;">Privacy Policy</a></p>
           //   `
@@ -545,7 +544,7 @@ export class EmailTemplateService {
 //         <td class="main">
 //           <h1 class="h1">${variables.main_heading}</h1>
 //           <p class="p">${variables.intro_paragraph}</p>
-          
+
 //           <div>${variables.body_content}</div>
 
 //           ${variables.cta_text && variables.cta_url ? `
@@ -699,7 +698,7 @@ export class EmailTemplateService {
             <tr>
               <td class="main">
                 <div>${content}</div>
-                
+
                 ${cta && ctaLink ? `
                 <div class="cta-container">
                   <a href="${ctaLink}" class="button" target="_blank">
@@ -746,7 +745,7 @@ export class EmailTemplateService {
       .replace(/<p[^>]*><\/p>/g, '') // Remove completely empty paragraphs
       .replace(/(<\/ul>)<p class="content-text">/g, '$1<p class="content-text">') // Fix paragraph after lists
       .replace(/(<ul[^>]*>)<p class="content-text">/g, '$1') // Remove paragraph tags inside lists
-      .replace(/(<\/li>)<p class="content-text">/g, '$1') // Remove paragraph tags after list items;
+      .replace(/(<\/li>)<p class="content-text">/g, '$1'); // Remove paragraph tags after list items;
 
     return `
 <!DOCTYPE html>
@@ -761,11 +760,11 @@ export class EmailTemplateService {
     table { border-spacing:0; border-collapse:collapse; }
     img { border:0; display:block; outline:none; text-decoration:none; max-width:100%; }
     a { text-decoration:none; }
-    
+
     /* Layout styles */
     .email-wrapper { width:100%; background-color:#f0f4f8; padding:40px 20px; }
     .email-container { max-width:650px; margin:0 auto; background:#ffffff; border-radius:16px; overflow:hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-    
+
     /* Header styles */
     .email-header { 
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
@@ -787,7 +786,7 @@ export class EmailTemplateService {
     .logo-container { position:relative; z-index:2; margin-bottom:15px; }
     .company-logo { font-size:32px; font-weight:800; color:#ffffff; margin:0; letter-spacing:-1px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
     .company-tagline { font-size:16px; color:rgba(255,255,255,0.9); margin:0; font-weight:400; }
-    
+
     /* Content styles */
     .email-content { padding:40px 30px; background:#ffffff; }
     .greeting { font-size:20px; color:#2d3748; margin:0 0 20px 0; font-weight:600; }
@@ -823,7 +822,7 @@ export class EmailTemplateService {
     }
     ul { margin:16px 0; padding-left:20px; }
     ul li { margin:8px 0; color:#4a5568; line-height:1.5; }
-    
+
     /* CTA Button */
     .cta-container { text-align:center; margin:35px 0; }
     .cta-button { 
@@ -843,7 +842,7 @@ export class EmailTemplateService {
       box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
       transform: translateY(-2px);
     }
-    
+
     /* Contact info */
     .contact-info { 
       background:#f7fafc; 
@@ -871,7 +870,7 @@ export class EmailTemplateService {
       margin-right:10px; 
       opacity:0.7;
     }
-    
+
     /* Footer */
     .email-footer { 
       background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%); 
@@ -892,7 +891,7 @@ export class EmailTemplateService {
     }
     .footer-links a:hover { border-bottom-color:#81e6d9; }
     .footer-disclaimer { font-size:12px; color:#718096; margin-top:20px; line-height:1.4; }
-    
+
     /* Responsive */
     @media screen and (max-width:480px) {
       .email-wrapper { padding:20px 10px; }
@@ -910,7 +909,7 @@ export class EmailTemplateService {
 <body>
   <div class="email-wrapper">
     <table class="email-container" width="650" cellpadding="0" cellspacing="0" role="presentation">
-      
+
       <!-- Header -->
       <tr>
         <td class="email-header">
@@ -925,7 +924,7 @@ export class EmailTemplateService {
       <tr>
         <td class="email-content">
           <h2 class="greeting">Dear ${recipientName} Team,</h2>
-          
+
           <div class="content-text">
             ${cleanContent.startsWith('<p>') ? cleanContent : `<p class="content-text">${cleanContent}</p>`}
           </div>
@@ -983,13 +982,13 @@ export class EmailTemplateService {
         <td class="email-footer">
           <h3 class="footer-logo">SOAR-AI</h3>
           <p class="footer-text">Transforming Corporate Travel Through Innovation</p>
-          
+
           <div class="footer-links">
             <a href="#">Privacy Policy</a>
             <a href="#">Terms of Service</a>
             <a href="#">Unsubscribe</a>
           </div>
-          
+
           <p class="footer-disclaimer">
             This email was sent regarding partnership opportunities for ${companyName}.<br>
             If you would prefer not to receive future communications, please reply with "UNSUBSCRIBE".<br>
