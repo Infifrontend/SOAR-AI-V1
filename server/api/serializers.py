@@ -698,28 +698,23 @@ class RoleMenuPermissionSerializer(serializers.ModelSerializer):
 
 
 class RoleSerializer(serializers.ModelSerializer):
-    permission_details = PermissionSerializer(source='permissions', many=True, read_only=True)
-    user_count = serializers.SerializerMethodField()
-    menu_permissions = serializers.ListField(child=serializers.CharField(), required=False, write_only=True)
+    description = serializers.SerializerMethodField(read_only=True)
     allowed_menus = serializers.SerializerMethodField(read_only=True)
-    permissions = serializers.SerializerMethodField(read_only=True)  # Override to return menu permissions for frontend
+    menu_permissions = serializers.ListField(child=serializers.CharField(), required=False, write_only=True)
+    role_description = serializers.CharField(required=False, write_only=True)
 
     class Meta:
         model = Group
-        fields = ['id', 'name', 'permissions', 'permission_details', 'user_count', 'menu_permissions', 'allowed_menus']
+        fields = ['name', 'description', 'allowed_menus', 'menu_permissions', 'role_description']
 
-    def get_user_count(self, obj):
-        return obj.user_set.count()
-
-    def get_allowed_menus(self, obj):
+    def get_description(self, obj):
         try:
             menu_perms = RoleMenuPermission.objects.get(role=obj)
-            return menu_perms.menu_list
+            return menu_perms.description or f"{obj.name} role"
         except RoleMenuPermission.DoesNotExist:
-            return []
+            return f"{obj.name} role"
 
-    def get_permissions(self, obj):
-        """Return menu permissions for frontend compatibility"""
+    def get_allowed_menus(self, obj):
         try:
             menu_perms = RoleMenuPermission.objects.get(role=obj)
             return menu_perms.menu_list
@@ -729,21 +724,19 @@ class RoleSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         from .models import RoleMenuPermission
 
-        # Extract menu permissions
+        # Extract menu permissions and description
         menu_permissions = validated_data.pop('menu_permissions', [])
+        role_description = validated_data.pop('role_description', '')
         
-        # Remove permissions from validated_data as it's read-only now
-        validated_data.pop('permissions', None)
-
         # Create the group
         group = Group.objects.create(**validated_data)
 
-        # Handle menu permissions
-        if menu_permissions:
-            RoleMenuPermission.objects.create(
-                role=group,
-                menu_list=menu_permissions
-            )
+        # Handle menu permissions and description
+        RoleMenuPermission.objects.create(
+            role=group,
+            menu_list=menu_permissions,
+            description=role_description or f"{group.name} role"
+        )
 
         return group
 
@@ -751,20 +744,20 @@ class RoleSerializer(serializers.ModelSerializer):
         from .models import RoleMenuPermission
 
         menu_permissions = validated_data.pop('menu_permissions', None)
-        
-        # Remove permissions from validated_data as it's read-only now
-        validated_data.pop('permissions', None)
+        role_description = validated_data.pop('role_description', None)
 
         # Update group fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
 
-        # Update menu permissions
+        # Update menu permissions and description
+        menu_perm, created = RoleMenuPermission.objects.get_or_create(role=instance)
         if menu_permissions is not None:
-            menu_perm, created = RoleMenuPermission.objects.get_or_create(role=instance)
             menu_perm.menu_list = menu_permissions
-            menu_perm.save()
+        if role_description is not None:
+            menu_perm.description = role_description
+        menu_perm.save()
 
         return instance
 

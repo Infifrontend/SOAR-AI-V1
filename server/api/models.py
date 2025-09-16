@@ -48,6 +48,7 @@ class RoleMenuPermission(models.Model):
     """Store menu permissions for roles"""
     role = models.OneToOneField(Group, on_delete=models.CASCADE, related_name='menu_permissions')
     menu_list = models.JSONField(default=list, blank=True)  # Store list of allowed menus
+    description = models.TextField(blank=True, default='')  # Role description
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
