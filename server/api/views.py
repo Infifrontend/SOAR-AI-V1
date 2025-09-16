@@ -55,7 +55,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return UserSerializer
 
     def update(self, request, *args, **kwargs):
-        """Handle user updates with proper username handling"""
+        """Handle user updates with proper username and groups handling"""
         try:
             instance = self.get_object()
             data = request.data.copy()
@@ -65,6 +65,13 @@ class UserViewSet(viewsets.ModelViewSet):
                 data['username'] = data['email'].split('@')[0] or instance.username
             elif not data.get('username'):
                 data['username'] = instance.username
+            
+            # Handle groups properly - convert selected_role_id to groups array
+            if 'selected_role_id' in data and data['selected_role_id']:
+                data['groups'] = [data['selected_role_id']]
+            elif 'groups' not in data:
+                # Preserve existing groups if not specified
+                data['groups'] = list(instance.groups.values_list('id', flat=True))
             
             serializer = self.get_serializer(instance, data=data, partial=kwargs.get('partial', False))
             if serializer.is_valid():

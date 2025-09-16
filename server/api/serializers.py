@@ -669,11 +669,19 @@ class UserSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         profile_data = validated_data.pop('profile', {})
+        groups_data = validated_data.pop('groups', None)
+        user_permissions_data = validated_data.pop('user_permissions', None)
 
-        # Update user fields
+        # Update user fields (excluding many-to-many fields)
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
+
+        # Handle many-to-many relationships separately
+        if groups_data is not None:
+            instance.groups.set(groups_data)
+        if user_permissions_data is not None:
+            instance.user_permissions.set(user_permissions_data)
 
         # Update or create profile
         if profile_data:
