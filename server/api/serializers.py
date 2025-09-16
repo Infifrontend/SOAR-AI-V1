@@ -765,16 +765,27 @@ class RoleSerializer(serializers.ModelSerializer):
 class CreateUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=6)
     profile = UserProfileSerializer(required=False)
+    username = serializers.CharField(required=False)  # Make username optional
 
     class Meta:
         model = User
         fields = ['username', 'email', 'first_name', 'last_name', 'password', 
                  'is_active', 'is_staff', 'groups', 'profile']
 
+    def validate(self, attrs):
+        # Ensure username is provided - generate from email if not provided
+        if not attrs.get('username') and attrs.get('email'):
+            attrs['username'] = attrs['email'].split('@')[0] or f"user_{timezone.now().timestamp()}"
+        return attrs
+
     def create(self, validated_data):
         profile_data = validated_data.pop('profile', {})
         groups_data = validated_data.pop('groups', [])
         password = validated_data.pop('password')
+
+        # Ensure username is set
+        if not validated_data.get('username') and validated_data.get('email'):
+            validated_data['username'] = validated_data['email'].split('@')[0] or f"user_{timezone.now().timestamp()}"
 
         user = User.objects.create_user(**validated_data)
         user.set_password(password)

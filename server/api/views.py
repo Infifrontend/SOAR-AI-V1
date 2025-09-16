@@ -54,6 +54,32 @@ class UserViewSet(viewsets.ModelViewSet):
             return CreateUserSerializer
         return UserSerializer
 
+    def update(self, request, *args, **kwargs):
+        """Handle user updates with proper username handling"""
+        try:
+            instance = self.get_object()
+            data = request.data.copy()
+            
+            # Ensure username is provided for updates
+            if not data.get('username') and data.get('email'):
+                data['username'] = data['email'].split('@')[0] or instance.username
+            elif not data.get('username'):
+                data['username'] = instance.username
+            
+            serializer = self.get_serializer(instance, data=data, partial=kwargs.get('partial', False))
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            else:
+                return Response({
+                    'error': 'Validation failed',
+                    'details': serializer.errors
+                }, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({
+                'error': f'Update failed: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     @action(detail=False, methods=['get'])
     def current(self, request):
         """Get current user details"""
