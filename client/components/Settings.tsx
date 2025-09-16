@@ -143,6 +143,7 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
   const [isCreatingRole, setIsCreatingRole] = useState(false);
   const [isEditingUser, setIsEditingUser] = useState(false);
   const [isEditingRole, setIsEditingRole] = useState(false);
+  const [error, setError] = useState(''); // State for error messages
 
   // API hooks
   const userApi = useUserApi();
@@ -347,14 +348,32 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
   };
 
   const handleCreateRole = async () => {
+    if (!newRole.name.trim()) {
+      setError('Role name is required');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
     try {
-      setLoading(true);
-      await roleApi.createRole(newRole);
-      await loadData();
-      setIsCreatingRole(false);
+      const roleData = {
+        name: newRole.name,
+        description: newRole.description,
+        menu_permissions: newRole.permissions // Send as menu_permissions instead of permissions
+      };
+
+      await roleApi.createRole(roleData); // Assuming createRole function is from roleApi
+
+      // Reset form
       setNewRole({ name: '', description: '', permissions: [] });
-    } catch (error) {
-      console.error('Error creating role:', error);
+      setIsCreatingRole(false);
+
+      // Refresh roles list
+      await loadData(); // Re-use loadData to fetch updated roles
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to create role');
+      console.error('Error creating role:', err);
     } finally {
       setLoading(false);
     }
