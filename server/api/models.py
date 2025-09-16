@@ -5,6 +5,45 @@ from django.utils import timezone
 import uuid
 
 
+class UserProfile(models.Model):
+    DEPARTMENT_CHOICES = [
+        ('executive', 'Executive'),
+        ('finance', 'Finance'),
+        ('hr', 'Human Resources'),
+        ('operations', 'Operations'),
+        ('travel', 'Travel Management'),
+        ('procurement', 'Procurement'),
+        ('it', 'IT'),
+        ('marketing', 'Marketing'),
+        ('sales', 'Sales'),
+        ('support', 'Customer Support'),
+        ('legal', 'Legal & Compliance'),
+        ('other', 'Other'),
+    ]
+
+    ROLE_CHOICES = [
+        ('administrator', 'Administrator'),
+        ('manager', 'Manager'),
+        ('agent', 'Agent'),
+        ('analyst', 'Analyst'),
+        ('specialist', 'Specialist'),
+        ('coordinator', 'Coordinator'),
+        ('supervisor', 'Supervisor'),
+        ('other', 'Other'),
+    ]
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    phone = models.CharField(max_length=20, blank=True)
+    department = models.CharField(max_length=20, choices=DEPARTMENT_CHOICES, default='other')
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='agent')
+    avatar = models.URLField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.get_full_name()} - {self.get_role_display()}"
+
+
 class AirportCode(models.Model):
     """Model to store airport codes and their corresponding names"""
     code = models.CharField(max_length=3, unique=True, primary_key=True)

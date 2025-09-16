@@ -55,101 +55,8 @@ import {
   List
 } from 'lucide-react';
 
-// Mock data for users
-const users = [
-  {
-    id: 1,
-    name: 'John Smith',
-    email: 'john.smith@soar-ai.com',
-    role: 'Administrator',
-    department: 'IT Operations',
-    status: 'Active',
-    lastLogin: '2024-06-16 09:30',
-    permissions: ['Dashboard', 'COINHUB', 'CONTRAQ', 'Offer Management', 'Settings'],
-    phone: '+1 (555) 123-4567',
-    joinDate: '2023-01-15'
-  },
-  {
-    id: 2,
-    name: 'Sarah Johnson',
-    email: 'sarah.johnson@soar-ai.com',
-    role: 'Contract Manager',
-    department: 'Legal & Compliance',
-    status: 'Active',
-    lastLogin: '2024-06-16 08:45',
-    permissions: ['Dashboard', 'CONTRAQ'],
-    phone: '+1 (555) 234-5678',
-    joinDate: '2023-03-20'
-  },
-  {
-    id: 3,
-    name: 'Mike Davis',
-    email: 'mike.davis@soar-ai.com',
-    role: 'Offer Manager',
-    department: 'Sales & Marketing',
-    status: 'Active',
-    lastLogin: '2024-06-15 16:22',
-    permissions: ['Dashboard', 'COINHUB', 'Offer Management'],
-    phone: '+1 (555) 345-6789',
-    joinDate: '2023-05-10'
-  },
-  {
-    id: 4,
-    name: 'Lisa Wong',
-    email: 'lisa.wong@soar-ai.com',
-    role: 'Analyst',
-    department: 'Business Analytics',
-    status: 'Inactive',
-    lastLogin: '2024-06-10 14:15',
-    permissions: ['Dashboard'],
-    phone: '+1 (555) 456-7890',
-    joinDate: '2023-08-05'
-  }
-];
-
-// Mock data for roles
-const roles = [
-  {
-    id: 1,
-    name: 'Administrator',
-    description: 'Full system access with user management capabilities',
-    permissions: ['Dashboard', 'COINHUB', 'CONTRAQ', 'Offer Management', 'Settings', 'User Management'],
-    userCount: 1,
-    color: 'destructive'
-  },
-  {
-    id: 2,
-    name: 'Contract Manager',
-    description: 'Contract oversight and breach monitoring access',
-    permissions: ['Dashboard', 'CONTRAQ', 'Breach Monitoring'],
-    userCount: 3,
-    color: 'default'
-  },
-  {
-    id: 3,
-    name: 'Offer Manager',
-    description: 'Offer creation and management capabilities',
-    permissions: ['Dashboard', 'Offer Management', 'Create Offers', 'Active Offers'],
-    userCount: 2,
-    color: 'secondary'
-  },
-  {
-    id: 4,
-    name: 'Support Agent',
-    description: 'Customer support and ticket management access',
-    permissions: ['Dashboard', 'CONVOY', 'Support Dashboard', 'Ticket Management'],
-    userCount: 5,
-    color: 'secondary'
-  },
-  {
-    id: 5,
-    name: 'Analyst',
-    description: 'Read-only access to dashboards and reports',
-    permissions: ['Dashboard', 'Reports'],
-    userCount: 4,
-    color: 'outline'
-  }
-];
+import { useUserApi } from '../hooks/api/useUserApi';
+import { useRoleApi } from '../hooks/api/useRoleApi';
 
 // Available screens configuration with hierarchical structure
 const availableScreens = [
@@ -363,6 +270,18 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
   const [selectedRole, setSelectedRole] = useState(null);
   const [isCreatingUser, setIsCreatingUser] = useState(false);
   const [isCreatingRole, setIsCreatingRole] = useState(false);
+  const [isEditingUser, setIsEditingUser] = useState(false);
+  const [isEditingRole, setIsEditingRole] = useState(false);
+  
+  // API hooks
+  const userApi = useUserApi();
+  const roleApi = useRoleApi();
+  
+  // State for users and roles data
+  const [users, setUsers] = useState([]);
+  const [roles, setRoles] = useState([]);
+  const [permissions, setPermissions] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   // Screen visibility state
   const [screenVisibility, setScreenVisibility] = useState(() => {
@@ -387,17 +306,22 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
   });
 
   const [newUser, setNewUser] = useState({
-    name: '',
+    username: '',
     email: '',
-    role: 'Analyst',
-    department: '',
-    phone: '',
-    permissions: []
+    first_name: '',
+    last_name: '',
+    password: '',
+    is_active: true,
+    groups: [],
+    profile: {
+      department: 'other',
+      role: 'agent',
+      phone: ''
+    }
   });
 
   const [newRole, setNewRole] = useState({
     name: '',
-    description: '',
     permissions: []
   });
 
@@ -427,6 +351,32 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
   useEffect(() => {
     localStorage.setItem('soar-ai-screen-visibility', JSON.stringify(screenVisibility));
   }, [screenVisibility]);
+
+  // Load data on component mount
+  useEffect(() => {
+    if (activeTab === 'users' || activeTab === 'roles') {
+      loadData();
+    }
+  }, [activeTab]);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [usersData, rolesData, permissionsData] = await Promise.all([
+        userApi.getUsers(),
+        roleApi.getRoles(),
+        roleApi.getPermissions()
+      ]);
+      
+      setUsers(usersData);
+      setRoles(rolesData);
+      setPermissions(permissionsData);
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleScreenToggle = (screenId: string, enabled: boolean) => {
     const newVisibility = { ...screenVisibility, [screenId]: enabled };
@@ -497,32 +447,101 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
     return Object.keys(screenVisibility).length;
   };
 
-  const handleCreateUser = () => {
-    console.log('Creating user:', newUser);
-    setIsCreatingUser(false);
-    setNewUser({ name: '', email: '', role: 'Analyst', department: '', phone: '', permissions: [] });
+  const handleCreateUser = async () => {
+    try {
+      setLoading(true);
+      await userApi.createUser(newUser);
+      await loadData();
+      setIsCreatingUser(false);
+      setNewUser({
+        username: '',
+        email: '',
+        first_name: '',
+        last_name: '',
+        password: '',
+        is_active: true,
+        groups: [],
+        profile: {
+          department: 'other',
+          role: 'agent',
+          phone: ''
+        }
+      });
+    } catch (error) {
+      console.error('Error creating user:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleCreateRole = () => {
-    console.log('Creating role:', newRole);
-    setIsCreatingRole(false);
-    setNewRole({ name: '', description: '', permissions: [] });
+  const handleCreateRole = async () => {
+    try {
+      setLoading(true);
+      await roleApi.createRole(newRole);
+      await loadData();
+      setIsCreatingRole(false);
+      setNewRole({ name: '', permissions: [] });
+    } catch (error) {
+      console.error('Error creating role:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handlePermissionChange = (permission: string, checked: boolean, type: 'user' | 'role') => {
+  const handleDeleteUser = async (userId) => {
+    if (window.confirm('Are you sure you want to delete this user?')) {
+      try {
+        setLoading(true);
+        await userApi.deleteUser(userId);
+        await loadData();
+      } catch (error) {
+        console.error('Error deleting user:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleDeleteRole = async (roleId) => {
+    if (window.confirm('Are you sure you want to delete this role?')) {
+      try {
+        setLoading(true);
+        await roleApi.deleteRole(roleId);
+        await loadData();
+      } catch (error) {
+        console.error('Error deleting role:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleToggleUserStatus = async (userId) => {
+    try {
+      setLoading(true);
+      await userApi.updateUser(userId, { is_active: !users.find(u => u.id === userId).is_active });
+      await loadData();
+    } catch (error) {
+      console.error('Error toggling user status:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePermissionChange = (permissionId: number, checked: boolean, type: 'user' | 'role') => {
     if (type === 'user') {
       setNewUser(prev => ({
         ...prev,
-        permissions: checked 
-          ? [...prev.permissions, permission]
-          : prev.permissions.filter(p => p !== permission)
+        groups: checked 
+          ? [...prev.groups, permissionId]
+          : prev.groups.filter(p => p !== permissionId)
       }));
     } else {
       setNewRole(prev => ({
         ...prev,
         permissions: checked 
-          ? [...prev.permissions, permission]
-          : prev.permissions.filter(p => p !== permission)
+          ? [...prev.permissions, permissionId]
+          : prev.permissions.filter(p => p !== permissionId)
       }));
     }
   };
@@ -677,27 +696,47 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                 </div>
                 <Dialog open={isCreatingUser} onOpenChange={setIsCreatingUser}>
                   <DialogTrigger asChild>
-                    <Button>
+                    <Button disabled={loading}>
                       <Plus className="h-4 w-4 mr-2" />
                       Add User
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="max-w-2xl">
                     <DialogHeader>
                       <DialogTitle>Create New User</DialogTitle>
                       <DialogDescription>
-                        Add a new user to the system with appropriate permissions
+                        Add a new user to the system with appropriate roles and permissions
                       </DialogDescription>
                     </DialogHeader>
-                    <div className="space-y-4">
+                    <div className="space-y-4 max-h-96 overflow-y-auto">
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <Label htmlFor="userName">Full Name</Label>
+                          <Label htmlFor="firstName">First Name</Label>
                           <Input
-                            id="userName"
-                            value={newUser.name}
-                            onChange={(e) => setNewUser({...newUser, name: e.target.value})}
-                            placeholder="Enter full name"
+                            id="firstName"
+                            value={newUser.first_name}
+                            onChange={(e) => setNewUser({...newUser, first_name: e.target.value})}
+                            placeholder="Enter first name"
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="lastName">Last Name</Label>
+                          <Input
+                            id="lastName"
+                            value={newUser.last_name}
+                            onChange={(e) => setNewUser({...newUser, last_name: e.target.value})}
+                            placeholder="Enter last name"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="username">Username</Label>
+                          <Input
+                            id="username"
+                            value={newUser.username}
+                            onChange={(e) => setNewUser({...newUser, username: e.target.value})}
+                            placeholder="Enter username"
                           />
                         </div>
                         <div>
@@ -711,48 +750,114 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                           />
                         </div>
                       </div>
+                      <div>
+                        <Label htmlFor="password">Password</Label>
+                        <Input
+                          id="password"
+                          type="password"
+                          value={newUser.password}
+                          onChange={(e) => setNewUser({...newUser, password: e.target.value})}
+                          placeholder="Enter password"
+                        />
+                      </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <Label htmlFor="userRole">Role</Label>
-                          <Select value={newUser.role} onValueChange={(value) => setNewUser({...newUser, role: value})}>
+                          <Label htmlFor="department">Department</Label>
+                          <Select 
+                            value={newUser.profile.department} 
+                            onValueChange={(value) => setNewUser({
+                              ...newUser, 
+                              profile: {...newUser.profile, department: value}
+                            })}
+                          >
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="Administrator">Administrator</SelectItem>
-                              <SelectItem value="Contract Manager">Contract Manager</SelectItem>
-                              <SelectItem value="Offer Manager">Offer Manager</SelectItem>
-                              <SelectItem value="Support Agent">Support Agent</SelectItem>
-                              <SelectItem value="Analyst">Analyst</SelectItem>
+                              <SelectItem value="executive">Executive</SelectItem>
+                              <SelectItem value="finance">Finance</SelectItem>
+                              <SelectItem value="hr">Human Resources</SelectItem>
+                              <SelectItem value="operations">Operations</SelectItem>
+                              <SelectItem value="travel">Travel Management</SelectItem>
+                              <SelectItem value="procurement">Procurement</SelectItem>
+                              <SelectItem value="it">IT</SelectItem>
+                              <SelectItem value="marketing">Marketing</SelectItem>
+                              <SelectItem value="sales">Sales</SelectItem>
+                              <SelectItem value="support">Customer Support</SelectItem>
+                              <SelectItem value="legal">Legal & Compliance</SelectItem>
+                              <SelectItem value="other">Other</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
                         <div>
-                          <Label htmlFor="userDepartment">Department</Label>
-                          <Input
-                            id="userDepartment"
-                            value={newUser.department}
-                            onChange={(e) => setNewUser({...newUser, department: e.target.value})}
-                            placeholder="Enter department"
-                          />
+                          <Label htmlFor="role">Role</Label>
+                          <Select 
+                            value={newUser.profile.role} 
+                            onValueChange={(value) => setNewUser({
+                              ...newUser, 
+                              profile: {...newUser.profile, role: value}
+                            })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="administrator">Administrator</SelectItem>
+                              <SelectItem value="manager">Manager</SelectItem>
+                              <SelectItem value="agent">Agent</SelectItem>
+                              <SelectItem value="analyst">Analyst</SelectItem>
+                              <SelectItem value="specialist">Specialist</SelectItem>
+                              <SelectItem value="coordinator">Coordinator</SelectItem>
+                              <SelectItem value="supervisor">Supervisor</SelectItem>
+                              <SelectItem value="other">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
                         </div>
                       </div>
                       <div>
                         <Label htmlFor="userPhone">Phone Number</Label>
                         <Input
                           id="userPhone"
-                          value={newUser.phone}
-                          onChange={(e) => setNewUser({...newUser, phone: e.target.value})}
+                          value={newUser.profile.phone}
+                          onChange={(e) => setNewUser({
+                            ...newUser, 
+                            profile: {...newUser.profile, phone: e.target.value}
+                          })}
                           placeholder="Enter phone number"
                         />
+                      </div>
+                      <div>
+                        <Label>Assign Roles</Label>
+                        <div className="grid grid-cols-2 gap-2 mt-2 max-h-32 overflow-y-auto">
+                          {roles.map((role) => (
+                            <div key={role.id} className="flex items-center space-x-2">
+                              <Checkbox
+                                id={`role-${role.id}`}
+                                checked={newUser.groups.includes(role.id)}
+                                onCheckedChange={(checked) => handlePermissionChange(role.id, checked, 'user')}
+                              />
+                              <Label htmlFor={`role-${role.id}`} className="text-sm">
+                                {role.name}
+                              </Label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="isActive"
+                          checked={newUser.is_active}
+                          onCheckedChange={(checked) => setNewUser({...newUser, is_active: checked})}
+                        />
+                        <Label htmlFor="isActive">Active User</Label>
                       </div>
                     </div>
                     <DialogFooter>
                       <Button variant="outline" onClick={() => setIsCreatingUser(false)}>
                         Cancel
                       </Button>
-                      <Button onClick={handleCreateUser}>
-                        Create User
+                      <Button onClick={handleCreateUser} disabled={loading}>
+                        {loading ? 'Creating...' : 'Create User'}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
@@ -760,49 +865,69 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
               </div>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Department</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Last Login</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {users.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.name}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>
-                        <Badge variant={getRoleColor(user.role)}>
-                          {user.role}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{user.department}</TableCell>
-                      <TableCell>
-                        <Badge variant={getStatusColor(user.status)}>
-                          {user.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{user.lastLogin}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
+              {loading ? (
+                <div className="flex justify-center py-8">
+                  <RefreshCw className="h-8 w-8 animate-spin" />
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Role</TableHead>
+                      <TableHead>Department</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Last Login</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {users.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell className="font-medium">
+                          {user.full_name || `${user.first_name} ${user.last_name}`.trim() || user.username}
+                        </TableCell>
+                        <TableCell>{user.email}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline">
+                            {user.profile?.role || 'No Role'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{user.profile?.department || 'N/A'}</TableCell>
+                        <TableCell>
+                          <Badge variant={user.is_active ? 'default' : 'secondary'}>
+                            {user.is_active ? 'Active' : 'Inactive'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {user.last_login ? new Date(user.last_login).toLocaleDateString() : 'Never'}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleToggleUserStatus(user.id)}
+                              disabled={loading}
+                            >
+                              {user.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleDeleteUser(user.id)}
+                              disabled={loading}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -823,12 +948,12 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                 </div>
                 <Dialog open={isCreatingRole} onOpenChange={setIsCreatingRole}>
                   <DialogTrigger asChild>
-                    <Button>
+                    <Button disabled={loading}>
                       <Plus className="h-4 w-4 mr-2" />
                       Create Role
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="max-w-2xl">
                     <DialogHeader>
                       <DialogTitle>Create New Role</DialogTitle>
                       <DialogDescription>
@@ -846,26 +971,17 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="roleDescription">Description</Label>
-                        <Textarea
-                          id="roleDescription"
-                          value={newRole.description}
-                          onChange={(e) => setNewRole({...newRole, description: e.target.value})}
-                          placeholder="Describe the role's purpose and responsibilities"
-                        />
-                      </div>
-                      <div>
                         <Label>Permissions</Label>
-                        <div className="grid grid-cols-2 gap-2 mt-2">
-                          {['Dashboard', 'COINHUB', 'CONTRAQ', 'Offer Management', 'CONVOY', 'Settings'].map((permission) => (
-                            <div key={permission} className="flex items-center space-x-2">
+                        <div className="grid grid-cols-2 gap-2 mt-2 max-h-64 overflow-y-auto border rounded p-3">
+                          {permissions.map((permission) => (
+                            <div key={permission.id} className="flex items-center space-x-2">
                               <Checkbox
-                                id={permission}
-                                checked={newRole.permissions.includes(permission)}
-                                onCheckedChange={(checked) => handlePermissionChange(permission, checked, 'role')}
+                                id={`permission-${permission.id}`}
+                                checked={newRole.permissions.includes(permission.id)}
+                                onCheckedChange={(checked) => handlePermissionChange(permission.id, checked, 'role')}
                               />
-                              <Label htmlFor={permission} className="text-sm">
-                                {permission}
+                              <Label htmlFor={`permission-${permission.id}`} className="text-sm">
+                                {permission.name}
                               </Label>
                             </div>
                           ))}
@@ -876,8 +992,8 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                       <Button variant="outline" onClick={() => setIsCreatingRole(false)}>
                         Cancel
                       </Button>
-                      <Button onClick={handleCreateRole}>
-                        Create Role
+                      <Button onClick={handleCreateRole} disabled={loading}>
+                        {loading ? 'Creating...' : 'Create Role'}
                       </Button>
                     </DialogFooter>
                   </DialogContent>
@@ -885,45 +1001,60 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {roles.map((role) => (
-                  <Card key={role.id}>
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-medium">{role.name}</h4>
-                        <Badge variant={role.color}>
-                          {role.userCount} user{role.userCount !== 1 ? 's' : ''}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-3">{role.description}</p>
-                      <div className="space-y-1">
-                        <Label className="text-xs font-medium">Permissions:</Label>
-                        <div className="flex flex-wrap gap-1">
-                          {role.permissions.slice(0, 3).map((permission) => (
-                            <Badge key={permission} variant="outline" className="text-xs">
-                              {permission}
-                            </Badge>
-                          ))}
-                          {role.permissions.length > 3 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{role.permissions.length - 3} more
-                            </Badge>
-                          )}
+              {loading ? (
+                <div className="flex justify-center py-8">
+                  <RefreshCw className="h-8 w-8 animate-spin" />
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {roles.map((role) => (
+                    <Card key={role.id}>
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium">{role.name}</h4>
+                          <Badge variant="outline">
+                            {role.user_count || 0} user{(role.user_count || 0) !== 1 ? 's' : ''}
+                          </Badge>
                         </div>
-                      </div>
-                      <div className="flex gap-2 mt-3">
-                        <Button variant="outline" size="sm" className="flex-1">
-                          <Edit className="h-3 w-3 mr-1" />
-                          Edit
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs font-medium">Permissions:</Label>
+                          <div className="flex flex-wrap gap-1">
+                            {role.permission_details?.slice(0, 3).map((permission) => (
+                              <Badge key={permission.id} variant="outline" className="text-xs">
+                                {permission.name}
+                              </Badge>
+                            ))}
+                            {(role.permission_details?.length || 0) > 3 && (
+                              <Badge variant="outline" className="text-xs">
+                                +{(role.permission_details?.length || 0) - 3} more
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex gap-2 mt-3">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="flex-1"
+                            disabled={loading}
+                          >
+                            <Edit className="h-3 w-3 mr-1" />
+                            Edit
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleDeleteRole(role.id)}
+                            disabled={loading}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

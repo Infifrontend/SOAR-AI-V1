@@ -1,8 +1,10 @@
 from rest_framework import serializers
+from django.contrib.auth.models import User, Group, Permission
 from .models import (
-    Company, Contact, Lead, Opportunity, OpportunityActivity, Contract, ContractBreach,
-    CampaignTemplate, EmailCampaign, TravelOffer, SupportTicket, RevenueForecast,
-    ActivityLog, AIConversation, LeadNote, LeadHistory, ProposalDraft, EmailTracking, AirportCode
+    Company, Contact, Lead, Opportunity, Contract, ContractBreach,
+    EmailCampaign, TravelOffer, SupportTicket, RevenueForecast, 
+    ActivityLog, AIConversation, LeadNote, LeadHistory, CampaignTemplate,
+    EmailTracking, OpportunityActivity, ProposalDraft, AirportCode, UserProfile
 )
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -622,4 +624,94 @@ class ProposalDraftSerializer(serializers.ModelSerializer):
 class AirportCodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = AirportCode
-        fields = ['code', 'name', 'city', 'country']
+        fields = ['code', 'name', 'city', 'country_code', 'country']
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ['phone', 'department', 'role', 'avatar']
+
+
+class UserSerializer(serializers.ModelSerializer):
+    profile = UserProfileSerializer(required=False)
+    full_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 
+                 'is_active', 'is_staff', 'is_superuser', 'date_joined', 
+                 'last_login', 'groups', 'user_permissions', 'profile', 'full_name']
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
+
+    def get_full_name(self, obj):
+        return obj.get_full_name() or obj.username
+
+    def create(self, validated_data):
+        profile_data = validated_data.pop('profile', {})
+        password = validated_data.pop('password')
+
+        user = User.objects.create_user(**validated_data)
+        user.set_password(password)
+        user.save()
+
+        UserProfile.objects.create(user=user, **profile_data)
+        return user
+
+    def update(self, instance, validated_data):
+        profile_data = validated_data.pop('profile', {})
+
+        # Update user fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        # Update or create profile
+        if profile_data:
+            profile, created = UserProfile.objects.get_or_create(user=instance)
+            for attr, value in profile_data.items():
+                setattr(profile, attr, value)
+            profile.save()
+
+        return instance
+
+
+class PermissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Permission
+        fields = ['id', 'name', 'content_type', 'codename']
+
+
+class RoleSerializer(serializers.ModelSerializer):
+    permission_details = PermissionSerializer(source='permissions', many=True, read_only=True)
+    user_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Group
+        fields = ['id', 'name', 'permissions', 'permission_details', 'user_count']
+
+    def get_user_count(self, obj):
+        return obj.user_set.count()
+
+
+class CreateUserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, min_length=6)
+    profile = UserProfileSerializer(required=False)
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'first_name', 'last_name', 'password', 
+                 'is_active', 'is_staff', 'groups', 'profile']
+
+    def create(self, validated_data):
+        profile_data = validated_data.pop('profile', {})
+        password = validated_data.pop('password')
+
+        user = User.objects.create_user(**validated_data)
+        user.set_password(password)
+        user.save()
+
+        UserProfile.objects.create(user=user, **profile_data)
+        return user

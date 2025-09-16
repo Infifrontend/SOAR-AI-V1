@@ -30,6 +30,9 @@ router.register(r'lead-notes', LeadNoteViewSet)
 router.register(r'lead-history', LeadHistoryViewSet)
 router.register(r'proposal-drafts', ProposalDraftViewSet)
 router.register(r'airport-codes', AirportCodeViewSet)
+router.register(r'users', views.UserViewSet)
+router.register(r'roles', views.RoleViewSet)
+router.register(r'permissions', views.PermissionViewSet)
 
 # Define URL patterns
 urlpatterns = [
