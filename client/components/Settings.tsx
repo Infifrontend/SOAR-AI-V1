@@ -855,7 +855,7 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                       </div>
                     </TableCell>
                   </TableRow>
-                  
+
                   <TableRow className="border-b border-gray-100 hover:bg-gray-50">
                     <TableCell className="font-medium text-gray-900">Sarah Johnson</TableCell>
                     <TableCell className="text-gray-600">sarah.johnson@soar-ai.com</TableCell>
@@ -1025,6 +1025,12 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                     Define a new role with specific permissions
                   </DialogDescription>
                 </DialogHeader>
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
                 <div className="space-y-4">
                   <div>
                     <Label htmlFor="roleName" className="text-sm font-medium text-gray-700">Role Name</Label>
@@ -1097,6 +1103,12 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                     Update role details and permissions
                   </DialogDescription>
                 </DialogHeader>
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
                 <div className="space-y-4">
                   <div>
                     <Label htmlFor="editRoleName" className="text-sm font-medium text-gray-700">Role Name</Label>
