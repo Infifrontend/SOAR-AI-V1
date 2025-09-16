@@ -615,255 +615,379 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
         </TabsList>
 
         {/* Users Tab */}
-        <TabsContent value="users" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5" />
-                    User Management
-                  </CardTitle>
-                  <CardDescription>
-                    Manage system users and their access permissions
-                  </CardDescription>
-                </div>
-                <Dialog open={isCreatingUser} onOpenChange={setIsCreatingUser}>
-                  <DialogTrigger asChild>
-                    <Button disabled={loading}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add User
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl">
-                    <DialogHeader>
-                      <DialogTitle>Create New User</DialogTitle>
-                      <DialogDescription>
-                        Add a new user to the system with appropriate roles and permissions
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4 max-h-96 overflow-y-auto">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="firstName">First Name</Label>
-                          <Input
-                            id="firstName"
-                            value={newUser.first_name}
-                            onChange={(e) => setNewUser({...newUser, first_name: e.target.value})}
-                            placeholder="Enter first name"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="lastName">Last Name</Label>
-                          <Input
-                            id="lastName"
-                            value={newUser.last_name}
-                            onChange={(e) => setNewUser({...newUser, last_name: e.target.value})}
-                            placeholder="Enter last name"
-                          />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="username">Username</Label>
-                          <Input
-                            id="username"
-                            value={newUser.username}
-                            onChange={(e) => setNewUser({...newUser, username: e.target.value})}
-                            placeholder="Enter username"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="userEmail">Email Address</Label>
-                          <Input
-                            id="userEmail"
-                            type="email"
-                            value={newUser.email}
-                            onChange={(e) => setNewUser({...newUser, email: e.target.value})}
-                            placeholder="Enter email address"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <Label htmlFor="password">Password</Label>
-                        <Input
-                          id="password"
-                          type="password"
-                          value={newUser.password}
-                          onChange={(e) => setNewUser({...newUser, password: e.target.value})}
-                          placeholder="Enter password"
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="department">Department</Label>
-                          <Select 
-                            value={newUser.profile.department} 
-                            onValueChange={(value) => setNewUser({
-                              ...newUser, 
-                              profile: {...newUser.profile, department: value}
-                            })}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="executive">Executive</SelectItem>
-                              <SelectItem value="finance">Finance</SelectItem>
-                              <SelectItem value="hr">Human Resources</SelectItem>
-                              <SelectItem value="operations">Operations</SelectItem>
-                              <SelectItem value="travel">Travel Management</SelectItem>
-                              <SelectItem value="procurement">Procurement</SelectItem>
-                              <SelectItem value="it">IT</SelectItem>
-                              <SelectItem value="marketing">Marketing</SelectItem>
-                              <SelectItem value="sales">Sales</SelectItem>
-                              <SelectItem value="support">Customer Support</SelectItem>
-                              <SelectItem value="legal">Legal & Compliance</SelectItem>
-                              <SelectItem value="other">Other</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div>
-                          <Label htmlFor="role">Role</Label>
-                          <Select 
-                            value={newUser.profile.role} 
-                            onValueChange={(value) => setNewUser({
-                              ...newUser, 
-                              profile: {...newUser.profile, role: value}
-                            })}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="administrator">Administrator</SelectItem>
-                              <SelectItem value="manager">Manager</SelectItem>
-                              <SelectItem value="agent">Agent</SelectItem>
-                              <SelectItem value="analyst">Analyst</SelectItem>
-                              <SelectItem value="specialist">Specialist</SelectItem>
-                              <SelectItem value="coordinator">Coordinator</SelectItem>
-                              <SelectItem value="supervisor">Supervisor</SelectItem>
-                              <SelectItem value="other">Other</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                      <div>
-                        <Label htmlFor="userPhone">Phone Number</Label>
-                        <Input
-                          id="userPhone"
-                          value={newUser.profile.phone}
-                          onChange={(e) => setNewUser({
-                            ...newUser, 
-                            profile: {...newUser.profile, phone: e.target.value}
-                          })}
-                          placeholder="Enter phone number"
-                        />
-                      </div>
-                      <div>
-                        <Label>Assign Roles</Label>
-                        <div className="grid grid-cols-2 gap-2 mt-2 max-h-32 overflow-y-auto">
-                          {roles.map((role) => (
-                            <div key={role.id} className="flex items-center space-x-2">
-                              <Checkbox
-                                id={`role-${role.id}`}
-                                checked={newUser.groups.includes(role.id)}
-                                onCheckedChange={(checked) => handlePermissionChange(role.id, checked, 'user')}
-                              />
-                              <Label htmlFor={`role-${role.id}`} className="text-sm">
-                                {role.name}
-                              </Label>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="isActive"
-                          checked={newUser.is_active}
-                          onCheckedChange={(checked) => setNewUser({...newUser, is_active: checked})}
-                        />
-                        <Label htmlFor="isActive">Active User</Label>
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button variant="outline" onClick={() => setIsCreatingUser(false)}>
-                        Cancel
-                      </Button>
-                      <Button onClick={handleCreateUser} disabled={loading}>
-                        {loading ? 'Creating...' : 'Create User'}
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
+        <TabsContent value="users" className="space-y-6">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gray-100 rounded-lg">
+                <Users className="h-5 w-5 text-gray-600" />
               </div>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="flex justify-center py-8">
-                  <RefreshCw className="h-8 w-8 animate-spin" />
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">User Management</h2>
+                <p className="text-sm text-gray-500">Manage system users and their access permissions</p>
+              </div>
+            </div>
+            <Dialog open={isCreatingUser} onOpenChange={setIsCreatingUser}>
+              <DialogTrigger asChild>
+                <Button className="bg-orange-500 hover:bg-orange-600 text-white" disabled={loading}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add User
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Create New User</DialogTitle>
+                  <DialogDescription>
+                    Add a new user to the system with appropriate roles and permissions
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 max-h-96 overflow-y-auto">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="firstName">First Name</Label>
+                      <Input
+                        id="firstName"
+                        value={newUser.first_name}
+                        onChange={(e) => setNewUser({...newUser, first_name: e.target.value})}
+                        placeholder="Enter first name"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="lastName">Last Name</Label>
+                      <Input
+                        id="lastName"
+                        value={newUser.last_name}
+                        onChange={(e) => setNewUser({...newUser, last_name: e.target.value})}
+                        placeholder="Enter last name"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="username">Username</Label>
+                      <Input
+                        id="username"
+                        value={newUser.username}
+                        onChange={(e) => setNewUser({...newUser, username: e.target.value})}
+                        placeholder="Enter username"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="userEmail">Email Address</Label>
+                      <Input
+                        id="userEmail"
+                        type="email"
+                        value={newUser.email}
+                        onChange={(e) => setNewUser({...newUser, email: e.target.value})}
+                        placeholder="Enter email address"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={newUser.password}
+                      onChange={(e) => setNewUser({...newUser, password: e.target.value})}
+                      placeholder="Enter password"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="department">Department</Label>
+                      <Select 
+                        value={newUser.profile.department} 
+                        onValueChange={(value) => setNewUser({
+                          ...newUser, 
+                          profile: {...newUser.profile, department: value}
+                        })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="it">IT Operations</SelectItem>
+                          <SelectItem value="legal">Legal & Compliance</SelectItem>
+                          <SelectItem value="sales">Sales & Marketing</SelectItem>
+                          <SelectItem value="analytics">Business Analytics</SelectItem>
+                          <SelectItem value="executive">Executive</SelectItem>
+                          <SelectItem value="finance">Finance</SelectItem>
+                          <SelectItem value="hr">Human Resources</SelectItem>
+                          <SelectItem value="operations">Operations</SelectItem>
+                          <SelectItem value="travel">Travel Management</SelectItem>
+                          <SelectItem value="procurement">Procurement</SelectItem>
+                          <SelectItem value="marketing">Marketing</SelectItem>
+                          <SelectItem value="support">Customer Support</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="role">Role</Label>
+                      <Select 
+                        value={newUser.profile.role} 
+                        onValueChange={(value) => setNewUser({
+                          ...newUser, 
+                          profile: {...newUser.profile, role: value}
+                        })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="administrator">Administrator</SelectItem>
+                          <SelectItem value="contract_manager">Contract Manager</SelectItem>
+                          <SelectItem value="offer_manager">Offer Manager</SelectItem>
+                          <SelectItem value="analyst">Analyst</SelectItem>
+                          <SelectItem value="manager">Manager</SelectItem>
+                          <SelectItem value="agent">Agent</SelectItem>
+                          <SelectItem value="specialist">Specialist</SelectItem>
+                          <SelectItem value="coordinator">Coordinator</SelectItem>
+                          <SelectItem value="supervisor">Supervisor</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="userPhone">Phone Number</Label>
+                    <Input
+                      id="userPhone"
+                      value={newUser.profile.phone}
+                      onChange={(e) => setNewUser({
+                        ...newUser, 
+                        profile: {...newUser.profile, phone: e.target.value}
+                      })}
+                      placeholder="Enter phone number"
+                    />
+                  </div>
+                  <div>
+                    <Label>Assign Roles</Label>
+                    <div className="grid grid-cols-2 gap-2 mt-2 max-h-32 overflow-y-auto">
+                      {roles.map((role) => (
+                        <div key={role.id} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`role-${role.id}`}
+                            checked={newUser.groups.includes(role.id)}
+                            onCheckedChange={(checked) => handlePermissionChange(role.id, checked, 'user')}
+                          />
+                          <Label htmlFor={`role-${role.id}`} className="text-sm">
+                            {role.name}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="isActive"
+                      checked={newUser.is_active}
+                      onCheckedChange={(checked) => setNewUser({...newUser, is_active: checked})}
+                    />
+                    <Label htmlFor="isActive">Active User</Label>
+                  </div>
                 </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead>Department</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Last Login</TableHead>
-                      <TableHead>Actions</TableHead>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsCreatingUser(false)}>
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={handleCreateUser} 
+                    disabled={loading}
+                    className="bg-orange-500 hover:bg-orange-600 text-white"
+                  >
+                    {loading ? 'Creating...' : 'Create User'}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          {/* User Table */}
+          <div className="bg-white rounded-lg border border-gray-200">
+            {loading ? (
+              <div className="flex justify-center py-12">
+                <RefreshCw className="h-8 w-8 animate-spin text-gray-400" />
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-b border-gray-200">
+                    <TableHead className="text-gray-600 font-medium">Name</TableHead>
+                    <TableHead className="text-gray-600 font-medium">Email</TableHead>
+                    <TableHead className="text-gray-600 font-medium">Role</TableHead>
+                    <TableHead className="text-gray-600 font-medium">Department</TableHead>
+                    <TableHead className="text-gray-600 font-medium">Status</TableHead>
+                    <TableHead className="text-gray-600 font-medium">Last Login</TableHead>
+                    <TableHead className="text-gray-600 font-medium">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {/* Sample data from the image */}
+                  <TableRow className="border-b border-gray-100 hover:bg-gray-50">
+                    <TableCell className="font-medium text-gray-900">John Smith</TableCell>
+                    <TableCell className="text-gray-600">john.smith@soar-ai.com</TableCell>
+                    <TableCell>
+                      <Badge className="bg-red-500 text-white hover:bg-red-600">Administrator</Badge>
+                    </TableCell>
+                    <TableCell className="text-gray-600">IT Operations</TableCell>
+                    <TableCell>
+                      <Badge className="bg-orange-100 text-orange-800 border-orange-200">Active</Badge>
+                    </TableCell>
+                    <TableCell className="text-gray-600">2024-06-16 09:30</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Button variant="ghost" size="sm" className="text-gray-400 hover:text-gray-600">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" className="text-gray-400 hover:text-red-600">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                  
+                  <TableRow className="border-b border-gray-100 hover:bg-gray-50">
+                    <TableCell className="font-medium text-gray-900">Sarah Johnson</TableCell>
+                    <TableCell className="text-gray-600">sarah.johnson@soar-ai.com</TableCell>
+                    <TableCell>
+                      <Badge className="bg-orange-500 text-white hover:bg-orange-600">Contract Manager</Badge>
+                    </TableCell>
+                    <TableCell className="text-gray-600">Legal & Compliance</TableCell>
+                    <TableCell>
+                      <Badge className="bg-orange-100 text-orange-800 border-orange-200">Active</Badge>
+                    </TableCell>
+                    <TableCell className="text-gray-600">2024-06-16 08:45</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Button variant="ghost" size="sm" className="text-gray-400 hover:text-gray-600">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" className="text-gray-400 hover:text-red-600">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+
+                  <TableRow className="border-b border-gray-100 hover:bg-gray-50">
+                    <TableCell className="font-medium text-gray-900">Mike Davis</TableCell>
+                    <TableCell className="text-gray-600">mike.davis@soar-ai.com</TableCell>
+                    <TableCell>
+                      <Badge className="bg-blue-500 text-white hover:bg-blue-600">Offer Manager</Badge>
+                    </TableCell>
+                    <TableCell className="text-gray-600">Sales & Marketing</TableCell>
+                    <TableCell>
+                      <Badge className="bg-orange-100 text-orange-800 border-orange-200">Active</Badge>
+                    </TableCell>
+                    <TableCell className="text-gray-600">2024-06-15 16:22</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Button variant="ghost" size="sm" className="text-gray-400 hover:text-gray-600">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" className="text-gray-400 hover:text-red-600">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+
+                  <TableRow className="border-b border-gray-100 hover:bg-gray-50">
+                    <TableCell className="font-medium text-gray-900">Lisa Wong</TableCell>
+                    <TableCell className="text-gray-600">lisa.wong@soar-ai.com</TableCell>
+                    <TableCell>
+                      <Badge className="bg-gray-500 text-white hover:bg-gray-600">Analyst</Badge>
+                    </TableCell>
+                    <TableCell className="text-gray-600">Business Analytics</TableCell>
+                    <TableCell>
+                      <Badge className="bg-gray-100 text-gray-800 border-gray-200">Inactive</Badge>
+                    </TableCell>
+                    <TableCell className="text-gray-600">2024-06-10 14:15</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Button variant="ghost" size="sm" className="text-gray-400 hover:text-gray-600">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="sm" className="text-gray-400 hover:text-red-600">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+
+                  {/* Dynamic users from API */}
+                  {users.map((user) => (
+                    <TableRow key={user.id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <TableCell className="font-medium text-gray-900">
+                        {user.full_name || `${user.first_name} ${user.last_name}`.trim() || user.username}
+                      </TableCell>
+                      <TableCell className="text-gray-600">{user.email}</TableCell>
+                      <TableCell>
+                        <Badge 
+                          className={`${
+                            user.profile?.role === 'administrator' ? 'bg-red-500 text-white hover:bg-red-600' :
+                            user.profile?.role === 'contract_manager' ? 'bg-orange-500 text-white hover:bg-orange-600' :
+                            user.profile?.role === 'offer_manager' ? 'bg-blue-500 text-white hover:bg-blue-600' :
+                            user.profile?.role === 'analyst' ? 'bg-gray-500 text-white hover:bg-gray-600' :
+                            'bg-gray-100 text-gray-800 border-gray-200'
+                          }`}
+                        >
+                          {user.profile?.role ? user.profile.role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'No Role'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-gray-600">
+                        {user.profile?.department ? 
+                          user.profile.department === 'it' ? 'IT Operations' :
+                          user.profile.department === 'legal' ? 'Legal & Compliance' :
+                          user.profile.department === 'sales' ? 'Sales & Marketing' :
+                          user.profile.department === 'analytics' ? 'Business Analytics' :
+                          user.profile.department.replace(/\b\w/g, l => l.toUpperCase())
+                          : 'N/A'
+                        }
+                      </TableCell>
+                      <TableCell>
+                        <Badge 
+                          className={user.is_active ? 
+                            'bg-orange-100 text-orange-800 border-orange-200' : 
+                            'bg-gray-100 text-gray-800 border-gray-200'
+                          }
+                        >
+                          {user.is_active ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-gray-600">
+                        {user.last_login ? new Date(user.last_login).toLocaleDateString() : 'Never'}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleToggleUserStatus(user.id)}
+                            disabled={loading}
+                            className="text-gray-400 hover:text-gray-600"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => handleDeleteUser(user.id)}
+                            disabled={loading}
+                            className="text-gray-400 hover:text-red-600"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {users.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell className="font-medium">
-                          {user.full_name || `${user.first_name} ${user.last_name}`.trim() || user.username}
-                        </TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline">
-                            {user.profile?.role || 'No Role'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>{user.profile?.department || 'N/A'}</TableCell>
-                        <TableCell>
-                          <Badge variant={user.is_active ? 'default' : 'secondary'}>
-                            {user.is_active ? 'Active' : 'Inactive'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          {user.last_login ? new Date(user.last_login).toLocaleDateString() : 'Never'}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => handleToggleUserStatus(user.id)}
-                              disabled={loading}
-                            >
-                              {user.is_active ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => handleDeleteUser(user.id)}
-                              disabled={loading}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </div>
         </TabsContent>
 
         {/* Roles & Access Tab */}
