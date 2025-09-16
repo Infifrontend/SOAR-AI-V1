@@ -1178,7 +1178,7 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                         <Button 
                           variant="ghost" 
                           size="sm" 
-                          className="flex-1 text-gray-600 hover:text-gray-800 border border-gray-200"
+                          className="flex-1 text-gray-600 hover:text-gray-800 border border-gray-200 hover:border-gray-600"
                           onClick={() => handleEditRole({
                             ...role,
                             permissions: role.menu_permissions || []
