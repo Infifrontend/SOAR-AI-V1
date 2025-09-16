@@ -52,7 +52,6 @@ import { Settings } from "./components/Settings";
 import { Login } from "./components/Login";
 import {
   Bot,
-  LayoutDashboard,
   Search,
   FileText,
   Building2,
@@ -76,6 +75,7 @@ import {
   MapPin,
   Play,
   ChevronRight,
+  LayoutDashboard,
 } from "lucide-react";
 
 // Mock user data and authentication status for demonstration
@@ -97,7 +97,7 @@ const useAuth = () => {
     // Check for existing authentication on app load
     const checkAuth = async () => {
       await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate network delay
-      
+
       // Check if user is already logged in from previous session
       const storedUser = localStorage.getItem("soar_user");
       if (storedUser) {
@@ -517,7 +517,7 @@ export default function App() {
           />
         );
       case "settings":
-        return <Settings onScreenVisibilityChange={() => {}} />;
+        return <Settings onScreenVisibilityChange={handleScreenVisibilityChange} initialActiveTab={sectionFilters?.activeTab} />;
       default:
         return <AIAssistant onNavigate={navigateToSection} />;
     }
@@ -770,7 +770,145 @@ export default function App() {
     },
   ];
 
-  
+  // Dummy function for handleScreenVisibilityChange as it's not defined elsewhere
+  const handleScreenVisibilityChange = (isVisible: boolean) => {
+    console.log(`Screen visibility changed: ${isVisible}`);
+  };
+
+  // Main business menu groups that can be collapsed
+  const mainMenuGroups = [
+    {
+      label: "Highlights",
+      items: [
+        {
+          id: "ai-assistant",
+          label: "AI Assistant",
+          icon: Bot,
+          description: "Natural language interface",
+        },
+        {
+          id: "dashboard",
+          label: "Dashboard",
+          icon: LayoutDashboard,
+          description: "System overview",
+        },
+      ],
+    },
+    {
+      label: "COINHUB",
+      items: [
+        {
+          id: "corporate-search",
+          label: "Corporate Search",
+          icon: Search,
+          description: "Find corporate clients",
+        },
+        {
+          id: "lead-management",
+          label: "Lead Dashboard",
+          icon: Target,
+          description: "Lead pipeline overview",
+        },
+        {
+          id: "leads-list",
+          label: "All Leads",
+          icon: UsersIcon,
+          description: "Complete lead management",
+        },
+        {
+          id: "email-campaigns",
+          label: "Email Campaigns",
+          icon: Mail,
+          description: "Automated outreach",
+        },
+        {
+          id: "opportunities",
+          label: "Opportunities",
+          icon: TrendingUp,
+          description: "Sales pipeline tracking",
+        },
+      ],
+    },
+    {
+      label: "COCAST",
+      subtitle: "Corporate Commercial Analytics & Sales Trend",
+      items: [
+        {
+          id: "revenue-prediction",
+          label: "Revenue Prediction",
+          icon: Brain,
+          description: "AI revenue forecasting & sales predictions",
+        },
+      ],
+    },
+    {
+      label: "CONTRAQ",
+      items: [
+        {
+          id: "contracts",
+          label: "Contracts",
+          icon: FileText,
+          description: "Manage agreements",
+        },
+        {
+          id: "breach-monitoring",
+          label: "Risk Monitoring",
+          icon: AlertTriangle,
+          description: "Contract compliance",
+        },
+      ],
+    },
+    {
+      label: "Travel Offers",
+      items: [
+        {
+          id: "design-travel-offers",
+          label: "Travel Offers",
+          icon: Presentation,
+          description: "Comprehensive offer management & creation",
+        },
+      ],
+    },
+  ];
+
+  // Support and system menu groups that are always visible
+  const supportMenuGroups = [
+    {
+      label: "CONVOY",
+      items: [
+        {
+          id: "agent-dashboard",
+          label: "Agent Dashboard",
+          icon: UserCheck,
+          description: "Agent workspace",
+        },
+        {
+          id: "ticket-list",
+          label: "Support Tickets",
+          icon: Users,
+          description: "Customer support",
+        },
+        {
+          id: "admin-dashboard",
+          label: "Admin Dashboard",
+          icon: Shield,
+          description: "System administration",
+        },
+      ],
+    },
+    {
+      label: "System",
+      items: [
+        {
+          id: "settings",
+          label: "Settings",
+          icon: SettingsIcon,
+          description: "System configuration",
+        },
+      ],
+    },
+  ];
+
 
   // Handle loading state
   if (loading) {
@@ -791,7 +929,7 @@ export default function App() {
 
   return (
     <TooltipProvider>
-     
+
       <SidebarProvider>
         <div className="min-h-screen w-full bg-gradient-to-br from-gray-50 via-white to-gray-50 flex relative overflow-hidden">
           {/* Enhanced Tour Guide Component */}

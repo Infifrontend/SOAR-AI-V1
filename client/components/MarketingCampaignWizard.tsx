@@ -809,7 +809,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => setShowCreateTemplate(true)}
+                  onClick={() => onNavigate('settings', { activeTab: 'template-creation' })}
                   className="text-orange-600 border-orange-300 hover:bg-orange-50"
                 >
                   <Plus className="h-4 w-4 mr-2" />
