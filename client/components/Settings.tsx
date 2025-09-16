@@ -139,6 +139,13 @@ interface ScreenManagementProps {
 
 export function Settings({ onScreenVisibilityChange, initialActiveTab }: ScreenManagementProps) {
   const [activeTab, setActiveTab] = useState(initialActiveTab || 'users');
+
+  // Handle navigation to template creation from other components
+  useEffect(() => {
+    if (initialActiveTab === 'template-creation') {
+      setActiveTab('template-creation');
+    }
+  }, [initialActiveTab]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedRole, setSelectedRole] = useState(null);
   const [isCreatingUser, setIsCreatingUser] = useState(false);
