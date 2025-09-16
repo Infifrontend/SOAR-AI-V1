@@ -398,55 +398,27 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
   };
 
   const handleUseTemplate = (template: EmailTemplate) => {
-    let templateVariables: Record<string, string> = {};
-
-    if (template.layout === 'standard') {
-      // Standard layout variables
-      templateVariables = {
-        subject: '{{subject}}',
-        preheader: '{{preheader}}',
-        logo_url: '{{logo_url}}',
-        company_name: '{{company_name}}',
-        main_heading: '{{main_heading}}',
-        intro_paragraph: '{{intro_paragraph}}',
-        body_content: '{{body_content}}',
-        cta_url: '{{cta_url}}',
-        cta_text: '{{cta_text}}',
-        company_address: '{{company_address}}',
-        unsubscribe_url: '{{unsubscribe_url}}',
-        year: '{{year}}'
-      };
-    } else {
-      // Custom layout variables
-      templateVariables = {
-        company_name: '{{company_name}}',
-        contact_name: '{{contact_name}}',
-        industry: '{{industry}}',
-        employees: '{{employees}}',
-        travel_budget: '{{travel_budget}}',
-        calculated_savings: '{{calculated_savings}}',
-        last_interaction: '{{last_interaction}}',
-        proposal_value: '{{proposal_value}}',
-        validity_period: '{{validity_period}}',
-        cta_link: '{{cta_link}}'
-      };
-    }
-
     if (selectedCampaign) {
       // Apply template to existing campaign
-      const templateHTML = EmailTemplateService.generateEmailHTML(template, templateVariables);
-      console.log('Apply template to campaign:', selectedCampaign.id, templateHTML);
+      console.log('Apply template to campaign:', selectedCampaign.id, template);
       toast.success(`Template "${template.name}" applied to campaign`);
     } else {
       // Create new campaign with template
-      const templateHTML = EmailTemplateService.generateEmailHTML(template, templateVariables);
       onNavigate('marketing-campaign', { 
         templateMode: true, 
-        selectedTemplate: template,
-        templateHTML: templateHTML,
-        isStandardLayout: template.layout === 'standard'
+        selectedEmailTemplate: template,
+        isEmailTemplate: true
       });
     }
+  };
+
+  const handleSelectEmailTemplate = (templateId: number) => {
+    // Navigate to campaign creation with selected email template
+    onNavigate('marketing-campaign', { 
+      templateMode: true, 
+      selectedEmailTemplateId: templateId,
+      isEmailTemplate: true
+    });
   };
 
   const getStatusBadgeColor = (status: string) => {

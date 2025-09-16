@@ -515,6 +515,53 @@ class CampaignTemplate(models.Model):
     class Meta:
         ordering = ['-created_at']
 
+
+class EmailTemplate(models.Model):
+    TEMPLATE_TYPES = [
+        ('email_campaign', 'Email Campaign'),
+        ('contract', 'Contract'),
+        ('proposal', 'Proposal'),
+        ('newsletter', 'Newsletter'),
+        ('notification', 'Notification'),
+    ]
+
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    template_type = models.CharField(max_length=20, choices=TEMPLATE_TYPES, default='email_campaign')
+    subject_line = models.CharField(max_length=255, blank=True)
+    content = models.TextField()
+    variables = models.JSONField(default=list, blank=True)  # Store template variables
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='email_templates', null=True, blank=True)
+    is_global = models.BooleanField(default=False)  # Global templates available to all companies
+    is_active = models.BooleanField(default=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['template_type', 'is_active']),
+            models.Index(fields=['company', 'is_active']),
+        ]
+
+    def __str__(self):
+        return f"{self.name} ({self.get_template_type_display()})"
+
+    def extract_variables(self):
+        """Extract variables from content using regex"""
+        import re
+        pattern = r'\{\{([^}]+)\}\}'
+        variables = re.findall(pattern, self.content)
+        if self.subject_line:
+            variables.extend(re.findall(pattern, self.subject_line))
+        return list(set([var.strip() for var in variables]))
+
+    def save(self, *args, **kwargs):
+        # Auto-extract variables when saving
+        self.variables = self.extract_variables()
+        super().save(*args, **kwargs)
+
 class EmailCampaign(models.Model):
     CAMPAIGN_STATUS_CHOICES = [
         ('draft', 'Draft'),
@@ -547,6 +594,7 @@ class EmailCampaign(models.Model):
         blank=False
     )
     email_content = models.TextField()
+    email_template = models.ForeignKey('EmailTemplate', on_delete=models.SET_NULL, null=True, blank=True)
     cta_link = models.URLField(blank=True, null=True)
     scheduled_date = models.DateTimeField()
     sent_date = models.DateTimeField(null=True, blank=True)

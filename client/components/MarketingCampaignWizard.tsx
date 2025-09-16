@@ -74,7 +74,7 @@ const steps = [
   { id: 5, name: 'Review & Launch', description: 'Final review and campaign launch' }
 ];
 
-export function MarketingCampaignWizard({ onNavigate, initialCampaignData, editMode = false, selectedLeads: propSelectedLeads }: MarketingCampaignWizardProps) {
+export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initialData, editMode = false, selectedLeads: propSelectedLeads }: MarketingCampaignWizardProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [showCreateTemplate, setShowCreateTemplate] = useState(false);
   const [templates, setTemplates] = useState<CampaignTemplate[]>([]);
@@ -91,18 +91,18 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData, editM
     layout: 'custom' as 'standard' | 'custom' // Default to custom
   });
   const [campaignData, setCampaignData] = useState(() => {
-    if (editMode && initialCampaignData) {
+    if (editMode && initialData) {
       return {
-        name: initialCampaignData.name || '',
-        description: initialCampaignData.description || '',
-        objective: initialCampaignData.objective || 'lead-nurturing',
-        channels: initialCampaignData.channels || ['email'],
+        name: initialData.name || '',
+        description: initialData.description || '',
+        objective: initialData.objective || 'lead-nurturing',
+        channels: initialData.channels || ['email'],
         targetAudience: [],
-        content: initialCampaignData.content || {
+        content: initialData.content || {
           email: {
-            subject: initialCampaignData.content?.email?.subject || '',
-            body: initialCampaignData.content?.email?.body || '',
-            cta: initialCampaignData.content?.email?.cta || ''
+            subject: initialData.content?.email?.subject || '',
+            body: initialData.content?.email?.body || '',
+            cta: initialData.content?.email?.cta || ''
           },
           whatsapp: {
             message: '',
@@ -184,6 +184,51 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData, editM
   useEffect(() => {
     loadTemplates();
   }, []);
+
+  // Initialize data from navigation props if provided
+  useEffect(() => {
+    if (initialData?.templateMode && initialData?.selectedTemplate) {
+      const template = initialData.selectedTemplate;
+      setCampaignData(prev => ({
+        ...prev,
+        name: template.name,
+        description: template.description,
+        content: {
+          ...prev.content,
+          email: {
+            subject: template.subject_line || '',
+            body: template.content || '',
+            cta: template.cta || ''
+          }
+        }
+      }));
+      setSelectedTemplate(template);
+    } else if (initialData?.templateMode && initialData?.selectedEmailTemplate) {
+      // Handle email template from new template system
+      const template = initialData.selectedEmailTemplate;
+      setCampaignData(prev => ({
+        ...prev,
+        name: `Campaign from ${template.name}`,
+        description: template.description || '',
+        content: {
+          ...prev.content,
+          email: {
+            subject: template.subject_line || '',
+            body: template.content || '',
+            cta: 'Learn More'
+          }
+        }
+      }));
+      setSelectedTemplate({
+        id: template.id.toString(),
+        name: template.name,
+        description: template.description,
+        variables: template.variables || [],
+        sections: [{ type: 'body', content: template.content }],
+        layout: 'custom'
+      });
+    }
+  }, [initialData]);
 
   const loadTemplates = async () => {
     try {
@@ -1371,6 +1416,27 @@ TechCorp Solutions can achieve complete travel governance without slowing down y
     }
   };
 
+  // Function to determine if the next step can be proceeded to.
+  const canProceedToNextStep = () => {
+    switch (currentStep) {
+      case 1: // Campaign Setup
+        return campaignData.name.trim() !== '' && campaignData.channels.length > 0 && campaignData.selectedTemplate !== null;
+      case 2: // Audience & Targeting
+        return true; // Always proceed from this step
+      case 3: // Content Creation
+        if (campaignData.channels.includes('email')) {
+          return campaignData.content.email.subject.trim() !== '' && campaignData.content.email.body.trim() !== '';
+        }
+        return true; // If email is not a selected channel, this step is considered complete
+      case 4: // Schedule & Settings
+        return true; // Always proceed from this step
+      case 5: // Review & Launch
+        return campaignData.selectedTemplate !== null; // Must have a template selected to launch
+      default:
+        return false;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       {/* Header */}
@@ -1424,7 +1490,7 @@ TechCorp Solutions can achieve complete travel governance without slowing down y
                 </div>
                 {index < steps.length - 1 && (
                   <div className={`h-0.5 w-16 mx-2 ${
-                    currentStep > step.id ? 'bg-green-500' : 'bg-gray-200'
+                    currentStep >= step.id ? 'bg-orange-500' : 'bg-gray-200'
                   }`} />
                 )}
               </div>
@@ -1461,15 +1527,24 @@ TechCorp Solutions can achieve complete travel governance without slowing down y
           <Button variant="outline" onClick={onBack} className="text-gray-700 border-gray-300">
             Cancel
           </Button>
+          {currentStep === 2 && (
+            <Button 
+              variant="outline"
+              onClick={() => onNavigate('settings', { activeTab: 'template-creation' })}
+              className="border-blue-200 text-blue-700 hover:bg-blue-50"
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Browse Templates
+            </Button>
+          )}
           <Button 
             onClick={handleNext}
             disabled={
-              (currentStep === 1 && (!campaignData.name || campaignData.channels.length === 0)) ||
-              (currentStep === 3 && campaignData.channels.includes('email') && (!campaignData.content.email.subject || !campaignData.content.email.body))
+              !canProceedToNextStep()
             }
             className="bg-orange-500 hover:bg-orange-600 text-white"
           >
-            {currentStep === 5 ? 'Launch Campaign' : 'Next'}
+            {currentStep === 5 ? (isLaunching || campaignLoading ? 'Launching...' : 'Launch Campaign') : 'Next'}
             {currentStep < 5 && <ArrowRight className="h-4 w-4 ml-2" />}
           </Button>
         </div>

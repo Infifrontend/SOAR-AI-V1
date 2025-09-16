@@ -29,14 +29,14 @@ from datetime import datetime, timedelta
 from django.contrib.auth.models import User, Group, Permission
 from .models import (Company, Contact, Lead, Opportunity, OpportunityActivity,
                      Contract, ContractBreach, CampaignTemplate, EmailCampaign,
-                     TravelOffer, SupportTicket, RevenueForecast, LeadNote,
+                     EmailTemplate, TravelOffer, SupportTicket, RevenueForecast, LeadNote,
                      LeadHistory, ActivityLog, AIConversation, ProposalDraft,
                      AirportCode, UserProfile)
 from .serializers import (CompanySerializer, ContactSerializer, LeadSerializer,
                           OpportunitySerializer, OpportunityActivitySerializer,
                           ContractSerializer, ContractBreachSerializer,
                           CampaignTemplateSerializer, EmailCampaignSerializer,
-                          TravelOfferSerializer, SupportTicketSerializer,
+                          EmailTemplateSerializer, TravelOfferSerializer, SupportTicketSerializer,
                           RevenueForecastSerializer, LeadNoteSerializer,
                           LeadHistorySerializer, ActivityLogSerializer,
                           AIConversationSerializer, ProposalDraftSerializer,
@@ -153,6 +153,128 @@ class PermissionViewSet(viewsets.ModelViewSet):
         
         serializer = self.get_serializer(permissions, many=True)
         return Response(serializer.data)
+
+
+class EmailTemplateViewSet(viewsets.ModelViewSet):
+    queryset = EmailTemplate.objects.all()
+    serializer_class = EmailTemplateSerializer
+
+    def get_queryset(self):
+        queryset = self.queryset.filter(is_active=True)
+        
+        # Filter by template type
+        template_type = self.request.query_params.get('template_type')
+        if template_type:
+            queryset = queryset.filter(template_type=template_type)
+        
+        # Filter by company or global templates
+        company_id = self.request.query_params.get('company_id')
+        if company_id:
+            queryset = queryset.filter(
+                models.Q(company_id=company_id) | models.Q(is_global=True)
+            )
+        else:
+            # If no company specified, return global templates only
+            queryset = queryset.filter(is_global=True)
+        
+        return queryset.order_by('-created_at')
+
+    @action(detail=True, methods=['post'])
+    def preview(self, request, pk=None):
+        """Preview template with sample data"""
+        template = self.get_object()
+        sample_data = request.data.get('sample_data', {})
+        
+        # Default sample data
+        default_data = {
+            'company_name': 'Acme Corporation',
+            'contact_name': 'John Smith',
+            'job_title': 'Travel Manager',
+            'industry': 'Technology',
+            'employees': '500',
+            'travel_budget': '$250,000',
+            'annual_revenue': '$50M',
+            'location': 'San Francisco, CA',
+            'phone': '+1 (555) 123-4567',
+            'email': 'john.smith@acme.com',
+            'website': 'www.acme.com',
+            'sender_name': 'Sarah Johnson',
+            'sender_title': 'Sales Representative',
+            'sender_company': 'SOAR-AI'
+        }
+        
+        # Merge with provided sample data
+        preview_data = {**default_data, **sample_data}
+        
+        # Render template with sample data
+        from django.template import Template, Context
+        
+        try:
+            subject_template = Template(template.subject_line or '')
+            content_template = Template(template.content)
+            
+            rendered_subject = subject_template.render(Context(preview_data))
+            rendered_content = content_template.render(Context(preview_data))
+            
+            return Response({
+                'success': True,
+                'subject': rendered_subject,
+                'content': rendered_content,
+                'variables_used': template.variables,
+                'sample_data': preview_data
+            })
+        except Exception as e:
+            return Response({
+                'success': False,
+                'error': f'Template rendering error: {str(e)}'
+            }, status=400)
+
+    @action(detail=True, methods=['post'])
+    def duplicate(self, request, pk=None):
+        """Duplicate a template"""
+        original_template = self.get_object()
+        
+        # Create a copy
+        duplicate = EmailTemplate.objects.create(
+            name=f"{original_template.name} (Copy)",
+            description=original_template.description,
+            template_type=original_template.template_type,
+            subject_line=original_template.subject_line,
+            content=original_template.content,
+            company=original_template.company,
+            is_global=False,  # Duplicates are not global by default
+            created_by=request.user if request.user.is_authenticated else None
+        )
+        
+        serializer = self.get_serializer(duplicate)
+        return Response(serializer.data, status=201)
+
+    @action(detail=False, methods=['get'])
+    def variables(self, request):
+        """Get all available template variables"""
+        return Response({
+            'available_variables': [
+                {'name': 'company_name', 'description': 'Company name'},
+                {'name': 'contact_name', 'description': 'Contact person full name'},
+                {'name': 'job_title', 'description': 'Contact job title'},
+                {'name': 'industry', 'description': 'Company industry'},
+                {'name': 'employees', 'description': 'Number of employees'},
+                {'name': 'travel_budget', 'description': 'Annual travel budget'},
+                {'name': 'annual_revenue', 'description': 'Company annual revenue'},
+                {'name': 'location', 'description': 'Company location'},
+                {'name': 'phone', 'description': 'Contact phone number'},
+                {'name': 'email', 'description': 'Contact email address'},
+                {'name': 'website', 'description': 'Company website'},
+                {'name': 'sender_name', 'description': 'Sender full name'},
+                {'name': 'sender_title', 'description': 'Sender job title'},
+                {'name': 'sender_company', 'description': 'Sender company name'}
+            ]
+        })
+
+    def perform_destroy(self, instance):
+        # Soft delete by setting is_active to False
+        instance.is_active = False
+        instance.save()
 
 
 # Helper function to create lead history entries

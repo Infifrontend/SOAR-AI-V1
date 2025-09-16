@@ -449,11 +449,12 @@ class EmailCampaignSerializer(serializers.ModelSerializer):
     click_rate = serializers.SerializerMethodField()
     click_to_open_rate = serializers.SerializerMethodField()
     engagement_metrics = serializers.SerializerMethodField()
+    email_template_name = serializers.CharField(source='email_template.name', read_only=True)
 
     class Meta:
         model = EmailCampaign
         fields = ['id', 'name', 'description', 'campaign_type', 'status', 'subject_line', 
-                 'email_content', 'cta_link', 'scheduled_date', 'sent_date', 'emails_sent', 'emails_opened', 
+                 'email_content', 'email_template', 'email_template_name', 'cta_link', 'scheduled_date', 'sent_date', 'emails_sent', 'emails_opened', 
                  'emails_clicked', 'target_leads', 'created_at', 'updated_at',
                  'target_leads_count', 'open_rate', 'click_rate', 'click_to_open_rate', 'engagement_metrics']
 
@@ -792,3 +793,42 @@ class CreateUserSerializer(serializers.ModelSerializer):
 
         UserProfile.objects.create(user=user, **profile_data)
         return user
+
+
+class EmailTemplateSerializer(serializers.ModelSerializer):
+    created_by_name = serializers.SerializerMethodField()
+    company_name = serializers.CharField(source='company.name', read_only=True)
+    variable_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = EmailTemplate
+        fields = ['id', 'name', 'description', 'template_type', 'subject_line', 
+                 'content', 'variables', 'company', 'company_name', 'is_global', 
+                 'is_active', 'created_by', 'created_by_name', 'variable_count',
+                 'created_at', 'updated_at']
+        read_only_fields = ['variables', 'created_by', 'created_at', 'updated_at']
+
+    def get_created_by_name(self, obj):
+        if obj.created_by:
+            return f"{obj.created_by.first_name} {obj.created_by.last_name}".strip() or obj.created_by.username
+        return 'System'
+
+    def get_variable_count(self, obj):
+        return len(obj.variables) if obj.variables else 0
+
+    def create(self, validated_data):
+        # Set created_by from request context
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            validated_data['created_by'] = request.user
+        return super().create(validated_data)
+
+    def validate_content(self, value):
+        if not value or not value.strip():
+            raise serializers.ValidationError("Content cannot be empty.")
+        return value
+
+    def validate_name(self, value):
+        if not value or not value.strip():
+            raise serializers.ValidationError("Template name is required.")
+        return value.strip()

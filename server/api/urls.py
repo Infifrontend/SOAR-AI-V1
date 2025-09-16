@@ -4,7 +4,7 @@ from . import views
 from .views import (
     CompanyViewSet, ContactViewSet, LeadViewSet, OpportunityViewSet,
     OpportunityActivityViewSet, ContractViewSet, ContractBreachViewSet,
-    CampaignTemplateViewSet, EmailCampaignViewSet, TravelOfferViewSet,
+    CampaignTemplateViewSet, EmailCampaignViewSet, EmailTemplateViewSet, TravelOfferViewSet,
     SupportTicketViewSet, RevenueForecastViewSet, LeadNoteViewSet,
     LeadHistoryViewSet, ActivityLogViewSet, AIConversationViewSet,
     ProposalDraftViewSet, AirportCodeViewSet, track_email_open, track_email_click
@@ -21,6 +21,7 @@ router.register(r'contracts', ContractViewSet)
 router.register(r'contract-breaches', ContractBreachViewSet)
 router.register(r'campaign-templates', CampaignTemplateViewSet)
 router.register(r'email-campaigns', EmailCampaignViewSet)
+router.register(r'email-templates', EmailTemplateViewSet)
 router.register(r'travel-offers', TravelOfferViewSet)
 router.register(r'support-tickets', SupportTicketViewSet)
 router.register(r'revenue-forecasts', RevenueForecastViewSet)
