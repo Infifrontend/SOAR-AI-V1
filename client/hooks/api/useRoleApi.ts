@@ -121,32 +121,7 @@ export const useRoleApi = () => {
     }
   }, [setLoading, setError, setData]);
 
-  // // Update role
-  // const updateRole = useCallback(async (id: number, roleData: Partial<Role>): Promise<Role> => {
-  //   setLoading(true);
-  //   setError(null);
-
-  //   try {
-  //     const response: AxiosResponse<Role> = await axios.put(
-  //       `${API_BASE_URL}/roles/${id}/`,
-  //       roleData,
-  //       {
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //         },
-  //       }
-  //     );
-
-  //     setData(response.data);
-  //     return response.data;
-  //   } catch (error: any) {
-  //     const errorMessage = error.response?.data?.message || error.message || 'Failed to update role';
-  //     setError(errorMessage);
-  //     throw error;
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }, [setLoading, setError, setData]);
+  
 
   // Delete role
   const deleteRole = useCallback(async (id: number): Promise<void> => {

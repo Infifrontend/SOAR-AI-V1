@@ -190,7 +190,8 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
       department: 'other',
       role: 'agent',
       phone: ''
-    }
+    },
+    selected_role_id: null
   });
 
   const [newRole, setNewRole] = useState({
@@ -339,7 +340,8 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
           department: 'other',
           role: 'agent',
           phone: ''
-        }
+        },
+        selected_role_id: null
       });
     } catch (error) {
       console.error('Error creating user:', error);
@@ -734,26 +736,30 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                     <div>
                       <Label htmlFor="role">Role</Label>
                       <Select 
-                        value={newUser.profile.role} 
-                        onValueChange={(value) => setNewUser({
-                          ...newUser, 
-                          profile: {...newUser.profile, role: value}
-                        })}
+                        value={newUser.selected_role_id?.toString() || ''} 
+                        onValueChange={(value) => {
+                          const roleId = value ? parseInt(value) : null;
+                          const selectedRole = roles.find(role => role.id === roleId);
+                          setNewUser({
+                            ...newUser, 
+                            selected_role_id: roleId,
+                            groups: roleId ? [roleId] : [],
+                            profile: {
+                              ...newUser.profile, 
+                              role: selectedRole ? selectedRole.name.toLowerCase().replace(' ', '_') : 'agent'
+                            }
+                          });
+                        }}
                       >
                         <SelectTrigger>
-                          <SelectValue />
+                          <SelectValue placeholder="Select a role" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="administrator">Administrator</SelectItem>
-                          <SelectItem value="contract_manager">Contract Manager</SelectItem>
-                          <SelectItem value="offer_manager">Offer Manager</SelectItem>
-                          <SelectItem value="analyst">Analyst</SelectItem>
-                          <SelectItem value="manager">Manager</SelectItem>
-                          <SelectItem value="agent">Agent</SelectItem>
-                          <SelectItem value="specialist">Specialist</SelectItem>
-                          <SelectItem value="coordinator">Coordinator</SelectItem>
-                          <SelectItem value="supervisor">Supervisor</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
+                          {roles.map((role) => (
+                            <SelectItem key={role.id} value={role.id.toString()}>
+                              {role.name}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -770,23 +776,7 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                       placeholder="Enter phone number"
                     />
                   </div>
-                  <div>
-                    <Label>Assign Roles</Label>
-                    <div className="grid grid-cols-2 gap-2 mt-2 max-h-32 overflow-y-auto">
-                      {roles.map((role) => (
-                        <div key={role.id} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`role-${role.id}`}
-                            checked={newUser.groups.includes(role.id)}
-                            onCheckedChange={(checked) => handlePermissionChange(role.id, checked, 'user')}
-                          />
-                          <Label htmlFor={`role-${role.id}`} className="text-sm">
-                            {role.name}
-                          </Label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="isActive"
