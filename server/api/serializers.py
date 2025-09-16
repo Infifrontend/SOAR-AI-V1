@@ -705,7 +705,7 @@ class RoleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Group
-        fields = ['name', 'description', 'allowed_menus', 'menu_permissions', 'role_description']
+        fields = ['id', 'name', 'description', 'allowed_menus', 'menu_permissions', 'role_description']
 
     def get_description(self, obj):
         try:
