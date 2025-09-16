@@ -575,7 +575,7 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
             className="flex items-center gap-2 text-orange-600 border-orange-300 hover:bg-orange-50"
           >
             <Plus className="h-4 w-4" />
-            Create Template
+            Template Creation
           </Button>
           <Button onClick={handleSaveSettings} className="flex items-center gap-2">
             <Save className="h-4 w-4" />

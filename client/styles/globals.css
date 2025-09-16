@@ -1211,8 +1211,8 @@ html {
     background-color: #eceef2 !important;
   }
   .cls-btn{
-    white-space: nowrap !important;
-    width:100px;
+    white-space: wrap !important;
+    width: 200px;
   }
 
   .bg-card {
