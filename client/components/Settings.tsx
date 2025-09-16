@@ -565,10 +565,23 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
             Manage users, permissions, screen visibility, and system configuration
           </p>
         </div>
-        <Button onClick={handleSaveSettings} className="flex items-center gap-2">
-          <Save className="h-4 w-4" />
-          Save All Changes
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              setActiveTab('template-creation');
+              // You can add any template creation logic here if needed
+            }}
+            className="flex items-center gap-2 text-orange-600 border-orange-300 hover:bg-orange-50"
+          >
+            <Plus className="h-4 w-4" />
+            Create Template
+          </Button>
+          <Button onClick={handleSaveSettings} className="flex items-center gap-2">
+            <Save className="h-4 w-4" />
+            Save All Changes
+          </Button>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
