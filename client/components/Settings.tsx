@@ -749,7 +749,7 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                     <div>
                       <Label htmlFor="role">Role</Label>
                       <Select 
-                        value={newUser.selected_role_id?.toString() || ''} 
+                        value={newUser.selected_role_id ? newUser.selected_role_id.toString() : ''} 
                         onValueChange={(value) => {
                           const roleId = value ? parseInt(value) : null;
                           const selectedRole = roles.find(role => role.id === roleId);
@@ -789,11 +789,15 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                           <SelectValue placeholder="Select a role" />
                         </SelectTrigger>
                         <SelectContent>
-                          {roles.map((role) => (
-                            <SelectItem key={role.id} value={role.id.toString()}>
-                              {role.name}
+                          {roles && roles.length > 0 ? roles.map((role) => (
+                            <SelectItem key={role.id} value={role.id ? role.id.toString() : ''}>
+                              {role.name || 'Unknown Role'}
                             </SelectItem>
-                          ))}
+                          )) : (
+                            <SelectItem value="" disabled>
+                              No roles available
+                            </SelectItem>
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
