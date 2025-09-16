@@ -1210,6 +1210,10 @@ html {
     border: 1px solid #e5e7eb !important;
     background-color: #eceef2 !important;
   }
+  .cls-btn{
+    white-space: nowrap !important;
+    width:100px;
+  }
 
   .bg-card {
     background-color: white !important;
