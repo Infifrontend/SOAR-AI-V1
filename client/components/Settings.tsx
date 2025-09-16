@@ -56,6 +56,7 @@ import {
 } from 'lucide-react';
 import { useUserApi } from '../hooks/api/useUserApi';
 import { useRoleApi } from '../hooks/api/useRoleApi';
+import TemplateCreation from './TemplateCreation';
 
 // Available main menus for role permissions
 const availableScreens = [
@@ -569,7 +570,7 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-6 mb-6 bg-gray-50/50 p-1 rounded-xl border border-gray-200/50">
+        <TabsList className="grid w-full grid-cols-7 mb-6 bg-gray-50/50 p-1 rounded-xl border border-gray-200/50">
           <TabsTrigger 
             value="users" 
             className="rounded-lg px-6 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-[#FD9646] data-[state=active]:border-b-[#FD9646] font-medium text-gray-600 data-[state=active]:text-gray-900 hover:text-gray-900 transition-all duration-200 flex items-center gap-2"
@@ -583,6 +584,13 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
           >
             <Shield className="h-4 w-4" />
             Roles & Access
+          </TabsTrigger>
+          <TabsTrigger 
+            value="template-creation" 
+            className="rounded-lg px-6 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-[#FD9646] data-[state=active]:border-b-[#FD9646] font-medium text-gray-600 data-[state=active]:text-gray-900 hover:text-gray-900 transition-all duration-200 flex items-center gap-2"
+          >
+            <FileText className="h-4 w-4" />
+            Template Creation
           </TabsTrigger>
           <TabsTrigger 
             value="screen-management" 
@@ -1442,6 +1450,11 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
               ))}
             </div>
           )}
+        </TabsContent>
+
+        {/* Template Creation Tab */}
+        <TabsContent value="template-creation" className="space-y-4">
+          <TemplateCreation />
         </TabsContent>
 
         {/* Screen Management Tab */}
