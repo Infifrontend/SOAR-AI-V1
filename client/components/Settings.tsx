@@ -1183,7 +1183,19 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
             </div>
             <Dialog open={isCreatingRole} onOpenChange={setIsCreatingRole}>
               <DialogTrigger asChild>
-                <Button className="bg-orange-500 hover:bg-orange-600 text-white" disabled={loading}>
+                <Button 
+                  className="bg-orange-500 hover:bg-orange-600 text-white" 
+                  disabled={loading}
+                  onClick={() => {
+                    // Reset form when creating new role
+                    setNewRole({
+                      name: '',
+                      description: '',
+                      permissions: []
+                    });
+                    setError('');
+                  }}
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   Create Role
                 </Button>
@@ -1250,7 +1262,11 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                   </div>
                 </div>
                 <DialogFooter className="flex gap-2">
-                  <Button variant="outline" onClick={() => setIsCreatingRole(false)}>
+                  <Button variant="outline" onClick={() => {
+                    setIsCreatingRole(false);
+                    setNewRole({ name: '', description: '', permissions: [] });
+                    setError('');
+                  }}>
                     Cancel
                   </Button>
                   <Button 
@@ -1328,7 +1344,12 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
                   </div>
                 </div>
                 <DialogFooter className="flex gap-2">
-                  <Button variant="outline" onClick={() => setIsEditingRole(false)}>
+                  <Button variant="outline" onClick={() => {
+                    setIsEditingRole(false);
+                    setSelectedRole(null);
+                    setNewRole({ name: '', description: '', permissions: [] });
+                    setError('');
+                  }}>
                     Cancel
                   </Button>
                   <Button 
