@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { useTemplateApi } from '../hooks/api/useTemplateApi';
 import { useCampaignApi } from '../hooks/api/useCampaignApi';
 import { useLeadApi } from '../hooks/api/useLeadApi';
+import { useEmailTemplateApi } from '../hooks/api/useEmailTemplateApi';
 import { EmailTemplateService } from '../utils/emailTemplateService';
 import { toast } from 'react-toastify';
 import RichTextEditor from './RichTextEditor';
@@ -160,6 +161,8 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
     };
   });
   const [isLaunching, setIsLaunching] = useState(false);
+  const [emailTemplates, setEmailTemplates] = useState<any[]>([]);
+  const [loadingEmailTemplates, setLoadingEmailTemplates] = useState(false);
 
   // Use actual selectedLeads from props instead of mock data
   const selectedLeads = propSelectedLeads || [];
@@ -174,6 +177,12 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
   } = useTemplateApi();
 
   const { 
+    getEmailTemplates,
+    loading: emailTemplateLoading,
+    error: emailTemplateError 
+  } = useEmailTemplateApi();
+
+  const { 
     launchCampaign,
     updateLead,
     loading: campaignLoading,
@@ -183,6 +192,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
 
   useEffect(() => {
     loadTemplates();
+    loadEmailTemplates();
   }, []);
 
   // Initialize data from navigation props if provided
@@ -236,6 +246,20 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
       setTemplates(allTemplates);
     } catch (error) {
       console.error('Failed to load templates:', error);
+    }
+  };
+
+  const loadEmailTemplates = async () => {
+    try {
+      setLoadingEmailTemplates(true);
+      const templates = await getEmailTemplates();
+      console.log('Email templates loaded:', templates);
+      setEmailTemplates(templates || []);
+    } catch (error) {
+      console.error('Failed to load email templates:', error);
+      setEmailTemplates([]);
+    } finally {
+      setLoadingEmailTemplates(false);
     }
   };
 
@@ -372,6 +396,62 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
           subject: subject,
           body: renderedContent,
           cta: template.cta || 'Schedule Demo',
+          cta_link: ctaLink
+        }
+      }
+    }));
+  };
+
+  const handleEmailTemplateSelect = (template: any) => {
+    if (!template) return;
+
+    const subject = template.subject_line || `Partnership Opportunity - ${template.name}`;
+    const ctaLink = 'https://calendly.com/soar-ai/demo';
+
+    // For email templates, use the content directly or wrap it in standard layout
+    let renderedContent = '';
+    
+    if (template.content && template.content.startsWith('<!DOCTYPE') || template.content.startsWith('<html')) {
+      // Content is already complete HTML
+      renderedContent = template.content;
+    } else {
+      // Wrap content in standard email template
+      renderedContent = renderEmailTemplate(
+        template.content || '', 
+        'Schedule Demo', 
+        ctaLink,
+        subject
+      );
+    }
+
+    // Create a template object that matches the expected structure
+    const emailTemplate = {
+      id: `email-${template.id}`,
+      name: template.name,
+      description: template.description || 'Email template',
+      channel_type: 'email',
+      subject_line: template.subject_line,
+      content: template.content,
+      cta: 'Schedule Demo',
+      cta_link: ctaLink,
+      estimated_open_rate: 45, // Default values for email templates
+      estimated_click_rate: 12,
+      is_custom: !template.is_global,
+      created_by: template.created_by_name || 'System',
+      template_type: 'email_template',
+      variables: template.variables || []
+    };
+
+    setCampaignData(prev => ({
+      ...prev,
+      selectedTemplate: emailTemplate,
+      channels: ['email'], // Email templates are email-only
+      content: {
+        ...prev.content,
+        email: {
+          subject: subject,
+          body: renderedContent,
+          cta: 'Schedule Demo',
           cta_link: ctaLink
         }
       }
@@ -723,9 +803,9 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
               </div>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <Label className="text-base font-medium text-gray-900">Campaign Templates</Label>
+                <Label className="text-base font-medium text-gray-900">Templates</Label>
                 <Button 
                   variant="outline" 
                   size="sm"
@@ -738,64 +818,137 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
               </div>
               <p className="text-sm text-gray-600">Choose a template to get started quickly</p>
 
-              {apiLoading && (
+              {(apiLoading || loadingEmailTemplates) && (
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="h-6 w-6 animate-spin" />
                   <span className="ml-2">Loading templates...</span>
                 </div>
               )}
 
-              {apiError && (
+              {(apiError || emailTemplateError) && (
                 <Alert>
                   <AlertDescription>
-                    Error loading templates: {apiError}
+                    Error loading templates: {apiError || emailTemplateError}
                   </AlertDescription>
                 </Alert>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {getFilteredTemplates().map((template) => (
-                  <Card 
-                    key={template.id}
-                    className={`cursor-pointer transition-all hover:shadow-md border-2 ${
-                      campaignData.selectedTemplate?.id === template.id 
-                        ? 'border-orange-500 bg-orange-50' 
-                        : 'border-gray-200 hover:border-orange-300'
-                    }`}
-                    onClick={() => handleTemplateSelect(template)}
-                  >
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="text-sm font-medium">{template.name}</CardTitle>
-                        <div className="flex items-center gap-1">
-                          <Badge variant="outline" className="text-xs">
-                            {template.channel_type === 'email' && <Mail className="h-3 w-3 mr-1" />}
-                            {template.channel_type === 'whatsapp' && <MessageSquare className="h-3 w-3 mr-1" />}
-                            {template.channel_type === 'linkedin' && <Linkedin className="h-3 w-3 mr-1" />}
-                            {template.channel_type}
-                          </Badge>
-                          {template.is_custom && (
-                            <Badge variant="secondary" className="text-xs">
-                              Custom
+              {/* Campaign Templates Section */}
+              <div>
+                <h4 className="text-sm font-semibold text-gray-900 mb-3">Campaign Templates</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                  {getFilteredTemplates().map((template) => (
+                    <Card 
+                      key={`campaign-${template.id}`}
+                      className={`cursor-pointer transition-all hover:shadow-md border-2 ${
+                        campaignData.selectedTemplate?.id === template.id 
+                          ? 'border-orange-500 bg-orange-50' 
+                          : 'border-gray-200 hover:border-orange-300'
+                      }`}
+                      onClick={() => handleTemplateSelect(template)}
+                    >
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-sm font-medium">{template.name}</CardTitle>
+                          <div className="flex items-center gap-1">
+                            <Badge variant="outline" className="text-xs">
+                              {template.channel_type === 'email' && <Mail className="h-3 w-3 mr-1" />}
+                              {template.channel_type === 'whatsapp' && <MessageSquare className="h-3 w-3 mr-1" />}
+                              {template.channel_type === 'linkedin' && <Linkedin className="h-3 w-3 mr-1" />}
+                              {template.channel_type}
                             </Badge>
-                          )}
-                          {template.layout && (
-                            <Badge variant="outline" className="text-xs capitalize">
-                              {template.layout}
-                            </Badge>
-                          )}
+                            {template.is_custom && (
+                              <Badge variant="secondary" className="text-xs">
+                                Custom
+                              </Badge>
+                            )}
+                            {template.layout && (
+                              <Badge variant="outline" className="text-xs capitalize">
+                                {template.layout}
+                              </Badge>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                      <CardDescription className="text-xs">{template.description}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="pt-0">
-                      <div className="flex justify-between text-xs text-gray-600">
-                        <span>Open: {template.estimated_open_rate}%</span>
-                        <span>Click: {template.estimated_click_rate}%</span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                        <CardDescription className="text-xs">{template.description}</CardDescription>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <div className="flex justify-between text-xs text-gray-600">
+                          <span>Open: {template.estimated_open_rate}%</span>
+                          <span>Click: {template.estimated_click_rate}%</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+
+              {/* Email Templates Section */}
+              <div>
+                <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  Email Templates ({emailTemplates.length})
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {emailTemplates
+                    .filter(template => campaignData.channels.includes('email'))
+                    .map((template) => (
+                    <Card 
+                      key={`email-${template.id}`}
+                      className={`cursor-pointer transition-all hover:shadow-md border-2 ${
+                        campaignData.selectedTemplate?.id === `email-${template.id}` 
+                          ? 'border-blue-500 bg-blue-50' 
+                          : 'border-gray-200 hover:border-blue-300'
+                      }`}
+                      onClick={() => handleEmailTemplateSelect(template)}
+                    >
+                      <CardHeader className="pb-3">
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-sm font-medium">{template.name}</CardTitle>
+                          <div className="flex items-center gap-1">
+                            <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                              <Mail className="h-3 w-3 mr-1" />
+                              Email
+                            </Badge>
+                            <Badge variant="secondary" className="text-xs">
+                              {template.template_type}
+                            </Badge>
+                          </div>
+                        </div>
+                        <CardDescription className="text-xs line-clamp-2">
+                          {template.description || 'Professional email template'}
+                        </CardDescription>
+                        <div className="text-xs text-gray-600 mt-2">
+                          <strong>Subject:</strong> {template.subject_line || 'No subject'}
+                        </div>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <div className="flex justify-between text-xs text-gray-600">
+                          <span>Variables: {template.variable_count || 0}</span>
+                          <span>{template.is_global ? 'Global' : 'Custom'}</span>
+                        </div>
+                        {template.created_by_name && (
+                          <div className="text-xs text-gray-500 mt-1">
+                            By: {template.created_by_name}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+                {emailTemplates.length === 0 && !loadingEmailTemplates && (
+                  <div className="text-center py-8 text-gray-500">
+                    <Mail className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p className="text-sm">No email templates available</p>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => onNavigate('settings', { activeTab: 'template-creation' })}
+                      className="mt-2"
+                    >
+                      Create Email Template
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
 
