@@ -1445,9 +1445,7 @@ export function Settings({ onScreenVisibilityChange }: ScreenManagementProps) {
         </TabsContent>
 
         {/* Screen Management Tab */}
-        <TabsContent value="screen-management" className="space-y-4"
-        </TabsContent>
->
+        <TabsContent value="screen-management" className="space-y-4">
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
