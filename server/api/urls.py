@@ -82,6 +82,9 @@ urlpatterns = [
 
     # Generic history endpoint
     path('get-history/', views.get_history, name='get_history'),
+    
+    # Lead history endpoint
+    path('leads/<int:lead_id>/history/', views.get_lead_history, name='get_lead_history'),
 
     # Send proposal endpoint
     path('opportunities/<int:pk>/send-proposal/', views.OpportunityViewSet.as_view({'post': 'send_proposal'}), name='send_proposal'),
