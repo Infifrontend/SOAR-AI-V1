@@ -1288,31 +1288,28 @@ const getRandomRiskLevel = () => {
   const loadDraft = useCallback(async (opportunityId: number) => {
     try {
       setIsDraftLoading(true);
-      const response = await getProposalDraft(opportunityId);
-      console.log(`Draft loaded for opportunity ${opportunityId}:`, response);
-
-      // Handle attachment info if present
-      const draftData = response?.data || response;
-      if (draftData?.attachment_info) {
-        setAttachmentInfo(draftData.attachment_info);
-      } else {
-        setAttachmentInfo({ exists: false, filename: "", path: "" });
+      const response = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/opportunities/${opportunityId}/proposal-draft/`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.draft) {
+          const draft = data.draft;
+          setProposalForm({
+            title: draft.title || '',
+            description: draft.description || '',
+            validityPeriod: draft.validity_period || '30',
+            specialTerms: draft.special_terms || '',
+            deliveryMethod: draft.delivery_method || 'email',
+            attachedFile: null,
+          });
+          setAttachmentInfo(data.attachment_info || { exists: false, filename: '', path: '' });
+        }
       }
-
-      return response;
     } catch (error) {
-      if (error.response?.status === 404) {
-        console.log(`No draft found for opportunity ${opportunityId}`);
-        setAttachmentInfo({ exists: false, filename: "", path: "" });
-        return null;
-      }
-      console.error("Error loading draft:", error);
-      setAttachmentInfo({ exists: false, filename: "", path: "" });
-      return null;
+      console.error('Error loading draft:', error);
     } finally {
       setIsDraftLoading(false);
     }
-  }, [getProposalDraft]);
+  }, []);
 
   const clearDraft = useCallback(async (opportunityId: number) => {
     try {

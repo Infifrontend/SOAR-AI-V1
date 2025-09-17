@@ -210,6 +210,199 @@ class OpportunityViewSet(viewsets.ModelViewSet):
 
         return queryset.order_by('-updated_at')
 
+    @action(detail=True, methods=['get'])
+    def proposal_draft(self, request, pk=None):
+        """Get proposal draft for opportunity"""
+        try:
+            opportunity = self.get_object()
+            draft = ProposalDraft.objects.filter(opportunity=opportunity).first()
+            
+            if draft:
+                serializer = ProposalDraftSerializer(draft)
+                return Response({
+                    'success': True,
+                    'draft': serializer.data,
+                    'attachment_info': {
+                        'exists': bool(draft.attachment_path),
+                        'filename': draft.attachment_original_name or '',
+                        'path': draft.attachment_path or ''
+                    }
+                })
+            else:
+                return Response({
+                    'success': True,
+                    'draft': None,
+                    'attachment_info': {
+                        'exists': False,
+                        'filename': '',
+                        'path': ''
+                    }
+                })
+        except Exception as e:
+            return Response({
+                'success': False,
+                'error': f'Failed to get proposal draft: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=True, methods=['post'])
+    def save_proposal_draft(self, request, pk=None):
+        """Save proposal draft for opportunity"""
+        try:
+            opportunity = self.get_object()
+            data = request.data.copy()
+            
+            # Handle file upload
+            attachment_file = request.FILES.get('attachedFile')
+            
+            # Get or create draft
+            draft, created = ProposalDraft.objects.get_or_create(
+                opportunity=opportunity,
+                defaults=data
+            )
+            
+            if not created:
+                # Update existing draft
+                for key, value in data.items():
+                    if hasattr(draft, key):
+                        setattr(draft, key, value)
+            
+            # Handle file attachment
+            if attachment_file:
+                import os
+                from django.conf import settings
+                
+                # Create proposal_attachments directory if it doesn't exist
+                upload_dir = os.path.join(settings.MEDIA_ROOT, 'proposal_attachments')
+                os.makedirs(upload_dir, exist_ok=True)
+                
+                # Generate unique filename
+                import uuid
+                file_extension = os.path.splitext(attachment_file.name)[1]
+                unique_filename = f"proposal_{opportunity.id}_{draft.id}_{uuid.uuid4().hex[:8]}{file_extension}"
+                file_path = os.path.join(upload_dir, unique_filename)
+                
+                # Save file
+                with open(file_path, 'wb') as f:
+                    for chunk in attachment_file.chunks():
+                        f.write(chunk)
+                
+                # Update draft with file info
+                draft.attachment_path = os.path.join('proposal_attachments', unique_filename)
+                draft.attachment_original_name = attachment_file.name
+            
+            draft.save()
+            
+            serializer = ProposalDraftSerializer(draft)
+            return Response({
+                'success': True,
+                'draft': serializer.data,
+                'attachment_info': {
+                    'exists': bool(draft.attachment_path),
+                    'filename': draft.attachment_original_name or '',
+                    'path': draft.attachment_path or ''
+                }
+            })
+            
+        except Exception as e:
+            return Response({
+                'success': False,
+                'error': f'Failed to save proposal draft: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=True, methods=['put'])
+    def update_proposal_draft(self, request, pk=None):
+        """Update proposal draft for opportunity"""
+        try:
+            opportunity = self.get_object()
+            draft = ProposalDraft.objects.filter(opportunity=opportunity).first()
+            
+            if not draft:
+                return Response({
+                    'success': False,
+                    'error': 'No proposal draft found'
+                }, status=status.HTTP_404_NOT_FOUND)
+            
+            data = request.data.copy()
+            attachment_file = request.FILES.get('attachedFile')
+            
+            # Update draft fields
+            for key, value in data.items():
+                if hasattr(draft, key):
+                    setattr(draft, key, value)
+            
+            # Handle file attachment
+            if attachment_file:
+                import os
+                from django.conf import settings
+                
+                # Remove old file if exists
+                if draft.attachment_path:
+                    old_file_path = os.path.join(settings.MEDIA_ROOT, draft.attachment_path)
+                    if os.path.exists(old_file_path):
+                        os.remove(old_file_path)
+                
+                # Save new file
+                upload_dir = os.path.join(settings.MEDIA_ROOT, 'proposal_attachments')
+                os.makedirs(upload_dir, exist_ok=True)
+                
+                import uuid
+                file_extension = os.path.splitext(attachment_file.name)[1]
+                unique_filename = f"proposal_{opportunity.id}_{draft.id}_{uuid.uuid4().hex[:8]}{file_extension}"
+                file_path = os.path.join(upload_dir, unique_filename)
+                
+                with open(file_path, 'wb') as f:
+                    for chunk in attachment_file.chunks():
+                        f.write(chunk)
+                
+                draft.attachment_path = os.path.join('proposal_attachments', unique_filename)
+                draft.attachment_original_name = attachment_file.name
+            
+            draft.save()
+            
+            serializer = ProposalDraftSerializer(draft)
+            return Response({
+                'success': True,
+                'draft': serializer.data,
+                'attachment_info': {
+                    'exists': bool(draft.attachment_path),
+                    'filename': draft.attachment_original_name or '',
+                    'path': draft.attachment_path or ''
+                }
+            })
+            
+        except Exception as e:
+            return Response({
+                'success': False,
+                'error': f'Failed to update proposal draft: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=True, methods=['delete'])
+    def delete_proposal_draft(self, request, pk=None):
+        """Delete proposal draft for opportunity"""
+        try:
+            opportunity = self.get_object()
+            draft = ProposalDraft.objects.filter(opportunity=opportunity).first()
+            
+            if draft:
+                # Remove attachment file if exists
+                if draft.attachment_path:
+                    import os
+                    from django.conf import settings
+                    file_path = os.path.join(settings.MEDIA_ROOT, draft.attachment_path)
+                    if os.path.exists(file_path):
+                        os.remove(file_path)
+                
+                draft.delete()
+                return Response({'success': True, 'message': 'Draft deleted successfully'})
+            else:
+                return Response({'success': False, 'error': 'No draft found'}, status=status.HTTP_404_NOT_FOUND)
+                
+        except Exception as e:
+            return Response({
+                'success': False,
+                'error': f'Failed to delete proposal draft: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     @action(detail=False, methods=['post'])
     def search(self, request):
         """Search opportunities with filters"""
@@ -319,6 +512,8 @@ class OpportunityViewSet(viewsets.ModelViewSet):
 
             # Handle file attachment if present
             attachment_added = False
+            attachment_name = ""
+            
             if 'attachedFile' in request.FILES:
                 attached_file = request.FILES['attachedFile']
                 
@@ -342,33 +537,40 @@ class OpportunityViewSet(viewsets.ModelViewSet):
                 # Attach file to email
                 email.attach(attached_file.name, attached_file.read(), attached_file.content_type)
                 attachment_added = True
+                attachment_name = attached_file.name
 
             # Check for existing proposal draft attachment
-            elif hasattr(opportunity, 'proposal_draft') and opportunity.proposal_draft.attachment_path:
-                draft = opportunity.proposal_draft
-                attachment_path = os.path.join(settings.MEDIA_ROOT, draft.attachment_path)
-                
-                if os.path.exists(attachment_path):
-                    with open(attachment_path, 'rb') as f:
-                        file_content = f.read()
-                        filename = draft.attachment_original_name or os.path.basename(attachment_path)
+            else:
+                try:
+                    draft = ProposalDraft.objects.filter(opportunity=opportunity).first()
+                    if draft and draft.attachment_path:
+                        attachment_path = os.path.join(settings.MEDIA_ROOT, draft.attachment_path)
                         
-                        # Determine MIME type based on file extension
-                        file_extension = os.path.splitext(filename)[1].lower()
-                        mime_types = {
-                            '.pdf': 'application/pdf',
-                            '.doc': 'application/msword',
-                            '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                            '.xls': 'application/vnd.ms-excel',
-                            '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                            '.ppt': 'application/vnd.ms-powerpoint',
-                            '.pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-                            '.txt': 'text/plain'
-                        }
-                        mime_type = mime_types.get(file_extension, 'application/octet-stream')
-                        
-                        email.attach(filename, file_content, mime_type)
-                        attachment_added = True
+                        if os.path.exists(attachment_path):
+                            with open(attachment_path, 'rb') as f:
+                                file_content = f.read()
+                                filename = draft.attachment_original_name or os.path.basename(attachment_path)
+                                
+                                # Determine MIME type based on file extension
+                                file_extension = os.path.splitext(filename)[1].lower()
+                                mime_types = {
+                                    '.pdf': 'application/pdf',
+                                    '.doc': 'application/msword',
+                                    '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                                    '.xls': 'application/vnd.ms-excel',
+                                    '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                                    '.ppt': 'application/vnd.ms-powerpoint',
+                                    '.pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                                    '.txt': 'text/plain'
+                                }
+                                mime_type = mime_types.get(file_extension, 'application/octet-stream')
+                                
+                                email.attach(filename, file_content, mime_type)
+                                attachment_added = True
+                                attachment_name = filename
+                except Exception as e:
+                    print(f"Error attaching draft file: {str(e)}")
+                    # Continue without attachment if draft file cannot be loaded
 
             # Send the email
             result = email.send(fail_silently=False)
@@ -392,7 +594,8 @@ class OpportunityViewSet(viewsets.ModelViewSet):
                 return Response({
                     'success': True,
                     'message': f'Proposal sent successfully to {contact.email}',
-                    'attachment_included': attachment_added
+                    'attachment_included': attachment_added,
+                    'attachment_name': attachment_name if attachment_added else None
                 })
             else:
                 return Response({
