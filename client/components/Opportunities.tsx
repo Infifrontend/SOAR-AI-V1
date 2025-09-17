@@ -2489,6 +2489,7 @@ const getRandomRiskLevel = () => {
     }
   }, [selectedOpportunity, proposalForm, generateEmailPreview, sendProposal, clearDraft, updateOpportunityStage]);
 
+
   const addRouteDiscount = useCallback(() => {
     setNegotiationForm({
       ...negotiationForm,
@@ -2651,6 +2652,68 @@ const getRandomRiskLevel = () => {
       setLoadingOpportunityId(null); // Clear loading state
     }
   };
+
+
+  // const handleSendNegotiateEmail = async () => {
+  //   if (!selectedOpportunity) return;
+
+  //   try {
+  //     setLoadingOpportunityId(selectedOpportunity.id); // Set loading state
+
+  //     // Prepare proposal data for sending
+  //     const proposalData = {
+  //       opportunity_id: selectedOpportunity.id,
+  //       subject: proposalForm.title || `Travel Solutions Negotations - ${selectedOpportunity.lead_info?.company?.name}`,
+  //       email_content: generateEmailPreview(),
+  //       delivery_method: proposalForm.deliveryMethod,
+  //       validity_period: proposalForm.validityPeriod,
+  //       special_terms: proposalForm.specialTerms,
+  //     };
+
+  //     console.log("Sending Negotiate email with data:", proposalData);
+
+  //     // Send proposal via API
+  //     const result = await sendProposal(selectedOpportunity.id, proposalData, proposalForm.attachedFile);
+
+  //     if (result.success) {
+  //       toast.success(result.message || 'Revised Proposal sent successfully!');
+
+  //       // Clear the draft since proposal is being sent
+  //       await clearDraft(selectedOpportunity.id);
+
+  //       // Update opportunity stage to negotiate
+  //       await updateOpportunityStage(selectedOpportunity.id, {
+  //         stage: "negotiate"
+  //       });
+
+  //       // Update local state to reflect the changes
+  //       const updatedOpportunity = {
+  //         ...selectedOpportunity,
+  //         stage: "negotiate"
+  //         updated_at: new Date().toISOString(),
+  //       };
+
+  //       setOpportunities((prev) =>
+  //         prev.map((opp) => 
+  //           opp.id === selectedOpportunity.id ? updatedOpportunity : opp
+  //         ),
+  //       );
+
+  //       setShowProposalDialog(false); // Close the proposal dialog
+  //       setSuccessMessage(
+  //         `Revised Proposal sent to ${selectedOpportunity.lead_info?.company?.name} and moved to Negotiate stage`,
+  //       );
+  //       setTimeout(() => setSuccessMessage(""), 5000);
+  //     } else {
+  //       toast.error(result.error || 'Failed to send Revised proposal');
+  //     }
+  //   } catch (error: any) {
+  //     console.error('Error sending proposal email:', error);
+  //     toast.error(error.response?.data?.error || 'Failed to send Revised proposal. Please try again.');
+  //   } finally {
+  //     setLoadingOpportunityId(null); // Clear loading state
+  //   }
+  // };
 
   return (
     <>
@@ -3515,7 +3578,7 @@ const getRandomRiskLevel = () => {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="corporateContact" className="text-sm font-medium">Corporate Contact</Label>
+                        <Label htmlFor="corporateContact" className="text-sm font-medium">Corporate Name</Label>
                         <Input
                           id="corporateContact"
                           value={`${selectedOpportunity?.lead_info?.contact?.first_name || ''} ${selectedOpportunity?.lead_info?.contact?.last_name || ''}`}
@@ -4187,7 +4250,7 @@ const getRandomRiskLevel = () => {
                       )}
                       {isDraftLoading ? "Saving..." : "Save Draft"}
                     </Button>
-                    <Button 
+                    {/* <Button 
                       onClick={handleSendProposalEmail} 
                       disabled={isDraftLoading}
                       className="bg-green-600 hover:bg-green-700 text-white"
@@ -4202,6 +4265,39 @@ const getRandomRiskLevel = () => {
                           <Mail className="h-4 w-4 mr-2" />
                           Send Proposal
                         </>
+                      )}
+                    </Button> */}
+                    <Button
+                      onClick={() => {
+                        if (proposalDialogMode === 'proposal') {
+                          handleSaveProposal();
+                        } else {
+                          handleGenerateRevisedProposal();
+                        }
+                      }}
+                      disabled={
+                        (!proposalForm.title && proposalDialogMode === 'proposal') ||
+                        (selectedOpportunity && loadingOpportunityId === selectedOpportunity.id)
+                      }
+                      className={
+                        proposalDialogMode === 'proposal'
+                          ? "bg-orange-500 hover:bg-orange-600 text-white"
+                          : "bg-green-600 hover:bg-green-700 text-white"
+                      }
+                    >
+                      {selectedOpportunity && loadingOpportunityId === selectedOpportunity.id ? (
+                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      ) : proposalDialogMode === 'proposal' ? (
+                        <Mail className="h-4 w-4 mr-2" />
+                      ) : (
+                        <FileText className="h-4 w-4 mr-2" />
+                      )}
+                      {selectedOpportunity && loadingOpportunityId === selectedOpportunity.id ? (
+                        proposalDialogMode === 'proposal' ? "Sending..." : "Sending..."
+                      ) : proposalDialogMode === 'proposal' ? (
+                        "Send Proposal"
+                      ) : (
+                        "Send Revised Proposal"
                       )}
                     </Button>
                   </div>

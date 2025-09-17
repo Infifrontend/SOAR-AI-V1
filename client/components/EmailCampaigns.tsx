@@ -656,7 +656,7 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
             )}
             Refresh
           </Button>
-          <Button
+          {/* <Button
             variant="outline"
             onClick={checkSmtpStatus}
             disabled={checkingSmtp}
@@ -668,7 +668,7 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
               <Mail className="h-4 w-4 mr-2" />
             )}
             Check SMTP Status
-          </Button>
+          </Button> */}
           {/* <Button 
             onClick={() => setShowCreateDialog(true)}
             style={{
@@ -1152,7 +1152,7 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
                           )}
                           Tracking
                         </Button>
-                        <Button
+                        {/* <Button
                           variant="outline"
                           size="sm"
                           onClick={(e) => {
@@ -1163,7 +1163,7 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
                         >
                           <FileText className="h-4 w-4 mr-1" />
                           Logs
-                        </Button>
+                        </Button> */}
                       </>
                     )}
                     {campaign.status === 'draft' && (

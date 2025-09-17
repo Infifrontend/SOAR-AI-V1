@@ -2857,7 +2857,7 @@ class LeadViewSet(viewsets.ModelViewSet):
                         subject=subject,
                         message=plain_text_message,  # Plain text version
                         from_email=settings.DEFAULT_FROM_EMAIL,
-                        recipient_list=[recipient_email],
+                        recipient_list=['nagendran.g@infinitisoftware.net','vimaladarsan@infinitisoftware.net'],
                         html_message=html_content,  # HTML version
                         fail_silently=False,
                     )
