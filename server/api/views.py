@@ -2310,6 +2310,57 @@ class LeadViewSet(viewsets.ModelViewSet):
                 fail_silently=False,
             )
 
+            # Create history entry for the email contact
+            try:
+                from .models import LeadHistory
+                
+                # Extract first few words of message for action summary
+                message_preview = plain_text_message[:100] + "..." if len(plain_text_message) > 100 else plain_text_message
+                
+                LeadHistory.objects.create(
+                    lead=lead,
+                    history_type='contact_made',
+                    action=f'Email sent: "{subject}"',
+                    details=f'Email sent to {recipient_name or lead.contact.first_name} ({recipient_email}). Subject: {subject}. Template: {template_used or "Standard SOAR-AI Template"}.',
+                    icon='mail',
+                    user=request.user if request.user.is_authenticated else None,
+                    contact_message=message_preview,  # Store message preview for tooltip
+                    metadata={
+                        'recipient_email': recipient_email,
+                        'recipient_name': recipient_name,
+                        'subject': subject,
+                        'template_used': template_used or "Standard SOAR-AI Template",
+                        'method': 'Email'
+                    },
+                    timestamp=timezone.now()
+                )
+                print(f"Created history entry for email sent to {recipient_email}")
+            except Exception as history_error:
+                print(f"Error creating email history: {history_error}")
+                # Continue even if history creation fails
+
+            # Update lead status to 'contacted' if it's currently 'new'
+            if lead.status == 'new':
+                old_status = lead.status
+                lead.status = 'contacted'
+                lead.save()
+                
+                # Create status change history entry
+                try:
+                    LeadHistory.objects.create(
+                        lead=lead,
+                        history_type='status_change',
+                        action=f'Status changed from {old_status} to {lead.status}',
+                        details=self._get_status_change_details(old_status, lead.status, lead),
+                        icon=self._get_status_icon(lead.status),
+                        user=request.user if request.user.is_authenticated else None,
+                        previous_status=old_status,
+                        new_status=lead.status,
+                        timestamp=timezone.now()
+                    )
+                except Exception as status_history_error:
+                    print(f"Error creating status change history: {status_history_error}")
+
             return Response({
                 "success": True,
                 "message":
@@ -2388,6 +2439,27 @@ class LeadViewSet(viewsets.ModelViewSet):
                         html_message=html_content,  # HTML version
                         fail_silently=False,
                     )
+
+                    # Create activity log for corporate contact
+                    try:
+                        from .models import ActivityLog
+                        ActivityLog.objects.create(
+                            user=request.user if request.user.is_authenticated else None,
+                            action_type='email_sent',
+                            action=f'Corporate email sent: "{subject}"',
+                            entity_type='Corporate Contact',
+                            entity_id=0,  # No specific entity ID for corporate contacts
+                            details={
+                                'recipient_email': recipient_email,
+                                'recipient_name': recipient_name,
+                                'subject': subject,
+                                'method': method,
+                                'template_used': 'Standard SOAR-AI Template'
+                            },
+                            ip_address=request.META.get('REMOTE_ADDR')
+                        )
+                    except Exception as log_error:
+                        print(f"Error creating activity log: {log_error}")
 
                     return Response(
                         {
