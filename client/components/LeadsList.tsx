@@ -897,8 +897,9 @@ export function LeadsList({ initialFilters, onNavigate }: LeadsListProps) {
     duration: '60 minutes',
     scheduledDate: '',
     scheduledTime: '',
+    meetingTitle: '',
     meetingAgenda: '',
-    preparationNotes: '',
+    expectedAttendees: '',
   });
   const [isSchedulingMeeting, setIsSchedulingMeeting] = useState(false);
 
@@ -1978,8 +1979,9 @@ SOAR-AI Team`,
       duration: '60 minutes',
       scheduledDate: '',
       scheduledTime: '',
+      meetingTitle: '',
       meetingAgenda: '',
-      preparationNotes: '',
+      expectedAttendees: '',
     });
     setShowScheduleMeetingModal(true);
   };
@@ -1997,7 +1999,7 @@ SOAR-AI Team`,
       const scheduledDateTime = `${meetingForm.scheduledDate} at ${meetingForm.scheduledTime}`;
 
       // Prepare email subject and content
-      const emailSubject = `Meeting Scheduled - ${meetingForm.meetingType} with ${selectedLeadForAction.company}`;
+      const emailSubject = `Meeting Scheduled - ${meetingForm.meetingTitle || 'Business Meeting'} with ${selectedLeadForAction.company}`;
       const emailContent = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #2563eb;">Meeting Scheduled Successfully</h2>
@@ -2006,11 +2008,12 @@ SOAR-AI Team`,
           <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="color: #374151; margin-top: 0;">Meeting Details:</h3>
             <ul style="color: #6b7280; line-height: 1.6;">
+              <li><strong>Title:</strong> ${meetingForm.meetingTitle || 'Business Meeting'}</li>
               <li><strong>Provider:</strong> ${meetingForm.provider}</li>
               <li><strong>Duration:</strong> ${meetingForm.duration}</li>
               <li><strong>Scheduled Date & Time:</strong> ${scheduledDateTime}</li>
               <li><strong>Agenda:</strong> ${meetingForm.meetingAgenda || 'N/A'}</li>
-              <li><strong>Preparation Notes:</strong> ${meetingForm.preparationNotes || 'N/A'}</li>
+              <li><strong>Expected Attendees:</strong> ${meetingForm.expectedAttendees || 'N/A'}</li>
             </ul>
           </div>
           <p>We look forward to a productive discussion.</p>
@@ -2056,8 +2059,9 @@ SOAR-AI Team`,
           duration: '60 minutes',
           scheduledDate: '',
           scheduledTime: '',
+          meetingTitle: '',
           meetingAgenda: '',
-          preparationNotes: '',
+          expectedAttendees: '',
         });
         setShowScheduleMeetingModal(false);
         setSelectedLeadForAction(null);
@@ -5123,6 +5127,15 @@ SOAR-AI Team`,
               </div>
             </div>
             <div>
+              <Label className="text-sm font-medium text-gray-700">Meeting Title</Label>
+              <Input
+                placeholder="Enter meeting title..."
+                className="mt-1"
+                value={meetingForm.meetingTitle}
+                onChange={(e) => setMeetingForm(prev => ({ ...prev, meetingTitle: e.target.value }))}
+              />
+            </div>
+            <div>
               <Label className="text-sm font-medium text-gray-700">Meeting Agenda</Label>
               <Textarea
                 placeholder="Brief description of meeting agenda and objectives..."
@@ -5132,12 +5145,12 @@ SOAR-AI Team`,
               />
             </div>
             <div>
-              <Label className="text-sm font-medium text-gray-700">Preparation Notes (Optional)</Label>
-              <Textarea
-                placeholder="Any preparation materials or key points to cover..."
-                className="mt-1 min-h-[80px] resize-none"
-                value={meetingForm.preparationNotes}
-                onChange={(e) => setMeetingForm(prev => ({ ...prev, preparationNotes: e.target.value }))}
+              <Label className="text-sm font-medium text-gray-700">Expected Attendees</Label>
+              <Input
+                placeholder="List of expected meeting attendees..."
+                className="mt-1"
+                value={meetingForm.expectedAttendees}
+                onChange={(e) => setMeetingForm(prev => ({ ...prev, expectedAttendees: e.target.value }))}
               />
             </div>
           </div>
