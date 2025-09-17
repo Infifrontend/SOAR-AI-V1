@@ -1469,41 +1469,6 @@ const getRandomRiskLevel = () => {
         </div>
         ` : ''}
 
-        <h3>💼 Proposal Details:</h3>
-        <div class="terms">
-            <p><strong>Delivery Method:</strong> ${
-              proposalForm.deliveryMethod === 'email' ? 'Email Delivery' : 
-              proposalForm.deliveryMethod === 'secure_portal' ? 'Secure Portal Access' :
-              proposalForm.deliveryMethod === 'in_person' ? 'In-Person Presentation' : 'Video Call Presentation'
-            }</p>
-            <p><strong>Proposal Validity:</strong> ${proposalForm.validityPeriod || '30'} days from date of receipt</p>
-            <p><strong>Estimated Deal Value:</strong> ${formatCurrency(selectedOpportunity?.value)}</p>
-            <p><strong>Expected Implementation:</strong> 2-4 weeks after contract signing</p>
-            ${proposalForm.attachedFile ? `<p><strong>Attached Document:</strong> ${proposalForm.attachedFile.name}</p>` : ''}
-            ${attachmentInfo.exists ? `<p><strong>Previously Attached:</strong> ${attachmentInfo.filename}</p>` : ''}
-        </div>
-
-        ${proposalForm.specialTerms ? `
-        <h3>📝 Special Terms & Conditions:</h3>
-        <div class="terms">
-            <p>${proposalForm.specialTerms}</p>
-        </div>
-        ` : ''}
-
-        ${negotiationData.corporateCommitments ? `
-        <div class="highlight">
-            <h3 class="section-title">🤝 Corporate Commitments</h3>
-            <p>${negotiationData.corporateCommitments}</p>
-        </div>
-        ` : ''}
-
-        ${negotiationData.airlineConcessions ? `
-        <div class="highlight">
-            <h3 class="section-title">✈️ Airline Concessions</h3>
-            <p>${negotiationData.airlineConcessions}</p>
-        </div>
-        ` : ''}
-
         <h3>🚀 Next Steps:</h3>
         <ol>
             <li>Review the ${isNegotiationMode ? 'negotiation terms' : 'detailed proposal document'}</li>
@@ -2623,6 +2588,69 @@ const getRandomRiskLevel = () => {
     },
     [filteredOpportunities],
   );
+
+  const handleSendProposalEmail = async () => {
+    if (!selectedOpportunity) return;
+
+    try {
+      setLoadingOpportunityId(selectedOpportunity.id); // Set loading state
+
+      // Prepare proposal data for sending
+      const proposalData = {
+        opportunity_id: selectedOpportunity.id,
+        subject: proposalForm.title || `Travel Solutions Proposal - ${selectedOpportunity.lead_info?.company?.name}`,
+        email_content: generateEmailPreview(),
+        delivery_method: proposalForm.deliveryMethod,
+        validity_period: proposalForm.validityPeriod,
+        special_terms: proposalForm.specialTerms,
+      };
+
+      console.log("Sending proposal email with data:", proposalData);
+
+      // Send proposal via API
+      const result = await sendProposal(selectedOpportunity.id, proposalData, proposalForm.attachedFile);
+
+      if (result.success) {
+        toast.success(result.message || 'Proposal sent successfully!');
+
+        // Clear the draft since proposal is being sent
+        await clearDraft(selectedOpportunity.id);
+
+        // Update opportunity stage to proposal
+        await updateOpportunityStage(selectedOpportunity.id, {
+          stage: "proposal",
+          probability: 65,
+        });
+
+        // Update local state to reflect the changes
+        const updatedOpportunity = {
+          ...selectedOpportunity,
+          stage: "proposal",
+          probability: 65,
+          updated_at: new Date().toISOString(),
+        };
+
+        setOpportunities((prev) =>
+          prev.map((opp) => 
+            opp.id === selectedOpportunity.id ? updatedOpportunity : opp
+          ),
+        );
+
+        setShowProposalDialog(false); // Close the proposal dialog
+        setSuccessMessage(
+          `Proposal sent to ${selectedOpportunity.lead_info?.company?.name} and moved to Proposal stage`,
+        );
+        setTimeout(() => setSuccessMessage(""), 5000);
+      } else {
+        toast.error(result.error || 'Failed to send proposal');
+      }
+    } catch (error: any) {
+      console.error('Error sending proposal email:', error);
+      toast.error(error.response?.data?.error || 'Failed to send proposal. Please try again.');
+    } finally {
+      setLoadingOpportunityId(null); // Clear loading state
+    }
+  };
 
   return (
     <>
@@ -4159,89 +4187,21 @@ const getRandomRiskLevel = () => {
                       )}
                       {isDraftLoading ? "Saving..." : "Save Draft"}
                     </Button>
-                    <Button
-                      onClick={async () => {
-                        if (!selectedOpportunity) return;
-
-                        setIsDraftLoading(true);
-                        setLoadingOpportunityId(selectedOpportunity.id);
-
-                        try {
-                          // Prepare proposal data
-                          const proposalData = {
-                            opportunity_id: selectedOpportunity.id,
-                            subject: proposalForm.title || `Travel Solutions Proposal - ${selectedOpportunity.lead_info?.company?.name}`,
-                            email_content: generateEmailPreview(),
-                            delivery_method: proposalForm.deliveryMethod,
-                            validity_period: proposalForm.validityPeriod,
-                            special_terms: proposalForm.specialTerms,
-                          };
-
-                          // Send the proposal with attachment
-                          const result = await sendProposal(
-                            selectedOpportunity.id, 
-                            proposalData,
-                            proposalForm.attachedFile || undefined
-                          );
-
-                          if (result.success) {
-                            toast.success(result.message || 'Proposal sent successfully!');
-
-                            // Clear draft after successful send
-                            await clearDraft(selectedOpportunity.id);
-
-                            // Update opportunity stage to proposal
-                            setOpportunities(prev => prev.map(opp => 
-                              opp.id === selectedOpportunity.id 
-                                ? { ...opp, stage: 'proposal' }
-                                : opp
-                            ));
-
-                            // Close dialog and reset form
-                            setShowProposalDialog(false);
-                            setProposalForm({
-                              title: "",
-                              description: "",
-                              validityPeriod: "30",
-                              specialTerms: "",
-                              deliveryMethod: "email",
-                              attachedFile: null,
-                            });
-                            setAttachmentInfo({ exists: false, filename: "", path: "" });
-                          } else {
-                            toast.error(result.error || 'Failed to send proposal');
-                          }
-                        } catch (error: any) {
-                          console.error('Error sending proposal:', error);
-                          toast.error(error.response?.data?.error || 'Failed to send proposal. Please try again.');
-                        } finally {
-                          setIsDraftLoading(false);
-                          setLoadingOpportunityId(null);
-                        }
-                      }}
-                      disabled={
-                        (!proposalForm.title && proposalDialogMode === 'proposal') ||
-                        (selectedOpportunity && loadingOpportunityId === selectedOpportunity.id)
-                      }
-                      className={
-                        proposalDialogMode === 'proposal'
-                          ? "bg-orange-500 hover:bg-orange-600 text-white"
-                          : "bg-green-600 hover:bg-green-700 text-white"
-                      }
+                    <Button 
+                      onClick={handleSendProposalEmail} 
+                      disabled={isDraftLoading}
+                      className="bg-green-600 hover:bg-green-700 text-white"
                     >
-                      {selectedOpportunity && loadingOpportunityId === selectedOpportunity.id ? (
-                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                      ) : proposalDialogMode === 'proposal' ? (
-                        <Mail className="h-4 w-4 mr-2" />
+                      {isDraftLoading ? (
+                        <>
+                          <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                          Sending...
+                        </>
                       ) : (
-                        <FileText className="h-4 w-4 mr-2" />
-                      )}
-                      {selectedOpportunity && loadingOpportunityId === selectedOpportunity.id ? (
-                        proposalDialogMode === 'proposal' ? "Sending..." : "Sending..."
-                      ) : proposalDialogMode === 'proposal' ? (
-                        "Send Proposal"
-                      ) : (
-                        "Send Revised Proposal"
+                        <>
+                          <Mail className="h-4 w-4 mr-2" />
+                          Send Proposal
+                        </>
                       )}
                     </Button>
                   </div>
