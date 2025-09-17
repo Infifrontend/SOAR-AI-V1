@@ -859,7 +859,7 @@ export function LeadsList({ initialFilters, onNavigate }: LeadsListProps) {
   const [leadsForViewProfile, setLeadsForViewProfile] = useState<any[]>([]); // Leads data for view profile
 
   // Modal states
-  const [showInitiateCallModal, setShowInitiateCallModal] = useState(false);
+  const [showInitiateCallModal, setShowInitiateCallModal] = useState(false); // Renamed from showInitiateCallDialog to match the change
   const [showScheduleMeetingModal, setShowScheduleMeetingModal] =
     useState(false);
   const [showScheduleDemoModal, setShowScheduleDemoModal] = useState(false);
@@ -1819,7 +1819,7 @@ SOAR-AI Team`,
       callAgenda: '',
       preparationNotes: '',
     });
-    setShowInitiateCallModal(true);
+    setShowInitiateCallModal(true); // Use the correct modal state variable
   };
 
   const handleInitiateCallSubmit = async () => {
@@ -4734,15 +4734,27 @@ SOAR-AI Team`,
         open={showInitiateCallModal}
         onOpenChange={setShowInitiateCallModal}
       >
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <PhoneCall className="h-5 w-5 text-gray-700" />
-              Initiate Call - {selectedLeadForAction?.company}
-            </DialogTitle>
-            <DialogDescription>
-              Schedule a phone call with {selectedLeadForAction?.contact} at {selectedLeadForAction?.company}
-            </DialogDescription>
+            <div className="flex items-center gap-2">
+              <PhoneCall className="h-5 w-5 text-orange-500" />
+              <div>
+                <DialogTitle>
+                  Initiate Call - {selectedLeadForAction?.company}
+                </DialogTitle>
+                <DialogDescription>
+                  Schedule a phone call with {selectedLeadForAction?.contact} at {selectedLeadForAction?.company}
+                </DialogDescription>
+              </div>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute right-4 top-4"
+              onClick={() => setShowInitiateCallModal(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </DialogHeader>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
