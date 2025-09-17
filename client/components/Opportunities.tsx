@@ -77,6 +77,8 @@ import {
   ChevronUp,
   X,
 } from "lucide-react";
+import { formatDate, formatDateTime } from "../utils/dateFormatter";
+import { useUserApi } from "../hooks/api/useUserApi"; // Import useUserApi
 
 interface OpportunitiesProps {
   initialFilters?: any;
@@ -762,7 +764,6 @@ export function Opportunities({
     getOpportunities,
     updateOpportunityStage,
     addOpportunityActivity,
-    getOpportunityActivities,
     getOpportunityHistory,
     getHistory,
     getProposalDraft,
@@ -3165,7 +3166,6 @@ const getRandomRiskLevel = () => {
                         "check-circle": CheckCircle,
                         "x-circle": X,
                         calendar: Calendar,
-                        briefcase: Activity,
                         "file-text": FileText,
                         handshake: Handshake,
                         trophy: Award,
@@ -3973,7 +3973,7 @@ const getRandomRiskLevel = () => {
                               variant="outline"
                               size="sm"
                               onClick={() => setNegotiationForm({...negotiationForm, attachedFile: null})}
-                              className="h-8 w-8 p-0"
+                              className="h-9 w-9 p-0"
                             >
                               ×
                             </Button>
