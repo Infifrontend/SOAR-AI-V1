@@ -1515,7 +1515,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                         className="text-base h-12"
                       />
                       <p className="text-sm text-gray-500 mt-1">
-                        Use variables like {{company_name}} for personalization
+                        Use variables like {'{{company_name}}'} for personalization
                       </p>
                     </div>
 
