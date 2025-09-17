@@ -329,16 +329,22 @@ const transformApiLeadToUILead = (apiLead: any) => {
     followUpDate:
       apiLead.next_action_date ||
       formatDate(new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)),
-    assignedAgent: apiLead.assigned_to?.username || null,
+    assignedAgent: typeof apiLead.assigned_to === 'string' ? apiLead.assigned_to : apiLead.assigned_to?.username || null,
     assigned_agent_details: apiLead.assigned_to
       ? {
           // Map assigned agent details if available
-          name: apiLead.assigned_to.full_name || apiLead.assigned_to.username,
-          email:
-            apiLead.assigned_to.email ||
-            `${apiLead.assigned_to.username}@soarai.com`,
-          specialties: apiLead.assigned_to.specialties || [], // Assuming specialties field exists
-          current_leads: apiLead.assigned_to.current_leads || 0, // Assuming current_leads field exists
+          name: typeof apiLead.assigned_to === 'string' 
+            ? apiLead.assigned_to 
+            : apiLead.assigned_to.full_name || apiLead.assigned_to.username,
+          email: typeof apiLead.assigned_to === 'string' 
+            ? `${apiLead.assigned_to}@soarai.com` 
+            : apiLead.assigned_to.email || `${apiLead.assigned_to.username}@soarai.com`,
+          specialties: typeof apiLead.assigned_to === 'string' 
+            ? [] 
+            : apiLead.assigned_to.specialties || [],
+          current_leads: typeof apiLead.assigned_to === 'string' 
+            ? 0 
+            : apiLead.assigned_to.current_leads || 0,
         }
       : undefined,
     // Campaign count from API
