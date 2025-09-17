@@ -15,7 +15,7 @@ import { useEmailTemplateApi } from '../hooks/api/useEmailTemplateApi';
 import { EmailTemplateService } from '../utils/emailTemplateService';
 import { toast } from 'react-toastify';
 import RichTextEditor from './RichTextEditor';
-import { 
+import {
   ArrowLeft,
   ArrowRight,
   Mail,
@@ -32,7 +32,8 @@ import {
   Eye,
   FileText,
   Lightbulb,
-  AlertTriangle
+  AlertTriangle,
+  Info
 } from 'lucide-react';
 import {
   Dialog,
@@ -174,20 +175,20 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
 
   const targetLeads = selectedLeads; // Alias for clarity in case 5
 
-  const { 
-    getTemplates, 
-    createTemplate, 
-    loading: apiLoading, 
-    error: apiError 
+  const {
+    getTemplates,
+    createTemplate,
+    loading: apiLoading,
+    error: apiError
   } = useTemplateApi();
 
-  const { 
+  const {
     getEmailTemplates,
     loading: emailTemplateLoading,
-    // error: emailTemplateError 
+    // error: emailTemplateError
   } = useEmailTemplateApi();
 
-  const { 
+  const {
     launchCampaign,
     updateLead,
     loading: campaignLoading,
@@ -382,8 +383,8 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
     if (template.layout === 'standard' || template.is_standard_layout) {
       // For standard layout, parse the JSON content and generate HTML
       try {
-        const templateVariables = typeof template.content === 'string' 
-          ? JSON.parse(template.content) 
+        const templateVariables = typeof template.content === 'string'
+          ? JSON.parse(template.content)
           : template.content;
 
         // Use EmailTemplateService to generate proper HTML
@@ -405,8 +406,8 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
         console.error('Error parsing standard template content:', error);
         // Fallback to custom template rendering
         renderedContent = renderEmailTemplate(
-          template.content || '', 
-          template.cta || 'Schedule Demo', 
+          template.content || '',
+          template.cta || 'Schedule Demo',
           ctaLink,
           subject
         );
@@ -414,8 +415,8 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
     } else {
       // For custom templates, use the existing rendering method
       renderedContent = renderEmailTemplate(
-        template.content || '', 
-        template.cta || 'Schedule Demo', 
+        template.content || '',
+        template.cta || 'Schedule Demo',
         ctaLink,
         subject
       );
@@ -424,8 +425,8 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
     setCampaignData(prev => ({
       ...prev,
       selectedTemplate: template,
-      channels: template.channel_type === 'mixed' 
-        ? ['email', 'whatsapp', 'linkedin'] 
+      channels: template.channel_type === 'mixed'
+        ? ['email', 'whatsapp', 'linkedin']
         : [template.channel_type],
       content: {
         ...prev.content,
@@ -454,8 +455,8 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
     } else {
       // Wrap content in standard email template
       renderedContent = renderEmailTemplate(
-        template.content || '', 
-        'Schedule Demo', 
+        template.content || '',
+        'Schedule Demo',
         ctaLink,
         subject
       );
@@ -523,10 +524,10 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
 
       if (response.ok) {
         const preview = await response.json();
-        
+
         // Import EmailTemplateService for complete layout rendering
         const { EmailTemplateService } = await import('../utils/emailTemplateService');
-        
+
         // Create a complete email layout with header and footer
         const completeEmailHtml = EmailTemplateService.renderCorporateContactTemplate(
           preview.sample_data?.contact_name || 'John Smith',
@@ -536,7 +537,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
           'Schedule Demo',
           'https://calendly.com/soar-ai/demo'
         );
-        
+
         setTemplatePreviewData({
           template,
           preview: {
@@ -559,7 +560,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
   const handleChannelChange = (channel: string, checked: boolean) => {
     setCampaignData(prev => ({
       ...prev,
-      channels: checked 
+      channels: checked
         ? [...prev.channels, channel]
         : prev.channels.filter(c => c !== channel)
     }));
@@ -819,8 +820,8 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
 
 
   const getFilteredTemplates = () => {
-    return templates.filter(template => 
-      campaignData.channels.includes(template.channel_type) || 
+    return templates.filter(template =>
+      campaignData.channels.includes(template.channel_type) ||
       (template.channel_type === 'mixed' && campaignData.channels.length > 1)
     );
   };
@@ -864,7 +865,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
               <Label className="text-base font-medium text-gray-900">Communication Channels</Label>
               <div className="flex items-center gap-4">
                 <div className="flex items-center space-x-3">
-                  <Checkbox 
+                  <Checkbox
                     id="email"
                     checked={campaignData.channels.includes('email')}
                     onCheckedChange={(checked) => handleChannelChange('email', checked as boolean)}
@@ -875,7 +876,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                   </Label>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <Checkbox 
+                  <Checkbox
                     id="whatsapp"
                     checked={campaignData.channels.includes('whatsapp')}
                     onCheckedChange={(checked) => handleChannelChange('whatsapp', checked as boolean)}
@@ -886,7 +887,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                   </Label>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <Checkbox 
+                  <Checkbox
                     id="linkedin"
                     checked={campaignData.channels.includes('linkedin')}
                     onCheckedChange={(checked) => handleChannelChange('linkedin', checked as boolean)}
@@ -902,8 +903,8 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <Label className="text-base font-medium text-gray-900">Templates</Label>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
                   onClick={() => {
                     console.log('Navigating to Settings Template Creation');
@@ -937,11 +938,11 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                 <h4 className="text-sm font-semibold text-gray-900 mb-3">Campaign Templates</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
                   {getFilteredTemplates().map((template) => (
-                    <Card 
+                    <Card
                       key={`campaign-${template.id}`}
                       className={`cursor-pointer transition-all hover:shadow-md border-2 ${
-                        campaignData.selectedTemplate?.id === template.id 
-                          ? 'border-orange-500 bg-orange-50' 
+                        campaignData.selectedTemplate?.id === template.id
+                          ? 'border-orange-500 bg-orange-50'
                           : 'border-gray-200 hover:border-orange-300'
                       }`}
                       onClick={() => handleTemplateSelect(template)}
@@ -990,7 +991,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                     <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
                   )}
                 </h4>
-                
+
                 {loadingEmailTemplates ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {[1, 2, 3].map((i) => (
@@ -1013,8 +1014,8 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {emailTemplates.map((template) => (
-                      <Card 
-                        key={`email-template-${template.id}`} 
+                      <Card
+                        key={`email-template-${template.id}`}
                         className={`cursor-pointer transition-all hover:shadow-md border-2 ${
                           selectedEmailTemplate?.id === `email-${template.id}` ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-orange-300'
                         }`}
@@ -1035,24 +1036,24 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                               )}
                             </div>
                           </div>
-                          
+
                           <div className="mb-2">
                             <Badge variant="secondary" className="text-xs capitalize">
                               {template.template_type.replace('_', ' ')}
                             </Badge>
                           </div>
-                          
+
                           <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
                             {template.description || 'Professional email template for campaigns'}
                           </p>
-                          
+
                           {template.subject_line && (
                             <div className="mb-3 p-2 bg-gray-50 rounded">
                               <span className="text-xs text-gray-500">Subject: </span>
                               <span className="text-xs font-medium">{template.subject_line}</span>
                             </div>
                           )}
-                          
+
                           {template.variables && template.variables.length > 0 && (
                             <div className="mb-3">
                               <div className="text-xs text-gray-500 mb-1">Variables:</div>
@@ -1070,16 +1071,16 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                               </div>
                             </div>
                           )}
-                          
+
                           <div className="flex items-center justify-between mb-3 text-xs text-gray-500">
                             <span>By: {template.created_by_name || 'System'}</span>
                             <span>{new Date(template.created_at).toLocaleDateString()}</span>
                           </div>
-                          
+
                           <div className="flex gap-2">
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
+                            <Button
+                              variant="outline"
+                              size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handlePreviewEmailTemplate(template);
@@ -1089,8 +1090,8 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                               <Eye className="h-3 w-3 mr-1" />
                               Preview
                             </Button>
-                            <Button 
-                              size="sm" 
+                            <Button
+                              size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleEmailTemplateSelect(template);
@@ -1106,7 +1107,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                     ))}
                   </div>
                 )}
-                
+
                 {emailTemplates.length === 0 && !loadingEmailTemplates && (
                   <div className="text-center py-12 border-2 border-dashed border-gray-200 rounded-lg">
                     <Mail className="h-12 w-12 mx-auto mb-4 text-gray-400" />
@@ -1114,8 +1115,8 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                     <p className="text-sm text-gray-600 mb-4">
                       Create email templates in Settings to use them in campaigns
                     </p>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       onClick={() => onNavigate('settings', { activeTab: 'template-creation' })}
                       className="text-orange-600 border-orange-300 hover:bg-orange-50"
                     >
@@ -1124,16 +1125,16 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                     </Button>
                   </div>
                 )}
-                
+
                 {emailTemplateError && (
                   <div className="text-center py-8">
                     <AlertTriangle className="h-8 w-8 mx-auto mb-4 text-red-400" />
                     <p className="text-sm text-red-600">
                       Error loading email templates: {emailTemplateError}
                     </p>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={loadEmailTemplates}
                       className="mt-2"
                     >
@@ -1393,7 +1394,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                         {campaignData.content.email.body?.replace('{{contact_name}}', 'Sarah Johnson')
                           .replace('{{employees}}', '2,500')
                           .replace('{{industry}}', 'Technology')
-                          .replace('{{company_name}}', 'TechCorp Solutions') || 
+                          .replace('{{company_name}}', 'TechCorp Solutions') ||
                         `Managing travel compliance for 2,500 employees can be challenging. SOAR-AI ensures 100% policy adherence while maintaining traveler satisfaction.
 
 Key compliance features for Technology companies:
@@ -1407,9 +1408,9 @@ TechCorp Solutions can achieve complete travel governance without slowing down y
                       </div>
                       {campaignData.content.email.cta && (
                         campaignData.content.email.cta_link ? (
-                          <a 
-                            href={campaignData.content.email.cta_link} 
-                            target="_blank" 
+                          <a
+                            href={campaignData.content.email.cta_link}
+                            target="_blank"
                             rel="noopener noreferrer"
                             className="inline-block"
                           >
@@ -1694,7 +1695,7 @@ TechCorp Solutions can achieve complete travel governance without slowing down y
                           <div className="text-sm text-green-800">
                             <div className="font-medium mb-1">Expected Performance</div>
                             <div className="text-xs text-green-600">
-                              Open Rate: {campaignData.selectedTemplate.estimated_open_rate}% | 
+                              Open Rate: {campaignData.selectedTemplate.estimated_open_rate}% |
                               Click Rate: {campaignData.selectedTemplate.estimated_click_rate}%
                             </div>
                           </div>
@@ -1727,7 +1728,7 @@ TechCorp Solutions can achieve complete travel governance without slowing down y
 
             {/* Launch Button */}
             <div className="flex justify-center mt-12">
-              <Button 
+              <Button
                 onClick={handleLaunchCampaign}
                 disabled={isLaunching || campaignLoading || !campaignData.selectedTemplate}
                 className="bg-[#FD9646] hover:bg-[#FD9646]/90 text-white px-12 py-4 text-lg font-semibold rounded-lg shadow-lg w-full max-w-md"
@@ -1789,14 +1790,14 @@ TechCorp Solutions can achieve complete travel governance without slowing down y
       <div className="flex items-center justify-between mb-6">
 
           <div>
-            <h2 style={{ 
-              fontSize: 'var(--text-2xl)', 
+            <h2 style={{
+              fontSize: 'var(--text-2xl)',
               fontWeight: 'var(--font-weight-medium)',
               fontFamily: 'var(--font-family)'
             }}>
               {editMode ? 'Edit Marketing Campaign' : 'Marketing Campaign Wizard'}
             </h2>
-            <p style={{ 
+            <p style={{
               fontSize: 'var(--text-base)',
               color: 'var(--color-muted-foreground)',
               fontFamily: 'var(--font-family)'
@@ -1822,10 +1823,10 @@ TechCorp Solutions can achieve complete travel governance without slowing down y
             {steps.map((step, index) => (
               <div key={step.id} className="flex items-center">
                 <div className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium ${
-                  currentStep === step.id 
-                    ? 'bg-orange-500 text-white' 
-                    : currentStep > step.id 
-                      ? 'bg-green-500 text-white' 
+                  currentStep === step.id
+                    ? 'bg-orange-500 text-white'
+                    : currentStep > step.id
+                      ? 'bg-green-500 text-white'
                       : 'bg-gray-200 text-gray-600'
                 }`}>
                   {currentStep > step.id ? (
@@ -1859,8 +1860,8 @@ TechCorp Solutions can achieve complete travel governance without slowing down y
 
       {/* Navigation */}
       <div className="flex items-center justify-between">
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           onClick={handlePrevious}
           disabled={currentStep === 1}
           className="text-gray-700 border-gray-300"
@@ -1874,7 +1875,7 @@ TechCorp Solutions can achieve complete travel governance without slowing down y
             Cancel
           </Button>
           {currentStep === 2 && (
-            <Button 
+            <Button
               variant="outline"
               onClick={() => onNavigate('settings', { activeTab: 'template-creation' })}
               className="border-blue-200 text-blue-700 hover:bg-blue-50"
@@ -1883,7 +1884,7 @@ TechCorp Solutions can achieve complete travel governance without slowing down y
               Browse Templates
             </Button>
           )}
-          <Button 
+          <Button
             onClick={handleNext}
             disabled={
               !canProceedToNextStep()
@@ -2073,14 +2074,14 @@ TechCorp Solutions can achieve complete travel governance without slowing down y
 
           {/* Dialog Footer */}
           <div className="flex justify-end gap-3 pt-6 border-t">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setShowCreateTemplate(false)}
               className="px-6"
             >
               Cancel
             </Button>
-            <Button 
+            <Button
               onClick={handleCreateTemplate}
               disabled={!templateData.name || !templateData.content || apiLoading}
               className="bg-orange-500 hover:bg-orange-600 text-white px-6"
@@ -2113,7 +2114,7 @@ TechCorp Solutions can achieve complete travel governance without slowing down y
               Preview of "{templatePreviewData?.template?.name}" with sample data
             </DialogDescription>
           </DialogHeader>
-          
+
           {templatePreviewData && (
             <div className="flex-1 overflow-hidden flex flex-col space-y-4">
               {/* Email Header Info */}
@@ -2206,7 +2207,7 @@ TechCorp Solutions can achieve complete travel governance without slowing down y
               <Button variant="outline" onClick={() => setShowTemplatePreview(false)}>
                 Close Preview
               </Button>
-              <Button 
+              <Button
                 onClick={() => {
                   if (templatePreviewData?.template) {
                     handleEmailTemplateSelect(templatePreviewData.template);
