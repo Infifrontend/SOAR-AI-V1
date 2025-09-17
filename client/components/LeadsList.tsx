@@ -893,7 +893,7 @@ export function LeadsList({ initialFilters, onNavigate }: LeadsListProps) {
 
   // New state for Schedule Meeting Dialog
   const [meetingForm, setMeetingForm] = useState({
-    meetingType: 'Business Presentation',
+    provider: 'Google Meet',
     duration: '60 minutes',
     scheduledDate: '',
     scheduledTime: '',
@@ -1974,7 +1974,7 @@ SOAR-AI Team`,
     setSelectedLeadForAction(lead);
     // Reset meeting form state to default when opening the modal
     setMeetingForm({
-      meetingType: 'Business Presentation',
+      provider: 'Google Meet',
       duration: '60 minutes',
       scheduledDate: '',
       scheduledTime: '',
@@ -2006,7 +2006,7 @@ SOAR-AI Team`,
           <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="color: #374151; margin-top: 0;">Meeting Details:</h3>
             <ul style="color: #6b7280; line-height: 1.6;">
-              <li><strong>Type:</strong> ${meetingForm.meetingType}</li>
+              <li><strong>Provider:</strong> ${meetingForm.provider}</li>
               <li><strong>Duration:</strong> ${meetingForm.duration}</li>
               <li><strong>Scheduled Date & Time:</strong> ${scheduledDateTime}</li>
               <li><strong>Agenda:</strong> ${meetingForm.meetingAgenda || 'N/A'}</li>
@@ -2038,7 +2038,7 @@ SOAR-AI Team`,
                   ...l,
                   status: "in-progress", // or 'scheduled' if such status exists
                   lastActivity: formatDate(new Date()),
-                  nextAction: `${meetingForm.meetingType} scheduled for ${scheduledDateTime}`,
+                  nextAction: `Meeting via ${meetingForm.provider} scheduled for ${scheduledDateTime}`,
                 }
               : l,
           ),
@@ -2052,7 +2052,7 @@ SOAR-AI Team`,
 
         // Clear form and close modal
         setMeetingForm({
-          meetingType: 'Business Presentation',
+          provider: 'Google Meet',
           duration: '60 minutes',
           scheduledDate: '',
           scheduledTime: '',
@@ -5068,20 +5068,17 @@ SOAR-AI Team`,
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-sm font-medium text-gray-700">Meeting Type</Label>
+                <Label className="text-sm font-medium text-gray-700">Provider</Label>
                 <Select
-                  value={meetingForm.meetingType}
-                  onValueChange={(value) => setMeetingForm(prev => ({ ...prev, meetingType: value }))}
+                  value={meetingForm.provider}
+                  onValueChange={(value) => setMeetingForm(prev => ({ ...prev, provider: value }))}
                 >
                   <SelectTrigger className="mt-1">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Business Presentation">Business Presentation</SelectItem>
-                    <SelectItem value="Discovery Meeting">Discovery Meeting</SelectItem>
-                    <SelectItem value="Contract Negotiation">Contract Negotiation</SelectItem>
-                    <SelectItem value="Follow-up Meeting">Follow-up Meeting</SelectItem>
-                    <SelectItem value="Project Review">Project Review</SelectItem>
+                    <SelectItem value="Google Meet">Google Meet</SelectItem>
+                    <SelectItem value="Microsoft Teams">Microsoft Teams</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
