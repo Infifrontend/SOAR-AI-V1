@@ -787,7 +787,7 @@ export function Opportunities({
   const [showHistoryDialog, setShowHistoryDialog] = useState(false);
   const [showProposalDialog, setShowProposalDialog] = useState(false);
   const [proposalDialogMode, setProposalDialogMode] = useState<'proposal' | 'negotiation'>('proposal');
-  const [showEmailPreviewDialog, setShowEmailPreviewDialog] = useState(false); // Renamed from showEmailPreview
+  const [showEmailPreview, setShowEmailPreview] = useState(false);
   const [emailPreviewContent, setEmailPreviewContent] = useState("");
   const [isDraftLoading, setIsDraftLoading] = useState(false);
   const [loadingOpportunityId, setLoadingOpportunityId] = useState<number | null>(null);
@@ -801,11 +801,11 @@ export function Opportunities({
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [isSavingActivity, setIsSavingActivity] = useState(false);
   const [showNegotiationDialog, setShowNegotiationDialog] = useState(false);
-  const [isSavingNegotiation, setIsSavingNegotiation] = useState(false);
-  const leadApi = useLeadApi();
-  const [selectedCorporate, setSelectedCorporate] = useState();
-  const [showCorporateProfile, setShowCorporateProfile] = useState(false);
-  const [leadData,setleads] = useState([]);
+  const [isSavingNegotiation, setIsSavingNegotiation] = useState(false);  
+const leadApi = useLeadApi();
+ const [selectedCorporate, setSelectedCorporate] = useState();
+    const [showCorporateProfile, setShowCorporateProfile] = useState(false);   
+    const [leadData,setleads] = useState([]);
 
   const handleViewProfile = (opportunityId: string) => {
     const companyName = opportunities.find(opp => String(opp.id) === opportunityId)?.lead_info?.company?.name;
@@ -816,67 +816,67 @@ export function Opportunities({
     setSelectedCorporate(item);
     setShowCorporateProfile(true);
   };
-  console.log(showCorporateProfile,'showCorporateProfile',selectedCorporate);
+  console.log(showCorporateProfile,'showCorporateProfile',selectedCorporate); 
 
-  const fetchLeads = async () => {
-    try {
-      // Apply current filters when fetching
-      const filterParams = {
-        search: '',
-        status: '',
-        industry: '',
-        score: '',
-        engagement: ''
+ const fetchLeads = async () => {
+        try {
+          // Apply current filters when fetching
+          const filterParams = {
+            search: '',
+            status: '',
+            industry: '',
+            score: '',
+            engagement: ''
+          };
+
+          console.log('Fetching leads with filters:', filterParams);
+          const apiResponse = await leadApi.getLeads(filterParams);
+          console.log('Raw API response:', apiResponse);
+
+          // Handle different response formats
+          let apiLeads = [];
+          if (Array.isArray(apiResponse)) {
+            apiLeads = apiResponse;
+          } else if (apiResponse && Array.isArray(apiResponse.results)) {
+            apiLeads = apiResponse.results;
+          } else if (apiResponse && apiResponse.data && Array.isArray(apiResponse.data)) {
+            apiLeads = apiResponse.data;
+          } else {
+            console.warn('Unexpected API response format:', apiResponse);
+            apiLeads = [];
+          }
+
+          console.log('Processed leads array:', apiLeads);
+
+          // Transform leads - history_entries are not included here as they are fetched on demand
+          const transformedLeads = apiLeads.map((apiLead: any) => {
+            console.log('Transforming lead:', apiLead);
+            return transformApiLeadToUILead(apiLead);
+          });
+
+          const transformedLeadsforViewProfile = apiLeads.map((apiLead: any) => {
+            console.log('Transforming lead for view profile:', apiLead);
+            return transformCompanyDataForViewProfile(apiLead);
+          });
+
+          console.log("Transformed leads for view profile:", transformedLeadsforViewProfile);
+          setleads(transformedLeadsforViewProfile); // Use the correct transformed data
+
+        } catch (error) {
+          console.error('Error fetching leads:', error);
+          console.error('Error details:', error?.response?.data);
+          // Don't show toast error for leads since it's optional for opportunities view
+          // Set empty array on error to avoid showing static data
+          setleads([]);
+        }
       };
-
-      console.log('Fetching leads with filters:', filterParams);
-      const apiResponse = await leadApi.getLeads(filterParams);
-      console.log('Raw API response:', apiResponse);
-
-      // Handle different response formats
-      let apiLeads = [];
-      if (Array.isArray(apiResponse)) {
-        apiLeads = apiResponse;
-      } else if (apiResponse && Array.isArray(apiResponse.results)) {
-        apiLeads = apiResponse.results;
-      } else if (apiResponse && apiResponse.data && Array.isArray(apiResponse.data)) {
-        apiLeads = apiResponse.data;
-      } else {
-        console.warn('Unexpected API response format:', apiResponse);
-        apiLeads = [];
-      }
-
-      console.log('Processed leads array:', apiLeads);
-
-      // Transform leads - history_entries are not included here as they are fetched on demand
-      const transformedLeads = apiLeads.map((apiLead: any) => {
-        console.log('Transforming lead:', apiLead);
-        return transformApiLeadToUILead(apiLead);
-      });
-
-      const transformedLeadsforViewProfile = apiLeads.map((apiLead: any) => {
-        console.log('Transforming lead for view profile:', apiLead);
-        return transformCompanyDataForViewProfile(apiLead);
-      });
-
-      console.log("Transformed leads for view profile:", transformedLeadsforViewProfile);
-      setleads(transformedLeadsforViewProfile); // Use the correct transformed data
-
-    } catch (error) {
-      console.error('Error fetching leads:', error);
-      console.error('Error details:', error?.response?.data);
-      // Don't show toast error for leads since it's optional for opportunities view
-      // Set empty array on error to avoid showing static data
-      setleads([]);
-    }
-  };
-  useEffect(() => {
+      useEffect(() => {
     // Always fetch leads on component mount
     fetchLeads();
   }, []); // Keep empty dependency array to run only once on mount
-  const transformApiLeadToUILead = (apiLead: any) => {
+    const transformApiLeadToUILead = (apiLead: any) => {
     // Get the latest note from lead_notes array if available
-    const latestNote = apiLead.lead_notes && apiLead.lead_notes.length > 0
+    const latestNote = apiLead.lead_notes && apiLead.lead_notes.length > 0 
       ? apiLead.lead_notes[0] // Notes are ordered by -created_at in the backend
       : null;
 
@@ -942,196 +942,196 @@ export function Opportunities({
     };
   };
   const transformCompanyDataForViewProfile = (apiLead) => {
-    // console.log(apiLead, "apilead for view profile")
-    // Transform backend data to match frontend expectations
-    console.log(apiLead,'final');
+  // console.log(apiLead, "apilead for view profile")
+  // Transform backend data to match frontend expectations
+  console.log(apiLead,'final');
 
-    return {
-      id: apiLead.id,
-      name: apiLead.contact.company_name,
-      type: getCompanyTypeDisplay(apiLead.company.company_type || apiLead.company.size),
-      industry: getIndustryDisplay(apiLead.company.industry),
-      location: apiLead.company.location,
-      aiScore: Math.floor(Math.random() * 20) + 80, // Random AI score for demo
-      rating: (Math.random() * 1 + 4).toFixed(1), // Random rating 4.0-5.0
-      established: apiLead.company.year_established || (apiLead.company.created_at ? new Date(apiLead.company.created_at).getFullYear() : 2020),
-      employees: apiLead.company.employee_count || Math.floor(Math.random() * 5000) + 100,
-      specialties: apiLead.company.specialties ? apiLead.company.specialties.split(',').map(s => s.trim()).filter(s => s).slice(0, 5) : ["Business Services", "Corporate Solutions"],
-      travelBudget: apiLead.company.travel_budget ? `${(apiLead.company.travel_budget / 1000000).toFixed(1)}M` : "1.0M",
-      annualTravelVolume: apiLead.company.annual_travel_volume || `${Math.floor(Math.random() * 5000) + 1000} trips`,
-      contracts: Math.floor(Math.random() * 20) + 1,
-      revenue: apiLead.company.annual_revenue || Math.floor(Math.random() * 50000000) + 10000000,
-      phone: apiLead.company.phone || "+1 (555) " + Math.floor(Math.random() * 900 + 100) + "-" + Math.floor(Math.random() * 9000 + 1000),
-      email: apiLead.company.email || `contact@${apiLead.company.name.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`,
-      website: apiLead.company.website || `www.${apiLead.company.name.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`,
-      aiRecommendation: generateAIRecommendation(apiLead.company),
-      compliance: Math.floor(Math.random() * 20) + 80,
-      financialStability: Math.floor(Math.random() * 20) + 80,
-      travelFrequency: apiLead.company.travel_frequency || getRandomTravelFrequency(),
-      destinations: getRandomDestinations(),
-      preferredClass: apiLead.company.preferred_class || getRandomPreferredClass(),
-      teamSize: Math.floor((apiLead.company.employee_count || 1000) * 0.1),
-      travelManagers: Math.floor(Math.random() * 5) + 1,
-      currentAirlines: apiLead.company.current_airlines ? apiLead.company.current_airlines.split(',').map(s => s.trim()).filter(s => s).slice(0, 5) : getRandomAirlines(),
-      paymentTerms: apiLead.company.payment_terms || getRandomPaymentTerms(),
-      creditRating: apiLead.company.credit_rating || getRandomCreditRating(),
-      sustainabilityFocus: apiLead.company.sustainability_focus || getRandomSustainabilityFocus(),
-      technologyIntegration: apiLead.company.technology_integration ? apiLead.company.technology_integration.split(',').map(s => s.trim()).filter(s => s).slice(0, 5) : getRandomTechIntegration(),
-      seasonality: getRandomSeasonality(),
-      meetingTypes: getRandomMeetingTypes(),
-      companySize: getSizeDisplay(apiLead.company.size),
-      marketSegment: getIndustryDisplay(apiLead.company.industry),
-      decisionMakers: Math.floor(Math.random() * 8) + 2,
-      contractValue: Math.floor(Math.random() * 3000000) + 500000,
-      competitorAirlines: Math.floor(Math.random() * 5) + 1,
-      loyaltyPotential: Math.floor(Math.random() * 30) + 70,
-      expansionPlans: apiLead.company.expansion_plans || getRandomExpansionPlans(),
-      riskLevel: apiLead.company.risk_level || getRandomRiskLevel(),
-      assigned_agent_details: apiLead.assigned_to ? { // Map assigned agent details if available
+  return {
+    id: apiLead.id,
+    name: apiLead.contact.company_name,
+    type: getCompanyTypeDisplay(apiLead.company.company_type || apiLead.company.size),
+    industry: getIndustryDisplay(apiLead.company.industry),
+    location: apiLead.company.location,
+    aiScore: Math.floor(Math.random() * 20) + 80, // Random AI score for demo
+    rating: (Math.random() * 1 + 4).toFixed(1), // Random rating 4.0-5.0
+    established: apiLead.company.year_established || (apiLead.company.created_at ? new Date(apiLead.company.created_at).getFullYear() : 2020),
+    employees: apiLead.company.employee_count || Math.floor(Math.random() * 5000) + 100,
+    specialties: apiLead.company.specialties ? apiLead.company.specialties.split(',').map(s => s.trim()).filter(s => s).slice(0, 5) : ["Business Services", "Corporate Solutions"],
+    travelBudget: apiLead.company.travel_budget ? `${(apiLead.company.travel_budget / 1000000).toFixed(1)}M` : "1.0M",
+    annualTravelVolume: apiLead.company.annual_travel_volume || `${Math.floor(Math.random() * 5000) + 1000} trips`,
+    contracts: Math.floor(Math.random() * 20) + 1,
+    revenue: apiLead.company.annual_revenue || Math.floor(Math.random() * 50000000) + 10000000,
+    phone: apiLead.company.phone || "+1 (555) " + Math.floor(Math.random() * 900 + 100) + "-" + Math.floor(Math.random() * 9000 + 1000),
+    email: apiLead.company.email || `contact@${apiLead.company.name.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`,
+    website: apiLead.company.website || `www.${apiLead.company.name.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`,
+    aiRecommendation: generateAIRecommendation(apiLead.company),
+    compliance: Math.floor(Math.random() * 20) + 80,
+    financialStability: Math.floor(Math.random() * 20) + 80,
+    travelFrequency: apiLead.company.travel_frequency || getRandomTravelFrequency(),
+    destinations: getRandomDestinations(),
+    preferredClass: apiLead.company.preferred_class || getRandomPreferredClass(),
+    teamSize: Math.floor((apiLead.company.employee_count || 1000) * 0.1),
+    travelManagers: Math.floor(Math.random() * 5) + 1,
+    currentAirlines: apiLead.company.current_airlines ? apiLead.company.current_airlines.split(',').map(s => s.trim()).filter(s => s).slice(0, 5) : getRandomAirlines(),
+    paymentTerms: apiLead.company.payment_terms || getRandomPaymentTerms(),
+    creditRating: apiLead.company.credit_rating || getRandomCreditRating(),
+    sustainabilityFocus: apiLead.company.sustainability_focus || getRandomSustainabilityFocus(),
+    technologyIntegration: apiLead.company.technology_integration ? apiLead.company.technology_integration.split(',').map(s => s.trim()).filter(s => s).slice(0, 5) : getRandomTechIntegration(),
+    seasonality: getRandomSeasonality(),
+    meetingTypes: getRandomMeetingTypes(),
+    companySize: getSizeDisplay(apiLead.company.size),
+    marketSegment: getIndustryDisplay(apiLead.company.industry),
+    decisionMakers: Math.floor(Math.random() * 8) + 2,
+    contractValue: Math.floor(Math.random() * 3000000) + 500000,
+    competitorAirlines: Math.floor(Math.random() * 5) + 1,
+    loyaltyPotential: Math.floor(Math.random() * 30) + 70,
+    expansionPlans: apiLead.company.expansion_plans || getRandomExpansionPlans(),
+    riskLevel: apiLead.company.risk_level || getRandomRiskLevel(),
+    assigned_agent_details: apiLead.assigned_to ? { // Map assigned agent details if available
         name: apiLead.assigned_to.full_name || apiLead.assigned_to.username,
         email: apiLead.assigned_to.email || `${apiLead.assigned_to.username}@soarai.com`,
         specialties: apiLead.assigned_to.specialties || [], // Assuming specialties field exists
         current_leads: apiLead.assigned_to.current_leads || 0, // Assuming current_leads field exists
       } : undefined,
-    };
   };
-  const getCompanyTypeDisplay = (size) => {
-    const types = {
-      startup: "Startup Company",
-      small: "Small Business",
-      medium: "Medium Corporation",
-      large: "Large Corporation",
-      enterprise: "Enterprise Corporation",
-      corporation: "Corporation",
-      llc: "LLC",
-      partnership: "Partnership",
-      nonprofit: "Non-Profit"
-    };
-    return types[size] || "Corporation";
+};
+const getCompanyTypeDisplay = (size) => {
+  const types = {
+    startup: "Startup Company",
+    small: "Small Business",
+    medium: "Medium Corporation",
+    large: "Large Corporation",
+    enterprise: "Enterprise Corporation",
+    corporation: "Corporation",
+    llc: "LLC",
+    partnership: "Partnership",
+    nonprofit: "Non-Profit"
   };
+  return types[size] || "Corporation";
+};
 
-  const getIndustryDisplay = (industry) => {
-    const industries = {
-      technology: "Technology & Software",
-      finance: "Finance & Banking",
-      healthcare: "Healthcare",
-      manufacturing: "Manufacturing",
-      retail: "Retail & Consumer",
-      consulting: "Consulting Services",
-      telecommunications: "Telecommunications",
-      energy: "Energy & Utilities",
-      transportation: "Transportation & Logistics",
-      education: "Education",
-      government: "Government",
-      other: "Other"
-    };
-    return industries[industry] || "Business Services";
+const getIndustryDisplay = (industry) => {
+  const industries = {
+    technology: "Technology & Software",
+    finance: "Finance & Banking",
+    healthcare: "Healthcare",
+    manufacturing: "Manufacturing",
+    retail: "Retail & Consumer",
+    consulting: "Consulting Services",
+    telecommunications: "Telecommunications",
+    energy: "Energy & Utilities",
+    transportation: "Transportation & Logistics",
+    education: "Education",
+    government: "Government",
+    other: "Other"
   };
+  return industries[industry] || "Business Services";
+};
 
-  const getSizeDisplay = (size) => {
-    const sizes = {
-      startup: "Startup",
-      small: "Small",
-      medium: "Medium",
-      large: "Large",
-      enterprise: "Enterprise"
-    };
-    return sizes[size] || "Medium";
+const getSizeDisplay = (size) => {
+  const sizes = {
+    startup: "Startup",
+    small: "Small",
+    medium: "Medium",
+    large: "Large",
+    enterprise: "Enterprise"
   };
+  return sizes[size] || "Medium";
+};
 
-  const generateAIRecommendation = (company) => {
-    const recommendations = [
-      "High-potential corporate client with strong growth indicators. Excellent opportunity for partnership.",
-      "Established company with consistent business patterns. Good candidate for long-term contracts.",
-      "Growing organization with expanding travel needs. Consider volume-based pricing strategies.",
-      "Premium client with sophisticated requirements. Focus on high-service offerings.",
-      "Cost-conscious organization seeking value. Emphasize efficiency and competitive pricing."
-    ];
-    return recommendations[Math.floor(Math.random() * recommendations.length)];
-  };
+const generateAIRecommendation = (company) => {
+  const recommendations = [
+    "High-potential corporate client with strong growth indicators. Excellent opportunity for partnership.",
+    "Established company with consistent business patterns. Good candidate for long-term contracts.",
+    "Growing organization with expanding travel needs. Consider volume-based pricing strategies.",
+    "Premium client with sophisticated requirements. Focus on high-service offerings.",
+    "Cost-conscious organization seeking value. Emphasize efficiency and competitive pricing."
+  ];
+  return recommendations[Math.floor(Math.random() * recommendations.length)];
+};
 
-  const getRandomTravelFrequency = () => {
-    const frequencies = ["Daily", "Weekly", "Monthly", "Bi-weekly", "Quarterly"];
-    return frequencies[Math.floor(Math.random() * frequencies.length)];
-  };
+const getRandomTravelFrequency = () => {
+  const frequencies = ["Daily", "Weekly", "Monthly", "Bi-weekly", "Quarterly"];
+  return frequencies[Math.floor(Math.random() * frequencies.length)];
+};
 
-  const getRandomDestinations = () => {
-    const destinations = [
-      ["North America", "Europe"],
-      ["Global", "Asia-Pacific", "Europe"],
-      ["North America", "Asia-Pacific"],
-      ["Domestic", "Regional"],
-      ["Global", "Emerging Markets"]
-    ];
-    return destinations[Math.floor(Math.random() * destinations.length)];
-  };
+const getRandomDestinations = () => {
+  const destinations = [
+    ["North America", "Europe"],
+    ["Global", "Asia-Pacific", "Europe"],
+    ["North America", "Asia-Pacific"],
+    ["Domestic", "Regional"],
+    ["Global", "Emerging Markets"]
+  ];
+  return destinations[Math.floor(Math.random() * destinations.length)];
+};
 
-  const getRandomPreferredClass = () => {
-    const classes = ["Economy", "Economy Plus", "Business", "First", "Business/First"];
-    return classes[Math.floor(Math.random() * classes.length)];
-  };
+const getRandomPreferredClass = () => {
+  const classes = ["Economy", "Economy Plus", "Business", "First", "Business/First"];
+  return classes[Math.floor(Math.random() * classes.length)];
+};
 
-  const getRandomAirlines = () => {
-    const airlines = [
-      ["United", "Delta"],
-      ["American", "Southwest"],
-      ["Emirates", "Singapore Airlines"],
-      ["British Airways", "Lufthansa"],
-      ["Air France", "KLM"]
-    ];
-    return airlines[Math.floor(Math.random() * airlines.length)];
-  };
+const getRandomAirlines = () => {
+  const airlines = [
+    ["United", "Delta"],
+    ["American", "Southwest"],
+    ["Emirates", "Singapore Airlines"],
+    ["British Airways", "Lufthansa"],
+    ["Air France", "KLM"]
+  ];
+  return airlines[Math.floor(Math.random() * airlines.length)];
+};
 
-  const getRandomPaymentTerms = () => {
-    const terms = ["Net 15", "Net 30", "Net 45", "Net 60"];
-    return terms[Math.floor(Math.random() * terms.length)];
-  };
+const getRandomPaymentTerms = () => {
+  const terms = ["Net 15", "Net 30", "Net 45", "Net 60"];
+  return terms[Math.floor(Math.random() * terms.length)];
+};
 
-  const getRandomCreditRating = () => {
-    const ratings = ["AAA", "AA", "A", "BBB", "A+"];
-    return ratings[Math.floor(Math.random() * ratings.length)];
-  };
+const getRandomCreditRating = () => {
+  const ratings = ["AAA", "AA", "A", "BBB", "A+"];
+  return ratings[Math.floor(Math.random() * ratings.length)];
+};
 
-  const getRandomSustainabilityFocus = () => {
-    const focus = ["Very High", "High", "Medium", "Low"];
-    return focus[Math.floor(Math.random() * focus.length)];
-  };
+const getRandomSustainabilityFocus = () => {
+  const focus = ["Very High", "High", "Medium", "Low"];
+  return focus[Math.floor(Math.random() * focus.length)];
+};
 
-  const getRandomTechIntegration = () => {
-    const tech = [
-      ["API", "Mobile App"],
-      ["GDS", "Corporate Portal"],
-      ["API", "Real-time Booking"],
-      ["Mobile App", "Expense Management"],
-      ["Corporate Portal", "Reporting"]
-    ];
-    return tech[Math.floor(Math.random() * tech.length)];
-  };
+const getRandomTechIntegration = () => {
+  const tech = [
+    ["API", "Mobile App"],
+    ["GDS", "Corporate Portal"],
+    ["API", "Real-time Booking"],
+    ["Mobile App", "Expense Management"],
+    ["Corporate Portal", "Reporting"]
+  ];
+  return tech[Math.floor(Math.random() * tech.length)];
+};
 
-  const getRandomSeasonality = () => {
-    const patterns = ["Year-round", "Q1/Q3 Heavy", "Spring/Summer Peak", "Holiday Heavy"];
-    return patterns[Math.floor(Math.random() * patterns.length)];
-  };
+const getRandomSeasonality = () => {
+  const patterns = ["Year-round", "Q1/Q3 Heavy", "Spring/Summer Peak", "Holiday Heavy"];
+  return patterns[Math.floor(Math.random() * patterns.length)];
+};
 
-  const getRandomMeetingTypes = () => {
-    const types = [
-      ["Business Meetings", "Conferences"],
-      ["Client Visits", "Trade Shows"],
-      ["Team Offsites", "Training"],
-      ["Site Visits", "Regulatory Meetings"]
-    ];
-    return types[Math.floor(Math.random() * types.length)];
-  };
+const getRandomMeetingTypes = () => {
+  const types = [
+    ["Business Meetings", "Conferences"],
+    ["Client Visits", "Trade Shows"],
+    ["Team Offsites", "Training"],
+    ["Site Visits", "Regulatory Meetings"]
+  ];
+  return types[Math.floor(Math.random() * types.length)];
+};
 
-  const getRandomExpansionPlans = () => {
-    const plans = ["Aggressive", "Moderate", "Conservative", "Rapid", "Stable"];
-    return plans[Math.floor(Math.random() * plans.length)];
-  };
+const getRandomExpansionPlans = () => {
+  const plans = ["Aggressive", "Moderate", "Conservative", "Rapid", "Stable"];
+  return plans[Math.floor(Math.random() * plans.length)];
+};
 
-  const getRandomRiskLevel = () => {
-    const risks = ["Very Low", "Low", "Medium", "High"];
-    return risks[Math.floor(Math.random() * risks.length)];
-  };
+const getRandomRiskLevel = () => {
+  const risks = ["Very Low", "Low", "Medium", "High"];
+  return risks[Math.floor(Math.random() * risks.length)];
+};   
   const [editForm, setEditForm] = useState({
     stage: "",
     probability: "",
@@ -1339,7 +1339,7 @@ export function Opportunities({
 
         <h3>💼 Proposal Details:</h3>
         <div class="terms">
-            <p><strong>Delivery Method:</strong> ${proposalForm.deliveryMethod === 'email' ? 'Email Delivery' :
+            <p><strong>Delivery Method:</strong> ${proposalForm.deliveryMethod === 'email' ? 'Email Delivery' : 
               proposalForm.deliveryMethod === 'secure_portal' ? 'Secure Portal Access' :
               proposalForm.deliveryMethod === 'in_person' ? 'In-Person Presentation' : 'Video Call Presentation'}</p>
             <p><strong>Proposal Validity:</strong> ${proposalForm.validityPeriod} days from date of receipt</p>
@@ -1363,10 +1363,10 @@ export function Opportunities({
         </ol>
 
         <div class="highlight">
-            <p><strong>⏰ This proposal is valid until:</strong> ${new Date(Date.now() + parseInt(proposalForm.validityPeriod) * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
+            <p><strong>⏰ This proposal is valid until:</strong> ${new Date(Date.now() + parseInt(proposalForm.validityPeriod) * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
             })}</p>
         </div>
 
@@ -1486,7 +1486,7 @@ export function Opportunities({
   useEffect(() => {
     if (initialFilters?.newOpportunity && opportunities.length > 0) {
       // Check if this opportunity was already added to prevent duplicates
-      const existingOpportunity = opportunities.find(opp =>
+      const existingOpportunity = opportunities.find(opp => 
         opp.leadId === initialFilters.newOpportunity.leadId ||
         opp.lead_info?.company?.name === initialFilters.newOpportunity.company
       );
@@ -1739,53 +1739,131 @@ export function Opportunities({
   );
 
   const handleSendProposal = useCallback(async (opportunity: Opportunity) => {
-    if (!opportunity) return;
-
-    setIsDraftLoading(true);
+    setSelectedOpportunity(opportunity);
     setLoadingOpportunityId(opportunity.id);
+    setProposalDialogMode('proposal'); // Set mode to proposal
 
     try {
-      // Save draft before sending
-      await saveDraft(opportunity.id, proposalForm, proposalForm.attachedFile || undefined);
+      // Try to load existing draft
+      const response = await loadDraft(opportunity.id);
 
-      // Send the proposal with file attachment
-      const result = await sendProposal(opportunity.id, proposalForm, proposalForm.attachedFile || undefined);
+      // Handle API response - extract data from response object
+      const existingDraft = response?.data || response;
 
-      if (result.success) {
-        toast.success(result.message);
+      if (existingDraft && Object.keys(existingDraft).length > 0) {
+        console.log("Loading existing draft:", existingDraft);
 
-        // Clear the draft after successful send
-        await clearDraft(opportunity.id);
-
-        // Reset the proposal form
+        // Load proposal form data from draft
         setProposalForm({
-          title: "",
-          description: "",
+          title: existingDraft.title || `Travel Solutions Proposal - ${opportunity.lead_info?.company?.name}`,
+          description: existingDraft.description || `Comprehensive travel management solution tailored for ${opportunity.lead_info?.company?.name}'s needs including cost optimization, policy compliance, and reporting analytics.`,
+          validityPeriod: existingDraft.validity_period || "30",
+          specialTerms: existingDraft.special_terms || "",
+          deliveryMethod: existingDraft.delivery_method || "email",
+          attachedFile: null, // File is not saved in draft
+        });
+
+        // Load negotiation form data from draft
+        setNegotiationForm(prevForm => ({
+          ...prevForm,
+          dealTitle: existingDraft.deal_title || `${opportunity.lead_info?.company?.name} Corporate Travel Agreement`,
+          corporateContact: existingDraft.corporate_contact || `${opportunity.lead_info?.contact?.first_name} ${opportunity.lead_info?.contact?.last_name}`,
+          airlineAccountManager: existingDraft.airline_account_manager || "Current User",
+          expectedCloseDate: existingDraft.expected_close_date || opportunity.estimated_close_date,
+          travelFrequency: existingDraft.travel_frequency || prevForm.travelFrequency,
+          annualBookingVolume: existingDraft.annual_booking_volume || prevForm.annualBookingVolume,
+          projectedSpend: existingDraft.projected_spend || prevForm.projectedSpend,
+          preferredRoutes: existingDraft.preferred_routes || prevForm.preferredRoutes,
+          domesticEconomy: existingDraft.domestic_economy !== undefined ? existingDraft.domestic_economy : prevForm.domesticEconomy,
+          domesticBusiness: existingDraft.domestic_business !== undefined ? existingDraft.domesticBusiness : prevForm.domesticBusiness,
+          international: existingDraft.international !== undefined ? existingDraft.international : prevForm.international,
+          baseDiscount: existingDraft.base_discount || prevForm.baseDiscount,
+          routeDiscounts: Array.isArray(existingDraft.route_discounts) ? existingDraft.route_discounts : prevForm.routeDiscounts,
+          loyaltyBenefits: typeof existingDraft.loyalty_benefits === 'object' ? existingDraft.loyalty_benefits : prevForm.loyaltyBenefits,
+          volumeIncentives: existingDraft.volume_incentives || prevForm.volumeIncentives,
+          contractDuration: existingDraft.contract_duration || prevForm.contractDuration,
+          autoRenewal: existingDraft.auto_renewal !== undefined ? existingDraft.autoRenewal : prevForm.autoRenewal,
+          paymentTerms: existingDraft.payment_terms || prevForm.paymentTerms,
+          settlementType: existingDraft.settlement_type || prevForm.settlementType,
+          airlineConcessions: existingDraft.airline_concessions || prevForm.airlineConcessions,
+          corporateCommitments: existingDraft.corporate_commitments || `Annual volume commitment based on ${opportunity.lead_info?.company?.employee_count || 'N/A'} employees. Projected spend: ${formatCurrency(opportunity.value)}.`,
+          internalNotes: existingDraft.internalNotes || prevForm.internalNotes,
+          priorityLevel: existingDraft.priorityLevel || prevForm.priorityLevel,
+          discountApprovalRequired: existingDraft.discountApprovalRequired !== undefined ? existingDraft.discountApprovalRequired : prevForm.discountApprovalRequired,
+          revenueManagerAssigned: existingDraft.revenueManagerAssigned || prevForm.revenueManagerAssigned,
+          legalApprovalRequired: existingDraft.legalApprovalRequired !== undefined ? existingDraft.legalApprovalRequired : prevForm.legalApprovalRequired
+        }));
+
+        // Handle attachment info
+        if (existingDraft.attachment_info) {
+          setAttachmentInfo(existingDraft.attachment_info);
+        } else {
+          setAttachmentInfo({ exists: false, filename: "", path: "" });
+        }
+
+        toast.success(`Draft loaded successfully! Last saved: ${existingDraft.updated_at ? new Date(existingDraft.updated_at).toLocaleString() : 'Recently'}`);
+      } else {
+        console.log("No existing draft found, setting default values");
+
+        // Set default values
+        setProposalForm({
+          title: `Travel Solutions Proposal - ${opportunity.lead_info?.company?.name}`,
+          description: `Comprehensive travel management solution tailored for ${opportunity.lead_info?.company?.name}'s needs including cost optimization, policy compliance, and reporting analytics.`,
           validityPeriod: "30",
           specialTerms: "",
           deliveryMethod: "email",
           attachedFile: null,
         });
 
-        setShowProposalDialog(false);
+        // Reset negotiation form to defaults for this opportunity
+        setNegotiationForm(prevForm => ({
+          ...prevForm,
+          dealTitle: `${opportunity.lead_info?.company?.name} Corporate Travel Agreement`,
+          corporateContact: `${opportunity.lead_info?.contact?.first_name} ${opportunity.lead_info?.contact?.last_name}`,
+          airlineAccountManager: "Current User",
+          expectedCloseDate: opportunity.estimated_close_date,
+          corporateCommitments: `Annual volume commitment based on ${opportunity.lead_info?.company?.employee_count || 'N/A'} employees. Projected spend: ${formatCurrency(opportunity.value)}.`
+        }));
 
-        // Refresh opportunities data
-        setOpportunities(prev => prev.map(opp =>
-          opp.id === opportunity.id
-            ? { ...opp, stage: opp.stage === 'discovery' ? 'proposal' : opp.stage }
-            : opp
-        ));
-      } else {
-        toast.error(result.error || "Failed to send proposal");
+        // Reset attachment info
+        setAttachmentInfo({ exists: false, filename: "", path: "" });
       }
     } catch (error) {
-      console.error("Error sending proposal:", error);
-      toast.error("Failed to send proposal. Please try again.");
+      console.error("Error loading draft:", error);
+      console.error("Error details:", error.response?.data);
+
+      // Only show error if it's not a 404 (no draft found)
+      if (error.response?.status !== 404) {
+        toast.error("Failed to load draft data");
+      }
+
+      // Set default values as fallback
+      setProposalForm({
+        title: `Travel Solutions Proposal - ${opportunity.lead_info?.company?.name}`,
+        description: `Comprehensive travel management solution tailored for ${opportunity.lead_info?.company?.name}'s needs including cost optimization, policy compliance, and reporting analytics.`,
+        validityPeriod: "30",
+        specialTerms: "",
+        deliveryMethod: "email",
+        attachedFile: null,
+      });
+
+      setNegotiationForm(prevForm => ({
+        ...prevForm,
+        dealTitle: `${opportunity.lead_info?.company?.name} Corporate Travel Agreement`,
+        corporateContact: `${opportunity.lead_info?.contact?.first_name} ${opportunity.lead_info?.contact?.last_name}`,
+        airlineAccountManager: "Current User",
+        expectedCloseDate: opportunity.estimated_close_date,
+        corporateCommitments: `Annual volume commitment based on ${opportunity.lead_info?.company?.employee_count || 'N/A'} employees. Projected spend: ${formatCurrency(opportunity.value)}.`
+      }));
+
+      // Reset attachment info on error
+      setAttachmentInfo({ exists: false, filename: "", path: "" });
     } finally {
-      setIsDraftLoading(false);
       setLoadingOpportunityId(null);
     }
-  }, [proposalForm, saveDraft, sendProposal, clearDraft, setOpportunities]);
+
+    setShowProposalDialog(true);
+  }, [loadDraft, formatCurrency]);
 
   const handleMoveToNegotiation = useCallback(async (opportunity: Opportunity) => {
     setSelectedOpportunity(opportunity);
@@ -1941,7 +2019,7 @@ export function Opportunities({
         prev.map((opp) => (opp.id === opportunity.id ? updatedOpportunity : opp)),
       );
 
-      const message = status === "closed_won"
+      const message = status === "closed_won" 
         ? `${opportunity.lead_info?.company?.name} deal closed successfully! 🎉`
         : `${opportunity.lead_info?.company?.name} deal marked as Deal Lost`;
 
@@ -2193,7 +2271,7 @@ export function Opportunities({
       };
 
       setOpportunities((prev) =>
-        prev.map((opp) =>
+        prev.map((opp) => 
           opp.id === selectedOpportunity.id ? updatedOpportunity : opp
         ),
       );
@@ -2242,7 +2320,7 @@ export function Opportunities({
   const handlePreviewEmail = useCallback(() => {
     const previewContent = generateEmailPreview();
     setEmailPreviewContent(previewContent);
-    setShowEmailPreviewDialog(true); // Use the renamed state variable
+    setShowEmailPreview(true);
   }, [generateEmailPreview]);
 
   const handleSaveNegotiationDraft = useCallback(() => {
@@ -2272,7 +2350,7 @@ export function Opportunities({
     };
 
     setOpportunities((prev) =>
-      prev.map((opp) =>
+      prev.map((opp) => 
         opp.id === selectedOpportunity.id ? updatedOpportunity : opp
       ),
     );
@@ -2327,7 +2405,7 @@ export function Opportunities({
       };
 
       setOpportunities((prev) =>
-        prev.map((opp) =>
+        prev.map((opp) => 
           opp.id === selectedOpportunity.id ? updatedOpportunity : opp
         ),
       );
@@ -2688,12 +2766,12 @@ export function Opportunities({
                     No Opportunities Found
                   </h3>
                   <p className="text-gray-600 mb-4">
-                    {opportunities.length === 0
+                    {opportunities.length === 0 
                       ? "No opportunities available. Create your first opportunity from the leads section."
                       : "No opportunities match your current filters. Try adjusting your search criteria."
                     }
                   </p>
-                  <Button
+                  <Button 
                     onClick={() => onNavigate('leads')}
                     className="bg-orange-500 hover:bg-orange-600 text-white"
                   >
@@ -3911,6 +3989,18 @@ export function Opportunities({
                                 PDF, DOC, DOCX, XLS, XLSX files up to 10MB
                               </p>
                             </div>
+                            <input
+                              type="file"
+                              id="negotiation-file-input"
+                              className="hidden"
+                              accept=".pdf,.doc,.docx,.xls,.xlsx"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  setNegotiationForm({...negotiationForm, attachedFile: file});
+                                }
+                              }}
+                            />
                             <Button
                               type="button"
                               variant="outline"
@@ -3924,18 +4014,6 @@ export function Opportunities({
                               <Plus className="h-4 w-4 mr-2" />
                               Browse Files
                             </Button>
-                            <input
-                              type="file"
-                              id="negotiation-file-input"
-                              className="hidden"
-                              accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                  setNegotiationForm({...negotiationForm, attachedFile: file});
-                                }
-                              }}
-                            />
                           </div>
                         )}
                       </div>
@@ -4002,7 +4080,7 @@ export function Opportunities({
 
                           // Send the proposal with attachment
                           const result = await sendProposal(
-                            selectedOpportunity.id,
+                            selectedOpportunity.id, 
                             proposalData,
                             proposalForm.attachedFile || undefined
                           );
@@ -4014,9 +4092,9 @@ export function Opportunities({
                             await clearDraft(selectedOpportunity.id);
 
                             // Update opportunity stage to proposal
-                            setOpportunities(prev => prev.map(opp =>
-                              opp.id === selectedOpportunity.id
-                                ? { ...opp, stage: opp.stage === 'discovery' ? 'proposal' : opp.stage }
+                            setOpportunities(prev => prev.map(opp => 
+                              opp.id === selectedOpportunity.id 
+                                ? { ...opp, stage: 'proposal' }
                                 : opp
                             ));
 
@@ -4076,7 +4154,7 @@ export function Opportunities({
         </Dialog>
 
         {/* Email Preview Dialog */}
-        <Dialog open={showEmailPreviewDialog} onOpenChange={setShowEmailPreviewDialog}>
+        <Dialog open={showEmailPreview} onOpenChange={setShowEmailPreview}>
           <DialogContent className="max-w-4xl max-h-[95vh] p-0">
             <div className="flex flex-col h-full">
               {/* Header */}
@@ -4118,7 +4196,7 @@ export function Opportunities({
 
               {/* Email Content */}
               <ScrollArea className="flex-1 p-6">
-                <div
+                <div 
                   className="prose max-w-none"
                   dangerouslySetInnerHTML={{ __html: emailPreviewContent }}
                 />
@@ -4133,13 +4211,14 @@ export function Opportunities({
                   <div className="flex gap-3">
                     <Button
                       variant="outline"
-                      onClick={() => setShowEmailPreviewDialog(false)}
+                      onClick={() => setShowEmailPreview(false)}
+                      className="border-gray-300"
                     >
                       Close Preview
                     </Button>
                     {/* <Button
                       onClick={() => {
-                        setShowEmailPreviewDialog(false);
+                        setShowEmailPreview(false);
                         setShowProposalDialog(true); // Re-open proposal dialog
                       }}
                       className="bg-blue-600 hover:bg-blue-700 text-white"
