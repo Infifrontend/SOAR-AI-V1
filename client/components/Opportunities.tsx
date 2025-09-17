@@ -787,7 +787,6 @@ export function Opportunities({
   const [showHistoryDialog, setShowHistoryDialog] = useState(false);
   const [showProposalDialog, setShowProposalDialog] = useState(false);
   const [proposalDialogMode, setProposalDialogMode] = useState<'proposal' | 'negotiation'>('proposal');
-  const [showEmailPreview, setShowEmailPreview] = useState(false);
   const [emailPreviewContent, setEmailPreviewContent] = useState("");
   const [isDraftLoading, setIsDraftLoading] = useState(false);
   const [loadingOpportunityId, setLoadingOpportunityId] = useState<number | null>(null);
@@ -1365,7 +1364,7 @@ const getRandomRiskLevel = () => {
             ${negotiationData.projectedSpend ? `<p><strong>Projected Annual Spend:</strong> $${negotiationData.projectedSpend}</p>` : ''}
             ${negotiationData.preferredRoutes ? `<p><strong>Preferred Routes:</strong> ${negotiationData.preferredRoutes}</p>` : ''}
             <p><strong>Travel Frequency:</strong> ${negotiationData.travelFrequency === 'monthly' ? 'Monthly' : 'Quarterly'}</p>
-            
+
             <div class="cabin-mix">
                 <div class="cabin-item">
                     <div><strong>${negotiationData.domesticEconomy}%</strong></div>
@@ -1388,7 +1387,7 @@ const getRandomRiskLevel = () => {
             <h3 class="section-title">💰 Discount & Offer Terms</h3>
             ${negotiationData.baseDiscount ? `<p><strong>Base Discount:</strong> ${negotiationData.baseDiscount}%</p>` : ''}
             ${negotiationData.volumeIncentives ? `<p><strong>Volume Incentives:</strong> ${negotiationData.volumeIncentives}</p>` : ''}
-            
+
             ${negotiationData.routeDiscounts?.length > 0 ? `
             <div>
                 <strong>Route-Specific Discounts:</strong>
