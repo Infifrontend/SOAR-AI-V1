@@ -323,8 +323,16 @@ export const useLeadApi = () => {
 
   // Get history for a lead
   const getHistory = useCallback(async (leadId: number) => {
-    return baseApi.post('/get-history/', { lead_id: leadId });
-  }, [baseApi]);
+    if (!leadId) {
+      return { data: [] };
+    }
+    try {
+      return baseApi.post('/get-history/', { lead_id: leadId });
+    } catch (error) {
+      console.error('Error fetching lead history:', error);
+      return { data: [] };
+    }
+  }, []);
 
   // Get proposal draft for an opportunity
   const getProposalDraft = useCallback(async (opportunityId: number) => {

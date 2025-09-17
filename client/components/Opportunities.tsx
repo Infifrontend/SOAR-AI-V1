@@ -75,6 +75,7 @@ import {
   ChevronRight,
   ChevronDown,
   ChevronUp,
+  X,
 } from "lucide-react";
 
 interface OpportunitiesProps {
@@ -1699,33 +1700,41 @@ const getRandomRiskLevel = () => {
     async (opportunity: Opportunity) => {
       setSelectedOpportunity(opportunity);
       setIsLoadingHistory(true);
-      setHistoryData([]);
-      setShowHistoryDialog(true);
 
       try {
-        // Use the new comprehensive history API endpoint
-        const historyData = await getOpportunityHistory(opportunity.id);
-          console.log(historyData,'Fetched opportunity history')
-        // Ensure we have an array, even if empty
-        const formattedHistory = Array.isArray(historyData.data) ? historyData.data : [];
-  console.log("Fetched opportunity history:",formattedHistory)
-        setHistoryData(historyData.data);
+        // Fetch both opportunity and lead history
+        const [opportunityHistoryResponse, leadHistoryResponse] = await Promise.all([
+          getOpportunityHistory(opportunity.id),
+          getHistory(opportunity.lead_info?.company?.id || opportunity.leadId)
+        ]);
 
-        // Show success message if we got data, info if empty
-        if (formattedHistory.length > 0) {
-          console.log(`Loaded ${formattedHistory.length} history items`);
-        } else {
-          console.log("No history data available for this opportunity");
-        }
+        const opportunityHistory = opportunityHistoryResponse.data || [];
+        const leadHistory = leadHistoryResponse.data || [];
+
+        // Combine and sort histories by timestamp
+        const combinedHistory = [
+          ...opportunityHistory.map(entry => ({
+            ...entry,
+            source: 'opportunity',
+            entity_type: 'opportunity'
+          })),
+          ...leadHistory.map(entry => ({
+            ...entry,
+            source: 'lead',
+            entity_type: 'lead'
+          }))
+        ].sort((a, b) => new Date(b.timestamp || b.created_at || b.date).getTime() - new Date(a.timestamp || a.created_at || a.date).getTime());
+
+        setHistoryData(combinedHistory);
       } catch (error) {
-        console.error("Error fetching opportunity history:", error);
-        // Don't show toast error since we handle it gracefully now
+        console.error('Error fetching history:', error);
         setHistoryData([]);
       } finally {
         setIsLoadingHistory(false);
+        setShowHistoryDialog(true);
       }
     },
-    [getOpportunityHistory],
+    [getOpportunityHistory, getHistory],
   );
 
   const handleSendProposal = useCallback(async (opportunity: Opportunity) => {
@@ -3112,12 +3121,12 @@ const getRandomRiskLevel = () => {
         <Dialog open={showHistoryDialog} onOpenChange={setShowHistoryDialog}>
           <DialogContent className="max-w-4xl max-h-[90vh]">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-3">
+              <DialogTitle className="flex items-center gap-3 text-xl">
                 <History className="h-5 w-5" />
-                Opportunity History - {selectedOpportunity?.lead_info?.company?.name}
+                Complete History
               </DialogTitle>
               <DialogDescription>
-                Complete history and activity timeline for this opportunity
+                View the complete history including both lead and opportunity activities for {selectedOpportunity?.name}
               </DialogDescription>
             </DialogHeader>
             <ScrollArea className="max-h-[70vh] pr-4">
@@ -3139,46 +3148,77 @@ const getRandomRiskLevel = () => {
                 </div>
               ) : historyData.length > 0 ? (
                 <div className="space-y-4">
-                  {historyData.map((item, index) => (
-                    <div key={index} className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border-l-4 border-blue-500">
-                      <div className="w-3 h-3 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-medium text-gray-900 text-sm">
-                            {item.action || item.type || 'Activity'}
-                          </h4>
-                          <span className="text-xs text-gray-500 flex-shrink-0">
-                            {item.timestamp ? new Date(item.timestamp).toLocaleString() : 
-                             item.created_at ? new Date(item.created_at).toLocaleString() :
-                             item.date ? new Date(item.date).toLocaleString() : 'Unknown date'}
-                          </span>
-                        </div>
-                        <p className="text-sm text-gray-700 mb-2">
-                          {item.description || item.details || item.note || 'No description available'}
-                        </p>
-                        <div className="flex items-center gap-4 text-xs text-gray-500">
-                          {item.user && (
-                            <span className="flex items-center gap-1">
-                              <User className="h-3 w-3" />
-                              {item.user}
-                            </span>
-                          )}
-                          {item.entity_type && (
-                            <span className="px-2 py-1 bg-gray-200 rounded-full">
-                              {item.entity_type}
-                            </span>
-                          )}
+                  {historyData.map((entry, index) => {
+                    const getIconComponent = (iconName: string) => {
+                      const iconMap: {
+                        [key: string]: React.ComponentType<{
+                          className?: string;
+                        }>;
+                      } = {
+                        plus: Plus,
+                        mail: Mail,
+                        phone: Phone,
+                        "message-circle": MessageCircle,
+                        "message-square": MessageCircle,
+                        "trending-up": TrendingUp,
+                        user: User,
+                        "check-circle": CheckCircle,
+                        "x-circle": X,
+                        calendar: Calendar,
+                        briefcase: Activity,
+                        "file-text": FileText,
+                        handshake: Handshake,
+                        trophy: Award,
+                        x: X,
+                      };
+                      return iconMap[iconName] || Activity;
+                    };
+
+                    const IconComponent = getIconComponent(entry.icon || 'activity');
+                    const isLeadHistory = entry.source === 'lead';
+
+                    return (
+                      <div key={index} className={`border-l-4 ${isLeadHistory ? 'border-green-500' : 'border-blue-500'} pl-4 py-3 bg-gray-50 rounded-r-lg`}>
+                        <div className="flex items-start gap-3">
+                          <div className={`flex items-center justify-center w-8 h-8 rounded-full ${isLeadHistory ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'} flex-shrink-0`}>
+                            <IconComponent className="h-4 w-4" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${isLeadHistory ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}>
+                                {isLeadHistory ? 'Lead' : 'Opportunity'}
+                              </span>
+                              <span className="font-medium text-gray-900 text-sm">
+                                {entry.type_display || entry.action || entry.history_type}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                {formatDate(entry.timestamp || entry.date || entry.created_at)}
+                              </span>
+                            </div>
+                            <div className="text-sm text-gray-700 mb-2">
+                              {entry.details || entry.description || 'No additional details'}
+                            </div>
+                            {(entry.created_by_name || entry.user_name) && (
+                              <div className="flex items-center gap-1 text-xs text-gray-500">
+                                <User className="h-3 w-3" />
+                                <span>by {entry.created_by_name || entry.user_name}</span>
+                                {entry.user_role && (
+                                  <span className="text-gray-400">({entry.user_role})</span>
+                                )}
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
-                <div className="text-center py-12">
-                  <History className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                <div className="text-center py-8">
+                  <History className="h-12 w-12 mx-auto mb-4 text-gray-400" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No History Available</h3>
-                  <p className="text-gray-600">
-                    No historical data found for this opportunity. Activities and changes will appear here once recorded.
+                  <p className="text-gray-500">
+                    No history records found for this opportunity and its related lead.
                   </p>
                 </div>
               )}
