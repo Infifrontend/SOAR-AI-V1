@@ -489,14 +489,14 @@ export const useLeadApi = () => {
     try {
       // Create FormData to handle file uploads
       const formData = new FormData();
-
+      
       // Add all proposal data fields
       Object.keys(proposalData).forEach(key => {
         if (proposalData[key] !== null && proposalData[key] !== undefined) {
           formData.append(key, proposalData[key]);
         }
       });
-
+      
       // Add file attachment if provided
       if (attachedFile) {
         formData.append('attachedFile', attachedFile);
@@ -507,7 +507,7 @@ export const useLeadApi = () => {
           'Content-Type': 'multipart/form-data',
         },
       });
-
+      
       setData(response.data);
       return response.data;
     } catch (error: any) {

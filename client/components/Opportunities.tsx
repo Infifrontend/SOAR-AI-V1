@@ -801,11 +801,11 @@ export function Opportunities({
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [isSavingActivity, setIsSavingActivity] = useState(false);
   const [showNegotiationDialog, setShowNegotiationDialog] = useState(false);
-  const [isSavingNegotiation, setIsSavingNegotiation] = useState(false);
-  const leadApi = useLeadApi();
-  const [selectedCorporate, setSelectedCorporate] = useState();
-  const [showCorporateProfile, setShowCorporateProfile] = useState(false);
-  const [leadData,setleads] = useState([]);
+  const [isSavingNegotiation, setIsSavingNegotiation] = useState(false);  
+const leadApi = useLeadApi();
+ const [selectedCorporate, setSelectedCorporate] = useState();
+    const [showCorporateProfile, setShowCorporateProfile] = useState(false);   
+    const [leadData,setleads] = useState([]);
 
   const handleViewProfile = (opportunityId: string) => {
     const companyName = opportunities.find(opp => String(opp.id) === opportunityId)?.lead_info?.company?.name;
@@ -816,67 +816,67 @@ export function Opportunities({
     setSelectedCorporate(item);
     setShowCorporateProfile(true);
   };
-  console.log(showCorporateProfile,'showCorporateProfile',selectedCorporate);
+  console.log(showCorporateProfile,'showCorporateProfile',selectedCorporate); 
 
-  const fetchLeads = async () => {
-    try {
-      // Apply current filters when fetching
-      const filterParams = {
-        search: '',
-        status: '',
-        industry: '',
-        score: '',
-        engagement: ''
+ const fetchLeads = async () => {
+        try {
+          // Apply current filters when fetching
+          const filterParams = {
+            search: '',
+            status: '',
+            industry: '',
+            score: '',
+            engagement: ''
+          };
+
+          console.log('Fetching leads with filters:', filterParams);
+          const apiResponse = await leadApi.getLeads(filterParams);
+          console.log('Raw API response:', apiResponse);
+
+          // Handle different response formats
+          let apiLeads = [];
+          if (Array.isArray(apiResponse)) {
+            apiLeads = apiResponse;
+          } else if (apiResponse && Array.isArray(apiResponse.results)) {
+            apiLeads = apiResponse.results;
+          } else if (apiResponse && apiResponse.data && Array.isArray(apiResponse.data)) {
+            apiLeads = apiResponse.data;
+          } else {
+            console.warn('Unexpected API response format:', apiResponse);
+            apiLeads = [];
+          }
+
+          console.log('Processed leads array:', apiLeads);
+
+          // Transform leads - history_entries are not included here as they are fetched on demand
+          const transformedLeads = apiLeads.map((apiLead: any) => {
+            console.log('Transforming lead:', apiLead);
+            return transformApiLeadToUILead(apiLead);
+          });
+
+          const transformedLeadsforViewProfile = apiLeads.map((apiLead: any) => {
+            console.log('Transforming lead for view profile:', apiLead);
+            return transformCompanyDataForViewProfile(apiLead);
+          });
+
+          console.log("Transformed leads for view profile:", transformedLeadsforViewProfile);
+          setleads(transformedLeadsforViewProfile); // Use the correct transformed data
+
+        } catch (error) {
+          console.error('Error fetching leads:', error);
+          console.error('Error details:', error?.response?.data);
+          // Don't show toast error for leads since it's optional for opportunities view
+          // Set empty array on error to avoid showing static data
+          setleads([]);
+        }
       };
-
-      console.log('Fetching leads with filters:', filterParams);
-      const apiResponse = await leadApi.getLeads(filterParams);
-      console.log('Raw API response:', apiResponse);
-
-      // Handle different response formats
-      let apiLeads = [];
-      if (Array.isArray(apiResponse)) {
-        apiLeads = apiResponse;
-      } else if (apiResponse && Array.isArray(apiResponse.results)) {
-        apiLeads = apiResponse.results;
-      } else if (apiResponse && apiResponse.data && Array.isArray(apiResponse.data)) {
-        apiLeads = apiResponse.data;
-      } else {
-        console.warn('Unexpected API response format:', apiResponse);
-        apiLeads = [];
-      }
-
-      console.log('Processed leads array:', apiLeads);
-
-      // Transform leads - history_entries are not included here as they are fetched on demand
-      const transformedLeads = apiLeads.map((apiLead: any) => {
-        console.log('Transforming lead:', apiLead);
-        return transformApiLeadToUILead(apiLead);
-      });
-
-      const transformedLeadsforViewProfile = apiLeads.map((apiLead: any) => {
-        console.log('Transforming lead for view profile:', apiLead);
-        return transformCompanyDataForViewProfile(apiLead);
-      });
-
-      console.log("Transformed leads for view profile:", transformedLeadsforViewProfile);
-      setleads(transformedLeadsforViewProfile); // Use the correct transformed data
-
-    } catch (error) {
-      console.error('Error fetching leads:', error);
-      console.error('Error details:', error?.response?.data);
-      // Don't show toast error for leads since it's optional for opportunities view
-      // Set empty array on error to avoid showing static data
-      setleads([]);
-    }
-  };
-  useEffect(() => {
+      useEffect(() => {
     // Always fetch leads on component mount
     fetchLeads();
   }, []); // Keep empty dependency array to run only once on mount
-  const transformApiLeadToUILead = (apiLead: any) => {
+    const transformApiLeadToUILead = (apiLead: any) => {
     // Get the latest note from lead_notes array if available
-    const latestNote = apiLead.lead_notes && apiLead.lead_notes.length > 0
+    const latestNote = apiLead.lead_notes && apiLead.lead_notes.length > 0 
       ? apiLead.lead_notes[0] // Notes are ordered by -created_at in the backend
       : null;
 
@@ -942,196 +942,196 @@ export function Opportunities({
     };
   };
   const transformCompanyDataForViewProfile = (apiLead) => {
-    // console.log(apiLead, "apilead for view profile")
-    // Transform backend data to match frontend expectations
-    console.log(apiLead,'final');
+  // console.log(apiLead, "apilead for view profile")
+  // Transform backend data to match frontend expectations
+  console.log(apiLead,'final');
 
-    return {
-      id: apiLead.id,
-      name: apiLead.contact.company_name,
-      type: getCompanyTypeDisplay(apiLead.company.company_type || apiLead.company.size),
-      industry: getIndustryDisplay(apiLead.company.industry),
-      location: apiLead.company.location,
-      aiScore: Math.floor(Math.random() * 20) + 80, // Random AI score for demo
-      rating: (Math.random() * 1 + 4).toFixed(1), // Random rating 4.0-5.0
-      established: apiLead.company.year_established || (apiLead.company.created_at ? new Date(apiLead.company.created_at).getFullYear() : 2020),
-      employees: apiLead.company.employee_count || Math.floor(Math.random() * 5000) + 100,
-      specialties: apiLead.company.specialties ? apiLead.company.specialties.split(',').map(s => s.trim()).filter(s => s).slice(0, 5) : ["Business Services", "Corporate Solutions"],
-      travelBudget: apiLead.company.travel_budget ? `${(apiLead.company.travel_budget / 1000000).toFixed(1)}M` : "1.0M",
-      annualTravelVolume: apiLead.company.annual_travel_volume || `${Math.floor(Math.random() * 5000) + 1000} trips`,
-      contracts: Math.floor(Math.random() * 20) + 1,
-      revenue: apiLead.company.annual_revenue || Math.floor(Math.random() * 50000000) + 10000000,
-      phone: apiLead.company.phone || "+1 (555) " + Math.floor(Math.random() * 900 + 100) + "-" + Math.floor(Math.random() * 9000 + 1000),
-      email: apiLead.company.email || `contact@${apiLead.company.name.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`,
-      website: apiLead.company.website || `www.${apiLead.company.name.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`,
-      aiRecommendation: generateAIRecommendation(apiLead.company),
-      compliance: Math.floor(Math.random() * 20) + 80,
-      financialStability: Math.floor(Math.random() * 20) + 80,
-      travelFrequency: apiLead.company.travel_frequency || getRandomTravelFrequency(),
-      destinations: getRandomDestinations(),
-      preferredClass: apiLead.company.preferred_class || getRandomPreferredClass(),
-      teamSize: Math.floor((apiLead.company.employee_count || 1000) * 0.1),
-      travelManagers: Math.floor(Math.random() * 5) + 1,
-      currentAirlines: apiLead.company.current_airlines ? apiLead.company.current_airlines.split(',').map(s => s.trim()).filter(s => s).slice(0, 5) : getRandomAirlines(),
-      paymentTerms: apiLead.company.payment_terms || getRandomPaymentTerms(),
-      creditRating: apiLead.company.credit_rating || getRandomCreditRating(),
-      sustainabilityFocus: apiLead.company.sustainability_focus || getRandomSustainabilityFocus(),
-      technologyIntegration: apiLead.company.technology_integration ? apiLead.company.technology_integration.split(',').map(s => s.trim()).filter(s => s).slice(0, 5) : getRandomTechIntegration(),
-      seasonality: getRandomSeasonality(),
-      meetingTypes: getRandomMeetingTypes(),
-      companySize: getSizeDisplay(apiLead.company.size),
-      marketSegment: getIndustryDisplay(apiLead.company.industry),
-      decisionMakers: Math.floor(Math.random() * 8) + 2,
-      contractValue: Math.floor(Math.random() * 3000000) + 500000,
-      competitorAirlines: Math.floor(Math.random() * 5) + 1,
-      loyaltyPotential: Math.floor(Math.random() * 30) + 70,
-      expansionPlans: apiLead.company.expansion_plans || getRandomExpansionPlans(),
-      riskLevel: apiLead.company.risk_level || getRandomRiskLevel(),
-      assigned_agent_details: apiLead.assigned_to ? { // Map assigned agent details if available
+  return {
+    id: apiLead.id,
+    name: apiLead.contact.company_name,
+    type: getCompanyTypeDisplay(apiLead.company.company_type || apiLead.company.size),
+    industry: getIndustryDisplay(apiLead.company.industry),
+    location: apiLead.company.location,
+    aiScore: Math.floor(Math.random() * 20) + 80, // Random AI score for demo
+    rating: (Math.random() * 1 + 4).toFixed(1), // Random rating 4.0-5.0
+    established: apiLead.company.year_established || (apiLead.company.created_at ? new Date(apiLead.company.created_at).getFullYear() : 2020),
+    employees: apiLead.company.employee_count || Math.floor(Math.random() * 5000) + 100,
+    specialties: apiLead.company.specialties ? apiLead.company.specialties.split(',').map(s => s.trim()).filter(s => s).slice(0, 5) : ["Business Services", "Corporate Solutions"],
+    travelBudget: apiLead.company.travel_budget ? `${(apiLead.company.travel_budget / 1000000).toFixed(1)}M` : "1.0M",
+    annualTravelVolume: apiLead.company.annual_travel_volume || `${Math.floor(Math.random() * 5000) + 1000} trips`,
+    contracts: Math.floor(Math.random() * 20) + 1,
+    revenue: apiLead.company.annual_revenue || Math.floor(Math.random() * 50000000) + 10000000,
+    phone: apiLead.company.phone || "+1 (555) " + Math.floor(Math.random() * 900 + 100) + "-" + Math.floor(Math.random() * 9000 + 1000),
+    email: apiLead.company.email || `contact@${apiLead.company.name.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`,
+    website: apiLead.company.website || `www.${apiLead.company.name.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`,
+    aiRecommendation: generateAIRecommendation(apiLead.company),
+    compliance: Math.floor(Math.random() * 20) + 80,
+    financialStability: Math.floor(Math.random() * 20) + 80,
+    travelFrequency: apiLead.company.travel_frequency || getRandomTravelFrequency(),
+    destinations: getRandomDestinations(),
+    preferredClass: apiLead.company.preferred_class || getRandomPreferredClass(),
+    teamSize: Math.floor((apiLead.company.employee_count || 1000) * 0.1),
+    travelManagers: Math.floor(Math.random() * 5) + 1,
+    currentAirlines: apiLead.company.current_airlines ? apiLead.company.current_airlines.split(',').map(s => s.trim()).filter(s => s).slice(0, 5) : getRandomAirlines(),
+    paymentTerms: apiLead.company.payment_terms || getRandomPaymentTerms(),
+    creditRating: apiLead.company.credit_rating || getRandomCreditRating(),
+    sustainabilityFocus: apiLead.company.sustainability_focus || getRandomSustainabilityFocus(),
+    technologyIntegration: apiLead.company.technology_integration ? apiLead.company.technology_integration.split(',').map(s => s.trim()).filter(s => s).slice(0, 5) : getRandomTechIntegration(),
+    seasonality: getRandomSeasonality(),
+    meetingTypes: getRandomMeetingTypes(),
+    companySize: getSizeDisplay(apiLead.company.size),
+    marketSegment: getIndustryDisplay(apiLead.company.industry),
+    decisionMakers: Math.floor(Math.random() * 8) + 2,
+    contractValue: Math.floor(Math.random() * 3000000) + 500000,
+    competitorAirlines: Math.floor(Math.random() * 5) + 1,
+    loyaltyPotential: Math.floor(Math.random() * 30) + 70,
+    expansionPlans: apiLead.company.expansion_plans || getRandomExpansionPlans(),
+    riskLevel: apiLead.company.risk_level || getRandomRiskLevel(),
+    assigned_agent_details: apiLead.assigned_to ? { // Map assigned agent details if available
         name: apiLead.assigned_to.full_name || apiLead.assigned_to.username,
         email: apiLead.assigned_to.email || `${apiLead.assigned_to.username}@soarai.com`,
         specialties: apiLead.assigned_to.specialties || [], // Assuming specialties field exists
         current_leads: apiLead.assigned_to.current_leads || 0, // Assuming current_leads field exists
       } : undefined,
-    };
   };
-  const getCompanyTypeDisplay = (size) => {
-    const types = {
-      startup: "Startup Company",
-      small: "Small Business",
-      medium: "Medium Corporation",
-      large: "Large Corporation",
-      enterprise: "Enterprise Corporation",
-      corporation: "Corporation",
-      llc: "LLC",
-      partnership: "Partnership",
-      nonprofit: "Non-Profit"
-    };
-    return types[size] || "Corporation";
+};
+const getCompanyTypeDisplay = (size) => {
+  const types = {
+    startup: "Startup Company",
+    small: "Small Business",
+    medium: "Medium Corporation",
+    large: "Large Corporation",
+    enterprise: "Enterprise Corporation",
+    corporation: "Corporation",
+    llc: "LLC",
+    partnership: "Partnership",
+    nonprofit: "Non-Profit"
   };
+  return types[size] || "Corporation";
+};
 
-  const getIndustryDisplay = (industry) => {
-    const industries = {
-      technology: "Technology & Software",
-      finance: "Finance & Banking",
-      healthcare: "Healthcare",
-      manufacturing: "Manufacturing",
-      retail: "Retail & Consumer",
-      consulting: "Consulting Services",
-      telecommunications: "Telecommunications",
-      energy: "Energy & Utilities",
-      transportation: "Transportation & Logistics",
-      education: "Education",
-      government: "Government",
-      other: "Other"
-    };
-    return industries[industry] || "Business Services";
+const getIndustryDisplay = (industry) => {
+  const industries = {
+    technology: "Technology & Software",
+    finance: "Finance & Banking",
+    healthcare: "Healthcare",
+    manufacturing: "Manufacturing",
+    retail: "Retail & Consumer",
+    consulting: "Consulting Services",
+    telecommunications: "Telecommunications",
+    energy: "Energy & Utilities",
+    transportation: "Transportation & Logistics",
+    education: "Education",
+    government: "Government",
+    other: "Other"
   };
+  return industries[industry] || "Business Services";
+};
 
-  const getSizeDisplay = (size) => {
-    const sizes = {
-      startup: "Startup",
-      small: "Small",
-      medium: "Medium",
-      large: "Large",
-      enterprise: "Enterprise"
-    };
-    return sizes[size] || "Medium";
+const getSizeDisplay = (size) => {
+  const sizes = {
+    startup: "Startup",
+    small: "Small",
+    medium: "Medium",
+    large: "Large",
+    enterprise: "Enterprise"
   };
+  return sizes[size] || "Medium";
+};
 
-  const generateAIRecommendation = (company) => {
-    const recommendations = [
-      "High-potential corporate client with strong growth indicators. Excellent opportunity for partnership.",
-      "Established company with consistent business patterns. Good candidate for long-term contracts.",
-      "Growing organization with expanding travel needs. Consider volume-based pricing strategies.",
-      "Premium client with sophisticated requirements. Focus on high-service offerings.",
-      "Cost-conscious organization seeking value. Emphasize efficiency and competitive pricing."
-    ];
-    return recommendations[Math.floor(Math.random() * recommendations.length)];
-  };
+const generateAIRecommendation = (company) => {
+  const recommendations = [
+    "High-potential corporate client with strong growth indicators. Excellent opportunity for partnership.",
+    "Established company with consistent business patterns. Good candidate for long-term contracts.",
+    "Growing organization with expanding travel needs. Consider volume-based pricing strategies.",
+    "Premium client with sophisticated requirements. Focus on high-service offerings.",
+    "Cost-conscious organization seeking value. Emphasize efficiency and competitive pricing."
+  ];
+  return recommendations[Math.floor(Math.random() * recommendations.length)];
+};
 
-  const getRandomTravelFrequency = () => {
-    const frequencies = ["Daily", "Weekly", "Monthly", "Bi-weekly", "Quarterly"];
-    return frequencies[Math.floor(Math.random() * frequencies.length)];
-  };
+const getRandomTravelFrequency = () => {
+  const frequencies = ["Daily", "Weekly", "Monthly", "Bi-weekly", "Quarterly"];
+  return frequencies[Math.floor(Math.random() * frequencies.length)];
+};
 
-  const getRandomDestinations = () => {
-    const destinations = [
-      ["North America", "Europe"],
-      ["Global", "Asia-Pacific", "Europe"],
-      ["North America", "Asia-Pacific"],
-      ["Domestic", "Regional"],
-      ["Global", "Emerging Markets"]
-    ];
-    return destinations[Math.floor(Math.random() * destinations.length)];
-  };
+const getRandomDestinations = () => {
+  const destinations = [
+    ["North America", "Europe"],
+    ["Global", "Asia-Pacific", "Europe"],
+    ["North America", "Asia-Pacific"],
+    ["Domestic", "Regional"],
+    ["Global", "Emerging Markets"]
+  ];
+  return destinations[Math.floor(Math.random() * destinations.length)];
+};
 
-  const getRandomPreferredClass = () => {
-    const classes = ["Economy", "Economy Plus", "Business", "First", "Business/First"];
-    return classes[Math.floor(Math.random() * classes.length)];
-  };
+const getRandomPreferredClass = () => {
+  const classes = ["Economy", "Economy Plus", "Business", "First", "Business/First"];
+  return classes[Math.floor(Math.random() * classes.length)];
+};
 
-  const getRandomAirlines = () => {
-    const airlines = [
-      ["United", "Delta"],
-      ["American", "Southwest"],
-      ["Emirates", "Singapore Airlines"],
-      ["British Airways", "Lufthansa"],
-      ["Air France", "KLM"]
-    ];
-    return airlines[Math.floor(Math.random() * airlines.length)];
-  };
+const getRandomAirlines = () => {
+  const airlines = [
+    ["United", "Delta"],
+    ["American", "Southwest"],
+    ["Emirates", "Singapore Airlines"],
+    ["British Airways", "Lufthansa"],
+    ["Air France", "KLM"]
+  ];
+  return airlines[Math.floor(Math.random() * airlines.length)];
+};
 
-  const getRandomPaymentTerms = () => {
-    const terms = ["Net 15", "Net 30", "Net 45", "Net 60"];
-    return terms[Math.floor(Math.random() * terms.length)];
-  };
+const getRandomPaymentTerms = () => {
+  const terms = ["Net 15", "Net 30", "Net 45", "Net 60"];
+  return terms[Math.floor(Math.random() * terms.length)];
+};
 
-  const getRandomCreditRating = () => {
-    const ratings = ["AAA", "AA", "A", "BBB", "A+"];
-    return ratings[Math.floor(Math.random() * ratings.length)];
-  };
+const getRandomCreditRating = () => {
+  const ratings = ["AAA", "AA", "A", "BBB", "A+"];
+  return ratings[Math.floor(Math.random() * ratings.length)];
+};
 
-  const getRandomSustainabilityFocus = () => {
-    const focus = ["Very High", "High", "Medium", "Low"];
-    return focus[Math.floor(Math.random() * focus.length)];
-  };
+const getRandomSustainabilityFocus = () => {
+  const focus = ["Very High", "High", "Medium", "Low"];
+  return focus[Math.floor(Math.random() * focus.length)];
+};
 
-  const getRandomTechIntegration = () => {
-    const tech = [
-      ["API", "Mobile App"],
-      ["GDS", "Corporate Portal"],
-      ["API", "Real-time Booking"],
-      ["Mobile App", "Expense Management"],
-      ["Corporate Portal", "Reporting"]
-    ];
-    return tech[Math.floor(Math.random() * tech.length)];
-  };
+const getRandomTechIntegration = () => {
+  const tech = [
+    ["API", "Mobile App"],
+    ["GDS", "Corporate Portal"],
+    ["API", "Real-time Booking"],
+    ["Mobile App", "Expense Management"],
+    ["Corporate Portal", "Reporting"]
+  ];
+  return tech[Math.floor(Math.random() * tech.length)];
+};
 
-  const getRandomSeasonality = () => {
-    const patterns = ["Year-round", "Q1/Q3 Heavy", "Spring/Summer Peak", "Holiday Heavy"];
-    return patterns[Math.floor(Math.random() * patterns.length)];
-  };
+const getRandomSeasonality = () => {
+  const patterns = ["Year-round", "Q1/Q3 Heavy", "Spring/Summer Peak", "Holiday Heavy"];
+  return patterns[Math.floor(Math.random() * patterns.length)];
+};
 
-  const getRandomMeetingTypes = () => {
-    const types = [
-      ["Business Meetings", "Conferences"],
-      ["Client Visits", "Trade Shows"],
-      ["Team Offsites", "Training"],
-      ["Site Visits", "Regulatory Meetings"]
-    ];
-    return types[Math.floor(Math.random() * types.length)];
-  };
+const getRandomMeetingTypes = () => {
+  const types = [
+    ["Business Meetings", "Conferences"],
+    ["Client Visits", "Trade Shows"],
+    ["Team Offsites", "Training"],
+    ["Site Visits", "Regulatory Meetings"]
+  ];
+  return types[Math.floor(Math.random() * types.length)];
+};
 
-  const getRandomExpansionPlans = () => {
-    const plans = ["Aggressive", "Moderate", "Conservative", "Rapid", "Stable"];
-    return plans[Math.floor(Math.random() * plans.length)];
-  };
+const getRandomExpansionPlans = () => {
+  const plans = ["Aggressive", "Moderate", "Conservative", "Rapid", "Stable"];
+  return plans[Math.floor(Math.random() * plans.length)];
+};
 
-  const getRandomRiskLevel = () => {
-    const risks = ["Very Low", "Low", "Medium", "High"];
-    return risks[Math.floor(Math.random() * risks.length)];
-  };
+const getRandomRiskLevel = () => {
+  const risks = ["Very Low", "Low", "Medium", "High"];
+  return risks[Math.floor(Math.random() * risks.length)];
+};   
   const [editForm, setEditForm] = useState({
     stage: "",
     probability: "",
@@ -1153,7 +1153,7 @@ export function Opportunities({
     validityPeriod: "30",
     specialTerms: "",
     deliveryMethod: "email",
-    attachedFile: null as File | null, // Explicitly type as File | null
+    attachedFile: null,
   });
 
   const [negotiationForm, setNegotiationForm] = useState({
@@ -1202,7 +1202,7 @@ export function Opportunities({
     legalApprovalRequired: false,
 
     // Document Attachments
-    attachedFile: null as File | null, // Explicitly type as File | null
+    attachedFile: null
   });
 
   const [isDragging, setIsDragging] = useState(false);
@@ -1299,26 +1299,13 @@ export function Opportunities({
             validityPeriod: draft.validity_period || '30',
             specialTerms: draft.special_terms || '',
             deliveryMethod: draft.delivery_method || 'email',
-            attachedFile: null, // File is not saved in draft
+            attachedFile: null,
           });
           setAttachmentInfo(data.attachment_info || { exists: false, filename: '', path: '' });
-          // Return the loaded draft data for potential further processing
-          return draft;
-        } else if (data.draft) {
-          // If data.draft exists but data.success is false, still return the draft
-          return data.draft;
         }
-      } else if (response.status === 404) {
-        // No draft found, which is not an error, return null or empty object
-        return null;
-      } else {
-        // Handle other non-ok responses
-        throw new Error(`HTTP error! status: ${response.status}`);
       }
     } catch (error) {
       console.error('Error loading draft:', error);
-      // Optionally re-throw or return null/empty on error
-      return null;
     } finally {
       setIsDraftLoading(false);
     }
@@ -1598,7 +1585,7 @@ export function Opportunities({
   useEffect(() => {
     if (initialFilters?.newOpportunity && opportunities.length > 0) {
       // Check if this opportunity was already added to prevent duplicates
-      const existingOpportunity = opportunities.find(opp =>
+      const existingOpportunity = opportunities.find(opp => 
         opp.leadId === initialFilters.newOpportunity.leadId ||
         opp.lead_info?.company?.name === initialFilters.newOpportunity.company
       );
@@ -1857,7 +1844,10 @@ export function Opportunities({
 
     try {
       // Try to load existing draft
-      const existingDraft = await loadDraft(opportunity.id);
+      const response = await loadDraft(opportunity.id);
+
+      // Handle API response - extract data from response object
+      const existingDraft = response?.data || response;
 
       if (existingDraft && Object.keys(existingDraft).length > 0) {
         console.log("Loading existing draft:", existingDraft);
@@ -1888,7 +1878,7 @@ export function Opportunities({
           international: existingDraft.international !== undefined ? existingDraft.international : prevForm.international,
           baseDiscount: existingDraft.base_discount || prevForm.baseDiscount,
           routeDiscounts: Array.isArray(existingDraft.route_discounts) ? existingDraft.route_discounts : prevForm.routeDiscounts,
-          loyaltyBenefits: typeof existingDraft.loyalty_benefits === 'object' ? existingDraft.loyaltyBenefits : prevForm.loyaltyBenefits,
+          loyaltyBenefits: typeof existingDraft.loyalty_benefits === 'object' ? existingDraft.loyalty_benefits : prevForm.loyaltyBenefits,
           volumeIncentives: existingDraft.volume_incentives || prevForm.volumeIncentives,
           contractDuration: existingDraft.contract_duration || prevForm.contractDuration,
           autoRenewal: existingDraft.auto_renewal !== undefined ? existingDraft.autoRenewal : prevForm.autoRenewal,
@@ -1939,6 +1929,8 @@ export function Opportunities({
       }
     } catch (error) {
       console.error("Error loading draft:", error);
+      console.error("Error details:", error.response?.data);
+
       // Only show error if it's not a 404 (no draft found)
       if (error.response?.status !== 404) {
         toast.error("Failed to load draft data");
@@ -1979,7 +1971,10 @@ export function Opportunities({
 
     try {
       // Try to load existing draft
-      const existingDraft = await loadDraft(opportunity.id);
+      const response = await loadDraft(opportunity.id);
+
+      // Handle API response - extract data from response object
+      const existingDraft = response?.data || response;
 
       if (existingDraft && Object.keys(existingDraft).length > 0) {
         console.log("Loading existing draft for negotiation:", existingDraft);
@@ -2010,7 +2005,7 @@ export function Opportunities({
           international: existingDraft.international !== undefined ? existingDraft.international : prevForm.international,
           baseDiscount: existingDraft.base_discount || prevForm.baseDiscount,
           routeDiscounts: Array.isArray(existingDraft.route_discounts) ? existingDraft.route_discounts : prevForm.routeDiscounts,
-          loyaltyBenefits: typeof existingDraft.loyalty_benefits === 'object' ? existingDraft.loyaltyBenefits : prevForm.loyaltyBenefits,
+          loyaltyBenefits: typeof existingDraft.loyalty_benefits === 'object' ? existingDraft.loyalty_benefits : prevForm.loyaltyBenefits,
           volumeIncentives: existingDraft.volume_incentives || prevForm.volumeIncentives,
           contractDuration: existingDraft.contract_duration || prevForm.contractDuration,
           autoRenewal: existingDraft.auto_renewal !== undefined ? existingDraft.autoRenewal : prevForm.autoRenewal,
@@ -2061,6 +2056,8 @@ export function Opportunities({
       }
     } catch (error) {
       console.error("Error loading draft for negotiation:", error);
+      console.error("Error details:", error.response?.data);
+
       // Only show error if it's not a 404 (no draft found)
       if (error.response?.status !== 404) {
         toast.error("Failed to load negotiation data");
@@ -2121,7 +2118,7 @@ export function Opportunities({
         prev.map((opp) => (opp.id === opportunity.id ? updatedOpportunity : opp)),
       );
 
-      const message = status === "closed_won"
+      const message = status === "closed_won" 
         ? `${opportunity.lead_info?.company?.name} deal closed successfully! 🎉`
         : `${opportunity.lead_info?.company?.name} deal marked as Deal Lost`;
 
@@ -2333,63 +2330,65 @@ export function Opportunities({
     // The stored attachment will only be hidden if user explicitly removes it via the separate remove button
   }, [proposalForm]);
 
-  const handleSendProposal = useCallback(async () => {
+  const handleSaveProposal = useCallback(async () => {
     if (!selectedOpportunity) return;
 
     try {
+      // Set loading state for the send proposal button
       setLoadingOpportunityId(selectedOpportunity.id);
 
+      // Prepare proposal data for sending
       const proposalData = {
         opportunity_id: selectedOpportunity.id,
         subject: proposalForm.title || `Travel Solutions Proposal - ${selectedOpportunity.lead_info?.company?.name}`,
-        email_content: emailPreviewContent,
+        email_content: generateEmailPreview(),
         delivery_method: proposalForm.deliveryMethod,
         validity_period: proposalForm.validityPeriod,
         special_terms: proposalForm.specialTerms,
-        title: proposalForm.title,
-        description: proposalForm.description
       };
 
-      // Include the attached file if present
-      const attachedFile = proposalForm.attachedFile;
+      console.log("Sending proposal with data:", proposalData);
 
-      const result = await sendProposal(selectedOpportunity.id, proposalData, attachedFile);
+      // Send proposal via API
+      await sendProposal(selectedOpportunity.id, proposalData);
 
-      if (result.success) {
-        toast.success(result.message || 'Proposal sent successfully!');
+      // Clear the draft since proposal is being sent
+      clearDraft(selectedOpportunity.id);
 
-        // Clear the draft after successful send
-        try {
-          await clearDraft(selectedOpportunity.id);
-        } catch (error) {
-          console.log('Note: Could not clear draft after sending:', error);
-        }
+      // Update opportunity stage via API
+      await updateOpportunityStage(selectedOpportunity.id, {
+        stage: "proposal",
+        probability: 65,
+      });
 
-        setShowProposalDialog(false);
-        setShowEmailPreview(false);
+      // Update local state to reflect the changes
+      const updatedOpportunity = {
+        ...selectedOpportunity,
+        stage: "proposal",
+        probability: 65,
+        updated_at: new Date().toISOString(),
+      };
 
-        // Reset form
-        setProposalForm({
-          title: "",
-          description: "",
-          validityPeriod: "30",
-          specialTerms: "",
-          deliveryMethod: "email",
-          attachedFile: null,
-        });
+      setOpportunities((prev) =>
+        prev.map((opp) => 
+          opp.id === selectedOpportunity.id ? updatedOpportunity : opp
+        ),
+      );
 
-        // Refresh opportunities to show updated stage
-        await getOpportunities({ ...filters }); // Re-fetch opportunities
-      } else {
-        throw new Error(result.message || 'Failed to send proposal');
-      }
-    } catch (error: any) {
-      console.error('Error sending proposal:', error);
-      toast.error(error.message || 'Failed to send proposal');
+      setShowProposalDialog(false);
+      setSuccessMessage(
+        `Proposal sent to ${selectedOpportunity.lead_info?.company?.name} and moved to Proposal stage`,
+      );
+      setTimeout(() => setSuccessMessage(""), 5000);
+      toast.success("Proposal sent successfully!");
+    } catch (error) {
+      console.error("Error sending proposal:", error);
+      toast.error("Failed to send proposal. Please try again.");
     } finally {
+      // Clear loading state
       setLoadingOpportunityId(null);
     }
-  }, [selectedOpportunity, proposalForm, emailPreviewContent, sendProposal, clearDraft, getOpportunities, filters]);
+  }, [selectedOpportunity, proposalForm, generateEmailPreview, sendProposal, clearDraft, updateOpportunityStage]);
 
   const handleSaveDraft = useCallback(async () => {
     if (!selectedOpportunity) return;
@@ -2450,7 +2449,7 @@ export function Opportunities({
     };
 
     setOpportunities((prev) =>
-      prev.map((opp) =>
+      prev.map((opp) => 
         opp.id === selectedOpportunity.id ? updatedOpportunity : opp
       ),
     );
@@ -2505,7 +2504,7 @@ export function Opportunities({
       };
 
       setOpportunities((prev) =>
-        prev.map((opp) =>
+        prev.map((opp) => 
           opp.id === selectedOpportunity.id ? updatedOpportunity : opp
         ),
       );
@@ -2520,6 +2519,7 @@ export function Opportunities({
       console.error("Error sending revised proposal:", error);
       toast.error("Failed to send revised proposal. Please try again.");
     } finally {
+      // Clear loading state
       setLoadingOpportunityId(null);
     }
   }, [selectedOpportunity, proposalForm, generateEmailPreview, sendProposal, clearDraft, updateOpportunityStage]);
@@ -2669,10 +2669,7 @@ export function Opportunities({
             <Button
               variant="outline"
               className="flex items-center gap-2 cls-addcomapany"
-              onClick={async () => {
-                // Refresh logic here
-                await getOpportunities({ ...filters });
-              }}
+              onClick={() => getOpportunities()}
             >
               <RefreshCw className="h-4 w-4" />
               Refresh
@@ -2868,12 +2865,12 @@ export function Opportunities({
                     No Opportunities Found
                   </h3>
                   <p className="text-gray-600 mb-4">
-                    {opportunities.length === 0
+                    {opportunities.length === 0 
                       ? "No opportunities available. Create your first opportunity from the leads section."
                       : "No opportunities match your current filters. Try adjusting your search criteria."
                     }
                   </p>
-                  <Button
+                  <Button 
                     onClick={() => onNavigate('leads')}
                     className="bg-orange-500 hover:bg-orange-600 text-white"
                   >
@@ -4166,6 +4163,7 @@ export function Opportunities({
                       onClick={async () => {
                         if (!selectedOpportunity) return;
 
+                        setIsDraftLoading(true);
                         setLoadingOpportunityId(selectedOpportunity.id);
 
                         try {
@@ -4173,17 +4171,15 @@ export function Opportunities({
                           const proposalData = {
                             opportunity_id: selectedOpportunity.id,
                             subject: proposalForm.title || `Travel Solutions Proposal - ${selectedOpportunity.lead_info?.company?.name}`,
-                            email_content: emailPreviewContent,
+                            email_content: generateEmailPreview(),
                             delivery_method: proposalForm.deliveryMethod,
                             validity_period: proposalForm.validityPeriod,
                             special_terms: proposalForm.specialTerms,
-                            title: proposalForm.title,
-                            description: proposalForm.description
                           };
 
                           // Send the proposal with attachment
                           const result = await sendProposal(
-                            selectedOpportunity.id,
+                            selectedOpportunity.id, 
                             proposalData,
                             proposalForm.attachedFile || undefined
                           );
@@ -4195,8 +4191,8 @@ export function Opportunities({
                             await clearDraft(selectedOpportunity.id);
 
                             // Update opportunity stage to proposal
-                            setOpportunities(prev => prev.map(opp =>
-                              opp.id === selectedOpportunity.id
+                            setOpportunities(prev => prev.map(opp => 
+                              opp.id === selectedOpportunity.id 
                                 ? { ...opp, stage: 'proposal' }
                                 : opp
                             ));
@@ -4219,6 +4215,7 @@ export function Opportunities({
                           console.error('Error sending proposal:', error);
                           toast.error(error.response?.data?.error || 'Failed to send proposal. Please try again.');
                         } finally {
+                          setIsDraftLoading(false);
                           setLoadingOpportunityId(null);
                         }
                       }}
@@ -4298,7 +4295,7 @@ export function Opportunities({
 
               {/* Email Content */}
               <ScrollArea className="flex-1 p-6">
-                <div
+                <div 
                   className="prose max-w-none"
                   dangerouslySetInnerHTML={{ __html: emailPreviewContent }}
                 />
