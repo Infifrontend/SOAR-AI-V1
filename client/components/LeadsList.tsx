@@ -811,7 +811,7 @@ export function LeadsList({ initialFilters, onNavigate }: LeadsListProps) {
     specialties: "", // Comma-separated specialties
     technologyIntegration: "", // Comma-separated tech integrations
     currentAirlines: "", // Comma-separated current airlines used
-    notes: "", // Additional notes
+    notes: "",
   });
   const [newCompany, setNewCompany] = useState({
     name: "",
@@ -890,6 +890,17 @@ export function LeadsList({ initialFilters, onNavigate }: LeadsListProps) {
     preparationNotes: '',
   });
   const [isInitiatingCall, setIsInitiatingCall] = useState(false);
+
+  // New state for Schedule Meeting Dialog
+  const [meetingForm, setMeetingForm] = useState({
+    meetingType: 'Business Presentation',
+    duration: '60 minutes',
+    scheduledDate: '',
+    scheduledTime: '',
+    meetingAgenda: '',
+    preparationNotes: '',
+  });
+  const [isSchedulingMeeting, setIsSchedulingMeeting] = useState(false);
 
 
   // Fetch users for the agent assignment dropdown
@@ -1860,7 +1871,7 @@ SOAR-AI Team`,
     }
   };
 
-  // This is the function that needs to be updated according to the user's request
+
   const handleScheduleCall = async () => {
     if (!selectedLeadForAction || !callForm.scheduledDate || !callForm.scheduledTime) {
       toast.error("Please fill in all required fields");
@@ -1961,8 +1972,107 @@ SOAR-AI Team`,
 
   const handleScheduleMeeting = (lead: any) => {
     setSelectedLeadForAction(lead);
+    // Reset meeting form state to default when opening the modal
+    setMeetingForm({
+      meetingType: 'Business Presentation',
+      duration: '60 minutes',
+      scheduledDate: '',
+      scheduledTime: '',
+      meetingAgenda: '',
+      preparationNotes: '',
+    });
     setShowScheduleMeetingModal(true);
   };
+
+  // Handler for submitting the Schedule Meeting modal
+  const handleScheduleMeetingSubmit = async () => {
+    if (!selectedLeadForAction || !meetingForm.scheduledDate || !meetingForm.scheduledTime) {
+      toast.error("Please fill in all required fields for scheduling the meeting");
+      return;
+    }
+
+    setIsSchedulingMeeting(true);
+    try {
+      // Construct the full date-time string for the meeting
+      const scheduledDateTime = `${meetingForm.scheduledDate} at ${meetingForm.scheduledTime}`;
+
+      // Prepare email subject and content
+      const emailSubject = `Meeting Scheduled - ${meetingForm.meetingType} with ${selectedLeadForAction.company}`;
+      const emailContent = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #2563eb;">Meeting Scheduled Successfully</h2>
+          <p>Dear ${selectedLeadForAction.contact.split(' ')[0]},</p>
+          <p>This email confirms your upcoming meeting:</p>
+          <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #374151; margin-top: 0;">Meeting Details:</h3>
+            <ul style="color: #6b7280; line-height: 1.6;">
+              <li><strong>Type:</strong> ${meetingForm.meetingType}</li>
+              <li><strong>Duration:</strong> ${meetingForm.duration}</li>
+              <li><strong>Scheduled Date & Time:</strong> ${scheduledDateTime}</li>
+              <li><strong>Agenda:</strong> ${meetingForm.meetingAgenda || 'N/A'}</li>
+              <li><strong>Preparation Notes:</strong> ${meetingForm.preparationNotes || 'N/A'}</li>
+            </ul>
+          </div>
+          <p>We look forward to a productive discussion.</p>
+          <p>Best regards,<br><strong>The SOAR-AI Team</strong></p>
+        </div>
+      `;
+
+      // Call the API to send the meeting confirmation email
+      const response = await leadApi.sendMessage(selectedLeadForAction.id, {
+        method: "Email",
+        subject: emailSubject,
+        message: emailContent,
+        followUpDate: meetingForm.scheduledDate,
+        followUpMode: "Meeting", // Assuming 'Meeting' is a valid follow-up mode
+        is_html: true,
+        template_used: "standard_layout",
+      });
+
+      if (response && response.success) {
+        // Update lead status and next action locally
+        setLeads((prev) =>
+          prev.map((l) =>
+            l.id === selectedLeadForAction.id
+              ? {
+                  ...l,
+                  status: "in-progress", // or 'scheduled' if such status exists
+                  lastActivity: formatDate(new Date()),
+                  nextAction: `${meetingForm.meetingType} scheduled for ${scheduledDateTime}`,
+                }
+              : l,
+          ),
+        );
+
+        toast.success(`Meeting scheduled with ${selectedLeadForAction.company} and confirmation email sent!`);
+        setSuccessMessage(
+          `Meeting with ${selectedLeadForAction.company} scheduled for ${scheduledDateTime}. Confirmation email sent.`
+        );
+        setTimeout(() => setSuccessMessage(""), 5000);
+
+        // Clear form and close modal
+        setMeetingForm({
+          meetingType: 'Business Presentation',
+          duration: '60 minutes',
+          scheduledDate: '',
+          scheduledTime: '',
+          meetingAgenda: '',
+          preparationNotes: '',
+        });
+        setShowScheduleMeetingModal(false);
+        setSelectedLeadForAction(null);
+
+      } else {
+        throw new Error(response?.message || "Failed to send meeting confirmation email");
+      }
+    } catch (error) {
+      console.error("Error scheduling meeting:", error);
+      toast.error("Failed to schedule meeting and send confirmation. Please try again.");
+    } finally {
+      setIsSchedulingMeeting(false);
+    }
+  };
+
 
   const handleScheduleDemo = (lead: any) => {
     setSelectedLeadForAction(lead);
@@ -3845,12 +3955,12 @@ SOAR-AI Team`,
             >
               {isSavingNote ? (
                 <>
-                  <RefreshCw className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                  <Save className="mr-2 h-4 w-4 animate-spin bg-orange-500" />
                   Saving...
                 </>
               ) : (
                 <>
-                  <Save className="mr-2 h-4 w-4 bg-orange-500" />
+                  <Save className="mr-2 h-4 w-4" />
                   Save Note
                 </>
               )}
@@ -4852,7 +4962,7 @@ SOAR-AI Team`,
                 <Label className="text-sm font-medium text-gray-700">Call Type</Label>
                 <Select
                   value={callForm.callType}
-                  onValueChange={(value) => setCallForm(prev => ({...prev, callType: value}))}
+                  onValueChange={(value) => setCallForm(prev => ({ ...prev, callType: value }))}
                 >
                   <SelectTrigger className="mt-1">
                     <SelectValue />
@@ -4860,17 +4970,17 @@ SOAR-AI Team`,
                   <SelectContent>
                     <SelectItem value="Discovery Call">Discovery Call</SelectItem>
                     <SelectItem value="Follow-up Call">Follow-up Call</SelectItem>
-                    <SelectItem value="Presentation Call">Presentation Call</SelectItem>
+                    <SelectItem value="Qualification Call">Qualification Call</SelectItem>
+                    <SelectItem value="Demo Call">Demo Call</SelectItem>
                     <SelectItem value="Closing Call">Closing Call</SelectItem>
-                    <SelectItem value="Check-in Call">Check-in Call</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label className="text-sm font-medium text-gray-700">Duration (minutes)</Label>
+                <Label className="text-sm font-medium text-gray-700">Duration</Label>
                 <Select
                   value={callForm.duration}
-                  onValueChange={(value) => setCallForm(prev => ({...prev, duration: value}))}
+                  onValueChange={(value) => setCallForm(prev => ({ ...prev, duration: value }))}
                 >
                   <SelectTrigger className="mt-1">
                     <SelectValue />
@@ -4880,47 +4990,47 @@ SOAR-AI Team`,
                     <SelectItem value="30 minutes">30 minutes</SelectItem>
                     <SelectItem value="45 minutes">45 minutes</SelectItem>
                     <SelectItem value="60 minutes">60 minutes</SelectItem>
-                    <SelectItem value="90 minutes">90 minutes</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
-
-            <div>
-              <Label className="text-sm font-medium text-gray-700">Scheduled Date & Time</Label>
-              <div className="grid grid-cols-2 gap-2 mt-1">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-sm font-medium text-gray-700">Scheduled Date</Label>
                 <Input
                   type="date"
+                  className="mt-1"
+                  min={new Date().toISOString().split('T')[0]}
                   value={callForm.scheduledDate}
-                  onChange={(e) => setCallForm(prev => ({...prev, scheduledDate: e.target.value}))}
-                  className="text-sm"
+                  onChange={(e) => setCallForm(prev => ({ ...prev, scheduledDate: e.target.value }))}
                 />
+              </div>
+              <div>
+                <Label className="text-sm font-medium text-gray-700">Scheduled Time</Label>
                 <Input
                   type="time"
+                  className="mt-1"
                   value={callForm.scheduledTime}
-                  onChange={(e) => setCallForm(prev => ({...prev, scheduledTime: e.target.value}))}
-                  className="text-sm"
+                  onChange={(e) => setCallForm(prev => ({ ...prev, scheduledTime: e.target.value }))}
                 />
               </div>
             </div>
-
             <div>
               <Label className="text-sm font-medium text-gray-700">Call Agenda</Label>
               <Textarea
+                placeholder="Brief description of call agenda and objectives..."
+                className="mt-1 min-h-[80px] resize-none"
                 value={callForm.callAgenda}
-                onChange={(e) => setCallForm(prev => ({...prev, callAgenda: e.target.value}))}
-                className="mt-1 min-h-[80px] resize-none text-sm"
-                placeholder="Discovery call with contact from company to discuss corporate travel needs and potential partnership opportunities."
+                onChange={(e) => setCallForm(prev => ({ ...prev, callAgenda: e.target.value }))}
               />
             </div>
-
             <div>
-              <Label className="text-sm font-medium text-gray-700">Preparation Notes</Label>
+              <Label className="text-sm font-medium text-gray-700">Preparation Notes (Optional)</Label>
               <Textarea
+                placeholder="Any preparation notes or key points to discuss..."
+                className="mt-1 min-h-[80px] resize-none"
                 value={callForm.preparationNotes}
-                onChange={(e) => setCallForm(prev => ({...prev, preparationNotes: e.target.value}))}
-                placeholder="Any additional preparation notes or context..."
-                className="mt-1 min-h-[60px] resize-none text-sm"
+                onChange={(e) => setCallForm(prev => ({ ...prev, preparationNotes: e.target.value }))}
               />
             </div>
           </div>
@@ -4936,9 +5046,9 @@ SOAR-AI Team`,
               Cancel
             </Button>
             <Button
-              onClick={handleScheduleCall} // This is the updated function call
-              disabled={isInitiatingCall || !callForm.scheduledDate || !callForm.scheduledTime}
-              className="bg-purple-600 hover:bg-purple-700 text-white"
+              onClick={handleScheduleCall}
+              disabled={isInitiatingCall}
+              className="bg-orange-500 hover:bg-orange-600 text-white"
             >
               {isInitiatingCall ? (
                 <>
@@ -4956,574 +5066,134 @@ SOAR-AI Team`,
         </DialogContent>
       </Dialog>
 
-      {/* Schedule Meeting Modal */}
-      <Dialog
-        open={showScheduleMeetingModal}
-        onOpenChange={setShowScheduleMeetingModal}
-      >
+      {/* Schedule Meeting Dialog */}
+      <Dialog open={showScheduleMeetingModal} onOpenChange={setShowScheduleMeetingModal}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-lg">
-              <CalendarDays className="h-5 w-5 text-blue-600" />
-              Schedule Meeting - {selectedLeadForAction?.company}
-            </DialogTitle>
-            <DialogDescription className="text-sm text-gray-600">
-              Schedule a business meeting with {selectedLeadForAction?.contact}{" "}
-              and team
-            </DialogDescription>
+            <div className="flex items-center gap-2">
+              <CalendarDays className="h-5 w-5 text-green-500" />
+              <div>
+                <DialogTitle>
+                  Schedule Meeting - {selectedLeadForAction?.company}
+                </DialogTitle>
+                <DialogDescription>
+                  Schedule a business meeting with {selectedLeadForAction?.contact} at {selectedLeadForAction?.company}
+                </DialogDescription>
+              </div>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute right-4 top-4"
+              onClick={() => setShowScheduleMeetingModal(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+          <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-sm font-medium text-gray-700">
-                  Meeting Type
-                </Label>
-                <Select defaultValue="business">
+                <Label className="text-sm font-medium text-gray-700">Meeting Type</Label>
+                <Select
+                  value={meetingForm.meetingType}
+                  onValueChange={(value) => setMeetingForm(prev => ({ ...prev, meetingType: value }))}
+                >
                   <SelectTrigger className="mt-1">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="business">Business Meeting</SelectItem>
-                    <SelectItem value="discovery">Discovery Call</SelectItem>
-                    <SelectItem value="presentation">
-                      Solution Presentation
-                    </SelectItem>
-                    <SelectItem value="negotiation">
-                      Contract Negotiation
-                    </SelectItem>
-                    <SelectItem value="follow-up">Follow-up Meeting</SelectItem>
+                    <SelectItem value="Business Presentation">Business Presentation</SelectItem>
+                    <SelectItem value="Discovery Meeting">Discovery Meeting</SelectItem>
+                    <SelectItem value="Contract Negotiation">Contract Negotiation</SelectItem>
+                    <SelectItem value="Follow-up Meeting">Follow-up Meeting</SelectItem>
+                    <SelectItem value="Project Review">Project Review</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label className="text-sm font-medium text-gray-700">
-                  Duration (minutes)
-                </Label>
-                <Select defaultValue="60">
+                <Label className="text-sm font-medium text-gray-700">Duration</Label>
+                <Select
+                  value={meetingForm.duration}
+                  onValueChange={(value) => setMeetingForm(prev => ({ ...prev, duration: value }))}
+                >
                   <SelectTrigger className="mt-1">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="30">30 minutes</SelectItem>
-                    <SelectItem value="45">45 minutes</SelectItem>
-                    <SelectItem value="60">60 minutes</SelectItem>
-                    <SelectItem value="90">90 minutes</SelectItem>
-                    <SelectItem value="120">120 minutes</SelectItem>
+                    <SelectItem value="30 minutes">30 minutes</SelectItem>
+                    <SelectItem value="45 minutes">45 minutes</SelectItem>
+                    <SelectItem value="60 minutes">60 minutes</SelectItem>
+                    <SelectItem value="90 minutes">90 minutes</SelectItem>
+                    <SelectItem value="2 hours">2 hours</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
-
-            <div>
-              <Label className="text-sm font-medium text-gray-700">
-                Meeting Title
-              </Label>
-              <Input
-                className="mt-1"
-                defaultValue={`Business Meeting - ${selectedLeadForAction?.company}`}
-                placeholder="Enter meeting title"
-              />
-            </div>
-
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label className="text-sm font-medium text-gray-700">
-                  Scheduled Date & Time
-                </Label>
-                <div className="flex gap-2 mt-1">
-                  <Input
-                    type="date"
-                    placeholder="dd-mm-yyyy"
-                    min={new Date().toISOString().split("T")[0]}
-                    className="flex-1"
-                  />
-                  <Input type="time" placeholder="--:--" className="flex-1" />
-                </div>
+                <Label className="text-sm font-medium text-gray-700">Meeting Date</Label>
+                <Input
+                  type="date"
+                  className="mt-1"
+                  min={new Date().toISOString().split('T')[0]}
+                  value={meetingForm.scheduledDate}
+                  onChange={(e) => setMeetingForm(prev => ({ ...prev, scheduledDate: e.target.value }))}
+                />
               </div>
               <div>
-                <Label className="text-sm font-medium text-gray-700">
-                  Location/Format
-                </Label>
-                <Select defaultValue="virtual">
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="virtual">Virtual Meeting</SelectItem>
-                    <SelectItem value="office">Office Meeting</SelectItem>
-                    <SelectItem value="client-site">Client Site</SelectItem>
-                    <SelectItem value="conference-room">
-                      Conference Room
-                    </SelectItem>
-                    <SelectItem value="phone">Phone Call</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label className="text-sm font-medium text-gray-700">Meeting Time</Label>
+                <Input
+                  type="time"
+                  className="mt-1"
+                  value={meetingForm.scheduledTime}
+                  onChange={(e) => setMeetingForm(prev => ({ ...prev, scheduledTime: e.target.value }))}
+                />
               </div>
             </div>
-
             <div>
-              <Label className="text-sm font-medium text-gray-700">
-                Expected Attendees
-              </Label>
-              <Input
-                className="mt-1"
-                defaultValue={`${selectedLeadForAction?.contact} (Procurement Director)`}
-                placeholder="Enter attendee names and roles"
+              <Label className="text-sm font-medium text-gray-700">Meeting Agenda</Label>
+              <Textarea
+                placeholder="Brief description of meeting agenda and objectives..."
+                className="mt-1 min-h-[80px] resize-none"
+                value={meetingForm.meetingAgenda}
+                onChange={(e) => setMeetingForm(prev => ({ ...prev, meetingAgenda: e.target.value }))}
               />
             </div>
-
             <div>
-              <Label className="text-sm font-medium text-gray-700">
-                Meeting Agenda
-              </Label>
+              <Label className="text-sm font-medium text-gray-700">Preparation Notes (Optional)</Label>
               <Textarea
-                className="mt-1 min-h-[80px]"
-                defaultValue="Travel program requirements, solution presentation, pricing discussion, next steps"
-                placeholder="Enter meeting agenda items"
-              />
-            </div>
-
-            <div>
-              <Label className="text-sm font-medium text-gray-700">
-                Meeting Objectives
-              </Label>
-              <Textarea
-                className="mt-1 min-h-[80px]"
-                defaultValue="Understand travel needs, present SOAR-AI solutions, identify decision makers, establish timeline"
-                placeholder="Enter meeting objectives and expected outcomes"
+                placeholder="Any preparation materials or key points to cover..."
+                className="mt-1 min-h-[80px] resize-none"
+                value={meetingForm.preparationNotes}
+                onChange={(e) => setMeetingForm(prev => ({ ...prev, preparationNotes: e.target.value }))}
               />
             </div>
           </div>
-          <DialogFooter className="flex gap-2 pt-4 border-t">
+          <DialogFooter className="flex gap-2">
             <Button
               variant="outline"
-              onClick={() => setShowScheduleMeetingModal(false)}
-              className="text-gray-600 border-gray-300"
-            >
-              Cancel
-            </Button>
-            <Button
-              className="bg-blue-600 hover:bg-blue-700 text-white"
               onClick={() => {
-                toast.success(
-                  `Meeting scheduled with ${selectedLeadForAction?.contact}`,
-                );
                 setShowScheduleMeetingModal(false);
                 setSelectedLeadForAction(null);
               }}
-            >
-              <CalendarDays className="h-4 w-4 mr-2" />
-              Schedule Meeting
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Schedule Demo Modal */}
-      <Dialog
-        open={showScheduleDemoModal}
-        onOpenChange={setShowScheduleDemoModal}
-      >
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-lg">
-              <Presentation className="h-5 w-5 text-purple-600" />
-              Schedule Demo - TechCorp Solutions
-            </DialogTitle>
-            <DialogDescription className="text-sm text-gray-600">
-              Schedule a product demonstration for Sarah Johnson and team
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="text-sm font-medium text-gray-700">
-                  Demo Type
-                </Label>
-                <Select defaultValue="product">
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="product">Product Demo</SelectItem>
-                    <SelectItem value="platform">Platform Overview</SelectItem>
-                    <SelectItem value="custom">Custom Solution Demo</SelectItem>
-                    <SelectItem value="integration">
-                      Integration Demo
-                    </SelectItem>
-                    <SelectItem value="mobile">Mobile App Demo</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-sm font-medium text-gray-700">
-                  Duration (minutes)
-                </Label>
-                <Select defaultValue="45">
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="30">30 minutes</SelectItem>
-                    <SelectItem value="45">45 minutes</SelectItem>
-                    <SelectItem value="60">60 minutes</SelectItem>
-                    <SelectItem value="90">90 minutes</SelectItem>
-                    <SelectItem value="120">120 minutes</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div>
-              <Label className="text-sm font-medium text-gray-700">
-                Demo Title
-              </Label>
-              <Input
-                className="mt-1"
-                defaultValue={`SOAR-AI Product Demo - ${selectedLeadForAction?.company}`}
-                placeholder="Enter demo title"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="text-sm font-medium text-gray-700">
-                  Scheduled Date & Time
-                </Label>
-                <div className="flex gap-2 mt-1">
-                  <Input
-                    type="date"
-                    placeholder="dd-mm-yyyy"
-                    min={new Date().toISOString().split("T")[0]}
-                    className="flex-1"
-                  />
-                  <Input type="time" placeholder="--:--" className="flex-1" />
-                </div>
-              </div>
-              <div>
-                <Label className="text-sm font-medium text-gray-700">
-                  Demo Format
-                </Label>
-                <Select defaultValue="virtual">
-                  <SelectTrigger className="mt-1">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="virtual">Virtual Demo</SelectItem>
-                    <SelectItem value="onsite">On-site Demo</SelectItem>
-                    <SelectItem value="hybrid">Hybrid Demo</SelectItem>
-                    <SelectItem value="recorded">Recorded Demo</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div>
-              <Label className="text-sm font-medium text-gray-700">
-                Expected Attendees
-              </Label>
-              <Input
-                className="mt-1"
-                defaultValue={`${selectedLeadForAction?.contact} (Procurement Director)`}
-                placeholder="Enter attendee names and roles"
-              />
-            </div>
-
-            <div>
-              <Label className="text-sm font-medium text-gray-700">
-                Focus Areas
-              </Label>
-              <Textarea
-                className="mt-1 min-h-[80px]"
-                defaultValue="Corporate travel booking platform, expense management, travel analytics, policy compliance"
-                placeholder="Enter specific features or use cases to highlight during the demo"
-              />
-            </div>
-
-            <div>
-              <Label className="text-sm font-medium text-gray-700">
-                Preparation Notes
-              </Label>
-              <Textarea
-                className="mt-1 min-h-[80px]"
-                defaultValue={`Prepare demo tailored for ${selectedLeadForAction?.industry} industry. Highlight cost savings and efficiency improvements.`}
-                placeholder="Enter any preparation notes or context for the demo"
-              />
-            </div>
-          </div>
-          <DialogFooter className="flex gap-2 pt-4 border-t">
-            <Button
-              variant="outline"
-              onClick={() => setShowScheduleDemoModal(false)}
               className="text-gray-600 border-gray-300"
             >
               Cancel
             </Button>
             <Button
-              className="bg-purple-600 hover:bg-purple-700 text-white"
-              onClick={() => {
-                toast.success(
-                  `Demo scheduled with ${selectedLeadForAction?.contact}`,
-                );
-                setShowScheduleDemoModal(false);
-                setSelectedLeadForAction(null);
-              }}
+              onClick={handleScheduleMeetingSubmit}
+              disabled={isSchedulingMeeting}
+              className="bg-green-500 hover:bg-green-600 text-white"
             >
-              <Presentation className="h-4 w-4 mr-2" />
-              Schedule Demo
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Assign/Reassign Agent Modal */}
-      <Dialog
-        open={showAssignAgentModal}
-        onOpenChange={setShowAssignAgentModal}
-      >
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
-              <User className="h-5 w-5 text-orange-600" />
-              {selectedLeadForAssign?.assignedAgent
-                ? "Reassign Sales Agent"
-                : "Assign Sales Agent"}{" "}
-              - {selectedLeadForAssign?.company}
-            </DialogTitle>
-            <DialogDescription className="text-sm text-gray-600">
-              {selectedLeadForAssign?.assignedAgent
-                ? `Reassign this lead from ${selectedLeadForAssign.assignedAgent} to a new sales agent for personalized follow-up and management`
-                : "Assign this lead to a sales agent for personalized follow-up and management"}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-5 py-4">
-            {/* Current Agent Display (for reassignment) */}
-            {selectedLeadForAssign?.assignedAgent && (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                <p className="text-sm text-yellow-800">
-                  <strong>Currently assigned to:</strong> {selectedLeadForAssign.assignedAgent}
-                </p>
-              </div>
-            )}
-
-            <div>
-              <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                {selectedLeadForAssign?.assignedAgent
-                  ? "Select New Sales Agent"
-                  : "Select Sales Agent"}
-              </Label>
-              <Select
-                value={selectedLeadForAssign?.assignedAgent
-                ? selectedLeadForAssign?.assignedAgent : selectedAgent}
-                onValueChange={setSelectedAgent}
-                disabled={loadingUsers}
-              >
-                <SelectTrigger>
-                  <SelectValue
-                    placeholder={
-                      loadingUsers ? "Loading agents..." : "Choose an agent..."
-                    }
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {loadingUsers ? (
-                    <SelectItem value="loading" disabled>
-                      Loading agents...
-                    </SelectItem>
-                  ) : users.length > 0 ? (
-                    users
-                      .filter(
-                        (user) => user.username && user.username.trim() !== "",
-                      ) // Filter out users with empty usernames
-                      .map((user) => (
-                        <SelectItem
-                          key={user.id}
-                          value={user.username || `user_${user.id}`}
-                        >
-                          {user.first_name && user.last_name
-                            ? `${user.first_name} ${user.last_name} (${user.username})`
-                            : user.username || `User ${user.id}`}
-                          {user.username === selectedLeadForAssign?.assignedAgent && ' (Current)'}
-                        </SelectItem>
-                      ))
-                  ) : (
-                    <SelectItem value="no-users" disabled>
-                      No sales agents available
-                    </SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Assignment Priority */}
-            <div>
-              <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                Assignment Priority
-              </Label>
-              <Select
-                value={assignmentPriority}
-                onValueChange={setAssignmentPriority}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Low Priority">Low Priority</SelectItem>
-                  <SelectItem value="Medium Priority">
-                    Medium Priority
-                  </SelectItem>
-                  <SelectItem value="High Priority">High Priority</SelectItem>
-                  <SelectItem value="Urgent">Urgent</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Assignment Notes */}
-            <div>
-              <Label className="text-sm font-medium text-gray-700 mb-2 block">
-                Assignment Notes
-              </Label>
-              <Textarea
-                value={assignmentNotes}
-                onChange={(e) => setAssignmentNotes(e.target.value)}
-                placeholder="Any specific instructions or context for the assigned agent..."
-                className="min-h-[80px] resize-none"
-              />
-            </div>
-
-            {/* Lead Summary */}
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-              <div className="text-sm font-medium text-gray-700 mb-2">
-                Lead Summary
-              </div>
-              <div className="space-y-1 text-sm text-gray-600">
-                <div>Industry: {selectedLeadForAssign?.industry}</div>
-                <div>Budget: {selectedLeadForAssign?.travelBudget}</div>
-                <div>Score: {selectedLeadForAssign?.score}</div>
-                <div>Status: {selectedLeadForAssign?.status}</div>
-                <div>
-                  AI Suggestion:{" "}
-                  {selectedLeadForAssign?.score >= 80
-                    ? "Send detailed cost comparison proposal. Mention case studies."
-                    : "Add to SMB nurture campaign. Follow up in Q4 for growth stage."}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <DialogFooter className="flex gap-2 pt-4 border-t">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowAssignAgentModal(false);
-                setSelectedLeadForAssign(null);
-                setSelectedAgent("");
-                setAssignmentNotes("");
-              }}
-              className="text-gray-600 border-gray-300"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleConfirmAssignAgent}
-              disabled={!selectedAgent || isAssigning || loadingUsers || selectedAgent === selectedLeadForAssign?.assignedAgent}
-              className="bg-orange-500 hover:bg-orange-600 text-white"
-            >
-              {isAssigning ? (
+              {isSchedulingMeeting ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  {selectedLeadForAssign?.assignedAgent ? 'Reassigning...' : 'Assigning...'}
+                  Scheduling...
                 </>
               ) : (
                 <>
-                  <User className="h-4 w-4 mr-2" />
-                  {selectedLeadForAssign?.assignedAgent ? 'Reassign Agent' : 'Assign Agent'}
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Move to Opportunity Confirmation Dialog */}
-      <Dialog
-        open={showMoveToOpportunityDialog}
-        onOpenChange={setShowMoveToOpportunityDialog}
-      >
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
-              <ArrowRight className="h-5 w-5 text-green-600" />
-              Move to Opportunities
-            </DialogTitle>
-            <DialogDescription>
-              Are you sure you want to move "
-              {selectedLeadForOpportunity?.company}" to the Opportunities menu?
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="flex items-center gap-2 mb-2">
-                <Info className="h-4 w-4 text-blue-600" />
-                <span className="text-sm font-medium text-blue-900">
-                  What happens next?
-                </span>
-              </div>
-              <ul className="text-sm text-blue-700 space-y-1">
-                <li>• Lead will be converted to an opportunity</li>
-                <li>• Opportunity stage will be set to "Discovery"</li>
-                <li>• You'll be redirected to the Opportunities page</li>
-                <li>• Lead will remain in the leads list for tracking</li>
-              </ul>
-            </div>
-
-            {selectedLeadForOpportunity && (
-              <div className="space-y-2">
-                <div className="text-sm">
-                  <span className="font-medium">Company:</span>{" "}
-                  {selectedLeadForOpportunity.company}
-                </div>
-                <div className="text-sm">
-                  <span className="font-medium">Contact:</span>{" "}
-                  {selectedLeadForOpportunity.contact}
-                </div>
-                <div className="text-sm">
-                  <span className="font-medium">Estimated Value:</span>{" "}
-                  {selectedLeadForOpportunity.travelBudget}
-                </div>
-              </div>
-            )}
-          </div>
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setShowMoveToOpportunityDialog(false);
-                setSelectedLeadForOpportunity(null);
-              }}
-              className="text-gray-600 border-gray-300"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleConfirmMoveToOpportunity}
-              disabled={
-                movingToOpportunityId === selectedLeadForOpportunity?.id
-              }
-              className="bg-green-600 hover:bg-green-700 text-white"
-            >
-              {movingToOpportunityId === selectedLeadForOpportunity?.id ? (
-                <>
-                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                  Moving...
-                </>
-              ) : (
-                <>
-                  <ArrowRight className="h-4 w-4 mr-2" />
-                  Move to Opportunities
+                  <CalendarDays className="h-4 w-4 mr-2" />
+                  Schedule Meeting
                 </>
               )}
             </Button>
