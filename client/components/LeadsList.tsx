@@ -1892,8 +1892,6 @@ SOAR-AI Team`,
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #2563eb;">Call Scheduled Successfully</h2>
 
-          <p>Dear ${selectedLeadForAction.contact.split(' ')[0]},</p>
-
           <p>This email confirms that we have scheduled a ${callForm.callType.toLowerCase()} for your team at ${selectedLeadForAction.company}.</p>
 
           <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
@@ -1911,7 +1909,6 @@ SOAR-AI Team`,
 
           <p>If you need to reschedule or have any questions, please don't hesitate to reach out.</p>
 
-          <p>Best regards,<br><strong>The SOAR-AI Team</strong></p>
         </div>
       `;
 
@@ -1992,19 +1989,26 @@ SOAR-AI Team`,
       toast.error("Please fill in all required fields for scheduling the meeting");
       return;
     }
-
+    
+    let meetingLink = "";
+    if (meetingForm.provider === "Google Meet") {
+      meetingLink = "https://meet.google.com/pzo-hgan-tft";
+    } else if (meetingForm.provider === "Microsoft Teams") {
+      meetingLink = "https://teams.microsoft.com/l/meetup-join/your-teams-link";
+    } else {
+      meetingLink = "#"; // fallback in case provider is unknown
+    }
     setIsSchedulingMeeting(true);
     try {
       // Construct the full date-time string for the meeting
       const scheduledDateTime = `${meetingForm.scheduledDate} at ${meetingForm.scheduledTime}`;
-
+      // Decide the meeting link dynamically
+      
       // Prepare email subject and content
       const emailSubject = `Meeting Scheduled - ${meetingForm.meetingTitle || 'Business Meeting'} with ${selectedLeadForAction.company}`;
       const emailContent = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #2563eb;">Meeting Scheduled Successfully</h2>
-          <p>Dear ${selectedLeadForAction.contact.split(' ')[0]},</p>
-          <p>This email confirms your upcoming meeting:</p>
           <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="color: #374151; margin-top: 0;">Meeting Details:</h3>
             <ul style="color: #6b7280; line-height: 1.6;">
@@ -2016,8 +2020,11 @@ SOAR-AI Team`,
               <li><strong>Expected Attendees:</strong> ${meetingForm.expectedAttendees || 'N/A'}</li>
             </ul>
           </div>
+         <a href="${meetingLink}" target="_blank" style="display: inline-block; background-color: #2563eb; color: #ffffff; 
+        padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold;">
+        Join ${meetingForm.provider}
+      </a>
           <p>We look forward to a productive discussion.</p>
-          <p>Best regards,<br><strong>The SOAR-AI Team</strong></p>
         </div>
       `;
 
@@ -4932,7 +4939,7 @@ SOAR-AI Team`,
               className="absolute right-4 top-4"
               onClick={() => setShowInitiateCallModal(false)}
             >
-              <X className="h-4 w-4" />
+             
             </Button>
           </DialogHeader>
           <div className="space-y-4">
@@ -5066,7 +5073,6 @@ SOAR-AI Team`,
               className="absolute right-4 top-4"
               onClick={() => setShowScheduleMeetingModal(false)}
             >
-              <X className="h-4 w-4" />
             </Button>
           </DialogHeader>
           <div className="space-y-4">
