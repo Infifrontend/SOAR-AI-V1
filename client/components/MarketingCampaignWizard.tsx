@@ -2433,7 +2433,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                   <Mail className="h-5 w-5" />
                   Email Preview
                 </h3>
-                
+
                 <div className="border rounded-lg overflow-hidden bg-white shadow-sm">
                   {/* Email Header */}
                   <div className="bg-gray-50 px-4 py-3 border-b">
@@ -2484,7 +2484,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                         .replace(/{{sender_name}}/g, 'SOAR-AI Team')
                       }}
                     />
-                    
+
                     {/* Call-to-Action */}
                     {campaignData.content.email.cta && (
                       <div className="mt-6 text-center">
@@ -2568,6 +2568,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                 onClick={() => setShowContentPreview(false)}
                 className="bg-orange-500 hover:bg-orange-600 text-white"
               >
+                <CheckCircle className="h-4 w-4 mr-2" />
                 Continue Editing
               </Button>
             </div>
