@@ -4565,10 +4565,10 @@ def get_history(request):
         entity_type = request.data.get('entity_type')
         entity_id = request.data.get('entity_id')
 
-        if lead_id:
+        if entity_id:
             # Get lead history
             try:
-                lead = Lead.objects.get(id=lead_id)
+                lead = Lead.objects.get(id=entity_id)
                 history_entries = lead.history_entries.all().order_by(
                     '-timestamp')
                 serializer = LeadHistorySerializer(history_entries, many=True)
