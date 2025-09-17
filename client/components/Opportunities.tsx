@@ -868,10 +868,52 @@ const leadApi = useLeadApi();
           setleads([]);
         }
       };
-      useEffect(() => {
-    // Always fetch leads on component mount
-    fetchLeads();
-  }, []); // Keep empty dependency array to run only once on mount
+      const loadOpportunities = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      console.log('Fetching opportunities with filters:', filters);
+      const data = await getOpportunities(filters);
+      console.log('Fetched opportunities data:', data);
+
+      let opportunitiesArray = [];
+      if (Array.isArray(data)) {
+        opportunitiesArray = data;
+      } else if (data && Array.isArray(data.results)) {
+        opportunitiesArray = data.results;
+      } else if (data && Array.isArray(data.opportunities)) {
+        opportunitiesArray = data.opportunities;
+      } else if (data && data.data && Array.isArray(data.data)) {
+        opportunitiesArray = data.data;
+      } else {
+        console.warn("Unexpected opportunities data format:", data);
+        opportunitiesArray = [];
+      }
+
+      console.log('Setting opportunities:', opportunitiesArray);
+      setOpportunities(opportunitiesArray);
+    } catch (error) {
+      console.error('Error loading opportunities:', error);
+      toast.error('Failed to load opportunities');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [getOpportunities, filters]);
+
+  // Load both opportunities and leads data on component mount
+  useEffect(() => {
+    const loadInitialData = async () => {
+      try {
+        await Promise.all([
+          loadOpportunities(),
+          fetchLeads()
+        ]);
+      } catch (error) {
+        console.error('Error loading initial data:', error);
+      }
+    };
+
+    loadInitialData();
+  }, []); // Run only once on component mount
     const transformApiLeadToUILead = (apiLead: any) => {
     // Get the latest note from lead_notes array if available
     const latestNote = apiLead.lead_notes && apiLead.lead_notes.length > 0 
