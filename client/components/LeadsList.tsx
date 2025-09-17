@@ -5190,6 +5190,181 @@ SOAR-AI Team`,
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Assign Agent Dialog */}
+      <Dialog open={showAssignAgentModal} onOpenChange={setShowAssignAgentModal}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <User className="h-5 w-5 text-orange-600" />
+              {selectedLeadForAssign?.assignedAgent ? 'Reassign Agent' : 'Assign Agent'}
+            </DialogTitle>
+            <DialogDescription>
+              {selectedLeadForAssign?.assignedAgent
+                ? `Reassign ${selectedLeadForAssign?.company} to a different agent.`
+                : `Assign ${selectedLeadForAssign?.company} to an agent for follow-up.`
+              }
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="agent-select" className="text-sm font-medium text-gray-700">
+                Select Agent
+              </Label>
+              {loadingUsers ? (
+                <div className="flex items-center justify-center py-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-600"></div>
+                  <span className="ml-2 text-sm text-gray-600">Loading agents...</span>
+                </div>
+              ) : (
+                <Select value={selectedAgent} onValueChange={setSelectedAgent}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose an agent..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {users && users.length > 0 ? (
+                      users.map((user) => (
+                        <SelectItem key={user.id} value={user.username}>
+                          {user.first_name && user.last_name
+                            ? `${user.first_name} ${user.last_name} (${user.username})`
+                            : user.username
+                          }
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="no-agents" disabled>
+                        No agents available
+                      </SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="priority-select" className="text-sm font-medium text-gray-700">
+                Assignment Priority
+              </Label>
+              <Select value={assignmentPriority} onValueChange={setAssignmentPriority}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Low Priority">Low Priority</SelectItem>
+                  <SelectItem value="Medium Priority">Medium Priority</SelectItem>
+                  <SelectItem value="High Priority">High Priority</SelectItem>
+                  <SelectItem value="Urgent">Urgent</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="assignment-notes" className="text-sm font-medium text-gray-700">
+                Assignment Notes (Optional)
+              </Label>
+              <Textarea
+                id="assignment-notes"
+                value={assignmentNotes}
+                onChange={(e) => setAssignmentNotes(e.target.value)}
+                placeholder="Any specific instructions or notes for the assigned agent..."
+                className="min-h-[80px] resize-none"
+              />
+            </div>
+
+            {selectedLeadForAssign?.assignedAgent && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <p className="text-sm text-yellow-800">
+                  <strong>Current Agent:</strong> {selectedLeadForAssign.assignedAgent}
+                </p>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowAssignAgentModal(false);
+                setSelectedLeadForAssign(null);
+                setSelectedAgent('');
+                setAssignmentNotes('');
+              }}
+              className="text-gray-600 border-gray-300"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirmAssignAgent}
+              disabled={!selectedAgent || isAssigning || loadingUsers}
+              className="bg-orange-500 hover:bg-orange-600 text-white"
+            >
+              {isAssigning ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  {selectedLeadForAssign?.assignedAgent ? 'Reassigning...' : 'Assigning...'}
+                </>
+              ) : (
+                <>
+                  <User className="h-4 w-4 mr-2" />
+                  {selectedLeadForAssign?.assignedAgent ? 'Reassign Agent' : 'Assign Agent'}
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Move To Opportunity Confirmation Dialog */}
+      <Dialog
+        open={showMoveToOpportunityDialog}
+        onOpenChange={setShowMoveToOpportunityDialog}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-green-700">
+              <ArrowRight className="h-5 w-5" />
+              Move to Opportunity
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to move{" "}
+              <span className="font-semibold">
+                {selectedLeadForOpportunity?.company}
+              </span>{" "}
+              to opportunities? This will create a new opportunity record.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowMoveToOpportunityDialog(false);
+                setSelectedLeadForOpportunity(null);
+              }}
+              className="text-gray-600 border-gray-300"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirmMoveToOpportunity}
+              className="bg-green-500 hover:bg-green-600 text-white"
+              disabled={movingToOpportunityId !== null}
+            >
+              {movingToOpportunityId !== null ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Moving...
+                </>
+              ) : (
+                <>
+                  <ArrowRight className="h-4 w-4 mr-2" />
+                  Move to Opportunity
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
