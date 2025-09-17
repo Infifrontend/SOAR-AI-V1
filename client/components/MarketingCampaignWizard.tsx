@@ -182,7 +182,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
   const { 
     getEmailTemplates,
     loading: emailTemplateLoading,
-    error: emailTemplateError 
+    // error: emailTemplateError 
   } = useEmailTemplateApi();
 
   const { 
@@ -194,7 +194,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
   } = useLeadApi();
 
   useEffect(() => {
-    loadTemplates();
+    // loadTemplates();
     loadEmailTemplates();
   }, []);
 
@@ -921,12 +921,12 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
               </div>
               <p className="text-sm text-gray-600">Choose a template to get started quickly</p>
 
-              {(apiLoading || loadingEmailTemplates) && (
+              {/* {(apiLoading || loadingEmailTemplates) && (
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="h-6 w-6 animate-spin" />
                   <span className="ml-2">Loading templates...</span>
                 </div>
-              )}
+              )} */}
 
               {(apiError || emailTemplateError) && (
                 <Alert>
@@ -937,7 +937,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
               )}
 
               {/* Campaign Templates Section */}
-              <div>
+              {/* <div>
                 <h4 className="text-sm font-semibold text-gray-900 mb-3">Campaign Templates</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
                   {getFilteredTemplates().map((template) => (
@@ -983,7 +983,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                     </Card>
                   ))}
                 </div>
-              </div>
+              </div> */}
 
               {/* Email Templates Section */}
               <div>
