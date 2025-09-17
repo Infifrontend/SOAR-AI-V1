@@ -476,7 +476,7 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
 
   const fetchTemplates = async () => {
     try {
-      const response = await fetch('https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/api/campaign-templates/');
+      const response = await fetch('https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/api/email-templates/');
       if (!response.ok) {
         throw new Error('Failed to fetch templates');
       }
