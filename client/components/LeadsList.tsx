@@ -5063,24 +5063,27 @@ Key Topics: Travel volume, preferred airlines, booking preferences, cost optimiz
               </Label>
               <Select value={selectedAgent} onValueChange={setSelectedAgent} disabled={loadingUsers}>
                 <SelectTrigger>
-                  <SelectValue placeholder={loadingUsers ? "Loading users..." : "Choose an agent..."} />
+                  <SelectValue placeholder={loadingUsers ? "Loading agents..." : "Choose an agent..."} />
                 </SelectTrigger>
                 <SelectContent>
                   {loadingUsers ? (
-                    <SelectItem value="" disabled>Loading users...</SelectItem>
+                    <SelectItem value="loading" disabled>
+                      Loading agents...
+                    </SelectItem>
                   ) : users.length > 0 ? (
-                    users.map((user) => (
-                      <SelectItem key={user.id} value={user.username}>
-                        {user.first_name && user.last_name
-                          ? `${user.first_name} ${user.last_name}`
-                          : user.username}
-                        {user.email && (
-                          <span className="text-sm text-gray-500 ml-2">({user.email})</span>
-                        )}
-                      </SelectItem>
-                    ))
+                    users
+                      .filter(user => user.username && user.username.trim() !== '') // Filter out users with empty usernames
+                      .map((user) => (
+                        <SelectItem key={user.id} value={user.username || `user_${user.id}`}>
+                          {user.first_name && user.last_name
+                            ? `${user.first_name} ${user.last_name}`
+                            : user.username || `User ${user.id}`}
+                        </SelectItem>
+                      ))
                   ) : (
-                    <SelectItem value="" disabled>No users available</SelectItem>
+                    <SelectItem value="no-users" disabled>
+                      No sales agents available
+                    </SelectItem>
                   )}
                 </SelectContent>
               </Select>
