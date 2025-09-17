@@ -3193,13 +3193,13 @@ SOAR-AI Team`,
                           <CalendarDays className="h-4 w-4" />
                           Schedule Meeting
                         </DropdownMenuItem>
-                        <DropdownMenuItem
+                        {/* <DropdownMenuItem
                           className="flex items-center gap-2 cursor-pointer"
                           onClick={() => handleScheduleDemo(lead)}
                         >
                           <Presentation className="h-4 w-4" />
                           Schedule Demo
-                        </DropdownMenuItem>
+                        </DropdownMenuItem> */}
                       </DropdownMenuContent>
                     </DropdownMenu>
                     {lead.status === "qualified" && (
