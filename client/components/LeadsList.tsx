@@ -387,8 +387,7 @@ const transformCompanyDataForViewProfile = (apiLead) => {
       ? `${(apiLead.company.travel_budget / 1000000).toFixed(1)}M`
       : "1.0M",
     annualTravelVolume:
-      apiLead.company.annual_travel_volume ||
-      `${Math.floor(Math.random() * 5000) + 1000} trips`,
+      apiLead.company.travel_frequency || getRandomTravelFrequency(),
     contracts: Math.floor(Math.random() * 20) + 1,
     revenue:
       apiLead.company.annual_revenue ||
@@ -756,6 +755,7 @@ export function LeadsList({ initialFilters, onNavigate }: LeadsListProps) {
     subject: "",
     message: "",
     followUpDate: "",
+    followUpMode: "", // Added followUpMode to contactForm
   });
   const [showAddNoteDialog, setShowAddNoteDialog] = useState(false);
   const [selectedLeadForNote, setSelectedLeadForNote] = useState<any>(null);
@@ -1860,6 +1860,104 @@ SOAR-AI Team`,
     }
   };
 
+  // This is the function that needs to be updated according to the user's request
+  const handleScheduleCall = async () => {
+    if (!selectedLeadForAction || !callForm.scheduledDate || !callForm.scheduledTime) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    try {
+      setIsInitiatingCall(true);
+
+      // Format the scheduled date and time
+      const scheduledDateTime = `${callForm.scheduledDate} at ${callForm.scheduledTime}`;
+
+      // Create professional email content
+      const emailSubject = `Call Scheduled - ${callForm.callType} with ${selectedLeadForAction.company}`;
+
+      const emailContent = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2 style="color: #2563eb;">Call Scheduled Successfully</h2>
+
+          <p>Dear ${selectedLeadForAction.contact.split(' ')[0]},</p>
+
+          <p>This email confirms that we have scheduled a ${callForm.callType.toLowerCase()} for your team at ${selectedLeadForAction.company}.</p>
+
+          <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="color: #374151; margin-top: 0;">Call Details:</h3>
+            <ul style="color: #6b7280; line-height: 1.6;">
+              <li><strong>Type:</strong> ${callForm.callType}</li>
+              <li><strong>Duration:</strong> ${callForm.duration}</li>
+              <li><strong>Scheduled Date & Time:</strong> ${scheduledDateTime}</li>
+              ${callForm.callAgenda ? `<li><strong>Agenda:</strong> ${callForm.callAgenda}</li>` : ''}
+              ${callForm.preparationNotes ? `<li><strong>Preparation Notes:</strong> ${callForm.preparationNotes}</li>` : ''}
+            </ul>
+          </div>
+
+          <p>We look forward to discussing how SOAR-AI can help optimize ${selectedLeadForAction.company}'s corporate travel needs.</p>
+
+          <p>If you need to reschedule or have any questions, please don't hesitate to reach out.</p>
+
+          <p>Best regards,<br><strong>The SOAR-AI Team</strong></p>
+        </div>
+      `;
+
+      // Send email via API
+      const response = await leadApi.sendMessage(selectedLeadForAction.id, {
+        method: "Email",
+        subject: emailSubject,
+        message: emailContent,
+        followUpDate: callForm.scheduledDate,
+        followUpMode: "Call",
+        is_html: true,
+        template_used: "standard_layout",
+      });
+
+      if (response && response.success) {
+        // Update lead status locally
+        setLeads((prev) =>
+          prev.map((l) =>
+            l.id === selectedLeadForAction.id
+              ? {
+                  ...l,
+                  status: "contacted",
+                  lastContact: formatDate(new Date()),
+                  nextAction: `${callForm.callType} scheduled for ${scheduledDateTime}`,
+                }
+              : l,
+          ),
+        );
+
+        toast.success(`${callForm.callType} scheduled and email sent successfully!`);
+        setSuccessMessage(
+          `${callForm.callType} scheduled with ${selectedLeadForAction.company} for ${scheduledDateTime}. Confirmation email sent.`
+        );
+        setTimeout(() => setSuccessMessage(""), 5000);
+      } else {
+        throw new Error(response?.message || "Failed to send confirmation email");
+      }
+
+      // Reset form and close dialog
+      setCallForm({
+        callType: 'Discovery Call',
+        duration: '30 minutes',
+        scheduledDate: '',
+        scheduledTime: '',
+        callAgenda: '',
+        preparationNotes: '',
+      });
+      setShowInitiateCallModal(false);
+      setSelectedLeadForAction(null);
+
+    } catch (error) {
+      console.error("Error scheduling call:", error);
+      toast.error("Failed to schedule call and send email. Please try again.");
+    } finally {
+      setIsInitiatingCall(false);
+    }
+  };
+
 
   const handleScheduleMeeting = (lead: any) => {
     setSelectedLeadForAction(lead);
@@ -2312,14 +2410,6 @@ SOAR-AI Team`,
           >
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
-          </Button>
-          <Button
-            variant="outline"
-            className="text-gray-700 hover:bg-gray-50 cls-addcomapany"
-            onClick={() => onNavigate("email-campaigns")}
-          >
-            <Mail className="h-4 w-4 mr-2" />
-            Email Campaign
           </Button>
           <Button
             className="bg-orange-500 hover:bg-orange-600 text-white"
@@ -3985,7 +4075,7 @@ SOAR-AI Team`,
               Qualify Lead
             </DialogTitle>
             <DialogDescription>
-              Are you sure to qualify this corporate{" "}
+              Are you sure you want to qualify this corporate{" "}
               <span className="font-semibold">
                 {selectedLeadForQualify?.company}
               </span>
@@ -4846,7 +4936,7 @@ SOAR-AI Team`,
               Cancel
             </Button>
             <Button
-              onClick={handleInitiateCallSubmit}
+              onClick={handleScheduleCall} // This is the updated function call
               disabled={isInitiatingCall || !callForm.scheduledDate || !callForm.scheduledTime}
               className="bg-purple-600 hover:bg-purple-700 text-white"
             >
