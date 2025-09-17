@@ -3219,7 +3219,7 @@ SOAR-AI Team`,
                       onClick={() => handleAssignAgent(lead)}
                     >
                       <User className="h-4 w-4 mr-1" />
-                      {lead.assignedAgent !== null ? "Reassign" : "Assign Agent"}
+                      {lead.assignedAgent ? "Reassign" : "Assign Agent"}
                     </Button>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
