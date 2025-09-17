@@ -4083,61 +4083,31 @@ SOAR-AI Team`,
                                 {(entry.history_type === "agent_assignment" ||
                                   entry.history_type ===
                                     "agent_reassignment") && (
-                                  <div className="mt-2 p-2 bg-blue-50 rounded-md border border-blue-200">
-                                    <div className="space-y-1 text-xs">
-                                      {entry.assigned_agent && (
-                                        <div className="flex items-center gap-2">
-                                          <Users className="w-3 h-3 text-blue-600" />
-                                          <span className="font-medium">
-                                            Agent:
-                                          </span>
-                                          <span className="text-blue-700">
-                                            {entry.assigned_agent}
-                                          </span>
-                                        </div>
-                                      )}
-                                      {entry.previous_agent && (
-                                        <div className="flex items-center gap-2">
-                                          <span className="font-medium">
-                                            Previous Agent:
-                                          </span>
-                                          <span className="text-gray-600">
-                                            {entry.previous_agent}
-                                          </span>
-                                        </div>
-                                      )}
-                                      {entry.assignment_priority && (
-                                        <div className="flex items-center gap-2">
-                                          <span className="font-medium">
-                                            Priority:
-                                          </span>
-                                          <span
-                                            className={`px-1 py-0.5 rounded text-xs ${
-                                              entry.assignment_priority ===
-                                              "High Priority"
-                                                ? "bg-red-100 text-red-700"
-                                                : entry.assignment_priority ===
-                                                    "Medium Priority"
-                                                  ? "bg-yellow-100 text-yellow-700"
-                                                  : "bg-gray-100 text-gray-700"
-                                            }`}
-                                          >
-                                            {entry.assignment_priority}
-                                          </span>
-                                        </div>
-                                      )}
-                                      {entry.assignment_notes && (
-                                        <div className="flex items-start gap-2">
-                                          <MessageSquare className="w-3 h-3 text-blue-600 mt-0.5" />
-                                          <span className="font-medium">
-                                            Notes:
-                                          </span>
-                                          <span className="text-gray-700">
-                                            {entry.assignment_notes}
-                                          </span>
-                                        </div>
-                                      )}
-                                    </div>
+                                  <div className="mt-2 p-2 bg-blue-50 rounded text-xs">
+                                    {entry.assigned_agent && (
+                                      <div>
+                                        <strong>Assigned to:</strong>{" "}
+                                        {entry.assigned_agent}
+                                      </div>
+                                    )}
+                                    {entry.previous_agent && (
+                                      <div>
+                                        <strong>Previous agent:</strong>{" "}
+                                        {entry.previous_agent}
+                                      </div>
+                                    )}
+                                    {entry.assignment_priority && (
+                                      <div>
+                                        <strong>Priority:</strong>{" "}
+                                        {entry.assignment_priority}
+                                      </div>
+                                    )}
+                                    {entry.assignment_notes && (
+                                      <div>
+                                        <strong>Notes:</strong>{" "}
+                                        {entry.assignment_notes}
+                                      </div>
+                                    )}
                                   </div>
                                 )}
                               </div>
@@ -4157,9 +4127,14 @@ SOAR-AI Team`,
                   )}
                 </div>
               ) : (
-                <div className="text-center py-8 text-gray-500">
+                <div className="text-center py-8">
                   <History className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                  <p>No history available for this lead.</p>
+                  <h3 className="text-lg font-medium mb-2">
+                    No History Available
+                  </h3>
+                  <p className="text-gray-600">
+                    No activity recorded for this lead yet.
+                  </p>
                 </div>
               )}
             </div>
