@@ -454,11 +454,11 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
+    return new Date(dateString).toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                      month: "2-digit", 
+                      year: "numeric"
+                    });
   };
 
   const getPerformanceScore = (campaign: Campaign) => {
@@ -1224,10 +1224,10 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
               </p>
             </div>
             <div className="flex gap-3 mb-6">
-              <Button variant="outline" onClick={handleCreateStandardTemplate}>
+              {/* <Button variant="outline" onClick={handleCreateStandardTemplate}>
                 <Plus className="h-4 w-4 mr-2" />
                 Create Standard Template
-              </Button>
+              </Button> */}
               {/* <Button variant="outline" onClick={handleCreateTemplate}>
                 <Plus className="h-4 w-4 mr-2" />
                 Create Custom Template
