@@ -1160,16 +1160,16 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                             <Button
                               variant="outline"
                               size="sm"
+                              className="flex-1 bg-orange-500 hover:bg-orange-600 text-xs text-white"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handlePreviewEmailTemplate(template);
                               }}
-                              className="flex-1 text-xs"
                             >
                               <Eye className="h-3 w-3 mr-1" />
                               Preview
                             </Button>
-                            <Button
+                            {/* <Button
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -1179,7 +1179,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                             >
                               <CheckCircle className="h-3 w-3 mr-1" />
                               Select
-                            </Button>
+                            </Button> */}
                           </div>
                         </CardContent>
                       </Card>
@@ -1431,7 +1431,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
 
       case 3:
         return (
-          <div className="space-y-8 max-w-4xl mx-auto">
+          <div className="space-y-8  mx-auto">
             <div className="text-center">
               <h3 className="text-2xl font-semibold text-gray-900 mb-2">Content Creation</h3>
               <p className="text-gray-600">Create compelling content for your marketing campaign</p>
@@ -1525,7 +1525,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                       </Label>
                       <div className="space-y-4">
                         {/* Content Structure Guide */}
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        {/* <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                           <div className="flex items-start gap-3">
                             <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
                             <div>
@@ -1557,7 +1557,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                               </div>
                             </div>
                           </div>
-                        </div>
+                        </div> */}
 
                         {/* Enhanced Content Editor */}
                         <div className="border rounded-lg overflow-hidden bg-white shadow-sm">

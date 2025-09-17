@@ -251,7 +251,7 @@ export function RichTextEditor({
               </div>
 
               {/* Custom Variable Input */}
-              <div className="pt-3 border-t">
+              {/* <div className="pt-3 border-t">
                 <Label className="text-xs font-medium text-gray-600 mb-2 block">
                   Add Custom Variable
                 </Label>
@@ -282,7 +282,7 @@ export function RichTextEditor({
                     Variables will be replaced with actual data when emails are sent.
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
         )}
@@ -316,22 +316,25 @@ export function RichTextEditor({
           variant="outline"
           size="sm"
           onClick={() => {
-            const sampleText = `Dear {{contact_name}},
+            const sampleText = `<p>Dear {{contact_name}},</p>
 
-I hope this email finds you well. I'm reaching out regarding {{company_name}}'s travel management needs.
+        <p>I hope this email finds you well. I'm reaching out regarding <strong>{{company_name}}</strong>'s travel management needs.</p>
 
-As a leading company in the {{industry}} industry with {{employees}} employees, I believe {{company_name}} would benefit significantly from our comprehensive travel solutions.
+        <p>As a leading company in the <strong>{{industry}}</strong> industry with <strong>{{employees}}</strong> employees, I believe <strong>{{company_name}}</strong> would benefit significantly from our comprehensive travel solutions.</p>
 
-Our services include:
-• Corporate travel booking and management
-• Policy compliance monitoring  
-• 24/7 travel support
-• Cost optimization strategies
+        <p>Our services include:</p>
+        <ul class="list">
+          <li>Corporate travel booking and management</li>
+          <li>Policy compliance monitoring</li>
+          <li>24/7 travel support</li>
+          <li>Cost optimization strategies</li>
+        </ul>
 
-I'd love to schedule a brief call to discuss how we can help optimize {{company_name}}'s travel budget of {{travel_budget}}.
+        <p>I'd love to schedule a brief call to discuss how we can help optimize <strong>{{company_name}}</strong>'s travel budget of <strong>{{travel_budget}}</strong>.</p>
 
-Best regards,
-{{sender_name}}`;
+        <a class="cta" href="{{cta_link}}">Schedule a call</a>
+
+        <p class="signature">Best regards,<br>{{sender_name}}</p>`;
 
             onChange(sampleText);
           }}

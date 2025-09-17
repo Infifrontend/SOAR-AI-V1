@@ -5187,7 +5187,7 @@ SOAR-AI Team`,
                 </>
               )}
             </Button>
-          </DialogFooter>
+          </DialogFooter>Pco
         </DialogContent>
       </Dialog>
 
@@ -5214,8 +5214,17 @@ SOAR-AI Team`,
               </Label>
               {loadingUsers ? (
                 <div className="flex items-center justify-center py-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-600"></div>
-                  <span className="ml-2 text-sm text-gray-600">Loading agents...</span>
+                   <Select>
+                     <SelectTrigger disabled>
+                       <SelectValue placeholder="Loading agents..." />
+                       </SelectTrigger>
+                     <SelectContent>
+                       <SelectItem value="loading" disabled>
+                         Loading agents...
+                       </SelectItem>
+                     </SelectContent> 
+                   </Select>
+                   
                 </div>
               ) : (
                 <Select value={selectedAgent} onValueChange={setSelectedAgent}>
@@ -5227,7 +5236,7 @@ SOAR-AI Team`,
                       users.map((user) => (
                         <SelectItem key={user.id} value={user.username}>
                           {user.first_name && user.last_name
-                            ? `${user.first_name} ${user.last_name} (${user.username})`
+                            ? `${user.first_name} ${user.last_name} (${user.email})`
                             : user.username
                           }
                         </SelectItem>

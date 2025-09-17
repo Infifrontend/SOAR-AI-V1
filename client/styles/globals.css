@@ -1219,6 +1219,18 @@ html {
     white-space: wrap !important;
     width: 200px;
   }
+  *{
+    color:inherit;
+    font-family: inherit;
+    font-size: inherit;
+    list-style-type: inherit;
+  }
+  ol{
+    list-style-type: auto !important;
+  }
+  ul{
+    list-style-type: auto !important;
+  }
 
   .bg-card {
     background-color: white !important;
