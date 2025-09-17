@@ -1520,22 +1520,142 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                     </div>
 
                     <div>
-                      <Label htmlFor="email-body" className="text-base font-medium text-gray-900 mb-2 block">
+                      <Label htmlFor="email-body" className="text-base font-medium text-gray-900 mb-3 block">
                         Email Content
                       </Label>
-                      <div className="bg-gray-50 rounded-lg p-1">
-                        <RichTextEditor
-                          value={campaignData.content.email.body || ''}
-                          onChange={(value) => setCampaignData(prev => ({
-                            ...prev,
-                            content: {
-                              ...prev.content,
-                              email: { ...prev.content.email, body: value }
-                            }
-                          }))}
-                          placeholder="Hi {{contact_name}},\n\nManaging travel compliance for {{employees}} employees can be challenging. SOAR-AI ensures 100% policy adherence while maintaining traveler satisfaction.\n\nKey compliance features for {{industry}} companies:\n• Automated policy enforcement\n• Real-time approval workflows\n• Expense management integration\n• Regulatory compliance reporting\n• Instant policy violation alerts\n\n{{company_name}} can achieve complete travel governance without slowing down your team."
-                          showVariables={true}
-                        />
+                      <div className="space-y-4">
+                        {/* Content Structure Guide */}
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <div className="flex items-start gap-3">
+                            <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                            <div>
+                              <h4 className="font-medium text-blue-900 mb-2">Content Structure Guide</h4>
+                              <div className="text-sm text-blue-800 space-y-2">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div>
+                                    <strong>Recommended Structure:</strong>
+                                    <ul className="mt-1 space-y-1 text-xs">
+                                      <li>• Personalized greeting</li>
+                                      <li>• Problem identification</li>
+                                      <li>• Solution overview</li>
+                                      <li>• Key benefits (bulleted)</li>
+                                      <li>• Call to action</li>
+                                      <li>• Professional closing</li>
+                                    </ul>
+                                  </div>
+                                  <div>
+                                    <strong>Formatting Tips:</strong>
+                                    <ul className="mt-1 space-y-1 text-xs">
+                                      <li>• Use bullet points for lists</li>
+                                      <li>• Bold important phrases</li>
+                                      <li>• Keep paragraphs short</li>
+                                      <li>• Include personalization variables</li>
+                                      <li>• Use line breaks for readability</li>
+                                    </ul>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Enhanced Content Editor */}
+                        <div className="border rounded-lg overflow-hidden bg-white shadow-sm">
+                          <div className="bg-gray-50 px-4 py-2 border-b">
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm font-medium text-gray-700">Content Editor</span>
+                              <div className="flex items-center gap-2 text-xs text-gray-500">
+                                <span>Use variables for personalization</span>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    const sampleContent = `<p><strong>Hi {{contact_name}},</strong></p>
+
+<p>Managing travel compliance for {{employees}} employees can be challenging. SOAR-AI ensures 100% policy adherence while maintaining traveler satisfaction.</p>
+
+<p><strong>Key compliance features for {{industry}} companies:</strong></p>
+<ul>
+<li>Automated policy enforcement</li>
+<li>Real-time approval workflows</li>
+<li>Expense management integration</li>
+<li>Regulatory compliance reporting</li>
+<li>Instant policy violation alerts</li>
+</ul>
+
+<p>{{company_name}} can achieve complete travel governance without slowing down your team.</p>
+
+<p><strong>Why choose SOAR-AI:</strong></p>
+<ul>
+<li>Save up to 30% on travel costs</li>
+<li>Reduce booking time by 75%</li>
+<li>24/7 traveler support</li>
+<li>Enterprise-grade security</li>
+</ul>
+
+<p>Let's discuss how we can transform your travel program.</p>
+
+<p>Best regards,<br>
+{{sender_name}}<br>
+SOAR-AI Team</p>`;
+                                    setCampaignData(prev => ({
+                                      ...prev,
+                                      content: {
+                                        ...prev.content,
+                                        email: { ...prev.content.email, body: sampleContent }
+                                      }
+                                    }));
+                                  }}
+                                  className="text-blue-600 hover:text-blue-700 h-6 px-2"
+                                >
+                                  Load Sample
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="p-4">
+                            <RichTextEditor
+                              value={campaignData.content.email.body || ''}
+                              onChange={(value) => setCampaignData(prev => ({
+                                ...prev,
+                                content: {
+                                  ...prev.content,
+                                  email: { ...prev.content.email, body: value }
+                                }
+                              }))}
+                              placeholder="Click 'Load Sample' above for a structured template, or start writing your personalized content here..."
+                              showVariables={true}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Content Preview */}
+                        <div className="border rounded-lg bg-gray-50">
+                          <div className="bg-gray-100 px-4 py-2 border-b">
+                            <span className="text-sm font-medium text-gray-700">Live Preview</span>
+                          </div>
+                          <div className="p-4 bg-white max-h-60 overflow-y-auto">
+                            {campaignData.content.email.body ? (
+                              <div 
+                                className="prose prose-sm max-w-none"
+                                dangerouslySetInnerHTML={{
+                                  __html: campaignData.content.email.body
+                                    .replace(/{{contact_name}}/g, '<span class="bg-yellow-100 px-1 rounded">Sarah Johnson</span>')
+                                    .replace(/{{company_name}}/g, '<span class="bg-yellow-100 px-1 rounded">TechCorp Solutions</span>')
+                                    .replace(/{{employees}}/g, '<span class="bg-yellow-100 px-1 rounded">2,500</span>')
+                                    .replace(/{{industry}}/g, '<span class="bg-yellow-100 px-1 rounded">Technology</span>')
+                                    .replace(/{{sender_name}}/g, '<span class="bg-yellow-100 px-1 rounded">Alex Smith</span>')
+                                }}
+                              />
+                            ) : (
+                              <div className="text-gray-400 text-sm italic">
+                                Your content will appear here as you type. Variables will be highlighted.
+                              </div>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
 

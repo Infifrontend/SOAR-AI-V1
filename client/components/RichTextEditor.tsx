@@ -1,10 +1,10 @@
-
-import React, { useRef, useCallback, useMemo } from 'react';
+import React, { useRef, useCallback, useMemo, useState } from 'react';
 import ReactQuill, { Quill } from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Label } from './ui/label';
+import { Input } from './ui/input';
 
 // Custom styles for the editor
 const editorStyles = `
@@ -14,19 +14,19 @@ const editorStyles = `
     font-size: 14px;
     line-height: 1.6;
   }
-  
+
   .ql-toolbar {
     border-top: 1px solid #ccc;
     border-left: 1px solid #ccc;
     border-right: 1px solid #ccc;
   }
-  
+
   .ql-container {
     border-bottom: 1px solid #ccc;
     border-left: 1px solid #ccc;
     border-right: 1px solid #ccc;
   }
-  
+
   .personalization-variable {
     background-color: #e3f2fd;
     color: #1976d2;
@@ -35,7 +35,7 @@ const editorStyles = `
     font-weight: 500;
     border: 1px solid #bbdefb;
   }
-  
+
   .variables-panel {
     max-height: 300px;
     overflow-y: auto;
@@ -48,25 +48,23 @@ interface RichTextEditorProps {
   placeholder?: string;
   className?: string;
   showVariables?: boolean;
-  variables?: string[];
+  variables?: { name: string; value: string; description: string; category?: string }[];
 }
 
-const defaultVariables = [
-  '{{company_name}}',
-  '{{contact_name}}',
-  '{{job_title}}',
-  '{{industry}}',
-  '{{employees}}',
-  '{{travel_budget}}',
-  '{{annual_revenue}}',
-  '{{location}}',
-  '{{phone}}',
-  '{{email}}',
-  '{{website}}',
-  '{{sender_name}}',
-  '{{sender_title}}',
-  '{{sender_company}}'
-];
+const commonVariables = [
+    { name: 'Contact Name', value: '{{contact_name}}', description: 'Recipient\'s full name', category: 'contact' },
+    { name: 'Contact Email', value: '{{contact_email}}', description: 'Recipient\'s email address', category: 'contact' },
+    { name: 'Job Title', value: '{{job_title}}', description: 'Recipient\'s position', category: 'contact' },
+    { name: 'Company Name', value: '{{company_name}}', description: 'Company or organization name', category: 'company' },
+    { name: 'Industry', value: '{{industry}}', description: 'Company industry sector', category: 'company' },
+    { name: 'Employees', value: '{{employees}}', description: 'Number of employees', category: 'company' },
+    { name: 'Company Location', value: '{{location}}', description: 'Company location', category: 'company' },
+    { name: 'Annual Revenue', value: '{{annual_revenue}}', description: 'Company annual revenue', category: 'company' },
+    { name: 'Travel Budget', value: '{{travel_budget}}', description: 'Annual travel budget' },
+    { name: 'Sender Name', value: '{{sender_name}}', description: 'Your name or team name' },
+    { name: 'Company Website', value: '{{website}}', description: 'Company website URL', category: 'company' },
+    { name: 'Phone Number', value: '{{phone}}', description: 'Contact phone number', category: 'contact' },
+  ];
 
 export function RichTextEditor({
   value,
@@ -74,16 +72,17 @@ export function RichTextEditor({
   placeholder = "Write your content here...",
   className = "",
   showVariables = true,
-  variables = defaultVariables
+  variables = commonVariables
 }: RichTextEditorProps) {
   const quillRef = useRef<ReactQuill>(null);
+  const [customVariable, setCustomVariable] = useState('');
 
   // Insert styles
   React.useEffect(() => {
     const styleSheet = document.createElement("style");
     styleSheet.textContent = editorStyles;
     document.head.appendChild(styleSheet);
-    
+
     return () => {
       document.head.removeChild(styleSheet);
     };
@@ -93,17 +92,17 @@ export function RichTextEditor({
     if (quillRef.current) {
       const editor = quillRef.current.getEditor();
       const range = editor.getSelection(true);
-      
+
       // Insert the variable with special formatting
       editor.insertText(range.index, variable);
-      
+
       // Format the inserted variable
       editor.formatText(range.index, variable.length, {
         'background': '#e3f2fd',
         'color': '#1976d2',
         'bold': true
       });
-      
+
       // Move cursor after the variable
       editor.setSelection(range.index + variable.length);
       editor.focus();
@@ -113,12 +112,12 @@ export function RichTextEditor({
   const modules = useMemo(() => ({
     toolbar: [
       [{ 'header': [1, 2, 3, false] }],
-      ['bold', 'italic', 'underline', 'strike'],
+      ['bold', 'italic', 'underline'],
       [{ 'color': [] }, { 'background': [] }],
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      [{ 'indent': '-1'}, { 'indent': '+1' }],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }, { 'indent': '-1'}, { 'indent': '+1' }],
       [{ 'align': [] }],
       ['link'],
+      ['blockquote', 'code-block'],
       ['clean']
     ],
     clipboard: {
@@ -129,7 +128,7 @@ export function RichTextEditor({
   const formats = [
     'header', 'bold', 'italic', 'underline', 'strike',
     'color', 'background', 'list', 'bullet', 'indent',
-    'align', 'link'
+    'align', 'link', 'blockquote', 'code-block'
   ];
 
   return (
@@ -154,7 +153,7 @@ export function RichTextEditor({
               }}
             />
           </div>
-          
+
           {/* Editor Tips */}
           <div className="mt-2 text-xs text-gray-500">
             <p>💡 <strong>Tips:</strong></p>
@@ -169,36 +168,119 @@ export function RichTextEditor({
         {/* Variables Panel */}
         {showVariables && (
           <div className="lg:col-span-1">
-            <Label className="text-sm font-medium text-gray-700 mb-2 block">
+            <Label className="text-sm font-medium text-gray-700 mb-3 block">
               Personalization Variables
             </Label>
-            <div className="border rounded-lg p-4 bg-gray-50 variables-panel">
-              <p className="text-xs text-gray-600 mb-3">
-                Click any variable to insert it into your content:
-              </p>
-              <div className="grid grid-cols-1 gap-2">
-                {variables.map((variable, index) => (
-                  <Badge
-                    key={index}
-                    variant="outline"
-                    className="justify-start cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition-colors p-2 text-xs"
-                    onClick={() => insertVariable(variable)}
-                  >
-                    <span className="font-mono">{variable}</span>
-                  </Badge>
-                ))}
+            <div className="space-y-4">
+              {/* Variable Categories */}
+              <div className="space-y-3">
+                <div>
+                  <div className="text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Contact Variables</div>
+                  <div className="grid grid-cols-1 gap-1">
+                    {variables.filter(v => v.category === 'contact').map((variable) => (
+                      <Button
+                        key={variable.name}
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => insertVariable(variable.value)}
+                        className="justify-start text-left h-auto p-2 hover:bg-green-50 hover:border-green-300"
+                      >
+                        <div className="w-full">
+                          <div className="font-medium text-xs text-green-700">
+                            {variable.value}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {variable.description}
+                          </div>
+                        </div>
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Company Variables</div>
+                  <div className="grid grid-cols-1 gap-1">
+                    {variables.filter(v => v.category === 'company').map((variable) => (
+                      <Button
+                        key={variable.name}
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => insertVariable(variable.value)}
+                        className="justify-start text-left h-auto p-2 hover:bg-blue-50 hover:border-blue-300"
+                      >
+                        <div className="w-full">
+                          <div className="font-medium text-xs text-blue-700">
+                            {variable.value}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {variable.description}
+                          </div>
+                        </div>
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Other Variables</div>
+                  <div className="grid grid-cols-1 gap-1">
+                    {variables.filter(v => !v.category || (v.category !== 'contact' && v.category !== 'company')).map((variable) => (
+                      <Button
+                        key={variable.name}
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => insertVariable(variable.value)}
+                        className="justify-start text-left h-auto p-2 hover:bg-purple-50 hover:border-purple-300"
+                      >
+                        <div className="w-full">
+                          <div className="font-medium text-xs text-purple-700">
+                            {variable.value}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {variable.description}
+                          </div>
+                        </div>
+                      </Button>
+                    ))}
+                  </div>
+                </div>
               </div>
-              
-              {/* Variable Descriptions */}
-              <div className="mt-4 pt-3 border-t border-gray-200">
-                <p className="text-xs font-medium text-gray-700 mb-2">Variable Descriptions:</p>
-                <div className="space-y-1 text-xs text-gray-600">
-                  <div><code>company_name</code> - Company name</div>
-                  <div><code>contact_name</code> - Contact person's full name</div>
-                  <div><code>job_title</code> - Contact's job title</div>
-                  <div><code>industry</code> - Company industry</div>
-                  <div><code>employees</code> - Number of employees</div>
-                  <div><code>travel_budget</code> - Annual travel budget</div>
+
+              {/* Custom Variable Input */}
+              <div className="pt-3 border-t">
+                <Label className="text-xs font-medium text-gray-600 mb-2 block">
+                  Add Custom Variable
+                </Label>
+                <div className="space-y-2">
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="variable_name"
+                      value={customVariable}
+                      onChange={(e) => setCustomVariable(e.target.value)}
+                      className="text-sm h-8"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        if (customVariable.trim()) {
+                          insertVariable(`{{${customVariable.trim()}}}`);
+                          setCustomVariable('');
+                        }
+                      }}
+                      className="h-8 px-3 text-xs bg-orange-500 text-white hover:bg-orange-600"
+                    >
+                      Insert
+                    </Button>
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    Variables will be replaced with actual data when emails are sent.
+                  </div>
                 </div>
               </div>
             </div>
@@ -228,7 +310,7 @@ export function RichTextEditor({
         >
           Clear Content
         </Button>
-        
+
         <Button
           type="button"
           variant="outline"
@@ -250,7 +332,7 @@ I'd love to schedule a brief call to discuss how we can help optimize {{company_
 
 Best regards,
 {{sender_name}}`;
-            
+
             onChange(sampleText);
           }}
         >
