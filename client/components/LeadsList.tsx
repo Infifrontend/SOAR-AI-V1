@@ -903,7 +903,6 @@ export function LeadsList({ initialFilters, onNavigate }: LeadsListProps) {
   });
   const [isSchedulingMeeting, setIsSchedulingMeeting] = useState(false);
 
-
   // Fetch users for the agent assignment dropdown
   useEffect(() => {
     const fetchUsers = async () => {
@@ -1989,7 +1988,7 @@ SOAR-AI Team`,
       toast.error("Please fill in all required fields for scheduling the meeting");
       return;
     }
-    
+
     let meetingLink = "";
     if (meetingForm.provider === "Google Meet") {
       meetingLink = "https://meet.google.com/pzo-hgan-tft";
@@ -2003,7 +2002,7 @@ SOAR-AI Team`,
       // Construct the full date-time string for the meeting
       const scheduledDateTime = `${meetingForm.scheduledDate} at ${meetingForm.scheduledTime}`;
       // Decide the meeting link dynamically
-      
+
       // Prepare email subject and content
       const emailSubject = `Meeting Scheduled - ${meetingForm.meetingTitle || 'Business Meeting'} with ${selectedLeadForAction.company}`;
       const emailContent = `
@@ -4939,7 +4938,7 @@ SOAR-AI Team`,
               className="absolute right-4 top-4"
               onClick={() => setShowInitiateCallModal(false)}
             >
-             
+
             </Button>
           </DialogHeader>
           <div className="space-y-4">
