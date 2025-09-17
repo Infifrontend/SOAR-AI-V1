@@ -1190,1298 +1190,1316 @@ export function RevenuePrediction({ onNavigate }: RevenuePredictionProps) {
           </div>
         </div>
       )}
-
-      {/* Key Metrics Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Pipeline Value
-            </CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatCurrency(getCurrentKeyMetrics().totalPipelineValue)}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-green-600">+12%</span> from last quarter
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Forecast Accuracy
-            </CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatPercentage(getCurrentKeyMetrics().forecastAccuracy)}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-green-600">+2.3%</span> improvement
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              YoY Growth Rate
-            </CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatPercentage(getCurrentKeyMetrics().yearOverYearGrowth)}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-green-600">Above target</span> of 25%
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Average Deal Size
-            </CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatCurrency(getCurrentKeyMetrics().averageDealSize)}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-green-600">+8%</span> increase
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5 mb-6 bg-gray-50/50 p-1 rounded-xl border border-gray-200/50">
-          <TabsTrigger
-            value="overview"
-            className="rounded-lg px-6 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-[#FD9646] data-[state=active]:border-b-[#FD9646] font-medium text-gray-600 data-[state=active]:text-gray-900 hover:text-gray-900 transition-all duration-200"
-          >
-            Overview
-          </TabsTrigger>
-          <TabsTrigger
-            value="monthly"
-            className="rounded-lg px-6 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-[#FD9646] data-[state=active]:border-b-[#FD9646] font-medium text-gray-600 data-[state=active]:text-gray-900 hover:text-gray-900 transition-all duration-200"
-          >
-            Monthly Forecast
-          </TabsTrigger>
-          <TabsTrigger
-            value="yearly"
-            className="rounded-lg px-6 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-[#FD9646] data-[state=active]:border-b-[#FD9646] font-medium text-gray-600 data-[state=active]:text-gray-900 hover:text-gray-900 transition-all duration-200"
-          >
-            Yearly Forecast
-          </TabsTrigger>
-          <TabsTrigger
-            value="corporate"
-            className="rounded-lg px-6 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-[#FD9646] data-[state=active]:border-b-[#FD9646] font-medium text-gray-600 data-[state=active]:text-gray-900 hover:text-gray-900 transition-all duration-200"
-          >
-            Corporate Analysis
-          </TabsTrigger>
-          <TabsTrigger
-            value="scenarios"
-            className="rounded-lg px-6 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-[#FD9646] data-[state=active]:border-b-[#FD9646] font-medium text-gray-600 data-[state=active]:text-gray-900 hover:text-gray-900 transition-all duration-200"
-          >
-            Scenario Planning
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="space-y-6">
-          {/* Business Statistics Overview */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                Business Performance Overview
-              </CardTitle>
-              <CardDescription>
-                Comprehensive statistics on bookings, revenue, and key business
-                metrics
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card
-                  className="border-2"
-                  style={{
-                    borderColor: "var(--color-blue-brand-200)",
-                    backgroundColor: "var(--color-blue-brand-50)",
-                  }}
-                >
-                  <CardContent className="p-4 text-center">
-                    <Package
-                      className="h-6 w-6 mx-auto mb-2"
-                      style={{ color: "var(--color-blue-brand-600)" }}
-                    />
-                    <div className="text-2xl font-bold">
-                      {formatNumber(getCurrentBusinessStats().totalBookings)}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      Total Bookings
-                    </div>
-                    <div
-                      className="text-xs"
-                      style={{ color: "var(--color-blue-brand-600)" }}
-                    >
-                      +
-                      {formatPercentage(
-                        getCurrentBusinessStats().bookingGrowthRate,
-                      )}{" "}
-                      YoY
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card
-                  className="border-2"
-                  style={{
-                    borderColor: "var(--color-blue-brand-200)",
-                    backgroundColor: "var(--color-blue-brand-50)",
-                  }}
-                >
-                  <CardContent className="p-4 text-center">
-                    <DollarSign
-                      className="h-6 w-6 mx-auto mb-2"
-                      style={{ color: "var(--color-blue-brand-600)" }}
-                    />
-                    <div className="text-2xl font-bold">
-                      {formatCurrency(getCurrentBusinessStats().totalRevenue)}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      Total Revenue
-                    </div>
-                    <div
-                      className="text-xs"
-                      style={{ color: "var(--color-blue-brand-600)" }}
-                    >
-                      +
-                      {formatPercentage(
-                        getCurrentBusinessStats().revenueGrowthRate,
-                      )}{" "}
-                      YoY
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card
-                  className="border-2"
-                  style={{
-                    borderColor: "var(--color-blue-brand-200)",
-                    backgroundColor: "var(--color-blue-brand-50)",
-                  }}
-                >
-                  <CardContent className="p-4 text-center">
-                    <Building2
-                      className="h-6 w-6 mx-auto mb-2"
-                      style={{ color: "var(--color-blue-brand-600)" }}
-                    />
-                    <div className="text-2xl font-bold">
-                      {formatNumber(getCurrentBusinessStats().activeClients)}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      Active Clients
-                    </div>
-                    <div
-                      className="text-xs"
-                      style={{ color: "var(--color-blue-brand-600)" }}
-                    >
-                      +{getCurrentBusinessStats().newClientsThisMonth} this
-                      month
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card
-                  className="border-2"
-                  style={{
-                    borderColor: "var(--color-blue-brand-200)",
-                    backgroundColor: "var(--color-blue-brand-50)",
-                  }}
-                >
-                  <CardContent className="p-4 text-center">
-                    <Calculator
-                      className="h-6 w-6 mx-auto mb-2"
-                      style={{ color: "var(--color-blue-brand-600)" }}
-                    />
-                    <div className="text-2xl font-bold">
-                      {formatCurrency(
-                        getCurrentBusinessStats().averageBookingValue,
-                      )}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      Avg Booking Value
-                    </div>
-                    <div
-                      className="text-xs"
-                      style={{ color: "var(--color-blue-brand-600)" }}
-                    >
-                      +15% increase
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Travel Services Breakdown */}
-          {/* <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Plane className="h-5 w-5" />
-                Travel Services Breakdown
-              </CardTitle>
-              <CardDescription>
-                Distribution of bookings across different travel services
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <Plane className="h-5 w-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <div className="font-medium">Flights</div>
-                      <div className="text-sm text-muted-foreground">
-                        {formatNumber(getCurrentBusinessStats().totalFlights)}{" "}
-                        bookings
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-bold">
-                      {formatPercentage(
-                        (getCurrentBusinessStats().totalFlights /
-                          getCurrentBusinessStats().totalBookings) *
-                          100,
-                      )}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      of total
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-green-100 rounded-lg">
-                      <Hotel className="h-5 w-5 text-green-600" />
-                    </div>
-                    <div>
-                      <div className="font-medium">Hotels</div>
-                      <div className="text-sm text-muted-foreground">
-                        {formatNumber(getCurrentBusinessStats().totalHotels)}{" "}
-                        bookings
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-bold">
-                      {formatPercentage(
-                        (getCurrentBusinessStats().totalHotels /
-                          getCurrentBusinessStats().totalBookings) *
-                          100,
-                      )}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      of total
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-purple-100 rounded-lg">
-                      <Car className="h-5 w-5 text-purple-600" />
-                    </div>
-                    <div>
-                      <div className="font-medium">Car Rentals</div>
-                      <div className="text-sm text-muted-foreground">
-                        {formatNumber(getCurrentBusinessStats().totalCars)}{" "}
-                        bookings
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="font-bold">
-                      {formatPercentage(
-                        (getCurrentBusinessStats().totalCars /
-                          getCurrentBusinessStats().totalBookings) *
-                          100,
-                      )}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      of total
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card> */}
-
-          {/* Performance Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="h-5 w-5" />
-                  Key Performance Indicators
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Client Retention Rate</span>
-                    <span className="font-medium">
-                      {formatPercentage(
-                        getCurrentBusinessStats().clientRetentionRate,
-                      )}
-                    </span>
-                  </div>
-                  <Progress
-                    value={getCurrentBusinessStats().clientRetentionRate}
-                    className="h-2"
-                  />
-
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Repeat Booking Rate</span>
-                    <span className="font-medium">
-                      {formatPercentage(
-                        getCurrentBusinessStats().repeatBookingRate,
-                      )}
-                    </span>
-                  </div>
-                  <Progress
-                    value={getCurrentBusinessStats().repeatBookingRate}
-                    className="h-2"
-                  />
-
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Average Lead Time</span>
-                    <span className="font-medium">
-                      {getCurrentBusinessStats().averageLeadTime} days
-                    </span>
-                  </div>
-                  <Progress
-                    value={
-                      (getCurrentBusinessStats().averageLeadTime / 30) * 100
-                    }
-                    className="h-2"
-                  />
-
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Deal Closure Time</span>
-                    <span className="font-medium">
-                      {getCurrentBusinessStats().avgDealClosure} days
-                    </span>
-                  </div>
-                  <Progress
-                    value={
-                      (getCurrentBusinessStats().avgDealClosure / 60) * 100
-                    }
-                    className="h-2"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="h-5 w-5" />
-                  Top Destinations
-                </CardTitle>
-                <CardDescription>
-                  Most popular travel destinations by booking volume
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {getCurrentTopDestinations().map((destination, index) => (
-                    <div
-                      key={destination.city}
-                      className="flex items-center justify-between p-3 border rounded-lg"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
-                          <span className="text-xs font-medium text-blue-600">
-                            {index + 1}
-                          </span>
-                        </div>
-                        <div>
-                          <div className="font-medium">{destination.city}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {formatNumber(destination.bookings)} bookings
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-medium">
-                          {formatCurrency(destination.revenue)}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          revenue
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Monthly Trends */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <LineChart className="h-5 w-5" />
-                Monthly Booking Trends
-              </CardTitle>
-              <CardDescription>
-                Monthly performance trends showing bookings, revenue, and growth
-                rates
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="max-h-96 overflow-y-auto space-y-4 pr-2">
-                {(dataSource === "dynamic" && dynamicData?.monthlyBookingTrends
-                  ? dynamicData.monthlyBookingTrends
-                  : businessStats.bookingTrends
-                ).map((trend) => {
-                  const growthRate =
-                    trend.growth ||
-                    (dataSource === "dynamic"
-                      ? getCurrentBusinessStats().revenueGrowthRate
-                      : trend.growth);
-                  return (
-                    <div
-                      key={trend.month}
-                      className="flex items-center justify-between p-4 border rounded-lg"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="text-sm font-medium w-20">
-                          {trend.month}
-                        </div>
-                        <div className="flex items-center gap-6">
-                          <div className="text-center">
-                            <div className="font-medium">
-                              {formatNumber(trend.bookings)}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              Bookings
-                            </div>
-                          </div>
-                          <div className="text-center">
-                            <div className="font-medium">
-                              {formatCurrency(trend.revenue)}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              Revenue
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div
-                          className={`flex items-center gap-1 ${growthRate >= 20 ? "text-green-600" : growthRate >= 10 ? "text-blue-600" : "text-yellow-600"}`}
-                        >
-                          {growthRate >= 0 ? (
-                            <TrendingUp className="h-4 w-4" />
-                          ) : (
-                            <TrendingDown className="h-4 w-4" />
-                          )}
-                          <span className="font-medium">
-                            {formatPercentage(growthRate)}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Quick Insights */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Lightbulb className="h-5 w-5 text-yellow-500" />
-                  Key Insights
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
-                  <div>
-                    <p className="font-medium">
-                      Strong Q3 Performance Expected
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Revenue projected to exceed target by 12%
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <TrendingUp className="h-5 w-5 text-blue-500 mt-0.5" />
-                  <div>
-                    <p className="font-medium">Enterprise Segment Growth</p>
-                    <p className="text-sm text-muted-foreground">
-                      Large deals increasing average contract value
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <AlertTriangle className="h-5 w-5 text-yellow-500 mt-0.5" />
-                  <div>
-                    <p className="font-medium">Seasonal Dip in December</p>
-                    <p className="text-sm text-muted-foreground">
-                      Plan for typical holiday season slowdown
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <Target className="h-5 w-5 text-purple-500 mt-0.5" />
-                  <div>
-                    <p className="font-medium">2025 Pipeline Building</p>
-                    <p className="text-sm text-muted-foreground">
-                      Early indicators show 29% growth potential
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Database className="h-5 w-5 text-blue-500" />
-                  Data Quality & Coverage
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Historical Sales Data</span>
-                    <Badge variant="outline">100% Complete</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Market Intelligence</span>
-                    <Badge variant="outline">Real-time</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Economic Indicators</span>
-                    <Badge variant="outline">Daily Updates</Badge>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm">Industry Trends</span>
-                    <Badge variant="outline">Weekly Sync</Badge>
-                  </div>
-                </div>
-                <div className="pt-3 border-t">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium">
-                      Prediction Confidence
-                    </span>
-                    <span className="text-sm font-medium">91.8%</span>
-                  </div>
-                  <Progress value={91.8} className="h-2" />
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Based on 36 months of historical data and current market
-                    conditions
+      {isRefreshing ? (
+            <div className="flex justify-center py-12">
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600 text-lg font-medium">
+                    Loading Prediction Data...
+                  </p>
+                  <p className="text-gray-500 text-sm mt-1">
+                    Please wait while we fetch your data
                   </p>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="monthly" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5" />
-                    Monthly Revenue Predictions
+              </div>{" "}
+            </div>
+          ) : (
+            <>
+            {/* Key Metrics Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Total Pipeline Value
                   </CardTitle>
-                  <CardDescription>
-                    Detailed month-by-month revenue forecasting with confidence
-                    intervals
-                  </CardDescription>
-                </div>
-                <div className="flex gap-2">
-                  {/* <Select
-                    value={selectedModel}
-                    onValueChange={setSelectedModel}
-                  >
-                    <SelectTrigger className="w-48">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {predictionModels.map((model) => (
-                        <SelectItem key={model.name} value={model.name}>
-                          {model.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select> */}
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Month</TableHead>
-                      <TableHead>Actual Revenue</TableHead>
-                      <TableHead>Predicted Revenue</TableHead>
-                      <TableHead>Variance</TableHead>
-                      <TableHead>Deals</TableHead>
-                      <TableHead>Confidence</TableHead>
-                      <TableHead>Trend</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {getCurrentMonthlyPredictions().map((prediction) => {
-                      const variance = prediction.actualRevenue
-                        ? ((prediction.actualRevenue -
-                            prediction.predictedRevenue) /
-                            prediction.predictedRevenue) *
-                          100
-                        : null;
-
-                      return (
-                        <TableRow key={prediction.month}>
-                          <TableCell className="font-medium">
-                            {prediction.month}
-                          </TableCell>
-                          <TableCell>
-                            {prediction.actualRevenue ? (
-                              formatCurrency(prediction.actualRevenue)
-                            ) : (
-                              <span className="text-muted-foreground">
-                                Pending
-                              </span>
-                            )}
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            {formatCurrency(prediction.predictedRevenue)}
-                          </TableCell>
-                          <TableCell>
-                            {variance !== null ? (
-                              <span
-                                className={
-                                  variance >= 0
-                                    ? "text-green-600"
-                                    : "text-red-600"
-                                }
-                              >
-                                {variance >= 0 ? "+" : ""}
-                                {formatPercentage(variance)}
-                              </span>
-                            ) : (
-                              <span className="text-muted-foreground">-</span>
-                            )}
-                          </TableCell>
-                          <TableCell>{prediction.deals}</TableCell>
-                          <TableCell>
-                            <span
-                              className={getConfidenceColor(
-                                prediction.confidence,
-                              )}
-                            >
-                              {formatPercentage(prediction.confidence)}
-                            </span>
-                          </TableCell>
-                          <TableCell>
-                            {prediction.month.includes("2024") &&
-                            !prediction.actualRevenue ? (
-                              <div className="flex items-center gap-1">
-                                <TrendingUp className="h-4 w-4 text-green-600" />
-                                <span className="text-sm text-green-600">
-                                  Growing
-                                </span>
-                              </div>
-                            ) : prediction.actualRevenue ? (
-                              <div className="flex items-center gap-1">
-                                <CheckCircle className="h-4 w-4 text-blue-600" />
-                                <span className="text-sm text-blue-600">
-                                  Actual
-                                </span>
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-1">
-                                <Clock className="h-4 w-4 text-gray-400" />
-                                <span className="text-sm text-gray-400">
-                                  Future
-                                </span>
-                              </div>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="yearly" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                Yearly Revenue Forecasting
-              </CardTitle>
-              <CardDescription>
-                Long-term revenue projections with growth analysis
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {(() => {
-                    const predictions = getCurrentYearlyPredictions();
-                    const currentYear = new Date().getFullYear();
-
-                    // Pick current, next, and long-term years
-                    const displayYears = [
-                      currentYear,
-                      currentYear + 1,
-                      currentYear + 2,
-                    ];
-
-                    return displayYears.map((year, idx) => {
-                      const prediction = predictions.find(
-                        (p) => p.year === year,
-                      );
-
-                      const colors = [
-                        {
-                          border: "border-blue-200",
-                          bg: "bg-blue-50",
-                          text: "text-blue-600",
-                        },
-                        {
-                          border: "border-green-200",
-                          bg: "bg-green-50",
-                          text: "text-green-600",
-                        },
-                        {
-                          border: "border-purple-200",
-                          bg: "bg-purple-50",
-                          text: "text-purple-600",
-                        },
-                      ];
-
-                      const style = colors[idx % colors.length];
-
-                      return (
-                        <Card
-                          key={year}
-                          className={`border-2 ${style.border} ${style.bg}`}
-                        >
-                          <CardContent className="p-4 text-center">
-                            <div className={`text-2xl font-bold ${style.text}`}>
-                              {year}
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              {idx === 0
-                                ? "Current Year"
-                                : idx === 1
-                                  ? "Next Year"
-                                  : "Long-term"}
-                            </div>
-                            <div className="text-lg font-medium mt-2">
-                              {prediction
-                                ? formatCurrency(prediction.predictedRevenue)
-                                : formatCurrency(0)}
-                            </div>
-                            <div className="text-sm text-green-600">
-                              +
-                              {prediction
-                                ? formatPercentage(prediction.growth)
-                                : "0%"}
-                            </div>
-                          </CardContent>
-                        </Card>
-                      );
-                    });
-                  })()}
-                </div>
-
-                {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Card className="border-2 border-blue-200 bg-blue-50">
-                    <CardContent className="p-4 text-center">
-                      <div className="text-2xl font-bold text-blue-600">
-                        2024
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Current Year
-                      </div>
-                      <div className="text-lg font-medium mt-2">
-                        {formatCurrency(48500000)}
-                      </div>
-                      <div className="text-sm text-green-600">+27% growth</div>
-                    </CardContent>
-                  </Card>
-                  <Card className="border-2 border-green-200 bg-green-50">
-                    <CardContent className="p-4 text-center">
-                      <div className="text-2xl font-bold text-green-600">
-                        2025
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Next Year
-                      </div>
-                      <div className="text-lg font-medium mt-2">
-                        {formatCurrency(62800000)}
-                      </div>
-                      <div className="text-sm text-green-600">
-                        +29.5% growth
-                      </div>
-                    </CardContent>
-                  </Card>
-                  <Card className="border-2 border-purple-200 bg-purple-50">
-                    <CardContent className="p-4 text-center">
-                      <div className="text-2xl font-bold text-purple-600">
-                        2026
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Long-term
-                      </div>
-                      <div className="text-lg font-medium mt-2">
-                        {formatCurrency(81200000)}
-                      </div>
-                      <div className="text-sm text-green-600">
-                        +29.3% growth
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
- */}
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Year</TableHead>
-                        <TableHead>Actual Revenue</TableHead>
-                        <TableHead>Predicted Revenue</TableHead>
-                        <TableHead>Total Deals</TableHead>
-                        <TableHead>Growth Rate</TableHead>
-                        <TableHead>Accuracy</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {getCurrentYearlyPredictions().map((prediction) => (
-                        <TableRow key={prediction.year}>
-                          <TableCell className="font-medium">
-                            {prediction.year}
-                          </TableCell>
-                          <TableCell>
-                            {prediction.actualRevenue ? (
-                              formatCurrency(prediction.actualRevenue)
-                            ) : (
-                              <span className="text-muted-foreground">
-                                Pending
-                              </span>
-                            )}
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            {formatCurrency(prediction.predictedRevenue)}
-                          </TableCell>
-                          <TableCell>{prediction.deals}</TableCell>
-                          <TableCell>
-                            <span className={getGrowthColor(prediction.growth)}>
-                              +{formatPercentage(prediction.growth)}
-                            </span>
-                          </TableCell>
-                          <TableCell>
-                            {prediction.actualRevenue ? (
-                              <Badge
-                                variant="outline"
-                                className="text-green-600"
-                              >
-                                Verified
-                              </Badge>
-                            ) : (
-                              <Badge variant="secondary">Forecast</Badge>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="corporate" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Building2 className="h-5 w-5" />
-                Corporate Revenue Analysis
-              </CardTitle>
-              <CardDescription>
-                Individual corporate client revenue predictions and growth
-                opportunities
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div>
-                    <Label>Region Filter</Label>
-                    <Select
-                      value={filters.region}
-                      onValueChange={(value) =>
-                        setFilters({ ...filters, region: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Regions</SelectItem>
-                        <SelectItem value="north-america">
-                          North America
-                        </SelectItem>
-                        <SelectItem value="europe">Europe</SelectItem>
-                        <SelectItem value="asia-pacific">
-                          Asia Pacific
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
+                  <Target className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {formatCurrency(getCurrentKeyMetrics().totalPipelineValue)}
                   </div>
-                  <div>
-                    <Label>Industry Filter</Label>
-                    <Select
-                      value={filters.industry}
-                      onValueChange={(value) =>
-                        setFilters({ ...filters, industry: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Industries</SelectItem>
-                        <SelectItem value="technology">Technology</SelectItem>
-                        <SelectItem value="manufacturing">
-                          Manufacturing
-                        </SelectItem>
-                        <SelectItem value="finance">Finance</SelectItem>
-                        <SelectItem value="healthcare">Healthcare</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  <p className="text-xs text-muted-foreground">
+                    <span className="text-green-600">+12%</span> from last quarter
+                  </p>
+                </CardContent>
+              </Card>
+      
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Forecast Accuracy
+                  </CardTitle>
+                  <Activity className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {formatPercentage(getCurrentKeyMetrics().forecastAccuracy)}
                   </div>
-                  <div>
-                    <Label>Deal Size</Label>
-                    <Select
-                      value={filters.dealSize}
-                      onValueChange={(value) =>
-                        setFilters({ ...filters, dealSize: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Sizes</SelectItem>
-                        <SelectItem value="enterprise">
-                          Enterprise (&gt;$1M)
-                        </SelectItem>
-                        <SelectItem value="mid-market">
-                          Mid-Market ($100K-$1M)
-                        </SelectItem>
-                        <SelectItem value="small">Small (&lt;$100K)</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  <p className="text-xs text-muted-foreground">
+                    <span className="text-green-600">+2.3%</span> improvement
+                  </p>
+                </CardContent>
+              </Card>
+      
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    YoY Growth Rate
+                  </CardTitle>
+                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {formatPercentage(getCurrentKeyMetrics().yearOverYearGrowth)}
                   </div>
-                  <div>
-                    <Label>Confidence Level</Label>
-                    <Select
-                      value={filters.confidence}
-                      onValueChange={(value) =>
-                        setFilters({ ...filters, confidence: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Levels</SelectItem>
-                        <SelectItem value="high">High (&gt;90%)</SelectItem>
-                        <SelectItem value="medium">Medium (70-90%)</SelectItem>
-                        <SelectItem value="low">Low (&lt;70%)</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  <p className="text-xs text-muted-foreground">
+                    <span className="text-green-600">Above target</span> of 25%
+                  </p>
+                </CardContent>
+              </Card>
+      
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Average Deal Size
+                  </CardTitle>
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {formatCurrency(getCurrentKeyMetrics().averageDealSize)}
                   </div>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Company</TableHead>
-                        <TableHead>Current Revenue</TableHead>
-                        <TableHead>Predicted Revenue</TableHead>
-                        <TableHead>Growth</TableHead>
-                        <TableHead>Confidence</TableHead>
-                        <TableHead>Active Deals</TableHead>
-                        <TableHead>Probability</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {getCurrentCorporatePredictions().map((corporate) => (
-                        <TableRow key={corporate.company}>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Building2 className="h-4 w-4 text-muted-foreground" />
-                              <span className="font-medium">
-                                {corporate.company}
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            {formatCurrency(corporate.currentRevenue)}
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            {formatCurrency(corporate.predictedRevenue)}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-1">
-                              <ArrowUp className="h-4 w-4 text-green-600" />
-                              <span className="text-green-600">
-                                +{formatPercentage(corporate.growth)}
-                              </span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <span
-                              className={getConfidenceColor(
-                                corporate.confidence,
-                              )}
-                            >
-                              {formatPercentage(corporate.confidence)}
-                            </span>
-                          </TableCell>
-                          <TableCell>{corporate.deals}</TableCell>
-                          <TableCell>
-                            <Badge
-                              className={getProbabilityColor(
-                                corporate.probability,
-                              )}
-                            >
-                              {corporate.probability}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleViewCompany(corporate)}
-                            >
-                              <Eye className="h-4 w-4 mr-1" />
-                              View
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="scenarios" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5" />
-                Scenario Planning & Analysis
-              </CardTitle>
-              <CardDescription>
-                Multiple revenue scenarios based on different market conditions
-                and assumptions
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {scenarioPlanning.map((scenario) => (
-                    <Card
-                      key={scenario.scenario}
-                      className={`cursor-pointer transition-all ${
-                        selectedScenario === scenario.scenario
-                          ? "border-2 border-blue-500 bg-blue-50"
-                          : "border hover:border-gray-300"
-                      }`}
-                      onClick={() => setSelectedScenario(scenario.scenario)}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <h3 className="font-medium">{scenario.scenario}</h3>
-                          <Badge variant="outline">
-                            {formatPercentage(scenario.probability)}
-                          </Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-4">
-                          {scenario.description}
-                        </p>
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span>Q3 Revenue:</span>
-                            <span className="font-medium">
-                              {formatCurrency(scenario.q3Revenue)}
-                            </span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span>Q4 Revenue:</span>
-                            <span className="font-medium">
-                              {formatCurrency(scenario.q4Revenue)}
-                            </span>
-                          </div>
-                          <div className="flex justify-between text-sm border-t pt-2">
-                            <span>Year-End Total:</span>
-                            <span className="font-bold">
-                              {formatCurrency(scenario.yearEndRevenue)}
-                            </span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-
+                  <p className="text-xs text-muted-foreground">
+                    <span className="text-green-600">+8%</span> increase
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+      
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-5 mb-6 bg-gray-50/50 p-1 rounded-xl border border-gray-200/50">
+                <TabsTrigger
+                  value="overview"
+                  className="rounded-lg px-6 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-[#FD9646] data-[state=active]:border-b-[#FD9646] font-medium text-gray-600 data-[state=active]:text-gray-900 hover:text-gray-900 transition-all duration-200"
+                >
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger
+                  value="monthly"
+                  className="rounded-lg px-6 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-[#FD9646] data-[state=active]:border-b-[#FD9646] font-medium text-gray-600 data-[state=active]:text-gray-900 hover:text-gray-900 transition-all duration-200"
+                >
+                  Monthly Forecast
+                </TabsTrigger>
+                <TabsTrigger
+                  value="yearly"
+                  className="rounded-lg px-6 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-[#FD9646] data-[state=active]:border-b-[#FD9646] font-medium text-gray-600 data-[state=active]:text-gray-900 hover:text-gray-900 transition-all duration-200"
+                >
+                  Yearly Forecast
+                </TabsTrigger>
+                <TabsTrigger
+                  value="corporate"
+                  className="rounded-lg px-6 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-[#FD9646] data-[state=active]:border-b-[#FD9646] font-medium text-gray-600 data-[state=active]:text-gray-900 hover:text-gray-900 transition-all duration-200"
+                >
+                  Corporate Analysis
+                </TabsTrigger>
+                <TabsTrigger
+                  value="scenarios"
+                  className="rounded-lg px-6 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-[#FD9646] data-[state=active]:border-b-[#FD9646] font-medium text-gray-600 data-[state=active]:text-gray-900 hover:text-gray-900 transition-all duration-200"
+                >
+                  Scenario Planning
+                </TabsTrigger>
+              </TabsList>
+      
+              <TabsContent value="overview" className="space-y-6">
+                {/* Business Statistics Overview */}
                 <Card>
                   <CardHeader>
-                    <CardTitle>Scenario Impact Analysis</CardTitle>
+                    <CardTitle className="flex items-center gap-2">
+                      <BarChart3 className="h-5 w-5" />
+                      Business Performance Overview
+                    </CardTitle>
                     <CardDescription>
-                      Detailed breakdown of the selected scenario:{" "}
-                      {selectedScenario}
+                      Comprehensive statistics on bookings, revenue, and key business
+                      metrics
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="space-y-4">
-                        <h4 className="font-medium">Key Assumptions</h4>
-                        {selectedScenario === "Conservative" && (
-                          <ul className="space-y-2 text-sm text-muted-foreground">
-                            <li>
-                              • Market uncertainties affect deal closure rates
-                            </li>
-                            <li>
-                              • 15% slower sales cycle due to economic
-                              conditions
-                            </li>
-                            <li>• Average deal size remains stable</li>
-                            <li>• Conservative expansion in new markets</li>
-                          </ul>
-                        )}
-                        {selectedScenario === "Realistic" && (
-                          <ul className="space-y-2 text-sm text-muted-foreground">
-                            <li>• Current market trends continue</li>
-                            <li>• Normal seasonal variations apply</li>
-                            <li>• Expected customer acquisition rate</li>
-                            <li>• Steady expansion into new verticals</li>
-                          </ul>
-                        )}
-                        {selectedScenario === "Optimistic" && (
-                          <ul className="space-y-2 text-sm text-muted-foreground">
-                            <li>
-                              • Favorable market conditions accelerate growth
-                            </li>
-                            <li>• Successful product launches drive revenue</li>
-                            <li>• Higher than expected deal closure rates</li>
-                            <li>• Aggressive market expansion succeeds</li>
-                          </ul>
-                        )}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <Card
+                        className="border-2"
+                        style={{
+                          borderColor: "var(--color-blue-brand-200)",
+                          backgroundColor: "var(--color-blue-brand-50)",
+                        }}
+                      >
+                        <CardContent className="p-4 text-center">
+                          <Package
+                            className="h-6 w-6 mx-auto mb-2"
+                            style={{ color: "var(--color-blue-brand-600)" }}
+                          />
+                          <div className="text-2xl font-bold">
+                            {formatNumber(getCurrentBusinessStats().totalBookings)}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            Total Bookings
+                          </div>
+                          <div
+                            className="text-xs"
+                            style={{ color: "var(--color-blue-brand-600)" }}
+                          >
+                            +
+                            {formatPercentage(
+                              getCurrentBusinessStats().bookingGrowthRate,
+                            )}{" "}
+                            YoY
+                          </div>
+                        </CardContent>
+                      </Card>
+      
+                      <Card
+                        className="border-2"
+                        style={{
+                          borderColor: "var(--color-blue-brand-200)",
+                          backgroundColor: "var(--color-blue-brand-50)",
+                        }}
+                      >
+                        <CardContent className="p-4 text-center">
+                          <DollarSign
+                            className="h-6 w-6 mx-auto mb-2"
+                            style={{ color: "var(--color-blue-brand-600)" }}
+                          />
+                          <div className="text-2xl font-bold">
+                            {formatCurrency(getCurrentBusinessStats().totalRevenue)}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            Total Revenue
+                          </div>
+                          <div
+                            className="text-xs"
+                            style={{ color: "var(--color-blue-brand-600)" }}
+                          >
+                            +
+                            {formatPercentage(
+                              getCurrentBusinessStats().revenueGrowthRate,
+                            )}{" "}
+                            YoY
+                          </div>
+                        </CardContent>
+                      </Card>
+      
+                      <Card
+                        className="border-2"
+                        style={{
+                          borderColor: "var(--color-blue-brand-200)",
+                          backgroundColor: "var(--color-blue-brand-50)",
+                        }}
+                      >
+                        <CardContent className="p-4 text-center">
+                          <Building2
+                            className="h-6 w-6 mx-auto mb-2"
+                            style={{ color: "var(--color-blue-brand-600)" }}
+                          />
+                          <div className="text-2xl font-bold">
+                            {formatNumber(getCurrentBusinessStats().activeClients)}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            Active Clients
+                          </div>
+                          <div
+                            className="text-xs"
+                            style={{ color: "var(--color-blue-brand-600)" }}
+                          >
+                            +{getCurrentBusinessStats().newClientsThisMonth} this
+                            month
+                          </div>
+                        </CardContent>
+                      </Card>
+      
+                      <Card
+                        className="border-2"
+                        style={{
+                          borderColor: "var(--color-blue-brand-200)",
+                          backgroundColor: "var(--color-blue-brand-50)",
+                        }}
+                      >
+                        <CardContent className="p-4 text-center">
+                          <Calculator
+                            className="h-6 w-6 mx-auto mb-2"
+                            style={{ color: "var(--color-blue-brand-600)" }}
+                          />
+                          <div className="text-2xl font-bold">
+                            {formatCurrency(
+                              getCurrentBusinessStats().averageBookingValue,
+                            )}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            Avg Booking Value
+                          </div>
+                          <div
+                            className="text-xs"
+                            style={{ color: "var(--color-blue-brand-600)" }}
+                          >
+                            +15% increase
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </CardContent>
+                </Card>
+      
+                {/* Travel Services Breakdown */}
+                {/* <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Plane className="h-5 w-5" />
+                      Travel Services Breakdown
+                    </CardTitle>
+                    <CardDescription>
+                      Distribution of bookings across different travel services
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-blue-100 rounded-lg">
+                            <Plane className="h-5 w-5 text-blue-600" />
+                          </div>
+                          <div>
+                            <div className="font-medium">Flights</div>
+                            <div className="text-sm text-muted-foreground">
+                              {formatNumber(getCurrentBusinessStats().totalFlights)}{" "}
+                              bookings
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-bold">
+                            {formatPercentage(
+                              (getCurrentBusinessStats().totalFlights /
+                                getCurrentBusinessStats().totalBookings) *
+                                100,
+                            )}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            of total
+                          </div>
+                        </div>
                       </div>
-                      <div className="space-y-4">
-                        <h4 className="font-medium">Risk Factors</h4>
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm">Market Risk</span>
-                            <Badge
-                              variant={
-                                selectedScenario === "Conservative"
-                                  ? "destructive"
-                                  : selectedScenario === "Realistic"
-                                    ? "secondary"
-                                    : "outline"
-                              }
-                            >
-                              {selectedScenario === "Conservative"
-                                ? "High"
-                                : selectedScenario === "Realistic"
-                                  ? "Medium"
-                                  : "Low"}
-                            </Badge>
+      
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-green-100 rounded-lg">
+                            <Hotel className="h-5 w-5 text-green-600" />
                           </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm">Competition Risk</span>
-                            <Badge
-                              variant={
-                                selectedScenario === "Optimistic"
-                                  ? "destructive"
-                                  : "secondary"
-                              }
-                            >
-                              {selectedScenario === "Optimistic"
-                                ? "High"
-                                : "Medium"}
-                            </Badge>
+                          <div>
+                            <div className="font-medium">Hotels</div>
+                            <div className="text-sm text-muted-foreground">
+                              {formatNumber(getCurrentBusinessStats().totalHotels)}{" "}
+                              bookings
+                            </div>
                           </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm">Execution Risk</span>
-                            <Badge
-                              variant={
-                                selectedScenario === "Optimistic"
-                                  ? "destructive"
-                                  : selectedScenario === "Realistic"
-                                    ? "secondary"
-                                    : "outline"
-                              }
-                            >
-                              {selectedScenario === "Optimistic"
-                                ? "High"
-                                : selectedScenario === "Realistic"
-                                  ? "Medium"
-                                  : "Low"}
-                            </Badge>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-bold">
+                            {formatPercentage(
+                              (getCurrentBusinessStats().totalHotels /
+                                getCurrentBusinessStats().totalBookings) *
+                                100,
+                            )}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            of total
+                          </div>
+                        </div>
+                      </div>
+      
+                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-purple-100 rounded-lg">
+                            <Car className="h-5 w-5 text-purple-600" />
+                          </div>
+                          <div>
+                            <div className="font-medium">Car Rentals</div>
+                            <div className="text-sm text-muted-foreground">
+                              {formatNumber(getCurrentBusinessStats().totalCars)}{" "}
+                              bookings
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-bold">
+                            {formatPercentage(
+                              (getCurrentBusinessStats().totalCars /
+                                getCurrentBusinessStats().totalBookings) *
+                                100,
+                            )}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            of total
                           </div>
                         </div>
                       </div>
                     </div>
                   </CardContent>
+                </Card> */}
+      
+                {/* Performance Metrics */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Target className="h-5 w-5" />
+                        Key Performance Indicators
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Client Retention Rate</span>
+                          <span className="font-medium">
+                            {formatPercentage(
+                              getCurrentBusinessStats().clientRetentionRate,
+                            )}
+                          </span>
+                        </div>
+                        <Progress
+                          value={getCurrentBusinessStats().clientRetentionRate}
+                          className="h-2"
+                        />
+      
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Repeat Booking Rate</span>
+                          <span className="font-medium">
+                            {formatPercentage(
+                              getCurrentBusinessStats().repeatBookingRate,
+                            )}
+                          </span>
+                        </div>
+                        <Progress
+                          value={getCurrentBusinessStats().repeatBookingRate}
+                          className="h-2"
+                        />
+      
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Average Lead Time</span>
+                          <span className="font-medium">
+                            {getCurrentBusinessStats().averageLeadTime} days
+                          </span>
+                        </div>
+                        <Progress
+                          value={
+                            (getCurrentBusinessStats().averageLeadTime / 30) * 100
+                          }
+                          className="h-2"
+                        />
+      
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Deal Closure Time</span>
+                          <span className="font-medium">
+                            {getCurrentBusinessStats().avgDealClosure} days
+                          </span>
+                        </div>
+                        <Progress
+                          value={
+                            (getCurrentBusinessStats().avgDealClosure / 60) * 100
+                          }
+                          className="h-2"
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+      
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <MapPin className="h-5 w-5" />
+                        Top Destinations
+                      </CardTitle>
+                      <CardDescription>
+                        Most popular travel destinations by booking volume
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {getCurrentTopDestinations().map((destination, index) => (
+                          <div
+                            key={destination.city}
+                            className="flex items-center justify-between p-3 border rounded-lg"
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                                <span className="text-xs font-medium text-blue-600">
+                                  {index + 1}
+                                </span>
+                              </div>
+                              <div>
+                                <div className="font-medium">{destination.city}</div>
+                                <div className="text-sm text-muted-foreground">
+                                  {formatNumber(destination.bookings)} bookings
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="font-medium">
+                                {formatCurrency(destination.revenue)}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                revenue
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+      
+                {/* Monthly Trends */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <LineChart className="h-5 w-5" />
+                      Monthly Booking Trends
+                    </CardTitle>
+                    <CardDescription>
+                      Monthly performance trends showing bookings, revenue, and growth
+                      rates
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="max-h-96 overflow-y-auto space-y-4 pr-2">
+                      {(dataSource === "dynamic" && dynamicData?.monthlyBookingTrends
+                        ? dynamicData.monthlyBookingTrends
+                        : businessStats.bookingTrends
+                      ).map((trend) => {
+                        const growthRate =
+                          trend.growth ||
+                          (dataSource === "dynamic"
+                            ? getCurrentBusinessStats().revenueGrowthRate
+                            : trend.growth);
+                        return (
+                          <div
+                            key={trend.month}
+                            className="flex items-center justify-between p-4 border rounded-lg"
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className="text-sm font-medium w-20">
+                                {trend.month}
+                              </div>
+                              <div className="flex items-center gap-6">
+                                <div className="text-center">
+                                  <div className="font-medium">
+                                    {formatNumber(trend.bookings)}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground">
+                                    Bookings
+                                  </div>
+                                </div>
+                                <div className="text-center">
+                                  <div className="font-medium">
+                                    {formatCurrency(trend.revenue)}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground">
+                                    Revenue
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div
+                                className={`flex items-center gap-1 ${growthRate >= 20 ? "text-green-600" : growthRate >= 10 ? "text-blue-600" : "text-yellow-600"}`}
+                              >
+                                {growthRate >= 0 ? (
+                                  <TrendingUp className="h-4 w-4" />
+                                ) : (
+                                  <TrendingDown className="h-4 w-4" />
+                                )}
+                                <span className="font-medium">
+                                  {formatPercentage(growthRate)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
                 </Card>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      
+                {/* Quick Insights */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Lightbulb className="h-5 w-5 text-yellow-500" />
+                        Key Insights
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-start gap-3">
+                        <CheckCircle className="h-5 w-5 text-green-500 mt-0.5" />
+                        <div>
+                          <p className="font-medium">
+                            Strong Q3 Performance Expected
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Revenue projected to exceed target by 12%
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <TrendingUp className="h-5 w-5 text-blue-500 mt-0.5" />
+                        <div>
+                          <p className="font-medium">Enterprise Segment Growth</p>
+                          <p className="text-sm text-muted-foreground">
+                            Large deals increasing average contract value
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <AlertTriangle className="h-5 w-5 text-yellow-500 mt-0.5" />
+                        <div>
+                          <p className="font-medium">Seasonal Dip in December</p>
+                          <p className="text-sm text-muted-foreground">
+                            Plan for typical holiday season slowdown
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <Target className="h-5 w-5 text-purple-500 mt-0.5" />
+                        <div>
+                          <p className="font-medium">2025 Pipeline Building</p>
+                          <p className="text-sm text-muted-foreground">
+                            Early indicators show 29% growth potential
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+      
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Database className="h-5 w-5 text-blue-500" />
+                        Data Quality & Coverage
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Historical Sales Data</span>
+                          <Badge variant="outline">100% Complete</Badge>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Market Intelligence</span>
+                          <Badge variant="outline">Real-time</Badge>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Economic Indicators</span>
+                          <Badge variant="outline">Daily Updates</Badge>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-sm">Industry Trends</span>
+                          <Badge variant="outline">Weekly Sync</Badge>
+                        </div>
+                      </div>
+                      <div className="pt-3 border-t">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm font-medium">
+                            Prediction Confidence
+                          </span>
+                          <span className="text-sm font-medium">91.8%</span>
+                        </div>
+                        <Progress value={91.8} className="h-2" />
+                        <p className="text-xs text-muted-foreground mt-2">
+                          Based on 36 months of historical data and current market
+                          conditions
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+      
+              <TabsContent value="monthly" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          <Calendar className="h-5 w-5" />
+                          Monthly Revenue Predictions
+                        </CardTitle>
+                        <CardDescription>
+                          Detailed month-by-month revenue forecasting with confidence
+                          intervals
+                        </CardDescription>
+                      </div>
+                      <div className="flex gap-2">
+                        {/* <Select
+                          value={selectedModel}
+                          onValueChange={setSelectedModel}
+                        >
+                          <SelectTrigger className="w-48">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {predictionModels.map((model) => (
+                              <SelectItem key={model.name} value={model.name}>
+                                {model.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select> */}
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Month</TableHead>
+                            <TableHead>Actual Revenue</TableHead>
+                            <TableHead>Predicted Revenue</TableHead>
+                            <TableHead>Variance</TableHead>
+                            <TableHead>Deals</TableHead>
+                            <TableHead>Confidence</TableHead>
+                            <TableHead>Trend</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {getCurrentMonthlyPredictions().map((prediction) => {
+                            const variance = prediction.actualRevenue
+                              ? ((prediction.actualRevenue -
+                                  prediction.predictedRevenue) /
+                                  prediction.predictedRevenue) *
+                                100
+                              : null;
+      
+                            return (
+                              <TableRow key={prediction.month}>
+                                <TableCell className="font-medium">
+                                  {prediction.month}
+                                </TableCell>
+                                <TableCell>
+                                  {prediction.actualRevenue ? (
+                                    formatCurrency(prediction.actualRevenue)
+                                  ) : (
+                                    <span className="text-muted-foreground">
+                                      Pending
+                                    </span>
+                                  )}
+                                </TableCell>
+                                <TableCell className="font-medium">
+                                  {formatCurrency(prediction.predictedRevenue)}
+                                </TableCell>
+                                <TableCell>
+                                  {variance !== null ? (
+                                    <span
+                                      className={
+                                        variance >= 0
+                                          ? "text-green-600"
+                                          : "text-red-600"
+                                      }
+                                    >
+                                      {variance >= 0 ? "+" : ""}
+                                      {formatPercentage(variance)}
+                                    </span>
+                                  ) : (
+                                    <span className="text-muted-foreground">-</span>
+                                  )}
+                                </TableCell>
+                                <TableCell>{prediction.deals}</TableCell>
+                                <TableCell>
+                                  <span
+                                    className={getConfidenceColor(
+                                      prediction.confidence,
+                                    )}
+                                  >
+                                    {formatPercentage(prediction.confidence)}
+                                  </span>
+                                </TableCell>
+                                <TableCell>
+                                  {prediction.month.includes("2024") &&
+                                  !prediction.actualRevenue ? (
+                                    <div className="flex items-center gap-1">
+                                      <TrendingUp className="h-4 w-4 text-green-600" />
+                                      <span className="text-sm text-green-600">
+                                        Growing
+                                      </span>
+                                    </div>
+                                  ) : prediction.actualRevenue ? (
+                                    <div className="flex items-center gap-1">
+                                      <CheckCircle className="h-4 w-4 text-blue-600" />
+                                      <span className="text-sm text-blue-600">
+                                        Actual
+                                      </span>
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center gap-1">
+                                      <Clock className="h-4 w-4 text-gray-400" />
+                                      <span className="text-sm text-gray-400">
+                                        Future
+                                      </span>
+                                    </div>
+                                  )}
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+      
+              <TabsContent value="yearly" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <BarChart3 className="h-5 w-5" />
+                      Yearly Revenue Forecasting
+                    </CardTitle>
+                    <CardDescription>
+                      Long-term revenue projections with growth analysis
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {(() => {
+                          const predictions = getCurrentYearlyPredictions();
+                          const currentYear = new Date().getFullYear();
+      
+                          // Pick current, next, and long-term years
+                          const displayYears = [
+                            currentYear,
+                            currentYear + 1,
+                            currentYear + 2,
+                          ];
+      
+                          return displayYears.map((year, idx) => {
+                            const prediction = predictions.find(
+                              (p) => p.year === year,
+                            );
+      
+                            const colors = [
+                              {
+                                border: "border-blue-200",
+                                bg: "bg-blue-50",
+                                text: "text-blue-600",
+                              },
+                              {
+                                border: "border-green-200",
+                                bg: "bg-green-50",
+                                text: "text-green-600",
+                              },
+                              {
+                                border: "border-purple-200",
+                                bg: "bg-purple-50",
+                                text: "text-purple-600",
+                              },
+                            ];
+      
+                            const style = colors[idx % colors.length];
+      
+                            return (
+                              <Card
+                                key={year}
+                                className={`border-2 ${style.border} ${style.bg}`}
+                              >
+                                <CardContent className="p-4 text-center">
+                                  <div className={`text-2xl font-bold ${style.text}`}>
+                                    {year}
+                                  </div>
+                                  <div className="text-sm text-muted-foreground">
+                                    {idx === 0
+                                      ? "Current Year"
+                                      : idx === 1
+                                        ? "Next Year"
+                                        : "Long-term"}
+                                  </div>
+                                  <div className="text-lg font-medium mt-2">
+                                    {prediction
+                                      ? formatCurrency(prediction.predictedRevenue)
+                                      : formatCurrency(0)}
+                                  </div>
+                                  <div className="text-sm text-green-600">
+                                    +
+                                    {prediction
+                                      ? formatPercentage(prediction.growth)
+                                      : "0%"}
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            );
+                          });
+                        })()}
+                      </div>
+      
+                      {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <Card className="border-2 border-blue-200 bg-blue-50">
+                          <CardContent className="p-4 text-center">
+                            <div className="text-2xl font-bold text-blue-600">
+                              2024
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              Current Year
+                            </div>
+                            <div className="text-lg font-medium mt-2">
+                              {formatCurrency(48500000)}
+                            </div>
+                            <div className="text-sm text-green-600">+27% growth</div>
+                          </CardContent>
+                        </Card>
+                        <Card className="border-2 border-green-200 bg-green-50">
+                          <CardContent className="p-4 text-center">
+                            <div className="text-2xl font-bold text-green-600">
+                              2025
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              Next Year
+                            </div>
+                            <div className="text-lg font-medium mt-2">
+                              {formatCurrency(62800000)}
+                            </div>
+                            <div className="text-sm text-green-600">
+                              +29.5% growth
+                            </div>
+                          </CardContent>
+                        </Card>
+                        <Card className="border-2 border-purple-200 bg-purple-50">
+                          <CardContent className="p-4 text-center">
+                            <div className="text-2xl font-bold text-purple-600">
+                              2026
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              Long-term
+                            </div>
+                            <div className="text-lg font-medium mt-2">
+                              {formatCurrency(81200000)}
+                            </div>
+                            <div className="text-sm text-green-600">
+                              +29.3% growth
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+       */}
+                      <div className="overflow-x-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Year</TableHead>
+                              <TableHead>Actual Revenue</TableHead>
+                              <TableHead>Predicted Revenue</TableHead>
+                              <TableHead>Total Deals</TableHead>
+                              <TableHead>Growth Rate</TableHead>
+                              <TableHead>Accuracy</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {getCurrentYearlyPredictions().map((prediction) => (
+                              <TableRow key={prediction.year}>
+                                <TableCell className="font-medium">
+                                  {prediction.year}
+                                </TableCell>
+                                <TableCell>
+                                  {prediction.actualRevenue ? (
+                                    formatCurrency(prediction.actualRevenue)
+                                  ) : (
+                                    <span className="text-muted-foreground">
+                                      Pending
+                                    </span>
+                                  )}
+                                </TableCell>
+                                <TableCell className="font-medium">
+                                  {formatCurrency(prediction.predictedRevenue)}
+                                </TableCell>
+                                <TableCell>{prediction.deals}</TableCell>
+                                <TableCell>
+                                  <span className={getGrowthColor(prediction.growth)}>
+                                    +{formatPercentage(prediction.growth)}
+                                  </span>
+                                </TableCell>
+                                <TableCell>
+                                  {prediction.actualRevenue ? (
+                                    <Badge
+                                      variant="outline"
+                                      className="text-green-600"
+                                    >
+                                      Verified
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant="secondary">Forecast</Badge>
+                                  )}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+      
+              <TabsContent value="corporate" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Building2 className="h-5 w-5" />
+                      Corporate Revenue Analysis
+                    </CardTitle>
+                    <CardDescription>
+                      Individual corporate client revenue predictions and growth
+                      opportunities
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                          <Label>Region Filter</Label>
+                          <Select
+                            value={filters.region}
+                            onValueChange={(value) =>
+                              setFilters({ ...filters, region: value })
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">All Regions</SelectItem>
+                              <SelectItem value="north-america">
+                                North America
+                              </SelectItem>
+                              <SelectItem value="europe">Europe</SelectItem>
+                              <SelectItem value="asia-pacific">
+                                Asia Pacific
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label>Industry Filter</Label>
+                          <Select
+                            value={filters.industry}
+                            onValueChange={(value) =>
+                              setFilters({ ...filters, industry: value })
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">All Industries</SelectItem>
+                              <SelectItem value="technology">Technology</SelectItem>
+                              <SelectItem value="manufacturing">
+                                Manufacturing
+                              </SelectItem>
+                              <SelectItem value="finance">Finance</SelectItem>
+                              <SelectItem value="healthcare">Healthcare</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label>Deal Size</Label>
+                          <Select
+                            value={filters.dealSize}
+                            onValueChange={(value) =>
+                              setFilters({ ...filters, dealSize: value })
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">All Sizes</SelectItem>
+                              <SelectItem value="enterprise">
+                                Enterprise (&gt;$1M)
+                              </SelectItem>
+                              <SelectItem value="mid-market">
+                                Mid-Market ($100K-$1M)
+                              </SelectItem>
+                              <SelectItem value="small">Small (&lt;$100K)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label>Confidence Level</Label>
+                          <Select
+                            value={filters.confidence}
+                            onValueChange={(value) =>
+                              setFilters({ ...filters, confidence: value })
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="all">All Levels</SelectItem>
+                              <SelectItem value="high">High (&gt;90%)</SelectItem>
+                              <SelectItem value="medium">Medium (70-90%)</SelectItem>
+                              <SelectItem value="low">Low (&lt;70%)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+      
+                      <div className="overflow-x-auto">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Company</TableHead>
+                              <TableHead>Current Revenue</TableHead>
+                              <TableHead>Predicted Revenue</TableHead>
+                              <TableHead>Growth</TableHead>
+                              <TableHead>Confidence</TableHead>
+                              <TableHead>Active Deals</TableHead>
+                              <TableHead>Probability</TableHead>
+                              <TableHead>Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {getCurrentCorporatePredictions().map((corporate) => (
+                              <TableRow key={corporate.company}>
+                                <TableCell>
+                                  <div className="flex items-center gap-2">
+                                    <Building2 className="h-4 w-4 text-muted-foreground" />
+                                    <span className="font-medium">
+                                      {corporate.company}
+                                    </span>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  {formatCurrency(corporate.currentRevenue)}
+                                </TableCell>
+                                <TableCell className="font-medium">
+                                  {formatCurrency(corporate.predictedRevenue)}
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex items-center gap-1">
+                                    <ArrowUp className="h-4 w-4 text-green-600" />
+                                    <span className="text-green-600">
+                                      +{formatPercentage(corporate.growth)}
+                                    </span>
+                                  </div>
+                                </TableCell>
+                                <TableCell>
+                                  <span
+                                    className={getConfidenceColor(
+                                      corporate.confidence,
+                                    )}
+                                  >
+                                    {formatPercentage(corporate.confidence)}
+                                  </span>
+                                </TableCell>
+                                <TableCell>{corporate.deals}</TableCell>
+                                <TableCell>
+                                  <Badge
+                                    className={getProbabilityColor(
+                                      corporate.probability,
+                                    )}
+                                  >
+                                    {corporate.probability}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleViewCompany(corporate)}
+                                  >
+                                    <Eye className="h-4 w-4 mr-1" />
+                                    View
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+      
+              <TabsContent value="scenarios" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Sparkles className="h-5 w-5" />
+                      Scenario Planning & Analysis
+                    </CardTitle>
+                    <CardDescription>
+                      Multiple revenue scenarios based on different market conditions
+                      and assumptions
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {scenarioPlanning.map((scenario) => (
+                          <Card
+                            key={scenario.scenario}
+                            className={`cursor-pointer transition-all ${
+                              selectedScenario === scenario.scenario
+                                ? "border-2 border-blue-500 bg-blue-50"
+                                : "border hover:border-gray-300"
+                            }`}
+                            onClick={() => setSelectedScenario(scenario.scenario)}
+                          >
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between mb-3">
+                                <h3 className="font-medium">{scenario.scenario}</h3>
+                                <Badge variant="outline">
+                                  {formatPercentage(scenario.probability)}
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-muted-foreground mb-4">
+                                {scenario.description}
+                              </p>
+                              <div className="space-y-2">
+                                <div className="flex justify-between text-sm">
+                                  <span>Q3 Revenue:</span>
+                                  <span className="font-medium">
+                                    {formatCurrency(scenario.q3Revenue)}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                  <span>Q4 Revenue:</span>
+                                  <span className="font-medium">
+                                    {formatCurrency(scenario.q4Revenue)}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between text-sm border-t pt-2">
+                                  <span>Year-End Total:</span>
+                                  <span className="font-bold">
+                                    {formatCurrency(scenario.yearEndRevenue)}
+                                  </span>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+      
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Scenario Impact Analysis</CardTitle>
+                          <CardDescription>
+                            Detailed breakdown of the selected scenario:{" "}
+                            {selectedScenario}
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                              <h4 className="font-medium">Key Assumptions</h4>
+                              {selectedScenario === "Conservative" && (
+                                <ul className="space-y-2 text-sm text-muted-foreground">
+                                  <li>
+                                    • Market uncertainties affect deal closure rates
+                                  </li>
+                                  <li>
+                                    • 15% slower sales cycle due to economic
+                                    conditions
+                                  </li>
+                                  <li>• Average deal size remains stable</li>
+                                  <li>• Conservative expansion in new markets</li>
+                                </ul>
+                              )}
+                              {selectedScenario === "Realistic" && (
+                                <ul className="space-y-2 text-sm text-muted-foreground">
+                                  <li>• Current market trends continue</li>
+                                  <li>• Normal seasonal variations apply</li>
+                                  <li>• Expected customer acquisition rate</li>
+                                  <li>• Steady expansion into new verticals</li>
+                                </ul>
+                              )}
+                              {selectedScenario === "Optimistic" && (
+                                <ul className="space-y-2 text-sm text-muted-foreground">
+                                  <li>
+                                    • Favorable market conditions accelerate growth
+                                  </li>
+                                  <li>• Successful product launches drive revenue</li>
+                                  <li>• Higher than expected deal closure rates</li>
+                                  <li>• Aggressive market expansion succeeds</li>
+                                </ul>
+                              )}
+                            </div>
+                            <div className="space-y-4">
+                              <h4 className="font-medium">Risk Factors</h4>
+                              <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm">Market Risk</span>
+                                  <Badge
+                                    variant={
+                                      selectedScenario === "Conservative"
+                                        ? "destructive"
+                                        : selectedScenario === "Realistic"
+                                          ? "secondary"
+                                          : "outline"
+                                    }
+                                  >
+                                    {selectedScenario === "Conservative"
+                                      ? "High"
+                                      : selectedScenario === "Realistic"
+                                        ? "Medium"
+                                        : "Low"}
+                                  </Badge>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm">Competition Risk</span>
+                                  <Badge
+                                    variant={
+                                      selectedScenario === "Optimistic"
+                                        ? "destructive"
+                                        : "secondary"
+                                    }
+                                  >
+                                    {selectedScenario === "Optimistic"
+                                      ? "High"
+                                      : "Medium"}
+                                  </Badge>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm">Execution Risk</span>
+                                  <Badge
+                                    variant={
+                                      selectedScenario === "Optimistic"
+                                        ? "destructive"
+                                        : selectedScenario === "Realistic"
+                                          ? "secondary"
+                                          : "outline"
+                                    }
+                                  >
+                                    {selectedScenario === "Optimistic"
+                                      ? "High"
+                                      : selectedScenario === "Realistic"
+                                        ? "Medium"
+                                        : "Low"}
+                                  </Badge>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+            </>
+          )
+        }
 
       {/* Upload Data Dialog */}
       <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
