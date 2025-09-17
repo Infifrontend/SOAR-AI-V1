@@ -1194,27 +1194,31 @@ class LeadNote(models.Model):
 class LeadHistory(models.Model):
     HISTORY_TYPES = [
         ('creation', 'Lead Created'),
-        ('note_added', 'Note Added'),
-        ('status_change', 'Status Change'),
-        ('score_update', 'Score Updated'),
-        ('assignment', 'Lead Assigned'),
         ('contact_made', 'Contact Made'),
-        ('call_made', 'Call Made'),
-        ('email_sent', 'Email Sent'),
-        ('meeting_scheduled', 'Meeting Scheduled'),
-        ('qualification', 'Lead Qualified'),
-        ('disqualification', 'Lead Disqualified'),
-        ('opportunity_created', 'Opportunity Created'),
-        ('proposal_sent', 'Proposal Sent'),
-        ('negotiation_started', 'Negotiation Started'),
-        ('won', 'Deal Won'),
-        ('lost', 'Deal Lost'),
+        ('status_change', 'Status Change'),
+        ('score_update', 'Score Update'),
+        ('note_added', 'Note Added'),
         ('agent_assignment', 'Agent Assignment'),
         ('agent_reassignment', 'Agent Reassignment'),
-        ('contact_response', 'Contact Response'),
+        ('qualification', 'Lead Qualified'),
+        ('disqualification', 'Lead Disqualified'),
+        ('proposal_sent', 'Proposal Sent'),
+        ('contract_signed', 'Contract Signed'),
+        ('deal_won', 'Deal Won'),
+        ('deal_lost', 'Deal Lost'),
+        ('call_made', 'Phone Call'),
+        ('email_sent', 'Email Sent'),
+        ('meeting_scheduled', 'Meeting Scheduled'),
+        ('follow_up_scheduled', 'Follow-up Scheduled'),
+        ('custom', 'Custom Activity'),
+        ('phone_call', 'Phone Call'),
+        ('email_campaign', 'Email Campaign'),
+        ('meeting_completed', 'Meeting Completed'),
+        ('discovery_call_scheduled', 'Discovery Call Scheduled'),
         ('phone_call_completed', 'Phone Call Completed'),
         ('email_response', 'Email Response'),
-        ('meeting_completed', 'Meeting Completed'),
+        ('contact_response', 'Contact Response'),
+        ('moved_to_opportunity', 'Moved to Opportunity'),
     ]
 
     lead = models.ForeignKey(Lead, on_delete=models.CASCADE, related_name='history_entries')
@@ -1222,19 +1226,25 @@ class LeadHistory(models.Model):
     action = models.CharField(max_length=255)
     details = models.TextField()
     icon = models.CharField(max_length=50, default='activity')
-    user = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    timestamp = models.DateTimeField(default=timezone.now)
     metadata = models.JSONField(default=dict, blank=True)
-    contact_message = models.TextField(blank=True, null=True)  # Store contact messages for tooltip
-    previous_status = models.CharField(max_length=50, blank=True, null=True)  # For status changes
-    new_status = models.CharField(max_length=50, blank=True, null=True)  # For status changes
-    timestamp = models.DateTimeField(auto_now_add=True)
+
+    # New fields for enhanced history tracking
+    contact_message = models.TextField(blank=True, null=True)
+    previous_status = models.CharField(max_length=50, blank=True, null=True)
+    new_status = models.CharField(max_length=50, blank=True, null=True)
 
     class Meta:
         ordering = ['-timestamp']
-        verbose_name_plural = 'Lead History'
+        indexes = [
+            models.Index(fields=['lead', '-timestamp']),
+            models.Index(fields=['history_type']),
+        ]
+        db_table = 'api_leadhistory'  # Explicitly set the table name
 
     def __str__(self):
-        return f"{self.lead.company.name} - {self.action}"
+        return f"{self.lead.company.name} - {self.action} ({self.timestamp})"
 
 class ActivityLog(models.Model):
     ACTION_TYPES = [
