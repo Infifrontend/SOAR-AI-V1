@@ -332,8 +332,6 @@ export function RichTextEditor({
 
         <p>I'd love to schedule a brief call to discuss how we can help optimize <strong>{{company_name}}</strong>'s travel budget of <strong>{{travel_budget}}</strong>.</p>
 
-        <a class="cta" href="{{cta_link}}">Schedule a call</a>
-
         <p class="signature">Best regards,<br>{{sender_name}}</p>`;
 
             onChange(sampleText);
