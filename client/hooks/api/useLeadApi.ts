@@ -322,7 +322,7 @@ export const useLeadApi = () => {
   }, [setLoading, setError, setData]);
 
   // Get history for a lead
-  const getHistory = useCallback(async (leadId: number) => {
+  const getHistory = useCallback(async (leadId: number): Promise<any[]> => {
     if (!leadId) {
       return { data: [] };
     }
@@ -839,6 +839,50 @@ export const useLeadApi = () => {
     });
   }, []);
 
+  // New methods for lead history API
+  const recordContact = useCallback(async (leadId: number, contactData: {
+    contact_type: string;
+    message: string;
+    details: string;
+  }): Promise<any> => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await baseApi.post(`/leads/${leadId}/record_contact/`, contactData);
+      setData(response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('Error recording contact:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to record contact';
+      setError(errorMessage);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, [setLoading, setError, setData]);
+
+  const recordStatusChange = useCallback(async (leadId: number, statusData: {
+    previous_status: string;
+    new_status: string;
+    reason?: string;
+  }): Promise<any> => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await baseApi.post(`/leads/${leadId}/record_status_change/`, statusData);
+      setData(response.data);
+      return response.data;
+    } catch (error: any) {
+      console.error('Error recording status change:', error);
+      const errorMessage = error.response?.data?.error || error.message || 'Failed to record status change';
+      setError(errorMessage);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, [setLoading, setError, setData]);
+
+
   return {
     ...state,
     getLeads,
@@ -877,6 +921,8 @@ export const useLeadApi = () => {
     sendProposal,
     launchCampaign,
     campaignLeadSearch,
+    recordContact, // Exporting new method
+    recordStatusChange, // Exporting new method
     // Expose individual methods for external use
     api: {
       getLeads,

@@ -82,10 +82,12 @@ class LeadHistorySerializer(serializers.ModelSerializer):
     previous_agent = serializers.SerializerMethodField()
     assignment_priority = serializers.SerializerMethodField()
     assignment_notes = serializers.SerializerMethodField()
+    contact_tooltip = serializers.SerializerMethodField()
+    status_change_details = serializers.SerializerMethodField()
 
     class Meta:
         model = LeadHistory
-        fields = ['id', 'history_type', 'action', 'details', 'icon', 'timestamp', 'metadata', 'user_name', 'user_role', 'formatted_timestamp', 'assigned_agent', 'previous_agent', 'assignment_priority', 'assignment_notes']
+        fields = ['id', 'history_type', 'action', 'details', 'icon', 'timestamp', 'metadata', 'user_name', 'user_role', 'formatted_timestamp', 'assigned_agent', 'previous_agent', 'assignment_priority', 'assignment_notes', 'contact_message', 'previous_status', 'new_status', 'contact_tooltip', 'status_change_details']
 
     def get_user_name(self, obj):
         if obj.user:
@@ -162,6 +164,27 @@ class LeadHistorySerializer(serializers.ModelSerializer):
         """Extract assignment notes from metadata"""
         if obj.history_type in ['agent_assignment', 'agent_reassignment'] and hasattr(obj, 'metadata') and obj.metadata:
             return obj.metadata.get('assignment_notes')
+        return None
+
+    def get_contact_tooltip(self, obj):
+        """Get contact message for tooltip display"""
+        if obj.history_type in ['contact_made', 'call_made', 'email_sent', 'contact_response', 'phone_call_completed', 'email_response', 'meeting_completed'] and obj.contact_message:
+            return {
+                'message': obj.contact_message,
+                'type': obj.history_type,
+                'timestamp': obj.timestamp.strftime('%m/%d/%Y at %I:%M %p') if obj.timestamp else ''
+            }
+        return None
+
+    def get_status_change_details(self, obj):
+        """Get status change details for display"""
+        if obj.history_type == 'status_change' and obj.previous_status and obj.new_status:
+            return {
+                'previous_status': obj.previous_status,
+                'new_status': obj.new_status,
+                'changed_by': obj.user.get_full_name() if obj.user else 'System',
+                'timestamp': obj.timestamp.strftime('%m/%d/%Y at %I:%M %p') if obj.timestamp else ''
+            }
         return None
 
 class LeadSerializer(serializers.ModelSerializer):

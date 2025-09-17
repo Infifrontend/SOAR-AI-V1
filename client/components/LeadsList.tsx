@@ -107,6 +107,12 @@ import { CorporateProfile } from "./CorporateProfile";
 import { MarketingCampaignWizard } from "./MarketingCampaignWizard";
 import { formatDate, formatDateTime } from "../utils/dateFormatter";
 import { useUserApi } from "../hooks/api/useUserApi"; // Import useUserApi
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
 
 interface LeadsListProps {
   initialFilters?: any;
@@ -132,6 +138,12 @@ interface HistoryEntry {
   assignment_priority?: string; // Added for priority in assignment history
   assignment_notes?: string; // Added for notes in assignment history
   icon?: string; // Added for icon mapping
+  contact_tooltip?: { message: string; timestamp: string }; // For contact message tooltips
+  status_change_details?: {
+    previous_status: string;
+    new_status: string;
+    changed_by: string;
+  }; // For status change details
 }
 
 // Interface for Lead (simplified for context)
@@ -186,7 +198,7 @@ interface User {
   // Add other relevant user properties if needed
 }
 
-// Helper function to transform API history entry to a consistent format
+// Helper function to map API history entry to internal format, including new fields
 const transformHistoryEntry = (entry: any) => {
   // Mapping from API's activity_type to our internal display type and icon
   const typeMap: { [key: string]: { display: string; icon: string } } = {
@@ -211,6 +223,7 @@ const transformHistoryEntry = (entry: any) => {
     custom: { display: "Custom Activity", icon: "activity" }, // For generic or unmapped types
   };
 
+  // Map to internal history entry structure, including new fields
   return {
     id: entry.id,
     type: typeMap[entry.activity_type]
@@ -220,12 +233,34 @@ const transformHistoryEntry = (entry: any) => {
           .replace(/\b\w/g, (l) => l.toUpperCase()), // Display type
     action:
       entry.title || typeMap[entry.activity_type]?.display || "Unknown Action", // Title or mapped display
-    user: entry.created_by?.username || "Unknown User",
+    user_name: entry.created_by?.username || "Unknown User", // Use username from API if available
+    user_role: entry.user_role, // Pass user_role if available
     timestamp: entry.created_at,
     details: entry.description,
     icon: typeMap[entry.activity_type]
       ? typeMap[entry.activity_type].icon
       : "activity", // Default to 'activity'
+    history_type: entry.activity_type, // Store the original history_type for conditional rendering
+
+    // New fields for enhanced history display
+    contact_tooltip: entry.metadata?.contact_message
+      ? {
+          message: entry.metadata.contact_message,
+          timestamp: entry.metadata.contact_timestamp || entry.created_at, // Use provided timestamp or entry timestamp
+        }
+      : undefined,
+    status_change_details:
+      entry.activity_type === "status_change" &&
+      entry.metadata &&
+      entry.metadata.previous_status &&
+      entry.metadata.new_status &&
+      entry.metadata.changed_by
+        ? {
+            previous_status: entry.metadata.previous_status,
+            new_status: entry.metadata.new_status,
+            changed_by: entry.metadata.changed_by,
+          }
+        : undefined,
   };
 };
 
@@ -1715,6 +1750,26 @@ SOAR-AI Team`,
         previous_agent: item.previous_agent, // Include previous_agent if available
         assignment_priority: item.assignment_priority, // Include priority if available
         assignment_notes: item.assignment_notes, // Include notes if available
+        // Enrich with new fields for tooltips and status change details
+        contact_tooltip: item.metadata?.contact_message
+          ? {
+              message: item.metadata.contact_message,
+              timestamp:
+                item.metadata.contact_timestamp ||
+                item.timestamp, // Use provided or fallback
+            }
+          : undefined,
+        status_change_details:
+          item.activity_type === "status_change" &&
+          item.metadata?.previous_status &&
+          item.metadata?.new_status &&
+          item.metadata?.changed_by
+            ? {
+                previous_status: item.metadata.previous_status,
+                new_status: item.metadata.new_status,
+                changed_by: item.metadata.changed_by,
+              }
+            : undefined,
       }));
 
       setLeadHistory((prev) => ({
@@ -3164,7 +3219,7 @@ SOAR-AI Team`,
                       onClick={() => handleAssignAgent(lead)}
                     >
                       <User className="h-4 w-4 mr-1" />
-                      {lead.assigned_to != null ? "Reassign" : "Assign Agent"}
+                      {lead.assignedAgent !== null ? "Reassign" : "Assign Agent"}
                     </Button>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -3698,13 +3753,12 @@ SOAR-AI Team`,
                       };
 
                       const IconComponent = getIconComponent(entry.icon);
-                      const isAgentAssignment =
-                        entry.history_type === "agent_assignment" ||
-                        entry.history_type === "agent_reassignment";
+                      const isContactRelated = ['contact_made', 'call_made', 'email_sent', 'contact_response', 'phone_call_completed', 'email_response', 'meeting_completed'].includes(entry.history_type);
+                      const isStatusChange = entry.history_type === 'status_change';
 
                       return (
                         <div
-                          key={index}
+                          key={entry.id || index}
                           className="flex gap-3 border-b border-gray-100 pb-3 last:border-b-0"
                         >
                           <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">

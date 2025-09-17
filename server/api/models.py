@@ -729,21 +729,21 @@ class EmailCampaign(models.Model):
                 if not is_complete_html:
                     # Wrap content in standard SOAR-AI template
                     contact_name = f"{lead.contact.first_name} {lead.contact.last_name}".strip() or 'Valued Customer'
-                    
+
                     # Get CTA link from campaign or use default
                     cta_link = self.cta_link or 'https://calendly.com/soar-ai/demo'
                     cta_text = 'Schedule Demo'
-                    
+
                     # Create CTA button HTML with tracking
                     base_url = os.getenv('DOMAIN_URL')
                     if not base_url:
                         base_url = 'https://51f54198-a9a2-4b01-b85b-23549e0b6e1c-00-385i2ayjj8nal.pike.replit.dev:8000'
-                    
+
                     # Encode CTA link for tracking
                     import urllib.parse
                     encoded_cta_link = urllib.parse.quote(cta_link, safe='')
                     tracked_cta_link = f"{base_url}/api/track/click/{tracking.tracking_id}/?url={encoded_cta_link}"
-                    
+
                     cta_button_html = f"""
                     <div style="text-align:center; margin:24px 0;">
                         <a href="{tracked_cta_link}" style="display:inline-block; padding:14px 28px; background:#2563eb; color:#ffffff; text-decoration:none; border-radius:6px; font-weight:600; font-size:16px;">
@@ -789,7 +789,7 @@ class EmailCampaign(models.Model):
                     {rendered_content_with_tracking}
                 </div>
 
-                
+
                 <div class="content-text">
                     <p>Thank you for your interest in SOAR-AI's corporate travel solutions.</p>
                     <p>Best regards,<br><strong>The SOAR-AI Team</strong></p>
@@ -1194,63 +1194,47 @@ class LeadNote(models.Model):
 class LeadHistory(models.Model):
     HISTORY_TYPES = [
         ('creation', 'Lead Created'),
-        ('status_change', 'Status Changed'),
         ('note_added', 'Note Added'),
+        ('status_change', 'Status Change'),
         ('score_update', 'Score Updated'),
-        ('agent_assignment', 'Agent Assigned'),
-        ('agent_reassignment', 'Agent Reassigned'),
         ('assignment', 'Lead Assigned'),
         ('contact_made', 'Contact Made'),
-        ('email_sent', 'Email Sent'),
         ('call_made', 'Call Made'),
+        ('email_sent', 'Email Sent'),
         ('meeting_scheduled', 'Meeting Scheduled'),
         ('qualification', 'Lead Qualified'),
         ('disqualification', 'Lead Disqualified'),
         ('opportunity_created', 'Opportunity Created'),
         ('proposal_sent', 'Proposal Sent'),
         ('negotiation_started', 'Negotiation Started'),
-        ('won', 'Lead Won'),
-        ('lost', 'Lead Lost'),
+        ('won', 'Deal Won'),
+        ('lost', 'Deal Lost'),
+        ('agent_assignment', 'Agent Assignment'),
+        ('agent_reassignment', 'Agent Reassignment'),
+        ('contact_response', 'Contact Response'),
+        ('phone_call_completed', 'Phone Call Completed'),
+        ('email_response', 'Email Response'),
+        ('meeting_completed', 'Meeting Completed'),
     ]
 
-    ICON_TYPES = [
-        ('plus', 'Plus'),
-        ('mail', 'Mail'),
-        ('phone', 'Phone'),
-        ('message-circle', 'Message Circle'),
-        ('message-square', 'Message Square'),
-        ('trending-up', 'Trending Up'),
-        ('user', 'User'),
-        ('check-circle', 'Check Circle'),
-        ('x-circle', 'X Circle'),
-        ('calendar', 'Calendar'),
-        ('briefcase', 'Briefcase'),
-        ('file-text', 'File Text'),
-        ('handshake', 'Handshake'),
-        ('trophy', 'Trophy'),
-        ('x', 'X'),
-    ]
-
-    lead = models.ForeignKey(Lead,
-                             on_delete=models.CASCADE,
-                             related_name='history_entries')
-    history_type = models.CharField(max_length=255)  # <- this must be here
-
+    lead = models.ForeignKey(Lead, on_delete=models.CASCADE, related_name='history_entries')
+    history_type = models.CharField(max_length=50, choices=HISTORY_TYPES)
     action = models.CharField(max_length=255)
     details = models.TextField()
-    icon = models.CharField(max_length=20, choices=ICON_TYPES, default='plus')
-    user = models.ForeignKey(User,
-                             on_delete=models.SET_NULL,
-                             null=True,
-                             blank=True)
+    icon = models.CharField(max_length=50, default='activity')
+    user = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True)
     metadata = models.JSONField(default=dict, blank=True)
-    timestamp = models.DateTimeField(default=timezone.now)
+    contact_message = models.TextField(blank=True, null=True)  # Store contact messages for tooltip
+    previous_status = models.CharField(max_length=50, blank=True, null=True)  # For status changes
+    new_status = models.CharField(max_length=50, blank=True, null=True)  # For status changes
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-timestamp']
+        verbose_name_plural = 'Lead History'
 
     def __str__(self):
         return f"{self.lead.company.name} - {self.action}"
-
-    class Meta:
-        ordering = ['timestamp']
 
 class ActivityLog(models.Model):
     ACTION_TYPES = [
