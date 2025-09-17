@@ -2548,7 +2548,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                   <ul className="text-sm text-amber-800 space-y-1">
                     <li>• This preview uses sample data from TechCorp Solutions</li>
                     <li>• Actual emails will use real recipient data and personalization</li>
-                    <li>• Variables like 'company_name' will be replaced with actual values</li>
+                    <li>• Variables like {'{{company_name}}'} will be replaced with actual values</li>
                     <li>• The final email design may include additional branding elements</li>
                   </ul>
                 </div>
