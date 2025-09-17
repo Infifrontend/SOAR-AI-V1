@@ -166,6 +166,8 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
   const [loadingEmailTemplates, setLoadingEmailTemplates] = useState(false);
   const [emailTemplateError, setEmailTemplateError] = useState<string | null>(null);
   const [selectedEmailTemplate, setSelectedEmailTemplate] = useState<any>(null); // State to track selected email template
+  const [showTemplatePreview, setShowTemplatePreview] = useState(false);
+  const [templatePreviewData, setTemplatePreviewData] = useState<any>(null);
 
   // Use actual selectedLeads from props instead of mock data
   const selectedLeads = propSelectedLeads || [];
@@ -521,41 +523,35 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
 
       if (response.ok) {
         const preview = await response.json();
-
-        // Create a new window to show the preview
-        const previewWindow = window.open('', '_blank', 'width=800,height=600');
-        if (previewWindow) {
-          previewWindow.document.write(`
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <title>Template Preview - ${template.name}</title>
-              <style>
-                body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
-                .preview-header { background: #f5f5f5; padding: 10px; margin-bottom: 20px; border-radius: 4px; }
-                .preview-subject { font-weight: bold; margin-bottom: 10px; }
-                .preview-content { background: white; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; }
-              </style>
-            </head>
-            <body>
-              <div class="preview-header">
-                <div class="preview-subject">Subject: ${preview.subject || template.subject_line || 'Email Preview'}</div>
-                <div style="font-size: 12px; color: #666;">Template: ${template.name}</div>
-              </div>
-              <div class="preview-content">
-                ${preview.content}
-              </div>
-            </body>
-            </html>
-          `);
-          previewWindow.document.close();
-        }
+        
+        // Import EmailTemplateService for complete layout rendering
+        const { EmailTemplateService } = await import('../utils/emailTemplateService');
+        
+        // Create a complete email layout with header and footer
+        const completeEmailHtml = EmailTemplateService.renderCorporateContactTemplate(
+          preview.sample_data?.contact_name || 'John Smith',
+          preview.sample_data?.company_name || 'TechCorp Solutions',
+          preview.content,
+          preview.subject || template.subject_line || 'Email Template Preview',
+          'Schedule Demo',
+          'https://calendly.com/soar-ai/demo'
+        );
+        
+        setTemplatePreviewData({
+          template,
+          preview: {
+            ...preview,
+            content: completeEmailHtml,
+            isCompleteLayout: true
+          }
+        });
+        setShowTemplatePreview(true);
       } else {
         throw new Error('Failed to generate preview');
       }
     } catch (error) {
       console.error('Error previewing template:', error);
-      alert('Failed to generate template preview');
+      toast.error('Failed to generate template preview');
     }
   };
 
@@ -2101,6 +2097,128 @@ TechCorp Solutions can achieve complete travel governance without slowing down y
                 </>
               )}
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Template Preview Dialog */}
+      <Dialog open={showTemplatePreview} onOpenChange={setShowTemplatePreview}>
+        <DialogContent className="max-w-6xl max-h-[95vh] overflow-hidden flex flex-col">
+          <DialogHeader className="flex-shrink-0 border-b pb-4">
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5 text-blue-600" />
+              Template Preview - {templatePreviewData?.template?.name}
+            </DialogTitle>
+            <DialogDescription>
+              Preview of "{templatePreviewData?.template?.name}" with sample data
+            </DialogDescription>
+          </DialogHeader>
+          
+          {templatePreviewData && (
+            <div className="flex-1 overflow-hidden flex flex-col space-y-4">
+              {/* Email Header Info */}
+              <div className="flex-shrink-0 bg-gray-50 p-4 rounded-lg border">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-semibold text-gray-700">Subject:</span>
+                    <div className="mt-1 text-gray-900">
+                      {templatePreviewData.preview.subject || templatePreviewData.template.subject_line || 'Email Preview'}
+                    </div>
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-700">Template Type:</span>
+                    <div className="mt-1">
+                      <Badge variant="outline" className="capitalize">
+                        {templatePreviewData.template.template_type?.replace('_', ' ') || 'Email Campaign'}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-700">From:</span>
+                    <div className="mt-1 text-gray-900">SOAR-AI &lt;corporate@soar-ai.com&gt;</div>
+                  </div>
+                  <div>
+                    <span className="font-semibold text-gray-700">To:</span>
+                    <div className="mt-1 text-gray-900">John Smith &lt;john.smith@techcorp.com&gt;</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Email Content Preview */}
+              <div className="flex-1 overflow-hidden">
+                <div className="h-full border rounded-lg overflow-hidden bg-white">
+                  <iframe
+                    srcDoc={templatePreviewData.preview.content}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      border: 'none',
+                      borderRadius: '4px'
+                    }}
+                    title="Email Template Preview"
+                  />
+                </div>
+              </div>
+
+              {/* Template Details Footer */}
+              <div className="flex-shrink-0 bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <span className="font-semibold text-blue-800">Variables Used:</span>
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {templatePreviewData.template.variables?.slice(0, 3).map((variable: string, index: number) => (
+                        <Badge key={index} variant="outline" className="text-xs">
+                          {variable.startsWith('{{') ? variable : `{{${variable}}}`}
+                        </Badge>
+                      ))}
+                      {templatePreviewData.template.variables?.length > 3 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{templatePreviewData.template.variables.length - 3} more
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <span className="font-semibold text-blue-800">Scope:</span>
+                    <div className="mt-1">
+                      <Badge variant={templatePreviewData.template.is_global ? "default" : "secondary"} className="text-xs">
+                        {templatePreviewData.template.is_global ? 'Global' : 'Company'}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div>
+                    <span className="font-semibold text-blue-800">Created By:</span>
+                    <div className="mt-1 text-blue-700">
+                      {templatePreviewData.template.created_by_name || 'System'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="flex-shrink-0 flex items-center justify-between gap-4 pt-4 border-t">
+            <div className="text-xs text-gray-500">
+              <Info className="h-4 w-4 inline mr-1" />
+              This preview shows your template with sample data and complete SOAR-AI email layout
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowTemplatePreview(false)}>
+                Close Preview
+              </Button>
+              <Button 
+                onClick={() => {
+                  if (templatePreviewData?.template) {
+                    handleEmailTemplateSelect(templatePreviewData.template);
+                    setShowTemplatePreview(false);
+                  }
+                }}
+                className="bg-orange-500 hover:bg-orange-600 text-white"
+              >
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Use This Template
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
