@@ -788,7 +788,8 @@ class EmailCampaign(models.Model):
                 <div class="content-text">
                     {rendered_content_with_tracking}
                 </div>
-                {cta_button_html}
+
+                
                 <div class="content-text">
                     <p>Thank you for your interest in SOAR-AI's corporate travel solutions.</p>
                     <p>Best regards,<br><strong>The SOAR-AI Team</strong></p>

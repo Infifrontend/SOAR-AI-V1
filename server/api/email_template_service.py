@@ -230,7 +230,7 @@ class EmailTemplateService:
                 <div class="content-section">
                     {content}
                 </div>
-                {cta_section}
+
                 <div class="content-section">
                     <p>Thank you for your interest in SOAR-AI's corporate travel solutions.</p>
                     <p>Best regards,<br><strong>The SOAR-AI Marketing Team</strong></p>
