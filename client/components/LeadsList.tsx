@@ -105,7 +105,7 @@ import { ScrollArea } from "./ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"; // Added Tabs components
 import { CorporateProfile } from "./CorporateProfile";
 import { MarketingCampaignWizard } from "./MarketingCampaignWizard";
-import { formatDate, formatDateTime } from '../utils/dateFormatter';
+import { formatDate, formatDateTime } from "../utils/dateFormatter";
 import { useUserApi } from "../hooks/api/useUserApi"; // Import useUserApi
 
 interface LeadsListProps {
@@ -703,7 +703,8 @@ export function LeadsList({ initialFilters, onNavigate }: LeadsListProps) {
     useState<any>(null);
   const [disqualifyReason, setDisqualifyReason] = useState("");
   const [showQualifyDialog, setShowQualifyDialog] = useState(false);
-  const [selectedLeadForQualify, setSelectedLeadForQualify] = useState<any>(null);
+  const [selectedLeadForQualify, setSelectedLeadForQualify] =
+    useState<any>(null);
   const [selectedLeads, setSelectedLeads] = useState<number[]>([]);
   const [selectAll, setSelectAll] = useState(false);
   const [showContactDialog, setShowContactDialog] = useState(false);
@@ -803,7 +804,9 @@ export function LeadsList({ initialFilters, onNavigate }: LeadsListProps) {
   const [disqualifyingLeadId, setDisqualifyingLeadId] = useState<number | null>(
     null,
   );
-  const [movingToOpportunityId, setMovingToOpportunityId] = useState<number | null>(null);
+  const [movingToOpportunityId, setMovingToOpportunityId] = useState<
+    number | null
+  >(null);
   const [leadNotes, setLeadNotes] = useState<{ [key: number]: any[] }>({}); // Stores lead notes fetched from API
   const [isLoadingNotes, setIsLoadingNotes] = useState<{
     [key: number]: boolean;
@@ -820,9 +823,10 @@ export function LeadsList({ initialFilters, onNavigate }: LeadsListProps) {
     useState(false);
   const [showScheduleDemoModal, setShowScheduleDemoModal] = useState(false);
   const [showAssignAgentModal, setShowAssignAgentModal] = useState(false);
-  const [showMoveToOpportunityDialog, setShowMoveToOpportunityDialog] = useState(false); // New state for confirmation dialog
-  const [selectedLeadForOpportunity, setSelectedLeadForOpportunity] = useState<any>(null); // State to hold the lead for the confirmation dialog
-
+  const [showMoveToOpportunityDialog, setShowMoveToOpportunityDialog] =
+    useState(false); // New state for confirmation dialog
+  const [selectedLeadForOpportunity, setSelectedLeadForOpportunity] =
+    useState<any>(null); // State to hold the lead for the confirmation dialog
 
   // Selected lead for actions
   const [selectedLeadForAction, setSelectedLeadForAction] = useState<any>(null);
@@ -851,11 +855,11 @@ export function LeadsList({ initialFilters, onNavigate }: LeadsListProps) {
       }
     };
 
-    if (showAssignAgentModal) { // Only fetch when the modal is opened
+    if (showAssignAgentModal) {
+      // Only fetch when the modal is opened
       fetchUsers();
     }
-  }, [showAssignAgentModal, userApi]);
-
+  }, [showAssignAgentModal]);
 
   const isFormValid = () => {
     return (
@@ -891,7 +895,8 @@ export function LeadsList({ initialFilters, onNavigate }: LeadsListProps) {
         status: filterParams.status !== "all" ? filterParams.status : "",
         industry: filterParams.industry !== "all" ? filterParams.industry : "",
         score: filterParams.score !== "all" ? filterParams.score : "",
-        engagement: filterParams.engagement !== "all" ? filterParams.engagement : "",
+        engagement:
+          filterParams.engagement !== "all" ? filterParams.engagement : "",
       };
 
       console.log("Fetching leads with filters:", apiFilterParams);
@@ -1004,7 +1009,9 @@ export function LeadsList({ initialFilters, onNavigate }: LeadsListProps) {
           tags: initialFilters.newLead.tags || ["Corporate Search", "New Lead"],
           contractReady: false,
           lastActivity: formatDate(new Date()),
-          followUpDate: formatDate(new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)),
+          followUpDate: formatDate(
+            new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
+          ),
           history_entries: [], // Will be fetched if needed, or use the provided notes as initial history
           has_opportunity: false, // Default to false
         };
@@ -1189,7 +1196,9 @@ export function LeadsList({ initialFilters, onNavigate }: LeadsListProps) {
           : null,
         notes: newCompanyForm.notes || "",
         next_action: "Initial outreach and qualification",
-        next_action_date: formatDate(new Date(Date.now() + 2 * 24 * 60 * 60 * 1000)), // Default next action in 2 days
+        next_action_date: formatDate(
+          new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
+        ), // Default next action in 2 days
       };
 
       console.log("Creating lead with data:", leadData);
@@ -1406,7 +1415,11 @@ export function LeadsList({ initialFilters, onNavigate }: LeadsListProps) {
 
       // Update the local state
       setLeads((prev) =>
-        prev.map((l) => (l.id === selectedLeadForQualify.id ? { ...l, status: "qualified" } : l)),
+        prev.map((l) =>
+          l.id === selectedLeadForQualify.id
+            ? { ...l, status: "qualified" }
+            : l,
+        ),
       );
 
       // Clear history for this lead to force refresh
@@ -1804,9 +1817,12 @@ SOAR-AI Team`,
         stage: "discovery",
         probability: 65,
         estimated_close_date: formatDate(
-          new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+          new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         ),
-        value: parseInt(selectedLeadForOpportunity.travelBudget.replace(/[^0-9]/g, "")) || 250000,
+        value:
+          parseInt(
+            selectedLeadForOpportunity.travelBudget.replace(/[^0-9]/g, ""),
+          ) || 250000,
         description: `Opportunity created from qualified lead. ${selectedLeadForOpportunity.notes}`,
         next_steps: "Send initial proposal and schedule presentation",
       };
@@ -1824,14 +1840,21 @@ SOAR-AI Team`,
       // Update the local state to mark the lead as having an opportunity
       setLeads((prev) =>
         prev.map((l) =>
-          l.id === selectedLeadForOpportunity.id ? { ...l, has_opportunity: true, status: "opportunity" } : l,
+          l.id === selectedLeadForOpportunity.id
+            ? { ...l, has_opportunity: true, status: "opportunity" }
+            : l,
         ),
       );
 
       // Show success popup message based on API response
-      const successMessage = response.message || `${selectedLeadForOpportunity.company} has been successfully moved to opportunities!`;
+      const successMessage =
+        response.message ||
+        `${selectedLeadForOpportunity.company} has been successfully moved to opportunities!`;
       setSuccessMessage(`🎉 ${successMessage}`);
-      console.log("Setting move to opportunity success message:", successMessage);
+      console.log(
+        "Setting move to opportunity success message:",
+        successMessage,
+      );
       setTimeout(() => {
         console.log("Clearing move to opportunity success message");
         setSuccessMessage("");
@@ -1858,25 +1881,30 @@ SOAR-AI Team`,
             source: selectedLeadForOpportunity.source,
             travelBudget: selectedLeadForOpportunity.travelBudget,
             decisionMaker: selectedLeadForOpportunity.decisionMaker,
-            tags: selectedLeadForOpportunity.tags || [selectedLeadForOpportunity.industry, "Qualified Lead"],
+            tags: selectedLeadForOpportunity.tags || [
+              selectedLeadForOpportunity.industry,
+              "Qualified Lead",
+            ],
             owner: selectedLeadForOpportunity.assignedAgent || "Current User",
           },
           message: successMessage,
         });
       }
 
-      toast.success(`${selectedLeadForOpportunity.company} moved to opportunities successfully!`);
+      toast.success(
+        `${selectedLeadForOpportunity.company} moved to opportunities successfully!`,
+      );
 
       // Close the confirmation dialog
       setShowMoveToOpportunityDialog(false);
       setSelectedLeadForOpportunity(null);
-
     } catch (error) {
       console.error("Error moving lead to opportunity:", error);
-      const errorMessage = error.response?.data?.error ||
-                          error.response?.data?.message ||
-                          error.message ||
-                          "Failed to move lead to opportunities. Please try again.";
+      const errorMessage =
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to move lead to opportunities. Please try again.";
 
       // Show error message in success message area
       setSuccessMessage(`❌ Error: ${errorMessage}`);
@@ -1991,14 +2019,16 @@ SOAR-AI Team`,
         selectedLeads.includes(lead.id),
       );
 
-      const newLeadsToUpdate = selectedLeadData.filter(lead => lead.status === 'new');
+      const newLeadsToUpdate = selectedLeadData.filter(
+        (lead) => lead.status === "new",
+      );
 
       if (newLeadsToUpdate.length > 0) {
         // Update each new lead's status to contacted
         const updatePromises = newLeadsToUpdate.map(async (lead) => {
           try {
             const updatedLead = await leadApi.updateLead(lead.id, {
-              status: 'contacted'
+              status: "contacted",
             });
             console.log(`Updated lead ${lead.id} status to contacted`);
             return { leadId: lead.id, success: true, updatedLead };
@@ -2009,20 +2039,26 @@ SOAR-AI Team`,
         });
 
         const updateResults = await Promise.all(updatePromises);
-        const successfulUpdates = updateResults.filter(result => result.success);
+        const successfulUpdates = updateResults.filter(
+          (result) => result.success,
+        );
 
         if (successfulUpdates.length > 0) {
           // Update local state for successfully updated leads
-          setLeads(prev => prev.map(lead => {
-            const successfulUpdate = successfulUpdates.find(update => update.leadId === lead.id);
-            if (successfulUpdate) {
-              return { ...lead, status: 'contacted' };
-            }
-            return lead;
-          }));
+          setLeads((prev) =>
+            prev.map((lead) => {
+              const successfulUpdate = successfulUpdates.find(
+                (update) => update.leadId === lead.id,
+              );
+              if (successfulUpdate) {
+                return { ...lead, status: "contacted" };
+              }
+              return lead;
+            }),
+          );
 
           toast.success(
-            `Campaign "${campaignData.name}" launched successfully! ${successfulUpdates.length} lead${successfulUpdates.length > 1 ? 's' : ''} status updated to 'Contacted'.`,
+            `Campaign "${campaignData.name}" launched successfully! ${successfulUpdates.length} lead${successfulUpdates.length > 1 ? "s" : ""} status updated to 'Contacted'.`,
           );
         } else {
           toast.success(
@@ -2039,7 +2075,9 @@ SOAR-AI Team`,
       toast.success(
         `Campaign "${campaignData.name}" launched successfully for ${selectedLeads.length} leads!`,
       );
-      toast.error("Some lead statuses could not be updated. Please check manually.");
+      toast.error(
+        "Some lead statuses could not be updated. Please check manually.",
+      );
     }
 
     setShowMarketingCampaign(false);
@@ -2104,7 +2142,9 @@ SOAR-AI Team`,
       {successMessage && (
         <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-green-50 border-2 border-green-200 rounded-lg p-4 flex items-center gap-3 shadow-2xl animate-in slide-in-from-top-2 max-w-md">
           <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0" />
-          <span className="text-green-800 font-medium text-base">{successMessage}</span>
+          <span className="text-green-800 font-medium text-base">
+            {successMessage}
+          </span>
           <button
             onClick={() => {
               console.log("Manual close success message");
@@ -2356,7 +2396,7 @@ SOAR-AI Team`,
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm font-medium text-gray-600 mb-1">
-                            Disqualifed  Leads
+                            Disqualifed Leads
                           </p>
                           <p className="text-2xl font-bold text-gray-900">
                             {
@@ -2768,7 +2808,8 @@ SOAR-AI Team`,
                         )}
                         {(lead.campaignCount || 0) >= 0 && (
                           <Badge className="text-xs px-2 py-1 rounded-full text-orange-700 border-orange-200 bg-orange-50">
-                            📧 {lead.campaignCount} Campaign{lead.campaignCount !== 1 ? 's' : ''}
+                            📧 {lead.campaignCount} Campaign
+                            {lead.campaignCount !== 1 ? "s" : ""}
                           </Badge>
                         )}
                       </div>
@@ -2984,11 +3025,7 @@ SOAR-AI Team`,
                                   >
                                     <div className="flex items-start justify-between mb-2">
                                       <span className="text-xs text-gray-500">
-                                        {formatDate(
-                                          new Date(
-                                            note.created_at,
-                                          ),
-                                        )}{" "}
+                                        {formatDate(new Date(note.created_at))}{" "}
                                         at{" "}
                                         {new Date(
                                           note.created_at,
@@ -3038,8 +3075,7 @@ SOAR-AI Team`,
                                 </Button>
                               )}
                             </div>
-                          ) :
-                            (
+                          ) : (
                             <div className="text-center py-4">
                               <MessageSquare className="h-8 w-8 mx-auto mb-2 text-gray-400" />
                               <p className="text-sm text-gray-500 mb-2">
@@ -3072,8 +3108,7 @@ SOAR-AI Team`,
                                 </Button>
                               </div>
                             </div>
-                          )
-                          }
+                          )}
                         </div>
                       </CollapsibleContent>
                     </Collapsible>
@@ -3186,21 +3221,23 @@ SOAR-AI Team`,
                           e.stopPropagation();
                           handleMoveToOpportunity(lead);
                         }}
-                        disabled={movingToOpportunityId === lead.id || lead.contractReady}
+                        disabled={
+                          movingToOpportunityId === lead.id ||
+                          lead.contractReady
+                        }
                       >
                         {movingToOpportunityId === lead.id ? (
                           <>
                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-1"></div>
                             Moving...
                           </>
-                        ) : (
-                        !lead.contractReady?
+                        ) : !lead.contractReady ? (
                           <>
                             <ArrowRight className="h-3 w-3 mr-1" />
                             Move to Opportunity
-                          </>:<>
-                            Already Moved to Opportunity
                           </>
+                        ) : (
+                          <>Already Moved to Opportunity</>
                         )}
                       </Button>
                     )}
@@ -3506,7 +3543,9 @@ SOAR-AI Team`,
             <Button
               onClick={handleSendMessage}
               className="bg-orange-500 hover:bg-orange-600 text-white"
-              disabled={!contactForm.subject || !contactForm.message || isSendingMessage}
+              disabled={
+                !contactForm.subject || !contactForm.message || isSendingMessage
+              }
             >
               {isSendingMessage ? (
                 <>
@@ -3826,7 +3865,10 @@ SOAR-AI Team`,
             </DialogTitle>
             <DialogDescription>
               Are you sure to qualify this corporate{" "}
-              <span className="font-semibold">{selectedLeadForQualify?.company}</span>?
+              <span className="font-semibold">
+                {selectedLeadForQualify?.company}
+              </span>
+              ?
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex gap-2">
@@ -3938,8 +3980,8 @@ SOAR-AI Team`,
               className="text-base mt-2"
               style={{ color: "#717182" }}
             >
-              Add a new lead to the corporate database for potential
-              partnership opportunities
+              Add a new lead to the corporate database for potential partnership
+              opportunities
             </DialogDescription>
           </DialogHeader>
 
@@ -5061,9 +5103,17 @@ Key Topics: Travel volume, preferred airlines, booking preferences, cost optimiz
                   ? "Select New Sales Agent"
                   : "Select Sales Agent"}
               </Label>
-              <Select value={selectedAgent} onValueChange={setSelectedAgent} disabled={loadingUsers}>
+              <Select
+                value={selectedAgent}
+                onValueChange={setSelectedAgent}
+                disabled={loadingUsers}
+              >
                 <SelectTrigger>
-                  <SelectValue placeholder={loadingUsers ? "Loading agents..." : "Choose an agent..."} />
+                  <SelectValue
+                    placeholder={
+                      loadingUsers ? "Loading agents..." : "Choose an agent..."
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   {loadingUsers ? (
@@ -5072,9 +5122,14 @@ Key Topics: Travel volume, preferred airlines, booking preferences, cost optimiz
                     </SelectItem>
                   ) : users.length > 0 ? (
                     users
-                      .filter(user => user.username && user.username.trim() !== '') // Filter out users with empty usernames
+                      .filter(
+                        (user) => user.username && user.username.trim() !== "",
+                      ) // Filter out users with empty usernames
                       .map((user) => (
-                        <SelectItem key={user.id} value={user.username || `user_${user.id}`}>
+                        <SelectItem
+                          key={user.id}
+                          value={user.username || `user_${user.id}`}
+                        >
                           {user.first_name && user.last_name
                             ? `${user.first_name} ${user.last_name}`
                             : user.username || `User ${user.id}`}
@@ -5182,7 +5237,10 @@ Key Topics: Travel volume, preferred airlines, booking preferences, cost optimiz
       </Dialog>
 
       {/* Move to Opportunity Confirmation Dialog */}
-      <Dialog open={showMoveToOpportunityDialog} onOpenChange={setShowMoveToOpportunityDialog}>
+      <Dialog
+        open={showMoveToOpportunityDialog}
+        onOpenChange={setShowMoveToOpportunityDialog}
+      >
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
@@ -5190,7 +5248,8 @@ Key Topics: Travel volume, preferred airlines, booking preferences, cost optimiz
               Move to Opportunities
             </DialogTitle>
             <DialogDescription>
-              Are you sure you want to move "{selectedLeadForOpportunity?.company}" to the Opportunities menu?
+              Are you sure you want to move "
+              {selectedLeadForOpportunity?.company}" to the Opportunities menu?
             </DialogDescription>
           </DialogHeader>
 
@@ -5198,7 +5257,9 @@ Key Topics: Travel volume, preferred airlines, booking preferences, cost optimiz
             <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
               <div className="flex items-center gap-2 mb-2">
                 <Info className="h-4 w-4 text-blue-600" />
-                <span className="text-sm font-medium text-blue-900">What happens next?</span>
+                <span className="text-sm font-medium text-blue-900">
+                  What happens next?
+                </span>
               </div>
               <ul className="text-sm text-blue-700 space-y-1">
                 <li>• Lead will be converted to an opportunity</li>
@@ -5211,13 +5272,16 @@ Key Topics: Travel volume, preferred airlines, booking preferences, cost optimiz
             {selectedLeadForOpportunity && (
               <div className="space-y-2">
                 <div className="text-sm">
-                  <span className="font-medium">Company:</span> {selectedLeadForOpportunity.company}
+                  <span className="font-medium">Company:</span>{" "}
+                  {selectedLeadForOpportunity.company}
                 </div>
                 <div className="text-sm">
-                  <span className="font-medium">Contact:</span> {selectedLeadForOpportunity.contact}
+                  <span className="font-medium">Contact:</span>{" "}
+                  {selectedLeadForOpportunity.contact}
                 </div>
                 <div className="text-sm">
-                  <span className="font-medium">Estimated Value:</span> {selectedLeadForOpportunity.travelBudget}
+                  <span className="font-medium">Estimated Value:</span>{" "}
+                  {selectedLeadForOpportunity.travelBudget}
                 </div>
               </div>
             )}
@@ -5236,7 +5300,9 @@ Key Topics: Travel volume, preferred airlines, booking preferences, cost optimiz
             </Button>
             <Button
               onClick={handleConfirmMoveToOpportunity}
-              disabled={movingToOpportunityId === selectedLeadForOpportunity?.id}
+              disabled={
+                movingToOpportunityId === selectedLeadForOpportunity?.id
+              }
               className="bg-green-600 hover:bg-green-700 text-white"
             >
               {movingToOpportunityId === selectedLeadForOpportunity?.id ? (
