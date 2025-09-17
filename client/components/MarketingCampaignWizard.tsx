@@ -2578,52 +2578,137 @@ SOAR-AI Team</p>`;
                     </div>
                   </div>
 
-                  {/* Email Body */}
-                  <div className="p-6">
-                    <div 
-                      className="prose prose-sm max-w-none"
-                      dangerouslySetInnerHTML={{
-                        __html: (campaignData.content.email.body || `
-                          <p><strong>Hi Sarah Johnson,</strong></p>
-                          <p>Managing travel compliance for 2,500 employees can be challenging. SOAR-AI ensures 100% policy adherence while maintaining traveler satisfaction.</p>
-                          <p><strong>Key compliance features for Technology companies:</strong></p>
-                          <ul>
-                            <li>Automated policy enforcement</li>
-                            <li>Real-time approval workflows</li>
-                            <li>Expense management integration</li>
-                            <li>Regulatory compliance reporting</li>
-                            <li>Instant policy violation alerts</li>
-                          </ul>
-                          <p>TechCorp Solutions can achieve complete travel governance without slowing down your team.</p>
-                        `)
-                        .replace(/{{contact_name}}/g, 'Sarah Johnson')
-                        .replace(/{{company_name}}/g, 'TechCorp Solutions')
-                        .replace(/{{employees}}/g, '2,500')
-                        .replace(/{{industry}}/g, 'Technology')
-                        .replace(/{{travel_budget}}/g, '$750,000')
-                        .replace(/{{sender_name}}/g, 'SOAR-AI Team')
-                      }}
-                    />
-
-                    {/* Call-to-Action */}
-                    {campaignData.content.email.cta && (
-                      <div className="mt-6 text-center">
-                        <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3">
-                          {campaignData.content.email.cta}
-                        </Button>
-                        {campaignData.content.email.cta_link && (
-                          <p className="text-xs text-gray-500 mt-2">
-                            Links to: {campaignData.content.email.cta_link}
-                          </p>
-                        )}
+                  {/* Complete Email Layout with Header and Footer */}
+                  <div className="bg-gray-100 p-4">
+                    <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
+                      {/* Email Header */}
+                      <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 text-white">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                              <span className="text-blue-600 font-bold text-lg">S</span>
+                            </div>
+                            <div>
+                              <h2 className="text-xl font-semibold">SOAR-AI</h2>
+                              <p className="text-blue-100 text-sm">Corporate Travel Solutions</p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-blue-100 text-xs">Transforming Business Travel</p>
+                          </div>
+                        </div>
                       </div>
-                    )}
-                  </div>
 
-                  {/* Email Footer */}
-                  <div className="bg-gray-50 px-4 py-3 border-t text-xs text-gray-500 text-center">
-                    <p>&copy; {new Date().getFullYear()} SOAR-AI. All rights reserved.</p>
-                    <p>This is a preview of your campaign content.</p>
+                      {/* Email Body */}
+                      <div className="px-6 py-8">
+                        <div 
+                          className="prose prose-sm max-w-none text-gray-700 leading-relaxed"
+                          style={{
+                            fontFamily: 'system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+                            fontSize: '16px',
+                            lineHeight: '1.6'
+                          }}
+                          dangerouslySetInnerHTML={{
+                            __html: (campaignData.content.email.body || `
+                              <p style="margin-bottom: 16px;"><strong>Hi Sarah Johnson,</strong></p>
+                              <p style="margin-bottom: 16px;">Managing travel compliance for 2,500 employees can be challenging. SOAR-AI ensures 100% policy adherence while maintaining traveler satisfaction.</p>
+                              <p style="margin-bottom: 12px;"><strong>Key compliance features for Technology companies:</strong></p>
+                              <ul style="margin-bottom: 16px; padding-left: 20px;">
+                                <li style="margin-bottom: 6px;">Automated policy enforcement</li>
+                                <li style="margin-bottom: 6px;">Real-time approval workflows</li>
+                                <li style="margin-bottom: 6px;">Expense management integration</li>
+                                <li style="margin-bottom: 6px;">Regulatory compliance reporting</li>
+                                <li style="margin-bottom: 6px;">Instant policy violation alerts</li>
+                              </ul>
+                              <p style="margin-bottom: 16px;">TechCorp Solutions can achieve complete travel governance without slowing down your team.</p>
+                              <p style="margin-bottom: 24px;"><strong>Why choose SOAR-AI:</strong></p>
+                              <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 24px; border-left: 4px solid #3b82f6;">
+                                <ul style="margin: 0; padding-left: 20px;">
+                                  <li style="margin-bottom: 8px; color: #1e40af;">Save up to 30% on travel costs</li>
+                                  <li style="margin-bottom: 8px; color: #1e40af;">Reduce booking time by 75%</li>
+                                  <li style="margin-bottom: 8px; color: #1e40af;">24/7 traveler support</li>
+                                  <li style="margin-bottom: 8px; color: #1e40af;">Enterprise-grade security</li>
+                                </ul>
+                              </div>
+                            `)
+                            .replace(/{{contact_name}}/g, '<span style="background-color: #fef3c7; padding: 2px 6px; border-radius: 4px; color: #92400e;">Sarah Johnson</span>')
+                            .replace(/{{company_name}}/g, '<span style="background-color: #fef3c7; padding: 2px 6px; border-radius: 4px; color: #92400e;">TechCorp Solutions</span>')
+                            .replace(/{{employees}}/g, '<span style="background-color: #fef3c7; padding: 2px 6px; border-radius: 4px; color: #92400e;">2,500</span>')
+                            .replace(/{{industry}}/g, '<span style="background-color: #fef3c7; padding: 2px 6px; border-radius: 4px; color: #92400e;">Technology</span>')
+                            .replace(/{{travel_budget}}/g, '<span style="background-color: #fef3c7; padding: 2px 6px; border-radius: 4px; color: #92400e;">$750,000</span>')
+                            .replace(/{{sender_name}}/g, '<span style="background-color: #fef3c7; padding: 2px 6px; border-radius: 4px; color: #92400e;">SOAR-AI Team</span>')
+                          }}
+                        />
+
+                        {/* Call-to-Action Section */}
+                        {campaignData.content.email.cta && (
+                          <div className="text-center mt-8 mb-6">
+                            <div className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-8 py-4 rounded-lg shadow-lg inline-block font-semibold text-lg transition-all duration-200 transform hover:scale-105">
+                              {campaignData.content.email.cta}
+                            </div>
+                            {campaignData.content.email.cta_link && (
+                              <p className="text-xs text-gray-500 mt-3">
+                                → {campaignData.content.email.cta_link}
+                              </p>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Personal Sign-off */}
+                        <div className="mt-8 pt-6 border-t border-gray-200">
+                          <p className="text-gray-700 mb-1">Best regards,</p>
+                          <p className="font-semibold text-gray-800">SOAR-AI Sales Team</p>
+                          <p className="text-sm text-gray-600">Corporate Travel Solutions</p>
+                        </div>
+                      </div>
+
+                      {/* Professional Footer */}
+                      <div className="bg-gray-50 px-6 py-6 border-t">
+                        <div className="text-center">
+                          <div className="flex items-center justify-center space-x-4 mb-4">
+                            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                              <span className="text-white font-bold text-sm">S</span>
+                            </div>
+                            <div>
+                              <p className="font-semibold text-gray-800">SOAR-AI</p>
+                              <p className="text-xs text-gray-600">Corporate Travel Solutions</p>
+                            </div>
+                          </div>
+                          
+                          <div className="border-t border-gray-200 pt-4">
+                            <p className="text-xs text-gray-600 mb-2">
+                              <strong>SOAR-AI Inc.</strong> • 123 Business Avenue, Suite 100 • San Francisco, CA 94105
+                            </p>
+                            <p className="text-xs text-gray-600 mb-2">
+                              Phone: +1 (555) 123-SOAR • Email: corporate@soar-ai.com
+                            </p>
+                            <p className="text-xs text-gray-500 mb-3">
+                              Visit us at: <span className="text-blue-600">www.soar-ai.com</span>
+                            </p>
+                          </div>
+
+                          <div className="border-t border-gray-200 pt-3">
+                            <p className="text-xs text-gray-500 mb-2">
+                              &copy; {new Date().getFullYear()} SOAR-AI Inc. All rights reserved.
+                            </p>
+                            <div className="flex items-center justify-center space-x-4 text-xs text-gray-500">
+                              <a href="#" className="hover:text-blue-600">Privacy Policy</a>
+                              <span>•</span>
+                              <a href="#" className="hover:text-blue-600">Terms of Service</a>
+                              <span>•</span>
+                              <a href="#" className="hover:text-blue-600">Unsubscribe</a>
+                            </div>
+                          </div>
+
+                          {/* Preview Badge */}
+                          <div className="mt-4 pt-3 border-t border-orange-200 bg-orange-50 -mx-6 px-6 py-2">
+                            <p className="text-xs text-orange-700 font-medium">
+                              📧 Email Preview Mode - Variables highlighted in yellow will be personalized for each recipient
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
