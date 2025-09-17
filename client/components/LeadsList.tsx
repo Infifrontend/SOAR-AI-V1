@@ -880,6 +880,11 @@ export function LeadsList({ initialFilters, onNavigate }: LeadsListProps) {
   const [assignmentNotes, setAssignmentNotes] = useState("");
   const [isAssigning, setIsAssigning] = useState(false);
 
+  // New states for Initiate Call Dialog
+  const [callNotes, setCallNotes] = useState('');
+  const [isInitiatingCall, setIsInitiatingCall] = useState(false);
+
+
   // Fetch users for the agent assignment dropdown
   useEffect(() => {
     const fetchUsers = async () => {
@@ -1798,8 +1803,34 @@ SOAR-AI Team`,
   // Handle action dropdown selections
   const handleInitiateCall = (lead: any) => {
     setSelectedLeadForAction(lead);
+    setCallNotes(''); // Reset call notes when opening the modal
     setShowInitiateCallModal(true);
   };
+
+  const handleInitiateCallSubmit = async () => {
+    if (!selectedLeadForAction) return;
+
+    setIsInitiatingCall(true);
+    try {
+      // Here you would typically call an API to initiate the call or schedule it.
+      // For now, we'll simulate success with a toast message.
+      // Replace with actual API call: await leadApi.initiateCall(selectedLeadForAction.id, { notes: callNotes });
+
+      // Simulate API call success
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      toast.success(`Call scheduled with ${selectedLeadForAction.company}!`);
+      setShowInitiateCallModal(false);
+      setSelectedLeadForAction(null);
+      setCallNotes(''); // Clear notes after successful submission
+    } catch (error) {
+      console.error("Error initiating call:", error);
+      toast.error("Failed to schedule call. Please try again.");
+    } finally {
+      setIsInitiatingCall(false);
+    }
+  };
+
 
   const handleScheduleMeeting = (lead: any) => {
     setSelectedLeadForAction(lead);
@@ -1836,7 +1867,7 @@ SOAR-AI Team`,
         notes: assignmentNotes,
       });
 
-      // Update local state
+      // Update the local state
       setLeads((prev) =>
         prev.map((l) =>
           l.id === selectedLeadForAssign.id
@@ -4673,112 +4704,68 @@ SOAR-AI Team`,
         open={showInitiateCallModal}
         onOpenChange={setShowInitiateCallModal}
       >
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <PhoneCall className="h-5 w-5 text-blue-600" />
-              Initiate Call - {selectedLeadForAction?.company}
+              Initiate Call with {selectedLeadForAction?.company}
             </DialogTitle>
             <DialogDescription>
-              Schedule a phone call with {selectedLeadForAction?.contact} at{" "}
-              {selectedLeadForAction?.company}
+              Start a phone call with {selectedLeadForAction?.contact}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label className="text-sm font-medium">Call Type</Label>
-                <Select defaultValue="discovery">
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="discovery">Discovery Call</SelectItem>
-                    <SelectItem value="follow-up">Follow-up Call</SelectItem>
-                    <SelectItem value="presentation">
-                      Sales Presentation
-                    </SelectItem>
-                    <SelectItem value="negotiation">
-                      Contract Discussion
-                    </SelectItem>
-                    <SelectItem value="check-in">Check-in Call</SelectItem>
-                  </SelectContent>
-                </Select>
+            <div className="p-4 bg-blue-50 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <Phone className="h-4 w-4 text-blue-600" />
+                <span className="font-medium text-blue-900">Contact Information</span>
               </div>
-              <div>
-                <Label className="text-sm font-medium">
-                  Duration (minutes)
-                </Label>
-                <Select defaultValue="30">
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="15">15 minutes</SelectItem>
-                    <SelectItem value="30">30 minutes</SelectItem>
-                    <SelectItem value="45">45 minutes</SelectItem>
-                    <SelectItem value="60">60 minutes</SelectItem>
-                    <SelectItem value="90">90 minutes</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <p className="text-sm text-blue-800">
+                <strong>Phone:</strong> {selectedLeadForAction?.phone}
+              </p>
+              <p className="text-sm text-blue-800">
+                <strong>Email:</strong> {selectedLeadForAction?.email}
+              </p>
             </div>
-
             <div>
-              <Label className="text-sm font-medium">
-                Scheduled Date & Time
-              </Label>
-              <div className="grid grid-cols-2 gap-2 mt-1">
-                <Input
-                  type="date"
-                  placeholder="dd-mm-yyyy"
-                  min={new Date().toISOString().split("T")[0]}
-                />
-                <Input type="time" placeholder="--:--" />
-              </div>
-            </div>
-
-            <div>
-              <Label className="text-sm font-medium">Call Agenda</Label>
+              <Label className="text-sm font-medium text-gray-700">Call Notes (Optional)</Label>
               <Textarea
-                placeholder="Discovery call with Sarah Johnson from TechCorp Solutions to discuss corporate travel needs and potential partnership opportunities."
-                className="mt-1 min-h-[80px]"
-                defaultValue={`Discovery call with ${selectedLeadForAction?.contact} from ${selectedLeadForAction?.company} to discuss corporate travel needs and potential partnership opportunities.`}
-              />
-            </div>
-
-            <div>
-              <Label className="text-sm font-medium">Preparation Notes</Label>
-              <Textarea
-                placeholder="Any additional preparation notes or context..."
-                className="mt-1 min-h-[80px]"
-                defaultValue={`Company Profile: ${selectedLeadForAction?.industry} sector, ${selectedLeadForAction?.employees} employees
-Budget: ${selectedLeadForAction?.travelBudget}
-Current Status: ${selectedLeadForAction?.status}
-Key Topics: Travel volume, preferred airlines, booking preferences, cost optimization`}
+                placeholder="Add any notes or talking points for this call..."
+                value={callNotes}
+                onChange={(e) => setCallNotes(e.target.value)}
+                className="mt-1 min-h-[80px] resize-none"
               />
             </div>
           </div>
           <DialogFooter className="flex gap-2">
             <Button
               variant="outline"
-              onClick={() => setShowInitiateCallModal(false)}
+              onClick={() => {
+                setShowInitiateCallModal(false);
+                setSelectedLeadForAction(null);
+                setCallNotes('');
+              }}
               className="text-gray-600 border-gray-300"
+              disabled={isInitiatingCall}
             >
               Cancel
             </Button>
             <Button
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-              onClick={() => {
-                toast.success(
-                  `Call scheduled with ${selectedLeadForAction?.contact}`,
-                );
-                setShowInitiateCallModal(false);
-                setSelectedLeadForAction(null);
-              }}
+              onClick={handleInitiateCallSubmit}
+              className="bg-blue-500 hover:bg-blue-600 text-white"
+              disabled={isInitiatingCall}
             >
-              <PhoneCall className="h-4 w-4 mr-2" />
-              Schedule Call
+              {isInitiatingCall ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  Scheduling...
+                </>
+              ) : (
+                <>
+                  <PhoneCall className="h-4 w-4 mr-2" />
+                  Schedule Call
+                </>
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
