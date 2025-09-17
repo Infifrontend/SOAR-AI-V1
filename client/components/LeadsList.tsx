@@ -1753,9 +1753,9 @@ SOAR-AI Team`,
   // Handle assign/reassign agent
   const handleAssignAgent = (lead: any) => {
     setSelectedLeadForAssign(lead);
-    setSelectedAgent("");
-    setAssignmentPriority("Medium Priority");
-    setAssignmentNotes("");
+    setSelectedAgent(""); // Reset selected agent
+    setAssignmentPriority("Medium Priority"); // Reset priority
+    setAssignmentNotes(""); // Reset notes
     setShowAssignAgentModal(true);
   };
 
@@ -5067,33 +5067,11 @@ Key Topics: Travel volume, preferred airlines, booking preferences, cost optimiz
 
           <div className="space-y-5 py-4">
             {/* Current Agent Display (for reassignment) */}
-            {selectedLeadForAssign?.assigned_agent_details && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <Label className="text-sm font-medium text-blue-900 mb-2 block">
-                  Current Agent
-                </Label>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="font-medium text-blue-900">
-                      {selectedLeadForAssign.assigned_agent_details.name}
-                    </div>
-                    <div className="text-sm text-blue-700">
-                      {selectedLeadForAssign.assigned_agent_details.email}
-                    </div>
-                    <div className="text-xs text-blue-600 mt-1">
-                      Specialties:{" "}
-                      {selectedLeadForAssign.assigned_agent_details.specialties?.join(
-                        ", ",
-                      )}{" "}
-                      •{" "}
-                      {
-                        selectedLeadForAssign.assigned_agent_details
-                          .current_leads
-                      }{" "}
-                      leads
-                    </div>
-                  </div>
-                </div>
+            {selectedLeadForAssign?.assignedAgent && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <p className="text-sm text-yellow-800">
+                  <strong>Currently assigned to:</strong> {selectedLeadForAssign.assignedAgent}
+                </p>
               </div>
             )}
 
@@ -5131,8 +5109,9 @@ Key Topics: Travel volume, preferred airlines, booking preferences, cost optimiz
                           value={user.username || `user_${user.id}`}
                         >
                           {user.first_name && user.last_name
-                            ? `${user.first_name} ${user.last_name}`
+                            ? `${user.first_name} ${user.last_name} (${user.username})`
                             : user.username || `User ${user.id}`}
+                          {user.username === selectedLeadForAssign?.assignedAgent && ' (Current)'}
                         </SelectItem>
                       ))
                   ) : (
@@ -5215,20 +5194,18 @@ Key Topics: Travel volume, preferred airlines, booking preferences, cost optimiz
             </Button>
             <Button
               onClick={handleConfirmAssignAgent}
-              disabled={!selectedAgent || isAssigning || loadingUsers}
+              disabled={!selectedAgent || isAssigning || loadingUsers || selectedAgent === selectedLeadForAssign?.assignedAgent}
               className="bg-orange-500 hover:bg-orange-600 text-white"
             >
               {isAssigning ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Assigning...
+                  {selectedLeadForAssign?.assignedAgent ? 'Reassigning...' : 'Assigning...'}
                 </>
               ) : (
                 <>
                   <User className="h-4 w-4 mr-2" />
-                  {selectedLeadForAssign?.assignedAgent
-                    ? "Reassign Agent"
-                    : "Assign Agent"}
+                  {selectedLeadForAssign?.assignedAgent ? 'Reassign Agent' : 'Assign Agent'}
                 </>
               )}
             </Button>
