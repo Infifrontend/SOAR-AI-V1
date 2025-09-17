@@ -329,23 +329,13 @@ export const useLeadApi = () => {
     try {
       console.log(`Fetching history for lead ID: ${leadId}`);
 
-      const response = await fetch(`${API_BASE_URL}/get-history/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          entity_type: 'lead',
-          entity_id: leadId.toString()
-        })
+      const response = await baseApi.post('/get-history/', {
+        entity_type: 'lead',
+        entity_id: leadId.toString()
       });
 
-      if (!response.ok) {
-        console.error(`History API error: ${response.status}`);
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log(`Received ${Array.isArray(data) ? data.length : 0} history entries`);
-      return data;
+      console.log(`Received ${Array.isArray(response.data) ? response.data.length : 0} history entries`);
+      return response.data;
     } catch (error) {
       console.error('Error fetching lead history:', error);
       throw error;
