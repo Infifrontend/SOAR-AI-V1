@@ -59,20 +59,20 @@ class UserViewSet(viewsets.ModelViewSet):
         try:
             instance = self.get_object()
             data = request.data.copy()
-
+            
             # Ensure username is provided for updates
             if not data.get('username') and data.get('email'):
                 data['username'] = data['email'].split('@')[0] or instance.username
             elif not data.get('username'):
                 data['username'] = instance.username
-
+            
             # Handle groups properly - convert selected_role_id to groups array
             if 'selected_role_id' in data and data['selected_role_id']:
                 data['groups'] = [data['selected_role_id']]
             elif 'groups' not in data:
                 # Preserve existing groups if not specified
                 data['groups'] = list(instance.groups.values_list('id', flat=True))
-
+            
             serializer = self.get_serializer(instance, data=data, partial=kwargs.get('partial', False))
             if serializer.is_valid():
                 serializer.save()
@@ -151,10 +151,10 @@ class RoleViewSet(viewsets.ModelViewSet):
         """Assign permissions to role"""
         role = self.get_object()
         permission_ids = request.data.get('permission_ids', [])
-
+        
         permissions = Permission.objects.filter(id__in=permission_ids)
         role.permissions.set(permissions)
-
+        
         serializer = self.get_serializer(role)
         return Response(serializer.data)
 
@@ -163,10 +163,10 @@ class RoleViewSet(viewsets.ModelViewSet):
         """Assign users to role"""
         role = self.get_object()
         user_ids = request.data.get('user_ids', [])
-
+        
         users = User.objects.filter(id__in=user_ids)
         role.user_set.set(users)
-
+        
         serializer = self.get_serializer(role)
         return Response(serializer.data)
 
@@ -183,7 +183,7 @@ class PermissionViewSet(viewsets.ModelViewSet):
             permissions = self.queryset.filter(content_type__model=content_type)
         else:
             permissions = self.queryset.all()
-
+        
         serializer = self.get_serializer(permissions, many=True)
         return Response(serializer.data)
 
@@ -216,7 +216,7 @@ class OpportunityViewSet(viewsets.ModelViewSet):
         try:
             opportunity = self.get_object()
             draft = ProposalDraft.objects.filter(opportunity=opportunity).first()
-
+            
             if draft:
                 serializer = ProposalDraftSerializer(draft)
                 return Response({
@@ -250,48 +250,48 @@ class OpportunityViewSet(viewsets.ModelViewSet):
         try:
             opportunity = self.get_object()
             data = request.data.copy()
-
+            
             # Handle file upload
             attachment_file = request.FILES.get('attachedFile')
-
+            
             # Get or create draft
             draft, created = ProposalDraft.objects.get_or_create(
                 opportunity=opportunity,
                 defaults=data
             )
-
+            
             if not created:
                 # Update existing draft
                 for key, value in data.items():
                     if hasattr(draft, key):
                         setattr(draft, key, value)
-
+            
             # Handle file attachment
             if attachment_file:
                 import os
                 from django.conf import settings
-
+                
                 # Create proposal_attachments directory if it doesn't exist
                 upload_dir = os.path.join(settings.MEDIA_ROOT, 'proposal_attachments')
                 os.makedirs(upload_dir, exist_ok=True)
-
+                
                 # Generate unique filename
                 import uuid
                 file_extension = os.path.splitext(attachment_file.name)[1]
                 unique_filename = f"proposal_{opportunity.id}_{draft.id}_{uuid.uuid4().hex[:8]}{file_extension}"
                 file_path = os.path.join(upload_dir, unique_filename)
-
+                
                 # Save file
                 with open(file_path, 'wb') as f:
                     for chunk in attachment_file.chunks():
                         f.write(chunk)
-
+                
                 # Update draft with file info
                 draft.attachment_path = os.path.join('proposal_attachments', unique_filename)
                 draft.attachment_original_name = attachment_file.name
-
+            
             draft.save()
-
+            
             serializer = ProposalDraftSerializer(draft)
             return Response({
                 'success': True,
@@ -302,7 +302,7 @@ class OpportunityViewSet(viewsets.ModelViewSet):
                     'path': draft.attachment_path or ''
                 }
             })
-
+            
         except Exception as e:
             return Response({
                 'success': False,
@@ -315,50 +315,50 @@ class OpportunityViewSet(viewsets.ModelViewSet):
         try:
             opportunity = self.get_object()
             draft = ProposalDraft.objects.filter(opportunity=opportunity).first()
-
+            
             if not draft:
                 return Response({
                     'success': False,
                     'error': 'No proposal draft found'
                 }, status=status.HTTP_404_NOT_FOUND)
-
+            
             data = request.data.copy()
             attachment_file = request.FILES.get('attachedFile')
-
+            
             # Update draft fields
             for key, value in data.items():
                 if hasattr(draft, key):
                     setattr(draft, key, value)
-
+            
             # Handle file attachment
             if attachment_file:
                 import os
                 from django.conf import settings
-
+                
                 # Remove old file if exists
                 if draft.attachment_path:
                     old_file_path = os.path.join(settings.MEDIA_ROOT, draft.attachment_path)
                     if os.path.exists(old_file_path):
                         os.remove(old_file_path)
-
+                
                 # Save new file
                 upload_dir = os.path.join(settings.MEDIA_ROOT, 'proposal_attachments')
                 os.makedirs(upload_dir, exist_ok=True)
-
+                
                 import uuid
                 file_extension = os.path.splitext(attachment_file.name)[1]
                 unique_filename = f"proposal_{opportunity.id}_{draft.id}_{uuid.uuid4().hex[:8]}{file_extension}"
                 file_path = os.path.join(upload_dir, unique_filename)
-
+                
                 with open(file_path, 'wb') as f:
                     for chunk in attachment_file.chunks():
                         f.write(chunk)
-
+                
                 draft.attachment_path = os.path.join('proposal_attachments', unique_filename)
                 draft.attachment_original_name = attachment_file.name
-
+            
             draft.save()
-
+            
             serializer = ProposalDraftSerializer(draft)
             return Response({
                 'success': True,
@@ -369,7 +369,7 @@ class OpportunityViewSet(viewsets.ModelViewSet):
                     'path': draft.attachment_path or ''
                 }
             })
-
+            
         except Exception as e:
             return Response({
                 'success': False,
@@ -382,7 +382,7 @@ class OpportunityViewSet(viewsets.ModelViewSet):
         try:
             opportunity = self.get_object()
             draft = ProposalDraft.objects.filter(opportunity=opportunity).first()
-
+            
             if draft:
                 # Remove attachment file if exists
                 if draft.attachment_path:
@@ -391,12 +391,12 @@ class OpportunityViewSet(viewsets.ModelViewSet):
                     file_path = os.path.join(settings.MEDIA_ROOT, draft.attachment_path)
                     if os.path.exists(file_path):
                         os.remove(file_path)
-
+                
                 draft.delete()
                 return Response({'success': True, 'message': 'Draft deleted successfully'})
             else:
                 return Response({'success': False, 'error': 'No draft found'}, status=status.HTTP_404_NOT_FOUND)
-
+                
         except Exception as e:
             return Response({
                 'success': False,
@@ -408,7 +408,7 @@ class OpportunityViewSet(viewsets.ModelViewSet):
         """Search opportunities with filters"""
         try:
             filters = request.data if hasattr(request, 'data') else {}
-
+            
             stage_filter = filters.get('stage', 'all')
             search_term = filters.get('search', '')
 
@@ -429,12 +429,12 @@ class OpportunityViewSet(viewsets.ModelViewSet):
             opportunities_data = []
             for opp in opportunities:
                 opp_data = OpportunitySerializer(opp).data
-
+                
                 # Add latest activities
                 latest_activities = OpportunityActivity.objects.filter(
                     opportunity=opp
                 ).order_by('-date', '-created_at')[:3]
-
+                
                 opp_data['latest_activities'] = [{
                     'id': activity.id,
                     'type': activity.type,
@@ -444,7 +444,7 @@ class OpportunityViewSet(viewsets.ModelViewSet):
                     'created_at': activity.created_at.isoformat(),
                     'created_by_name': activity.created_by.get_full_name() if activity.created_by else 'System'
                 } for activity in latest_activities]
-
+                
                 opportunities_data.append(opp_data)
 
             return Response(opportunities_data)
@@ -452,7 +452,8 @@ class OpportunityViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response(
                 {'error': f'Search failed: {str(e)}'},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     @action(detail=True, methods=['post'])
     def send_proposal(self, request, pk=None):
@@ -473,10 +474,10 @@ class OpportunityViewSet(viewsets.ModelViewSet):
 
             # Generate email content
             subject = f"Corporate Travel Proposal - {company.name}"
-
+            
             email_content = f"""
             <p>We are pleased to present our comprehensive corporate travel proposal for {company.name}.</p>
-
+            
             <h3>Proposal Details:</h3>
             <ul>
                 <li><strong>Title:</strong> {proposal_data.get('title', 'Corporate Travel Solution')}</li>
@@ -484,9 +485,9 @@ class OpportunityViewSet(viewsets.ModelViewSet):
                 <li><strong>Estimated Value:</strong> ${opportunity.value:,.2f}</li>
                 <li><strong>Validity Period:</strong> {proposal_data.get('validityPeriod', '30')} days</li>
             </ul>
-
+            
             <p>Please find the detailed proposal document attached to this email.</p>
-
+            
             <p>We look forward to discussing this opportunity with you and answering any questions you may have.</p>
             """
 
@@ -505,34 +506,34 @@ class OpportunityViewSet(viewsets.ModelViewSet):
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 to=[contact.email],
             )
-
+            
             # Attach HTML alternative
             email.attach_alternative(html_content, "text/html")
 
             # Handle file attachment if present
             attachment_added = False
             attachment_name = ""
-
+            
             if 'attachedFile' in request.FILES:
                 attached_file = request.FILES['attachedFile']
-
+                
                 # Validate file size (10MB limit)
                 if attached_file.size > 10 * 1024 * 1024:
                     return Response({
                         'success': False,
                         'error': 'File size exceeds 10MB limit'
                     }, status=status.HTTP_400_BAD_REQUEST)
-
+                
                 # Validate file type (common document formats)
                 allowed_extensions = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt']
                 file_extension = os.path.splitext(attached_file.name)[1].lower()
-
+                
                 if file_extension not in allowed_extensions:
                     return Response({
                         'success': False,
                         'error': f'File type {file_extension} not allowed. Supported formats: {", ".join(allowed_extensions)}'
                     }, status=status.HTTP_400_BAD_REQUEST)
-
+                
                 # Attach file to email
                 email.attach(attached_file.name, attached_file.read(), attached_file.content_type)
                 attachment_added = True
@@ -544,12 +545,12 @@ class OpportunityViewSet(viewsets.ModelViewSet):
                     draft = ProposalDraft.objects.filter(opportunity=opportunity).first()
                     if draft and draft.attachment_path:
                         attachment_path = os.path.join(settings.MEDIA_ROOT, draft.attachment_path)
-
+                        
                         if os.path.exists(attachment_path):
                             with open(attachment_path, 'rb') as f:
                                 file_content = f.read()
                                 filename = draft.attachment_original_name or os.path.basename(attachment_path)
-
+                                
                                 # Determine MIME type based on file extension
                                 file_extension = os.path.splitext(filename)[1].lower()
                                 mime_types = {
@@ -563,7 +564,7 @@ class OpportunityViewSet(viewsets.ModelViewSet):
                                     '.txt': 'text/plain'
                                 }
                                 mime_type = mime_types.get(file_extension, 'application/octet-stream')
-
+                                
                                 email.attach(filename, file_content, mime_type)
                                 attachment_added = True
                                 attachment_name = filename
@@ -573,7 +574,7 @@ class OpportunityViewSet(viewsets.ModelViewSet):
 
             # Send the email
             result = email.send(fail_silently=False)
-
+            
             if result == 1:
                 # Update opportunity stage to proposal if it's in discovery
                 if opportunity.stage == 'discovery':
@@ -620,12 +621,12 @@ class EmailTemplateViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = self.queryset.filter(is_active=True)
-
+        
         # Filter by template type
         template_type = self.request.query_params.get('template_type')
         if template_type:
             queryset = queryset.filter(template_type=template_type)
-
+        
         # Filter by company or global templates
         company_id = self.request.query_params.get('company_id')
         if company_id:
@@ -634,7 +635,7 @@ class EmailTemplateViewSet(viewsets.ModelViewSet):
             )
         # If no company filter specified, return all active templates
         # This allows the frontend to see all templates
-
+        
         return queryset.order_by('-created_at')
 
     @action(detail=True, methods=['post'])
@@ -642,7 +643,7 @@ class EmailTemplateViewSet(viewsets.ModelViewSet):
         """Preview template with sample data"""
         template = self.get_object()
         sample_data = request.data.get('sample_data', {})
-
+        
         # Default sample data
         default_data = {
             'company_name': 'Acme Corporation',
@@ -660,20 +661,20 @@ class EmailTemplateViewSet(viewsets.ModelViewSet):
             'sender_title': 'Sales Representative',
             'sender_company': 'SOAR-AI'
         }
-
+        
         # Merge with provided sample data
         preview_data = {**default_data, **sample_data}
-
+        
         # Render template with sample data
         from django.template import Template, Context
-
+        
         try:
             subject_template = Template(template.subject_line or '')
             content_template = Template(template.content)
-
+            
             rendered_subject = subject_template.render(Context(preview_data))
             rendered_content = content_template.render(Context(preview_data))
-
+            
             return Response({
                 'success': True,
                 'subject': rendered_subject,
@@ -691,7 +692,7 @@ class EmailTemplateViewSet(viewsets.ModelViewSet):
     def duplicate(self, request, pk=None):
         """Duplicate a template"""
         original_template = self.get_object()
-
+        
         # Create a copy
         duplicate = EmailTemplate.objects.create(
             name=f"{original_template.name} (Copy)",
@@ -703,7 +704,7 @@ class EmailTemplateViewSet(viewsets.ModelViewSet):
             is_global=False,  # Duplicates are not global by default
             created_by=request.user if request.user.is_authenticated else None
         )
-
+        
         serializer = self.get_serializer(duplicate)
         return Response(serializer.data, status=201)
 
@@ -765,7 +766,7 @@ def track_email_open(request, tracking_id):
     try:
         from .models import EmailTracking
         tracking = get_object_or_404(EmailTracking, tracking_id=tracking_id)
-
+        
         # Update tracking record
         if not tracking.first_opened:
             tracking.first_opened = timezone.now()
@@ -798,14 +799,14 @@ def track_email_click(request, tracking_id):
     try:
         from .models import EmailTracking
         tracking = get_object_or_404(EmailTracking, tracking_id=tracking_id)
-
+        
         # Get target URL from query params
         target_url = request.GET.get('url', 'https://soar-ai.com')
-
+        
         # Decode URL if it's encoded
         import urllib.parse
         target_url = urllib.parse.unquote(target_url)
-
+        
         # Update tracking record
         if not tracking.first_clicked:
             tracking.first_clicked = timezone.now()
@@ -826,6 +827,7 @@ class CompanyViewSet(viewsets.ModelViewSet):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
 
+    @csrf_exempt
     @action(detail=False, methods=['post'])
     def search(self, request):
         # Extract filters from request body
@@ -2733,10 +2735,10 @@ class LeadViewSet(viewsets.ModelViewSet):
             # Create history entry for the email contact
             try:
                 from .models import LeadHistory
-
+                
                 # Extract first few words of message for action summary
                 message_preview = plain_text_message[:100] + "..." if len(plain_text_message) > 100 else plain_text_message
-
+                
                 LeadHistory.objects.create(
                     lead=lead,
                     history_type='contact_made',
@@ -2764,7 +2766,7 @@ class LeadViewSet(viewsets.ModelViewSet):
                 old_status = lead.status
                 lead.status = 'contacted'
                 lead.save()
-
+                
                 # Create status change history entry
                 try:
                     LeadHistory.objects.create(
@@ -3385,6 +3387,1944 @@ class ContractViewSet(viewsets.ModelViewSet):
     queryset = Contract.objects.all()
     serializer_class = ContractSerializer
 
+    @action(detail=False, methods=['get'])
+    def renewal_alerts(self, request):
+        days_ahead = int(request.query_params.get('days', 30))
+        alert_date = timezone.now().date() + timedelta(days=days_ahead)
+
+        contracts = self.queryset.filter(end_date__lte=alert_date,
+                                         status='active').order_by('end_date')
+
+        serializer = self.get_serializer(contracts, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def at_risk(self, request):
+        contracts = self.queryset.filter(
+            Q(status='at_risk') | Q(risk_score__gte=7)).order_by('-risk_score')
+
+        serializer = self.get_serializer(contracts, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def dashboard_stats(self, request):
+        total_contracts = self.queryset.count()
+        active_contracts = self.queryset.filter(status='active').count()
+        expiring_soon = self.queryset.filter(
+            end_date__lte=timezone.now().date() + timedelta(days=30),
+            status='active').count()
+
+        stats = {
+            'total_contracts':
+            total_contracts,
+            'active_contracts':
+            active_contracts,
+            'expiring_soon':
+            expiring_soon,
+            'total_value':
+            self.queryset.aggregate(total=Sum('value'))['total'] or 0,
+            'average_value':
+            self.queryset.aggregate(avg=Avg('value'))['avg'] or 0,
+            'breach_count':
+            ContractBreach.objects.filter(is_resolved=False).count()
+        }
+
+        return Response(stats)
+
+
+class ContractBreachViewSet(viewsets.ModelViewSet):
+    queryset = ContractBreach.objects.all()
+    serializer_class = ContractBreachSerializer
+
+    @action(detail=False, methods=['get'])
+    def active_breaches(self, request):
+        breaches = self.queryset.filter(is_resolved=False).order_by(
+            '-severity', '-detected_date')
+        serializer = self.get_serializer(breaches, many=True)
+        return Response(breaches.data)
+
+    @action(detail=True, methods=['post'])
+    def resolve(self, request, pk=None):
+        breach = self.get_object()
+        breach.is_resolved = True
+        breach.resolved_date = timezone.now()
+        breach.resolution_notes = request.data.get('notes', '')
+        breach.save()
+
+        return Response({'status': 'breach resolved'})
+
+
+class CampaignTemplateViewSet(viewsets.ModelViewSet):
+    queryset = CampaignTemplate.objects.all()
+    serializer_class = CampaignTemplateSerializer
+
+    def list(self, request, *args, **kwargs):
+        """Get all templates including both custom and default templates"""
+        try:
+            # Get custom templates from database
+            custom_templates = []
+            try:
+                custom_templates_queryset = self.get_queryset()
+                custom_templates_serializer = self.get_serializer(
+                    custom_templates_queryset, many=True)
+                custom_templates = custom_templates_serializer.data
+            except Exception as e:
+                print(f"Error getting custom templates: {e}")
+                custom_templates = []
+
+            # Define default templates
+            default_templates = [{
+                'id': 'welcome-series',
+                'name': 'Welcome Series',
+                'description': 'Multi-touch welcome sequence for new leads',
+                'channel_type': 'email',
+                'target_industry': 'All',
+                'subject_line':
+                'Welcome to the future of corporate travel - {{company_name}}',
+                'content': '''Hi {{contact_name}},
+
+Welcome to SOAR-AI! We're excited to help {{company_name}} transform your corporate travel experience.
+
+Based on your {{industry}} background and {{employees}} team size, we've identified several opportunities to optimize your travel operations:
+
+✈️ Reduce travel costs by up to 35%
+📊 Streamline booking and approval processes  
+🌍 Access our global partner network
+🤖 AI-powered travel recommendations
+
+Ready to see how we can help? Let's schedule a 15-minute discovery call.''',
+                'cta': 'Schedule Discovery Call',
+                'linkedin_type': None,
+                'estimated_open_rate': 45.0,
+                'estimated_click_rate': 12.0,
+                'is_custom': False,
+                'created_by': 'System',
+                'created_at': '2024-01-01T00:00:00Z',
+                'updated_at': '2024-01-01T00:00:00Z'
+            }, {
+                'id': 'cost-savings',
+                'name': 'Cost Savings Focus',
+                'description': 'Emphasizes ROI and cost reduction benefits',
+                'channel_type': 'email',
+                'target_industry': 'Manufacturing',
+                'subject_line':
+                '{{company_name}}: Cut travel costs by 35% with SOAR-AI',
+                'content': '''{{contact_name}},
+
+Companies like {{company_name}} in the {{industry}} sector are saving an average of 35% on travel costs with SOAR-AI.
+
+Here's what {{company_name}} could save annually:
+• Current estimated budget: {{travel_budget}}
+• Potential savings: {{calculated_savings}}
+• ROI timeline: 3-6 months
+
+Our AI-powered platform optimizes:
+- Flight routing and pricing
+- Hotel negotiations
+- Policy compliance
+- Expense management
+
+Ready to see your personalized savings analysis?''',
+                'cta': 'View Savings Report',
+                'linkedin_type': None,
+                'estimated_open_rate': 52.0,
+                'estimated_click_rate': 15.0,
+                'is_custom': False,
+                'created_by': 'System',
+                'created_at': '2024-01-01T00:00:00Z',
+                'updated_at': '2024-01-01T00:00:00Z'
+            }, {
+                'id': 'linkedin-connection',
+                'name': 'LinkedIn Connection Request',
+                'description':
+                'Professional connection request for LinkedIn outreach',
+                'channel_type': 'linkedin',
+                'target_industry': 'All',
+                'subject_line': None,
+                'content': '''Hi {{contact_name}},
+
+I noticed {{company_name}} is expanding in the {{industry}} space. I'd love to connect and share how we're helping similar companies optimize their corporate travel operations.
+
+Would you be open to connecting?''',
+                'cta': 'Connect on LinkedIn',
+                'linkedin_type': 'connection',
+                'estimated_open_rate': 65.0,
+                'estimated_click_rate': 25.0,
+                'is_custom': False,
+                'created_by': 'System',
+                'created_at': '2024-01-01T00:00:00Z',
+                'updated_at': '2024-01-01T00:00:00Z'
+            }, {
+                'id': 'multi-channel-sequence',
+                'name': 'Multi-Channel Sequence',
+                'description':
+                'Coordinated outreach across email, LinkedIn, and WhatsApp',
+                'channel_type': 'mixed',
+                'target_industry': 'All',
+                'subject_line':
+                'Partnership opportunity with {{company_name}}',
+                'content': '''Hi {{contact_name}},
+
+I hope this message finds you well. I've been researching {{company_name}} and I'm impressed by your growth in the {{industry}} sector.
+
+We're helping companies like yours:
+• Reduce travel costs by 25-40%
+• Improve policy compliance
+• Streamline approval workflows
+• Access exclusive corporate rates
+
+Would you be interested in a brief conversation about how we could support {{company_name}}'s travel operations?''',
+                'cta': 'Schedule 15-min Call',
+                'linkedin_type': 'message',
+                'estimated_open_rate': 58.0,
+                'estimated_click_rate': 18.0,
+                'is_custom': False,
+                'created_by': 'System',
+                'created_at': '2024-01-01T00:00:00Z',
+                'updated_at': '2024-01-01T00:00:00Z'
+            }]
+
+            # Combine default templates first, then custom templates
+            all_templates = default_templates + custom_templates
+            return Response(all_templates)
+
+        except Exception as e:
+            print(f"Error in CampaignTemplateViewSet.list: {e}")
+            # Return just default templates if there's any error
+            default_templates = [{
+                'id': 'welcome-series',
+                'name': 'Welcome Series',
+                'description': 'Multi-touch welcome sequence for new leads',
+                'channel_type': 'email',
+                'target_industry': 'All',
+                'subject_line': 'Welcome to the future of corporate travel',
+                'content': 'Welcome to SOAR-AI!',
+                'cta': 'Schedule Discovery Call',
+                'linkedin_type': None,
+                'estimated_open_rate': 45.0,
+                'estimated_click_rate': 12.0,
+                'is_custom': False,
+                'created_by': 'System',
+                'created_at': '2024-01-01T00:00:00Z',
+                'updated_at': '2024-01-01T00:00:00Z'
+            }]
+            return Response(default_templates)
+
+    @action(detail=False, methods=['get'])
+    def default_templates(self, request):
+        """Get default/built-in campaign templates (legacy endpoint)"""
+        default_templates = [{
+            'id': 'welcome-series',
+            'name': 'Welcome Series',
+            'description': 'Multi-touch welcome sequence for new leads',
+            'channel_type': 'email',
+            'target_industry': 'All',
+            'subject_line':
+            'Welcome to the future of corporate travel - {{company_name}}',
+            'content': '''Hi {{contact_name}},
+
+Welcome to SOAR-AI! We're excited to help {{company_name}} transform your corporate travel experience.
+
+Based on your {{industry}} background and {{employees}} team size, we've identified several opportunities to optimize your travel operations:
+
+✈️ Reduce travel costs by up to 35%
+📊 Streamline booking and approval processes  
+🌍 Access our global partner network
+🤖 AI-powered travel recommendations
+
+Ready to see how we can help? Let's schedule a 15-minute discovery call.''',
+            'cta': 'Schedule Discovery Call',
+            'linkedin_type': None,
+            'estimated_open_rate': 45.0,
+            'estimated_click_rate': 12.0,
+            'is_custom': False,
+            'created_by': 'System',
+            'created_at': '2024-01-01T00:00:00Z',
+            'updated_at': '2024-01-01T00:00:00Z'
+        }, {
+            'id': 'cost-savings',
+            'name': 'Cost Savings Focus',
+            'description': 'Emphasizes ROI and cost reduction benefits',
+            'channel_type': 'email',
+            'target_industry': 'Manufacturing',
+            'subject_line':
+            '{{company_name}}: Cut travel costs by 35% with SOAR-AI',
+            'content': '''{{contact_name}},
+
+Companies like {{company_name}} in the {{industry}} sector are saving an average of 35% on travel costs with SOAR-AI.
+
+Here's what {{company_name}} could save annually:
+• Current estimated budget: {{travel_budget}}
+• Potential savings: {{calculated_savings}}
+• ROI timeline: 3-6 months
+
+Our AI-powered platform optimizes:
+- Flight routing and pricing
+- Hotel negotiations
+- Policy compliance
+- Expense management
+
+Ready to see your personalized savings analysis?''',
+            'cta': 'View Savings Report',
+            'linkedin_type': None,
+            'estimated_open_rate': 52.0,
+            'estimated_click_rate': 15.0,
+            'is_custom': False,
+            'created_by': 'System',
+            'created_at': '2024-01-01T00:00:00Z',
+            'updated_at': '2024-01-01T00:00:00Z'
+        }, {
+            'id': 'linkedin-connection',
+            'name': 'LinkedIn Connection Request',
+            'description':
+            'Professional connection request for LinkedIn outreach',
+            'channel_type': 'linkedin',
+            'target_industry': 'All',
+            'subject_line': None,
+            'content': '''Hi {{contact_name}},
+
+I noticed {{company_name}} is expanding in the {{industry}} space. I'd love to connect and share how we're helping similar companies optimize their corporate travel operations.
+
+Would you be open to connecting?''',
+            'cta': 'Connect on LinkedIn',
+            'linkedin_type': 'connection',
+            'estimated_open_rate': 65.0,
+            'estimated_click_rate': 25.0,
+            'is_custom': False,
+            'created_by': 'System',
+            'created_at': '2024-01-01T00:00:00Z',
+            'updated_at': '2024-01-01T00:00:00Z'
+        }, {
+            'id': 'multi-channel-sequence',
+            'name': 'Multi-Channel Sequence',
+            'description':
+            'Coordinated outreach across email, LinkedIn, and WhatsApp',
+            'channel_type': 'mixed',
+            'target_industry': 'All',
+            'subject_line': 'Partnership opportunity with {{company_name}}',
+            'content': '''Hi {{contact_name}},
+
+I hope this message finds you well. I've been researching {{company_name}} and I'm impressed by your growth in the {{industry}} sector.
+
+We're helping companies like yours:
+• Reduce travel costs by 25-40%
+• Improve policy compliance
+• Streamline approval workflows
+• Access exclusive corporate rates
+
+Would you be interested in a brief conversation about how we could support {{company_name}}'s travel operations?''',
+            'cta': 'Schedule 15-min Call',
+            'linkedin_type': 'message',
+            'estimated_open_rate': 58.0,
+            'estimated_click_rate': 18.0,
+            'is_custom': False,
+            'created_by': 'System',
+            'created_at': '2024-01-01T00:00:00Z',
+            'updated_at': '2024-01-01T00:00:00Z'
+        }]
+
+        return Response(default_templates)
+
+    def create(self, request, *args, **kwargs):
+        """Create a new campaign template, handling standard layout templates"""
+        try:
+            data = request.data.copy()
+
+            # Handle standard layout templates
+            if data.get('is_standard_layout'):
+                # For standard layout, the content should be stored as JSON string
+                if 'variables' in data and isinstance(data['variables'], dict):
+                    data['content'] = json.dumps(data['variables'])
+
+                # Set is_standard_layout field
+                data['is_standard_layout'] = True
+            else:
+                # For regular templates, ensure is_standard_layout is False
+                data['is_standard_layout'] = False
+
+            # Remove fields that don't exist in the model
+            if 'linkedin_type' in data:
+                data.pop('linkedin_type')
+            if 'is_custom' in data:
+                data.pop('is_custom')
+            if 'variables' in data:
+                data.pop('variables')
+
+            # Ensure required fields have defaults
+            if not data.get('subject_line'):
+                data['subject_line'] = data.get('name', 'Default Subject')
+            if not data.get('estimated_open_rate'):
+                data['estimated_open_rate'] = 40.0
+            if not data.get('estimated_click_rate'):
+                data['estimated_click_rate'] = 10.0
+            if not data.get('channel_type'):
+                data['channel_type'] = 'email'
+
+            serializer = self.get_serializer(data=data)
+            if serializer.is_valid():
+                template = serializer.save()
+
+                # Return the created template with proper formatting
+                response_data = serializer.data
+                response_data['is_custom'] = True
+                response_data['linkedin_type'] = None
+                response_data['created_by'] = 'System'
+
+                return Response(response_data, status=status.HTTP_201_CREATED)
+            else:
+                print(
+                    f"Template creation validation errors: {serializer.errors}"
+                )
+                return Response(
+                    {
+                        'error': 'Validation failed',
+                        'details': serializer.errors
+                    },
+                    status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            import traceback
+            error_details = traceback.format_exc()
+            print(f"Template creation error: {error_details}")
+            return Response({'error': f'Failed to create template: {str(e)}'},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def proposal_draft_detail(request, opportunity_id):
+    """
+    Handle proposal draft operations for a specific opportunity
+    """
+    import os
+    import uuid
+    from django.core.files.storage import default_storage
+    from django.core.files.base import ContentFile
+
+    try:
+        opportunity = Opportunity.objects.get(id=opportunity_id)
+    except Opportunity.DoesNotExist:
+        return Response({'error': 'Opportunity not found'},
+                        status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        # Get existing draft if it exists
+        try:
+            draft = ProposalDraft.objects.get(opportunity=opportunity)
+            serializer = ProposalDraftSerializer(draft)
+            draft_data = serializer.data
+
+            # Include attachment information if exists
+            if draft.attachment_path and os.path.exists(draft.attachment_path):
+                draft_data['attachment_info'] = {
+                    'filename': draft.attachment_original_name,
+                    'path': draft.attachment_path,
+                    'exists': True
+                }
+            else:
+                draft_data['attachment_info'] = {'exists': False}
+
+            return Response(draft_data, status=status.HTTP_200_OK)
+        except ProposalDraft.DoesNotExist:
+            return Response({'message': 'No draft found'},
+                            status=status.HTTP_404_NOT_FOUND)
+
+    elif request.method == 'POST' or request.method == 'PUT':
+        # Handle file upload if present
+        attachment_path = None
+        attachment_original_name = None
+
+        if 'attachment' in request.FILES:
+            uploaded_file = request.FILES['attachment']
+
+            # Create unique filename with corporate ID and timestamp
+            file_extension = os.path.splitext(uploaded_file.name)[1]
+            unique_filename = f"proposal_{opportunity.lead.company.id}_{opportunity.id}_{uuid.uuid4().hex[:8]}{file_extension}"
+
+            # Create attachments directory if it doesn't exist
+            attachments_dir = 'proposal_attachments'
+            os.makedirs(attachments_dir, exist_ok=True)
+
+            # Save file with unique name
+            attachment_path = os.path.join(attachments_dir, unique_filename)
+
+            # Write file to disk
+            with open(attachment_path, 'wb') as f:
+                for chunk in uploaded_file.chunks():
+                    f.write(chunk)
+
+            attachment_original_name = uploaded_file.name
+
+        # Prepare data for serializer
+        data = request.data.copy()
+        if attachment_path:
+            data['attachment_path'] = attachment_path
+            data['attachment_original_name'] = attachment_original_name
+
+        # Create or update draft
+        try:
+            draft = ProposalDraft.objects.get(opportunity=opportunity)
+            serializer = ProposalDraftSerializer(draft,
+                                                 data=data,
+                                                 partial=True)
+        except ProposalDraft.DoesNotExist:
+            data['opportunity'] = opportunity.id
+            serializer = ProposalDraftSerializer(data=data)
+
+        if serializer.is_valid():
+            saved_draft = serializer.save()
+
+            # Include attachment info in response
+            response_data = serializer.data
+            if saved_draft.attachment_path and os.path.exists(
+                    saved_draft.attachment_path):
+                response_data['attachment_info'] = {
+                    'filename': saved_draft.attachment_original_name,
+                    'path': saved_draft.attachment_path,
+                    'exists': True
+                }
+
+            return Response(response_data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'DELETE':
+        # Delete draft and associated files
+        try:
+            draft = ProposalDraft.objects.get(opportunity=opportunity)
+
+            # Delete attachment file if exists
+            if draft.attachment_path and os.path.exists(draft.attachment_path):
+                try:
+                    os.remove(draft.attachment_path)
+                except OSError:
+                    pass  # File might be already deleted
+
+            draft.delete()
+            return Response({'message': 'Draft deleted successfully'},
+                            status=status.HTTP_200_OK)
+        except ProposalDraft.DoesNotExist:
+            return Response({'message': 'No draft found'},
+                            status=status.HTTP_404_NOT_FOUND)
+
+    elif request.method == 'DELETE':
+        # Delete draft
+        try:
+            draft = ProposalDraft.objects.get(opportunity=opportunity)
+            draft.delete()
+            return Response({'message': 'Draft deleted successfully'},
+                            status=status.HTTP_200_OK)
+        except ProposalDraft.DoesNotExist:
+            return Response({'message': 'No draft found'},
+                            status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def lead_dashboard_stats(request):
+    """Get lead dashboard statistics"""
+    try:
+        time_period = request.GET.get('period', 'all_time')
+
+        # Calculate date range based on period
+        end_date = timezone.now()
+        if time_period == 'last_30_days':
+            start_date = end_date - timedelta(days=30)
+        elif time_period == 'last_90_days':
+            start_date = end_date - timedelta(days=90)
+        elif time_period == 'this_year':
+            start_date = end_date.replace(month=1,
+                                          day=1,
+                                          hour=0,
+                                          minute=0,
+                                          second=0,
+                                          microsecond=0)
+        else:
+            start_date = None
+
+        # Base queryset
+        leads_queryset = Lead.objects.all()
+        if start_date:
+            leads_queryset = leads_queryset.filter(created_at__gte=start_date)
+
+        # Calculate basic stats
+        total_leads = leads_queryset.count()
+        qualified_leads = leads_queryset.filter(status='qualified').count()
+        unqualified_leads = leads_queryset.filter(status='unqualified').count()
+        contacted_leads = leads_queryset.filter(status='contacted').count()
+        responded_leads = leads_queryset.filter(status='responded').count()
+
+        # Calculate conversion rate
+        conversion_rate = (qualified_leads / total_leads *
+                           100) if total_leads > 0 else 0
+
+        # Calculate email stats (mock data for now - can be enhanced with actual email tracking)
+        email_open_rate = 68.5  # This would come from email campaign data
+        email_open_rate_change = 5.2
+
+        # Calculate average response time (mock data)
+        avg_response_time = "2.4 hours"
+        avg_response_time_change = "15% faster"
+
+        # Calculate period-over-period changes
+        if start_date:
+            previous_period_start = start_date - (end_date - start_date)
+            previous_leads = Lead.objects.filter(
+                created_at__gte=previous_period_start,
+                created_at__lt=start_date).count()
+            total_change = ((total_leads - previous_leads) /
+                            max(previous_leads, 1) *
+                            100) if previous_leads > 0 else 0
+        else:
+            total_change = 12.5  # Mock data for all time
+
+        stats = {
+            'totalLeads': total_leads,
+            'qualifiedLeads': qualified_leads,
+            'unqualified': unqualified_leads,
+            'contacted': contacted_leads,
+            'responded': responded_leads,
+            'conversionRate': round(conversion_rate, 1),
+            'emailOpenRate': email_open_rate,
+            'emailOpenRateChange': email_open_rate_change,
+            'avgResponseTime': avg_response_time,
+            'avgResponseTimeChange': avg_response_time_change,
+            'totalChange': round(total_change, 1),
+            'period': time_period
+        }
+
+        return Response(stats)
+
+    except Exception as e:
+        return Response(
+            {
+                'error': f'Failed to fetch lead stats: {str(e)}',
+                'totalLeads': 0,
+                'qualifiedLeads': 0,
+                'unqualified': 0,
+                'contacted': 0,
+                'responded': 0,
+                'conversionRate': 0,
+                'emailOpenRate': 0,
+                'emailOpenRateChange': 0,
+                'avgResponseTime': '0 hours',
+                'avgResponseTimeChange': 'No change',
+                'totalChange': 0
+            },
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def list_revenue_files(request):
+    """
+    List files in the revenue_prediction folder
+    """
+    import os
+
+    try:
+        # Get the revenue_prediction folder path
+        revenue_folder = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)), 'revenue_prediction')
+
+        if not os.path.exists(revenue_folder):
+            return Response({
+                'success':
+                True,
+                'files': [],
+                'message':
+                'Revenue prediction folder does not exist yet'
+            })
+
+        files = []
+        for filename in os.listdir(revenue_folder):
+            file_path = os.path.join(revenue_folder, filename)
+            if os.path.isfile(file_path):
+                # Get file stats
+                file_stat = os.stat(file_path)
+
+                files.append({
+                    'name':
+                    filename,
+                    'size':
+                    file_stat.st_size,
+                    'uploadDate':
+                    datetime.fromtimestamp(file_stat.st_mtime).isoformat() +
+                    'Z'
+                })
+
+        # Sort by upload date (newest first)
+        files.sort(key=lambda x: x['uploadDate'], reverse=True)
+
+        return Response({'success': True, 'files': files, 'count': len(files)})
+
+    except Exception as e:
+        return Response(
+            {
+                'success': False,
+                'error': f'Failed to list files: {str(e)}'
+            },
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def get_revenue_prediction_data(request):
+    """
+    Process XLSX/CSV files from revenue_prediction folder and return structured + simulated KPIs
+    """
+    import os
+    import pandas as pd
+    from datetime import datetime
+
+    try:
+        # Get the revenue_prediction folder path
+        revenue_folder = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)), 'revenue_prediction')
+
+        if not os.path.exists(revenue_folder):
+            return Response(
+                {
+                    'success': False,
+                    'error': 'Revenue prediction folder does not exist'
+                },
+                status=status.HTTP_404_NOT_FOUND)
+
+        # Get all XLSX/CSV files
+        xlsx_files = [
+            f for f in os.listdir(revenue_folder)
+            if f.endswith(('.xlsx', '.xls', '.csv'))
+        ]
+
+        if not xlsx_files:
+            return Response(
+                {
+                    'success': False,
+                    'error': 'No data files found in revenue_prediction folder'
+                },
+                status=status.HTTP_404_NOT_FOUND)
+
+        # Use the most recent file
+        latest_file = max(
+            xlsx_files,
+            key=lambda f: os.path.getmtime(os.path.join(revenue_folder, f)))
+        file_path = os.path.join(revenue_folder, latest_file)
+
+        # Read the file
+        if latest_file.endswith('.csv'):
+            df = pd.read_csv(file_path)
+        else:
+            df = pd.read_excel(file_path)
+
+        # Ensure Booking_Month is in datetime format
+        if "Booking_Month" in df.columns:
+            df["Booking_Month"] = pd.to_datetime(df["Booking_Month"],
+                                                 errors="coerce")
+
+        # Process structured revenue insights
+        processed_data = process_revenue_data(df, latest_file)
+
+        return Response({
+            'success': True,
+            'data': processed_data,
+            'source_file': latest_file,
+            'last_updated': datetime.now().isoformat()
+        })
+
+    except Exception as e:
+        return Response(
+            {
+                'success': False,
+                'error': f'Failed to process revenue data: {str(e)}'
+            },
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+def process_revenue_data(df, filename):
+    """
+    Process corporate bookings data and generate insights + KPIs
+    """
+    import random
+
+    # ================= REAL DATA INSIGHTS =================
+
+    # --- Business Performance Overview ---
+    business_performance = {
+        "totalBookings": int(df["Booking_ID"].nunique()),
+        "totalRevenue": float(df["Total_Fare_Amount"].sum()),
+        "activeClients": int(df["Corporate_Account_Code"].nunique()),
+        "avgBookingValue": round(float(df["Total_Fare_Amount"].mean()), 2)
+    }
+
+    # --- Top Destinations ---
+    top_destinations = (df.groupby("Destination_Airport_Code").agg(
+        bookings=("Booking_ID", "count"),
+        revenue=("Total_Fare_Amount", "sum")).reset_index().sort_values(
+            by="bookings", ascending=False).head(5).to_dict(orient="records"))
+
+    # --- Monthly Booking Trends ---
+    # Group by month and create a proper date column for sorting
+    monthly_data = df.groupby(df["Booking_Month"].dt.to_period("M")).agg(
+        bookings=("Booking_ID", "count"),
+        revenue=("Total_Fare_Amount", "sum")).reset_index()
+
+    # Convert period to string format and sort in descending order (latest first)
+    monthly_data["month"] = monthly_data["Booking_Month"].dt.strftime("%b %Y")
+    monthly_trends = (
+        monthly_data.sort_values("Booking_Month",
+                                 ascending=False)  # Latest first
+        .drop("Booking_Month", axis=1).to_dict(orient="records"))
+
+    # --- Yearly Forecast ---
+    # Calculate yearly forecast by summing monthly revenues
+    yearly_revenue = df.groupby(df['Booking_Month'].dt.year).agg(
+        total_revenue=('Total_Fare_Amount', 'sum'),
+        total_bookings=('Booking_ID', 'count')).reset_index()
+
+    yearly_forecast = []
+    for index, row in yearly_revenue.iterrows():
+        yearly_forecast.append({
+            'year': int(row['Booking_Month']),
+            'totalRevenue': float(row['total_revenue']),
+            'totalBookings': int(row['total_bookings'])
+        })
+
+    # --- Enhanced Corporate Analysis ---
+    # Group by Corporate_Account_Code and calculate metrics for each corporate client
+    corporate_analysis = df.groupby("Corporate_Account_Code").agg(
+        current_revenue=("Total_Fare_Amount", "sum"),
+        total_bookings=("Booking_ID", "count"),
+        unique_destinations=("Destination_Airport_Code", "nunique"),
+        avg_booking_value=("Total_Fare_Amount", "mean")).reset_index()
+
+    # Calculate predictions and metrics for each corporate client
+    corporate_revenue_data = []
+    for index, corp in corporate_analysis.iterrows():
+        corp_code = corp["Corporate_Account_Code"]
+        current_rev = float(corp["current_revenue"])
+        total_bookings = int(corp["total_bookings"])
+
+        # Filter data for this specific corporate client
+        corp_data = df[df["Corporate_Account_Code"] == corp_code].copy()
+
+        # Generate monthly data for this corporate client
+        monthly_corp_data = corp_data.groupby(corp_data["Booking_Month"].dt.to_period("M")).agg(
+            revenue=("Total_Fare_Amount", "sum"),
+            bookings=("Booking_ID", "count")
+        ).reset_index()
+        monthly_corp_data["month"] = monthly_corp_data["Booking_Month"].dt.strftime("%b %Y")
+        monthly_breakdown = monthly_corp_data.sort_values("Booking_Month", ascending=False).drop("Booking_Month", axis=1).to_dict(orient="records")
+
+        # Generate yearly data for this corporate client
+        yearly_corp_data = corp_data.groupby(corp_data["Booking_Month"].dt.year).agg(
+            revenue=("Total_Fare_Amount", "sum"),
+            bookings=("Booking_ID", "count")
+        ).reset_index()
+        yearly_corp_data.rename(columns={"Booking_Month": "year"}, inplace=True)
+        yearly_breakdown = yearly_corp_data.to_dict(orient="records")
+
+        # Generate quarterly data for this corporate client
+        quarterly_corp_data = corp_data.groupby(corp_data["Booking_Month"].dt.to_period("Q")).agg(
+            revenue=("Total_Fare_Amount", "sum"),
+            bookings=("Booking_ID", "count")
+        ).reset_index()
+        quarterly_corp_data["quarter"] = quarterly_corp_data["Booking_Month"].dt.strftime("Q%q %Y")
+        quarterly_breakdown = quarterly_corp_data.sort_values("Booking_Month", ascending=False).drop("Booking_Month", axis=1).to_dict(orient="records")
+
+        # Calculate growth rate based on booking patterns
+        growth_multiplier = min(
+            1.5, 1 + (total_bookings / 100) *
+            0.1)  # Higher bookings = higher growth potential
+        base_growth = random.uniform(8, 25)
+
+        # Calculate predicted revenue with growth
+        predicted_revenue = current_rev * growth_multiplier * (
+            1 + base_growth / 100)
+
+        # Calculate growth percentage
+        growth_rate = ((predicted_revenue - current_rev) / current_rev *
+                       100) if current_rev > 0 else 0
+
+        # Calculate confidence based on booking volume and revenue stability
+        confidence_score = min(
+            95, 60 + (total_bookings / 10) + random.uniform(-5, 10))
+
+        # Calculate active deals (simulate based on booking frequency)
+        active_deals = max(1, int(total_bookings * random.uniform(0.1, 0.3)))
+
+        # Calculate probability based on current performance
+        if current_rev > 1000000:
+            probability = random.uniform(75, 95)
+        elif current_rev > 500000:
+            probability = random.uniform(60, 85)
+        else:
+            probability = random.uniform(45, 75)
+
+        corporate_revenue_data.append({
+            "CompanyName":
+            f"{corp_code}",
+            "CurrentRevenue":
+            round(current_rev, 2),
+            "PredictedRevenue":
+            round(predicted_revenue, 2),
+            "GrowthRate":
+            round(growth_rate, 1),
+            "Confidence":
+            round(confidence_score, 1),
+            "ActiveDeals":
+            active_deals,
+            "Probability":
+            round(probability, 1),
+            "TotalBookings":
+            total_bookings,
+            "AvgBookingValue":
+            round(float(corp["avg_booking_value"]), 2),
+            "MonthlyData":
+            monthly_breakdown,
+            "YearlyData":
+            yearly_breakdown,
+            "QuarterlyData":
+            quarterly_breakdown
+        })
+
+    # Sort by current revenue (highest first)
+    corporate_revenue_data.sort(key=lambda x: x["CurrentRevenue"],
+                                reverse=True)
+
+    # ================= SIMULATED KPI METRICS =================
+
+    total_rows = len(df)
+    current_revenue = df["Total_Fare_Amount"].sum()
+    base_revenue = current_revenue // 12 if current_revenue > 0 else 4000000
+
+    growth_rate = random.uniform(5, 20)
+
+    # Business Stats (simulated)
+    business_stats = {
+        "newClientsThisMonth": random.randint(50, 120),
+        "bookingGrowthRate": round(abs(growth_rate), 1),
+        "revenueGrowthRate":
+        round(abs(growth_rate) + random.uniform(-5, 5), 1),
+        "clientRetentionRate": round(85 + random.uniform(-5, 10), 1),
+        "averageLeadTime": round(12 + random.uniform(-3, 8), 1),
+        "cancelationRate": round(3 + random.uniform(-1, 3), 1),
+        "repeatBookingRate": round(60 + random.uniform(-10, 15), 1),
+        "avgDealClosure": random.randint(20, 40)
+    }
+
+    # Key Metrics (simulated)
+    key_metrics = {
+        "totalPipelineValue": max(current_revenue * 1.25, 125000000),
+        "weightedPipelineValue": max(current_revenue * 0.75, 75000000),
+        "averageDealSize": max(current_revenue // 100, 850000),
+        "conversionRate": round(20 + random.uniform(-5, 10), 1),
+        "salesCycleLength": random.randint(35, 55),
+        "forecastAccuracy": round(88 + random.uniform(-5, 8), 1),
+        "quarterlyGrowthRate":
+        round(abs(growth_rate) + random.uniform(-3, 8), 1),
+        "yearOverYearGrowth": round(abs(growth_rate), 1)
+    }
+
+    # Simulated predicted growth data
+    predicted_growth = {
+        "nextQuarter":
+        round(current_revenue * (1 + random.uniform(0.05, 0.15)), 2),
+        "nextYear": round(current_revenue * (1 + random.uniform(0.10, 0.25)),
+                          2)
+    }
+
+    # Simulated insights
+    insights = [
+        f"Processed {total_rows} rows from {filename}",
+        f"Detected {business_performance['activeClients']} active clients",
+        f"Total revenue of {business_performance['totalRevenue']:.2f}",
+        f"Growth rate simulated at {growth_rate:.1f}%",
+        f"Corporate analysis generated for {len(corporate_revenue_data)} clients"
+    ]
+
+    return {
+        "dataSource": {
+            "filename": filename,
+            "totalRows": total_rows,
+            "totalRevenue": current_revenue,
+        },
+        "businessPerformanceOverview": business_performance,
+        "topDestinations": top_destinations,
+        "monthlyBookingTrends": monthly_trends,
+        "yearlyForecast": yearly_forecast,
+        "corporateRevenue":corporate_revenue_data,  # New corporate analysis data
+        "businessStats": business_stats,
+        "keyMetrics": key_metrics,
+        "insights": insights,
+        "predictedGrowth": predicted_growth,
+    }
+
+
+@api_view(['DELETE'])
+@permission_classes([AllowAny])
+def delete_revenue_file(request, filename):
+    """
+    Delete a specific file from the revenue_prediction folder
+    """
+    import os
+
+    try:
+        # Get the revenue_prediction folder path
+        revenue_folder = os.path.join(
+            os.path.dirname(os.path.dirname(__file__)), 'revenue_prediction')
+        file_path = os.path.join(revenue_folder, filename)
+
+        if not os.path.exists(file_path):
+            return Response({
+                'success': False,
+                'error': 'File not found'
+            },
+                            status=status.HTTP_404_NOT_FOUND)
+
+        # Delete the file
+        os.remove(file_path)
+
+        return Response({
+            'success': True,
+            'message': f'File "{filename}" deleted successfully'
+        })
+
+    except Exception as e:
+        return Response(
+            {
+                'success': False,
+                'error': f'Failed to delete file: {str(e)}'
+            },
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def upload_revenue_data(request):
+    """
+    Upload revenue prediction data files to server/revenue_prediction folder
+    """
+    import os
+    import uuid
+    from django.conf import settings
+
+    try:
+        if 'file' not in request.FILES:
+            return Response({'error': 'No file provided'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        uploaded_file = request.FILES['file']
+        folder = request.POST.get('folder', 'revenue_prediction')
+
+        # Validate file type
+        allowed_extensions = ['.csv', '.xlsx', '.xls']
+        file_extension = os.path.splitext(uploaded_file.name)[1].lower()
+        if file_extension not in allowed_extensions:
+            return Response(
+                {
+                    'error':
+                    'Invalid file type. Please upload CSV or Excel files only.'
+                },
+                status=status.HTTP_400_BAD_REQUEST)
+
+        # Validate file size (100MB limit)
+        if uploaded_file.size > 100 * 1024 * 1024:
+            return Response({'error': 'File size exceeds 50MB limit'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # Create revenue_prediction directory if it doesn't exist
+        upload_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)),
+                                  folder)
+        os.makedirs(upload_dir, exist_ok=True)
+
+        # Generate unique filename to prevent conflicts
+        base_name = os.path.splitext(uploaded_file.name)[0]
+        unique_filename = f"{base_name}_{uuid.uuid4().hex[:8]}{file_extension}"
+        file_path = os.path.join(upload_dir, unique_filename)
+
+        # Save the file
+        with open(file_path, 'wb') as destination:
+            for chunk in uploaded_file.chunks():
+                destination.write(chunk)
+
+        # Analyze file for row/column count if it's CSV
+        rows = 0
+        columns = 0
+        try:
+            if file_extension == '.csv':
+                import pandas as pd
+                df = pd.read_csv(file_path)
+                rows = len(df)
+                columns = len(df.columns)
+            elif file_extension in ['.xlsx', '.xls']:
+                import pandas as pd
+                df = pd.read_excel(file_path)
+                rows = len(df)
+                columns = len(df.columns)
+        except Exception as e:
+            print(f"Error analyzing file: {e}")
+
+        return Response(
+            {
+                'success': True,
+                'message':
+                f'File "{uploaded_file.name}" uploaded successfully to {folder} folder',
+                'filename': unique_filename,
+                'original_name': uploaded_file.name,
+                'file_path': file_path,
+                'size': uploaded_file.size,
+                'rows': rows,
+                'columns': columns,
+                'folder': folder
+            },
+            status=status.HTTP_201_CREATED)
+
+    except Exception as e:
+        return Response({'error': f'Upload failed: {str(e)}'},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def recent_lead_activity(request):
+    """Get recent lead activity for dashboard"""
+    try:
+        limit = int(request.GET.get('limit', 10))
+
+        activities = []
+
+        # Get recent lead history entries
+        try:
+            recent_history = LeadHistory.objects.select_related(
+                'lead').order_by('-timestamp')[:limit]
+
+            for history in recent_history:
+                activity_type = 'qualification' if 'qualified' in history.action.lower() else \
+                              'disqualification' if 'disqualified' in history.action.lower() else \
+                              'email' if 'email' in history.action.lower() else \
+                              'response'
+
+                activities.append({
+                    'id':
+                    history.id,
+                    'type':
+                    activity_type,
+                    'lead':
+                    f"{history.lead.company.name}",
+                    'action':
+                    history.action,
+                    'time':
+                    history.timestamp.strftime('%d %b %Y, %I:%M %p'),
+                    'status':
+                    history.lead.status,
+                    'value':
+                    f"Score: {history.lead.score}"
+                    if history.lead.score else "No score"
+                })
+        except Exception as activity_error:
+            print(f"Error processing history {history.id}: {activity_error}")
+            # continue
+
+        # If no history available, get recent leads as activities
+        if not activities:
+            recent_leads = Lead.objects.select_related('company').order_by(
+                '-updated_at')[:5]
+
+            for i, lead in enumerate(recent_leads):
+                activities.append({
+                    'id':
+                    lead.id,
+                    'type':
+                    'qualification'
+                    if lead.status == 'qualified' else 'response',
+                    'lead':
+                    lead.company.name,
+                    'action':
+                    f'Lead {lead.status} - Recent update',
+                    'time':
+                    lead.updated_at.strftime('%d %b %Y, %I:%M %p'),
+                    'status':
+                    lead.status,
+                    'value':
+                    f"${int(lead.estimated_value/1000)}K"
+                    if lead.estimated_value else "No value set"
+                })
+
+        # If no activities found, return empty list
+        if not activities:
+            return Response([])
+
+        return Response(activities)
+    except Exception as e:
+        return Response({'error': str(e)},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def top_qualified_leads(request):
+    """Get top qualified leads for dashboard"""
+    try:
+        limit = int(request.GET.get('limit', 5))
+
+        # Get top qualified leads ordered by score and estimated value
+        top_leads = Lead.objects.select_related('company', 'contact').filter(
+            status='qualified').order_by('-score', '-estimated_value')[:limit]
+
+        leads_data = []
+        for lead in top_leads:
+            try:
+                # Determine engagement level based on score
+                if lead.score >= 80:
+                    engagement = 'High'
+                elif lead.score >= 60:
+                    engagement = 'Medium'
+                else:
+                    engagement = 'Low'
+
+                lead_data = {
+                    'id':
+                    lead.id,
+                    'company':
+                    lead.company.name if lead.company else 'Unknown Company',
+                    'contact':
+                    f"{lead.contact.first_name} {lead.contact.last_name}"
+                    if lead.contact else 'Unknown Contact',
+                    'title':
+                    lead.contact.position
+                    if lead.contact else 'Unknown Position',
+                    'industry':
+                    lead.company.industry.title()
+                    if lead.company and lead.company.industry else 'Unknown',
+                    'employees':
+                    lead.company.employee_count if lead.company else 0,
+                    'status':
+                    lead.status,
+                    'score':
+                    lead.score,
+                    'value':
+                    f"${int(lead.estimated_value/1000)}K"
+                    if lead.estimated_value else 'TBD',
+                    'engagement':
+                    engagement,
+                    'nextAction':
+                    lead.next_action or 'Follow up required',
+                    'lastContact':
+                    lead.updated_at.strftime('%m/%d/%Y')
+                    if lead.updated_at else 'Unknown'
+                }
+                leads_data.append(lead_data)
+
+            except Exception as lead_error:
+                print(f"Error processing lead {lead.id}: {lead_error}")
+                continue
+
+        return Response(leads_data)
+
+    except Exception as e:
+        print(f"Error in top leads endpoint: {str(e)}")
+        return Response([], status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class TravelOfferViewSet(viewsets.ModelViewSet):
+    queryset = TravelOffer.objects.all()
+    serializer_class = TravelOfferSerializer
+
+    @action(detail=False, methods=['get'])
+    def active_offers(self, request):
+        """Get active travel offers"""
+        offers = self.queryset.filter(status='active')
+        serializer = self.get_serializer(offers, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def by_type(self, request):
+        """Get offers by type"""
+        offer_type = request.query_params.get('type')
+        if offer_type:
+            offers = self.queryset.filter(offer_type=offer_type)
+        else:
+            offers = self.queryset.all()
+        serializer = self.get_serializer(offers, many=True)
+        return Response(serializer.data)
+
+
+class SupportTicketViewSet(viewsets.ModelViewSet):
+    queryset = SupportTicket.objects.all()
+    serializer_class = SupportTicketSerializer
+
+    @action(detail=False, methods=['get'])
+    def by_priority(self, request):
+        """Get tickets by priority"""
+        priority = request.query_params.get('priority')
+        if priority:
+            tickets = self.queryset.filter(priority=priority)
+        else:
+            tickets = self.queryset.all()
+        serializer = self.get_serializer(tickets, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def by_status(self, request):
+        """Get tickets by status"""
+        status_filter = request.query_params.get('status')
+        if status_filter:
+            tickets = self.queryset.filter(status=status_filter)
+        else:
+            tickets = self.queryset.all()
+        serializer = self.get_serializer(tickets, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'])
+    def resolve(self, request, pk=None):
+        ticket = self.get_object()
+        ticket.status = 'resolved'
+        ticket.resolved_at = timezone.now()
+        ticket.save()
+        return Response({'message': 'Ticket resolved successfully'})
+
+
+class RevenueForecastViewSet(viewsets.ModelViewSet):
+    queryset = RevenueForecast.objects.all()
+    serializer_class = RevenueForecastSerializer
+
+
+class ActivityLogViewSet(viewsets.ModelViewSet):
+    queryset = ActivityLog.objects.all()
+    serializer_class = ActivityLogSerializer
+
+
+class AIConversationViewSet(viewsets.ModelViewSet):
+    queryset = AIConversation.objects.all()
+    serializer_class = AIConversationSerializer
+
+
+class LeadNoteViewSet(viewsets.ModelViewSet):
+    queryset = LeadNote.objects.all()
+    serializer_class = LeadNoteSerializer
+
+
+class LeadHistoryViewSet(viewsets.ModelViewSet):
+    queryset = LeadHistory.objects.all()
+    serializer_class = LeadHistorySerializer
+
+
+class ProposalDraftViewSet(viewsets.ModelViewSet):
+    queryset = ProposalDraft.objects.all()
+    serializer_class = ProposalDraftSerializer
+
+
+class AirportCodeViewSet(viewsets.ModelViewSet):
+    queryset = AirportCode.objects.all()
+    serializer_class = AirportCodeSerializer
+
+    @action(detail=False, methods=['get'])
+    def lookup(self, request):
+        """Lookup airport name by code"""
+        code = request.query_params.get('code', '').upper()
+        if not code:
+            return Response({'error': 'Airport code is required'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            airport = AirportCode.objects.get(code=code)
+            serializer = self.get_serializer(airport)
+            return Response(serializer.data)
+        except AirportCode.DoesNotExist:
+            return Response(
+                {
+                    'code': code,
+                    'name': f'{code} Airport',
+                    'city': code,
+                    'country': 'Unknown'
+                },
+                status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'])
+    def all_codes(self, request):
+        """Get all airport codes for mapping"""
+        airports = self.queryset.all()
+        airport_dict = {
+            airport.code: {
+                'name': airport.name,
+                'city': airport.city,
+                'country': airport.country
+            }
+            for airport in airports
+        }
+        return Response(airport_dict)
+
+
+class EmailCampaignViewSet(viewsets.ModelViewSet):
+    queryset = EmailCampaign.objects.all()
+    serializer_class = EmailCampaignSerializer
+    pagination_class = None  # Disable pagination to return all campaigns
+
+    def list(self, request, *args, **kwargs):
+        """Override list method to handle database connection issues"""
+        from django.db import connection
+        from django.db.utils import OperationalError, ProgrammingError
+        from django.db import IntegrityError
+
+        try:
+            # Ensure database connection is alive
+            connection.ensure_connection()
+            return super().list(request, *args, **kwargs)
+        except (OperationalError, ProgrammingError, IntegrityError) as e:
+            error_message = str(e).lower()
+            if ('ssl connection has been closed' in error_message
+                    or 'connection' in error_message
+                    or 'column' in error_message
+                    and 'does not exist' in error_message):
+                # Try to close and reopen connection
+                connection.close()
+                try:
+                    return super().list(request, *args, **kwargs)
+                except Exception as retry_error:
+                    print(f"Retry failed: {str(retry_error)}")
+                    # Return empty list if still failing
+                    return Response([], status=200)
+            else:
+                print(f"Database error in EmailCampaignViewSet.list: {str(e)}")
+                return Response([], status=200)
+        except Exception as e:
+            print(f"Unexpected error in EmailCampaignViewSet.list: {str(e)}")
+            return Response([], status=200)
+
+    def get_queryset(self):
+        """Override get_queryset to handle connection issues"""
+        from django.db import connection
+        try:
+            connection.ensure_connection()
+            return self.queryset.select_related().prefetch_related(
+                'target_leads')
+        except Exception as e:
+            print(f"Error in get_queryset: {str(e)}")
+            return self.queryset.none()
+
+    @action(detail=False, methods=['post'])
+    def launch(self, request):
+        """Launch an email campaign"""
+        try:
+            data = request.data
+            template_id = data.get('templateId')
+            target_leads = data.get('targetLeads', [])
+            target_lead_ids = data.get('target_leads', [])
+
+            # Handle nested email content structure
+            email_content = data.get('content', {}).get('email', {})
+            subject_line = (data.get('subjectLine', '')
+                            or data.get('subject_line', '')
+                            or email_content.get('subject', ''))
+            message_content = (data.get('messageContent', '')
+                               or data.get('email_content', '')
+                               or email_content.get('body', ''))
+
+            # Handle CTA and CTA link
+            cta_text = email_content.get('cta', '') or data.get('cta', '')
+            cta_link = email_content.get('cta_link', '') or data.get(
+                'cta_link', '')
+
+            campaign_name = data.get('name',
+                                     '') or f"Campaign - {subject_line[:50]}"
+
+            # Handle both targetLeads and target_leads formats
+            all_target_leads = target_leads + target_lead_ids
+
+            if not subject_line:
+                return Response({'error': 'Subject line is required'},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+            if not message_content:
+                return Response({'error': 'Message content is required'},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+            # Create the campaign
+            campaign = EmailCampaign.objects.create(
+                name=campaign_name,
+                description=data.get('description', ''),
+                campaign_type=data.get('campaign_type', 'nurture'),
+                status='active',
+                subject_line=subject_line,
+                email_content=message_content,
+                cta_link=cta_link if cta_link else None,
+                scheduled_date=timezone.now(),
+                sent_date=timezone.now(),
+                target_count=len(all_target_leads))
+
+            # Add target leads to campaign
+            valid_leads_count = 0
+            for lead_id in all_target_leads:
+                try:
+                    lead = Lead.objects.get(id=lead_id)
+                    campaign.target_leads.add(lead)
+                    valid_leads_count += 1
+                except (Lead.DoesNotExist, ValueError):
+                    continue
+
+            if valid_leads_count == 0:
+                return Response({'error': 'No valid target leads found'},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+            # Store CTA text temporarily for email sending
+            if cta_text:
+                campaign._temp_cta_text = cta_text
+
+            # Send emails
+            result = campaign.send_emails()
+
+            serializer = self.get_serializer(campaign)
+            return Response(
+                {
+                    'success':
+                    True,
+                    'campaign':
+                    serializer.data,
+                    'campaign_id':
+                    campaign.id,
+                    'message':
+                    result.get('message', 'Campaign launched successfully'),
+                    'emails_sent':
+                    result.get('emails_sent', 0),
+                    'failed_count':
+                    result.get('failed_count', 0),
+                    'smtp_responses':
+                    result.get('smtp_responses', []),
+                    'smtp_details':
+                    result.get('smtp_details', {}),
+                    'log_file':
+                    result.get('log_file', '')
+                },
+                status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            import traceback
+            error_details = traceback.format_exc()
+            print(f"Campaign launch error: {error_details}")
+            return Response(
+                {
+                    'error': f'Failed to launch campaign: {str(e)}',
+                    'details': error_details
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=True, methods=['get'])
+    def real_time_stats(self, request, pk=None):
+        """Get real-time stats for a campaign"""
+        try:
+            from django.db import connection
+
+            # Ensure database connection is alive
+            connection.ensure_connection()
+
+            campaign = self.get_object()
+
+            # Get tracking data from EmailTracking model with connection handling
+            try:
+                from django.db import models as db_models
+                tracking_records = EmailTracking.objects.filter(
+                    campaign=campaign)
+                total_opened = tracking_records.filter(
+                    open_count__gt=0).count()
+                total_clicked = tracking_records.filter(
+                    click_count__gt=0).count()
+
+                # Get aggregate data safely
+                open_sum = tracking_records.aggregate(
+                    total=db_models.Sum('open_count'))['total'] or 0
+                click_sum = tracking_records.aggregate(
+                    total=db_models.Sum('click_count'))['total'] or 0
+
+            except Exception as db_error:
+                print(f"Database error in real_time_stats: {str(db_error)}")
+                # Use campaign stored values as fallback
+                total_opened = campaign.emails_opened or 0
+                total_clicked = campaign.emails_clicked or 0
+                open_sum = total_opened
+                click_sum = total_clicked
+
+            total_sent = campaign.emails_sent or 0
+
+            # Update campaign stats in real-time
+            try:
+                campaign.emails_opened = total_opened
+                campaign.emails_clicked = total_clicked
+                campaign.save(
+                    update_fields=['emails_opened', 'emails_clicked'])
+            except Exception as save_error:
+                print(f"Error saving campaign stats: {str(save_error)}")
+
+            # Calculate rates
+            open_rate = (total_opened / total_sent *
+                         100) if total_sent > 0 else 0
+            click_rate = (total_clicked / total_sent *
+                          100) if total_sent > 0 else 0
+
+            stats = {
+                'campaign_id':
+                campaign.id,
+                'campaign_name':
+                campaign.name,
+                'emails_sent':
+                total_sent,
+                'emails_opened':
+                total_opened,
+                'emails_clicked':
+                total_clicked,
+                'open_rate':
+                round(open_rate, 2),
+                'click_rate':
+                round(click_rate, 2),
+                'status':
+                campaign.status,
+                'sent_date':
+                campaign.sent_date.isoformat() if campaign.sent_date else None,
+                'total_opens':
+                open_sum,
+                'total_clicks':
+                click_sum
+            }
+
+            return Response(stats)
+
+        except Exception as e:
+            print(f"Error in real_time_stats: {str(e)}")
+            return Response(
+                {'error': f'Failed to get campaign stats: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=True, methods=['get'])
+    def tracking_details(self, request, pk=None):
+        """Get detailed tracking information for a campaign"""
+        try:
+            campaign = self.get_object()
+
+            # Get all tracking records for this campaign
+            tracking_records = EmailTracking.objects.filter(
+                campaign=campaign).select_related('lead')
+
+            tracking_data = []
+            for tracking in tracking_records:
+                tracking_data.append({
+                    'tracking_id':
+                    str(tracking.tracking_id),
+                    'lead_id':
+                    tracking.lead.id if tracking.lead else None,
+                    'lead_name':
+                    f"{tracking.lead.company.name}"
+                    if tracking.lead and tracking.lead.company else 'Unknown',
+                    'contact_email':
+                    tracking.lead.contact.email
+                    if tracking.lead and tracking.lead.contact else 'Unknown',
+                    'open_count':
+                    tracking.open_count,
+                    'click_count':
+                    tracking.click_count,
+                    'first_opened':
+                    tracking.first_opened.isoformat()
+                    if tracking.first_opened else None,
+                    'last_opened':
+                    tracking.last_opened.isoformat()
+                    if tracking.last_opened else None,
+                    'first_clicked':
+                    tracking.first_clicked.isoformat()
+                    if tracking.first_clicked else None,
+                    'last_clicked':
+                    tracking.last_clicked.isoformat()
+                    if tracking.last_clicked else None,
+                    'user_agent':
+                    tracking.user_agent,
+                    'ip_address':
+                    tracking.ip_address
+                })
+
+            return Response({
+                'campaign_id': campaign.id,
+                'campaign_name': campaign.name,
+                'total_tracking_records': len(tracking_data),
+                'tracking_details': tracking_data
+            })
+
+        except Exception as e:
+            return Response(
+                {'error': f'Failed to get tracking details: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET','POST'])
+@permission_classes([AllowAny])
+def get_history(request):
+    """Get history for leads or opportunities"""
+    try:
+        lead_id = request.data.get('lead_id')
+        entity_type = request.data.get('entity_type')
+        entity_id = request.data.get('entity_id')
+
+        if entity_id:
+            # Get lead history
+            try:
+                lead = Lead.objects.get(id=entity_id)
+                history_entries = lead.history_entries.all().order_by(
+                    '-timestamp')
+                serializer = LeadHistorySerializer(history_entries, many=True)
+                return Response(serializer.data)
+            except Lead.DoesNotExist:
+                return Response({'error': 'Lead not found'},
+                                status=status.HTTP_404_NOT_FOUND)
+            except Exception as e:
+                return Response([], status=status.HTTP_200_OK)
+
+        elif entity_type == 'opportunity' and entity_id:
+            # Get opportunity history
+            try:
+                opportunity = Opportunity.objects.get(id=entity_id)
+                activities = opportunity.activities.all().order_by(
+                    '-created_at')
+                activity_data = []
+
+                for activity in activities:
+                    activity_data.append({
+                        'id':
+                        activity.id,
+                        'type':
+                        activity.type,
+                        'action':
+                        activity.get_type_display(),
+                        'details':
+                        activity.description,
+                        'timestamp':
+                        activity.created_at.isoformat(),
+                        'user_name':
+                        activity.created_by.get_full_name()
+                        if activity.created_by else 'System',
+                        'date':
+                        activity.date.isoformat() if activity.date else ''
+                    })
+
+                return Response(activity_data)
+            except Opportunity.DoesNotExist:
+                return Response({'error': 'Opportunity not found'},
+                                status=status.HTTP_404_NOT_FOUND)
+
+        return Response({'error': 'Invalid parameters'},
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    except Exception as e:
+        return Response({'error': str(e)},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def track_email_open(request, tracking_id):
+    """Track email opens via tracking pixel"""
+    try:
+        print(f"🔵 OPEN TRACKING: Request received for {tracking_id}")
+        print(
+            f"🔵 OPEN TRACKING: User-Agent: {request.META.get('HTTP_USER_AGENT', 'None')}"
+        )
+        print(
+            f"🔵 OPEN TRACKING: IP: {request.META.get('HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', 'None'))}"
+        )
+
+        tracking = get_object_or_404(EmailTracking, tracking_id=tracking_id)
+
+        # Update open tracking
+        now = timezone.now()
+        was_first_open = not tracking.first_opened
+
+        if not tracking.first_opened:
+            tracking.first_opened = now
+        tracking.last_opened = now
+        tracking.open_count += 1
+
+        # Get user agent and IP
+        tracking.user_agent = request.META.get('HTTP_USER_AGENT',
+                                               '')[:500]  # Limit length
+        tracking.ip_address = request.META.get(
+            'HTTP_X_FORWARDED_FOR', request.META.get('REMOTE_ADDR', ''))
+
+        tracking.save()
+
+        # Update campaign stats only if this is the first open for this lead
+        if was_first_open:
+            campaign = tracking.campaign
+            # Count unique recipients who have opened at least once
+            unique_opens = campaign.email_tracking.filter(first_opened__isnull=False).count()
+            campaign.emails_opened = unique_opens
+            campaign.save(update_fields=['emails_opened'])
+
+        print(
+            f"🟢 OPEN TRACKING SUCCESS: {tracking_id} for campaign {campaign.name}"
+        )
+        print(
+            f"🟢 OPEN TRACKING: Open count: {tracking.open_count}, Campaign opens: {campaign.emails_opened}"
+        )
+        logger.info(
+            f"Email open tracked: {tracking_id} for campaign {campaign.name} (first={was_first_open})"
+        )
+
+        # Return 1x1 transparent pixel
+        from django.http import HttpResponse
+        pixel_data = b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\x21\xF9\x04\x01\x00\x00\x00\x00\x2C\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02\x04\x01\x00\x3B'
+        response = HttpResponse(pixel_data, content_type='image/gif')
+        response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response['Pragma'] = 'no-cache'
+        response['Expires'] = '0'
+        response['Access-Control-Allow-Origin'] = '*'
+        response['Access-Control-Allow-Methods'] = 'GET'
+        response['Access-Control-Allow-Headers'] = '*'
+        return response
+
+    except EmailTracking.DoesNotExist:
+        print(f"🔴 OPEN TRACKING ERROR: Tracking not found for {tracking_id}")
+        logger.error(f"Email tracking not found: {tracking_id}")
+        # Still return pixel to avoid broken images
+        from django.http import HttpResponse
+        pixel_data = b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x80\x00\x00\x00\x00\x00\x21\xF9\x04\x01\x00\x00\x00\x00\x2C\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02\x04\x01\x00\x3B'
+        return HttpResponse(pixel_data, content_type='image/gif')
+    except Exception as e:
+        print(f"🔴 OPEN TRACKING ERROR: {str(e)}")
+        logger.error(f"Error tracking email open: {str(e)}")
+        from django.http import HttpResponse
+        pixel_data = b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x00\x00\x21\xF9\x04\x01\x00\x00\x00\x00\x2C\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02\x04\x01\x00\x3B'
+        return HttpResponse(pixel_data, content_type='image/gif')
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def track_email_click(request, tracking_id):
+    """Track email clicks and redirect to target URL"""
+    try:
+        tracking = get_object_or_404(EmailTracking, tracking_id=tracking_id)
+        target_url = request.GET.get('url', '')
+
+        if not target_url:
+            return HttpResponseRedirect(
+                'https://soarai.com')  # Default redirect
+
+        # Decode the URL
+        original_url = urllib.parse.unquote(target_url)
+
+        # Find and update tracking record
+        try:
+            tracking = EmailTracking.objects.get(tracking_id=tracking_id)
+            tracking.click_count += 1
+            tracking.last_clicked = timezone.now()
+            if not tracking.first_clicked:
+                tracking.first_clicked = timezone.now()
+
+            # Capture user agent and IP
+            tracking.user_agent = request.META.get('HTTP_USER_AGENT',
+                                                   '')[:500]  # Limit length
+            tracking.ip_address = request.META.get('REMOTE_ADDR')
+            tracking.save()
+
+            logger.info(
+                f"Email click tracked: {tracking_id} -> {original_url}")
+        except EmailTracking.DoesNotExist:
+            logger.warning(f"Tracking record not found: {tracking_id}")
+
+        # Redirect to original URL
+        return HttpResponseRedirect(original_url)
+
+    except Exception as e:
+        logger.error(f"Error tracking email click: {str(e)}")
+        return HttpResponseRedirect('https://soarai.com')  # Safe fallback
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def check_smtp_status(request):
+    """Check SMTP server connection status"""
+    try:
+        from django.core.mail import get_connection
+        from django.conf import settings
+
+        # Test SMTP connection
+        connection = get_connection()
+        connection.open()
+        connection.close()
+
+        return Response({
+            'status': 'connected',
+            'message': f'SMTP server ({settings.EMAIL_HOST}) is accessible',
+            'backend': settings.EMAIL_BACKEND,
+            'host': settings.EMAIL_HOST,
+            'port': settings.EMAIL_PORT,
+            'use_tls': settings.EMAIL_USE_TLS,
+        })
+
+    except Exception as e:
+        return Response(
+            {
+                'status': 'error',
+                'message': f'SMTP connection failed: {str(e)}',
+                'backend': getattr(settings, 'EMAIL_BACKEND', 'unknown'),
+                'host': getattr(settings, 'EMAIL_HOST', 'unknown'),
+                'port': getattr(settings, 'EMAIL_PORT', 'unknown'),
+            },
+            status=500)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def health_check(request):
+    """Health check endpoint to verify server status"""
+    try:
+        return Response(
+            {
+                'status': 'healthy',
+                'message': 'SOAR Backend API is running',
+                'timestamp': timezone.now().isoformat()
+            },
+            status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({
+            'status': 'error',
+            'message': str(e)
+        },
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def campaign_analytics(request):
+    """Get campaign analytics data"""
+    try:
+        campaigns = EmailCampaign.objects.all()
+        analytics_data = []
+
+        for campaign in campaigns:
+            open_rate = (campaign.emails_opened / campaign.emails_sent *
+                         100) if campaign.emails_sent > 0 else 0
+            click_rate = (campaign.emails_clicked / campaign.emails_sent *
+                          100) if campaign.emails_sent > 0 else 0
+
+            analytics_data.append({
+                'id': campaign.id,
+                'name': campaign.name,
+                'status': campaign.status,
+                'emails_sent': campaign.emails_sent,
+                'emails_opened': campaign.emails_opened,
+                'emails_clicked': campaign.emails_clicked,
+                'open_rate': round(open_rate, 2),
+                'click_rate': round(click_rate, 2),
+                'created_at': campaign.created_at
+            })
+
+        return Response({'success': True, 'analytics': analytics_data})
+    except Exception as e:
+        return Response({
+            'success': False,
+            'error': str(e)
+        },
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ContractViewSet(viewsets.ModelViewSet):
+    queryset = Contract.objects.all()
+    serializer_class = ContractSerializer
+
     def get_queryset(self):
         """Return contracts with company info"""
         return Contract.objects.select_related('company').all().order_by(
@@ -3550,18 +5490,9 @@ class ContractViewSet(viewsets.ModelViewSet):
             data = request.data
             print(f"Contract creation data received: {data}")
 
-            # Validate required fields
-            required_fields = ['company_name', 'title', 'contract_type', 'value', 'start_date', 'end_date']
-            missing_fields = [field for field in required_fields if not request.data.get(field)]
-
-            if missing_fields:
-                return Response({
-                    'error': f'Missing required fields: {", ".join(missing_fields)}'
-                }, status=status.HTTP_400_BAD_REQUEST)
-
-            # Get or create the company
-            company_name = request.data.get('company_name')
-            company_email = request.data.get('company_email', '')
+            # Find or create company
+            company_name = data.get('company_name', '')
+            company_email = data.get('company_email', '')
 
             if not company_name:
                 return Response({'error': 'Company name is required'},
@@ -3573,13 +5504,14 @@ class ContractViewSet(viewsets.ModelViewSet):
                 defaults={
                     'email': company_email,
                     'industry': 'other',
-                    'size': 'medium',
                     'location': 'Unknown',
+                    'size': 'medium',
                     'is_active': True
                 })
 
-            # Generate unique contract number
-            contract_number = f"CTR-{timezone.now().year}-{uuid.uuid4().hex[:8].upper()}"
+            # Generate contract number
+            import uuid
+            contract_number = f"CTR-{timezone.now().strftime('%Y')}-{str(uuid.uuid4())[:8].upper()}"
 
             # Validate contract type
             contract_type = data.get('contract_type', 'corporate_travel')
@@ -3625,7 +5557,7 @@ class ContractViewSet(viewsets.ModelViewSet):
             except (ValueError, TypeError):
                 contract_value = 0
 
-            # Create contract data with only required fields first
+            # Create contract with all required fields - ensuring single insertion
             contract_data = {
                 'company':
                 company,
@@ -3644,17 +5576,23 @@ class ContractViewSet(viewsets.ModelViewSet):
                 'value':
                 contract_value,
                 'terms':
-                data.get('terms', 'Standard terms and conditions'),
+                data.get(
+                    'terms',
+                    'Standard corporate travel agreement terms and conditions'
+                ),
                 'renewal_terms':
                 data.get(
                     'renewal_terms',
-                    'Auto-renewal for 12 months unless terminated with 30 days notice'),
+                    'Auto-renewal for 12 months unless terminated with 30 days notice'
+                ),
                 'auto_renewal':
                 data.get('auto_renewal', False),
                 'notice_period_days':
                 int(data.get('notice_period_days', 30)),
                 'risk_score':
                 int(data.get('risk_score', 0)),
+                'sla_requirements':
+                data.get('sla_requirements', ''),
                 'payment_terms_days':
                 self._get_payment_terms_days(
                     data.get('payment_terms', 'net_30')),
@@ -3670,23 +5608,8 @@ class ContractViewSet(viewsets.ModelViewSet):
                 company_email or ''
             }
 
-            # Check if optional fields exist in the model before adding them
-            from django.db import connection
-            table_name = Contract._meta.db_table
-
-            # Get all column names from the database table
-            with connection.cursor() as cursor:
-                cursor.execute(f"PRAGMA table_info({table_name})")
-                columns = [column[1] for column in cursor.fetchall()]
-
-            # Only add sla_requirements if the column exists
-            if 'sla_requirements' in columns:
-                contract_data['sla_requirements'] = data.get('sla_requirements', '')
-
-            # Create the contract
+            # Create single contract record
             contract = Contract.objects.create(**contract_data)
-
-            print(f"Contract created successfully: {contract.contract_number}")
 
             serializer = self.get_serializer(contract)
             return Response(
@@ -3778,8 +5701,8 @@ class ContractViewSet(viewsets.ModelViewSet):
                     defaults={
                         'email': company_email,
                         'industry': 'other',
-                        'size': 'medium',
                         'location': 'Unknown',
+                        'size': 'medium',
                         'is_active': True
                     })
                 instance.company = company
@@ -4372,7 +6295,7 @@ def update_contract(request, contract_id):
             # Update contract with new data
             serializer = ContractSerializer(contract,
                                             data=request.data,
-                                             partial=True)
+                                            partial=True)
             if serializer.is_valid():
                 contract = serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
