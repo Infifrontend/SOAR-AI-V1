@@ -33,7 +33,9 @@ import {
   FileText,
   Lightbulb,
   AlertTriangle,
-  Info
+  Info,
+  Users,
+  Search
 } from 'lucide-react';
 import {
   Dialog,
@@ -69,6 +71,19 @@ interface CampaignTemplate {
   layout?: 'standard' | 'custom'; // Added for layout differentiation
 }
 
+interface Lead {
+  id: string | number;
+  company: string;
+  contact: string;
+  title: string;
+  email: string;
+  industry: string;
+  status: string;
+  score: number;
+  // other properties if any
+}
+
+
 const steps = [
   { id: 1, name: 'Campaign Setup', description: 'Basic campaign configuration' },
   { id: 2, name: 'Audience & Targeting', description: 'Define target audience and segmentation' },
@@ -100,7 +115,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
         description: initialData.description || '',
         objective: initialData.objective || 'lead-nurturing',
         channels: initialData.channels || ['email'],
-        targetAudience: [],
+        targetAudience: [], // This might need to be populated from initialData if it exists
         content: {
           email: {
             subject: initialData.content?.email?.subject || '',
@@ -170,8 +185,15 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
   const [showTemplatePreview, setShowTemplatePreview] = useState(false);
   const [templatePreviewData, setTemplatePreviewData] = useState<any>(null);
 
+  // State for available leads section
+  const [availableLeads, setAvailableLeads] = useState<Lead[]>([]);
+  const [loadingLeads, setLoadingLeads] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [industryFilter, setIndustryFilter] = useState('all');
+
   // Use actual selectedLeads from props instead of mock data
-  const selectedLeads = propSelectedLeads || [];
+  const [selectedLeads, setSelectedLeads] = useState<Lead[]>(propSelectedLeads || []);
 
   const targetLeads = selectedLeads; // Alias for clarity in case 5
 
@@ -184,8 +206,8 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
 
   const {
     getEmailTemplates,
-    loading: emailTemplateLoading,
-    // error: emailTemplateError
+    // loading: emailTemplateLoading, // This is already defined as loadingEmailTemplates
+    // error: emailTemplateError // This is already defined as emailTemplateError
   } = useEmailTemplateApi();
 
   const {
@@ -197,8 +219,9 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
   } = useLeadApi();
 
   useEffect(() => {
-    // loadTemplates();
+    // loadTemplates(); // This function is commented out in the original code, so keeping it commented
     loadEmailTemplates();
+    loadAvailableLeads(); // Load available leads when the component mounts
   }, []);
 
   // Initialize data from navigation props if provided
@@ -220,7 +243,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
       }));
       // This handles campaign templates, not email templates from settings
       // setSelectedTemplate(template); // Already handled by setCampaignData
-    } else if (initialData?.templateMode && initialData?.selectedEmailTemplate) {
+    } else if (initialData?.templateMode && initialData.selectedEmailTemplate) {
       // Handle email template from new template system
       const template = initialData.selectedEmailTemplate;
       setCampaignData(prev => ({
@@ -300,6 +323,61 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
       setLoadingEmailTemplates(false);
     }
   };
+
+  // Load available leads
+  const loadAvailableLeads = async () => {
+    setLoadingLeads(true);
+    try {
+      // Replace with actual API call to fetch leads
+      const response = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/leads/`);
+      if (response.ok) {
+        const leads = await response.json();
+        setAvailableLeads(leads);
+      } else {
+        throw new Error('Failed to fetch leads');
+      }
+    } catch (error) {
+      console.error('Error loading available leads:', error);
+      toast.error('Failed to load available leads.');
+    } finally {
+      setLoadingLeads(false);
+    }
+  };
+
+
+  // Filter available leads based on search term and filters
+  const filteredAvailableLeads = availableLeads.filter(lead => {
+    const matchesSearchTerm = lead.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                              lead.contact.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                              lead.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatusFilter = statusFilter === 'all' || lead.status.toLowerCase() === statusFilter.toLowerCase();
+    const matchesIndustryFilter = industryFilter === 'all' || lead.industry.toLowerCase() === industryFilter.toLowerCase();
+    return matchesSearchTerm && matchesStatusFilter && matchesIndustryFilter;
+  });
+
+  // Function to add a lead to selected leads
+  const handleAddLead = (leadToAdd: Lead) => {
+    // Check if the lead is already selected
+    if (!selectedLeads.some(lead => lead.id === leadToAdd.id)) {
+      setSelectedLeads(prevSelectedLeads => [...prevSelectedLeads, leadToAdd]);
+      toast.success(`${leadToAdd.contact} from ${leadToAdd.company} added to campaign.`);
+    } else {
+      toast.warn(`${leadToAdd.contact} from ${leadToAdd.company} is already selected.`);
+    }
+  };
+
+  // Function to remove a lead from selected leads
+  const handleRemoveLead = (leadId: string | number) => {
+    setSelectedLeads(prevSelectedLeads => prevSelectedLeads.filter(lead => lead.id !== leadId));
+    toast.info(`Lead removed from campaign.`);
+  };
+
+  // Function to clear all selected leads
+  const handleClearAllLeads = () => {
+    setSelectedLeads([]);
+    toast.info('All selected leads cleared.');
+  };
+
 
   // Standard layout with proper email structure
   const renderEmailTemplate = (content: string, cta: string, ctaLink: string, subject: string) => `
@@ -449,7 +527,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
     // For email templates, use the content directly or wrap it in standard layout
     let renderedContent = '';
 
-    if (template.content && template.content.startsWith('<!DOCTYPE') || template.content.startsWith('<html')) {
+    if (template.content && (template.content.startsWith('<!DOCTYPE') || template.content.startsWith('<html'))) {
       // Content is already complete HTML
       renderedContent = template.content;
     } else {
@@ -1164,70 +1242,174 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
 
       case 2:
         return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Audience & Targeting</h3>
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  Selected Leads ({selectedLeads.length})
-                </CardTitle>
-                <CardDescription>Leads selected for this campaign</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3 max-h-60 overflow-y-auto">
-                  {selectedLeads.slice(0, 10).map((lead, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 border rounded-lg bg-gray-50">
-                      <div>
-                        <p className="font-medium text-sm">{lead.company || `Company ${index + 1}`}</p>
-                        <p className="text-xs text-gray-600">{lead.contact || 'Contact'} • {lead.industry || 'Industry'}</p>
-                      </div>
-                      <Badge variant="secondary" className="text-xs">
-                        Score: {lead.score || Math.floor(Math.random() * 40) + 60}
-                      </Badge>
-                    </div>
-                  ))}
-                  {selectedLeads.length > 10 && (
-                    <div className="text-center py-2 text-sm text-gray-600">
-                      ... and {selectedLeads.length - 10} more leads
-                    </div>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5" />
+                Audience & Targeting
+              </CardTitle>
+              <CardDescription>Define your target audience and manage lead selection</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Selected Leads Section */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label className="text-lg font-medium">Selected Leads ({selectedLeads.length})</Label>
+                  {selectedLeads.length > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleClearAllLeads}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <X className="h-4 w-4 mr-1" />
+                      Clear All
+                    </Button>
                   )}
                 </div>
-              </CardContent>
-            </Card>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Card>
-                <CardContent className="p-4 text-center">
-                  <div className="text-2xl font-bold text-blue-600">{selectedLeads.length}</div>
-                  <p className="text-xs text-gray-600">Total Leads</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-4 text-center">
-                  <div className="text-2xl font-bold text-green-600">
-                    {Math.round(selectedLeads.reduce((sum, lead) => sum + (lead.score || 65), 0) / selectedLeads.length) || 65}
+                {selectedLeads.length > 0 ? (
+                  <div className="space-y-2 max-h-60 overflow-y-auto border rounded-lg p-4 bg-blue-50">
+                    {selectedLeads.map((lead) => (
+                      <div key={lead.id} className="flex items-center justify-between p-3 bg-white rounded border">
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900">{lead.company}</div>
+                          <div className="text-sm text-gray-600">{lead.contact} - {lead.title}</div>
+                          <div className="text-xs text-gray-500">{lead.email}</div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-xs">{lead.status}</Badge>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRemoveLead(lead.id)}
+                            className="text-red-600 hover:text-red-700 h-8 w-8 p-0"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <p className="text-xs text-gray-600">Avg Score</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-4 text-center">
-                  <div className="text-2xl font-bold text-purple-600">
-                    {new Set(selectedLeads.map(l => l.industry)).size || 3}
+                ) : (
+                  <div className="text-center py-8 text-gray-500 border rounded-lg bg-gray-50">
+                    <Users className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                    <p className="text-lg font-medium mb-2">No leads selected</p>
+                    <p>Add leads from the available leads section below</p>
                   </div>
-                  <p className="text-xs text-gray-600">Industries</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-4 text-center">
-                  <div className="text-2xl font-bold text-orange-600">
-                    {Math.round(selectedLeads.filter(l => (l.score || 65) >= 75).length / selectedLeads.length * 100) || 60}%
+                )}
+              </div>
+
+              {/* Available Leads Section */}
+              <div className="space-y-4">
+                <Label className="text-lg font-medium">Available Leads</Label>
+
+                {/* Filters */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Input
+                      placeholder="Search leads..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10"
+                    />
                   </div>
-                  <p className="text-xs text-gray-600">High Quality</p>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="new">New</SelectItem>
+                      <SelectItem value="contacted">Contacted</SelectItem>
+                      <SelectItem value="qualified">Qualified</SelectItem>
+                      <SelectItem value="unqualified">Unqualified</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={industryFilter} onValueChange={setIndustryFilter}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Industry" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Industries</SelectItem>
+                      <SelectItem value="technology">Technology</SelectItem>
+                      <SelectItem value="healthcare">Healthcare</SelectItem>
+                      <SelectItem value="finance">Finance</SelectItem>
+                      <SelectItem value="manufacturing">Manufacturing</SelectItem>
+                      <SelectItem value="retail">Retail</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Button
+                    variant="outline"
+                    onClick={loadAvailableLeads}
+                    disabled={loadingLeads}
+                    className="flex items-center gap-2"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${loadingLeads ? 'animate-spin' : ''}`} />
+                    Refresh
+                  </Button>
+                </div>
+
+                {/* Available Leads List */}
+                {loadingLeads ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+                    <span className="ml-2">Loading leads...</span>
+                  </div>
+                ) : filteredAvailableLeads.length > 0 ? (
+                  <div className="space-y-2 max-h-60 overflow-y-auto border rounded-lg p-4">
+                    {filteredAvailableLeads.map((lead) => (
+                      <div key={lead.id} className="flex items-center justify-between p-3 bg-gray-50 rounded hover:bg-gray-100 transition-colors">
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900">{lead.company}</div>
+                          <div className="text-sm text-gray-600">{lead.contact} - {lead.title}</div>
+                          <div className="text-xs text-gray-500">{lead.email} • {lead.industry}</div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="outline" className="text-xs">{lead.status}</Badge>
+                          <Badge variant="secondary" className="text-xs">Score: {lead.score}</Badge>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleAddLead(lead)}
+                            className="h-8 px-3"
+                          >
+                            <Plus className="h-4 w-4 mr-1" />
+                            Add
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500 border rounded-lg">
+                    <Search className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                    <p className="text-lg font-medium mb-2">No leads found</p>
+                    <p>Try adjusting your search criteria or refresh the list</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Campaign Summary */}
+              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <Info className="h-4 w-4 text-blue-600" />
+                  <span className="font-medium text-blue-900">Campaign Summary</span>
+                </div>
+                <div className="text-sm text-blue-800">
+                  <p>• Selected leads: <strong>{selectedLeads.length}</strong></p>
+                  <p>• Target channels: <strong>{campaignData.channels.join(', ')}</strong></p>
+                  {selectedLeads.length > 0 && (
+                    <p>• Estimated reach: <strong>{selectedLeads.length} contacts</strong></p>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         );
 
       case 3:
@@ -1488,10 +1670,10 @@ TechCorp Solutions can achieve complete travel governance without slowing down y
                   <div className="flex items-center justify-between">
                     <Label>Track Opens</Label>
                     <Checkbox
-                      checked={campaignData.settings.trackOpens}
+                      checked={campaignData.settings.trackingEnabled} // Assuming trackingEnabled covers both
                       onCheckedChange={(checked) => setCampaignData(prev => ({
                         ...prev,
-                        settings: { ...prev.settings, trackOpens: checked as boolean }
+                        settings: { ...prev.settings, trackingEnabled: checked as boolean }
                       }))}
                     />
                   </div>
@@ -1499,10 +1681,10 @@ TechCorp Solutions can achieve complete travel governance without slowing down y
                   <div className="flex items-center justify-between">
                     <Label>Track Clicks</Label>
                     <Checkbox
-                      checked={campaignData.settings.trackClicks}
+                      checked={campaignData.settings.trackingEnabled} // Assuming trackingEnabled covers both
                       onCheckedChange={(checked) => setCampaignData(prev => ({
                         ...prev,
-                        settings: { ...prev.settings, trackClicks: checked as boolean }
+                        settings: { ...prev.settings, trackingEnabled: checked as boolean }
                       }))}
                     />
                   </div>
@@ -1510,10 +1692,10 @@ TechCorp Solutions can achieve complete travel governance without slowing down y
                   <div className="flex items-center justify-between">
                     <Label>Auto Follow-up</Label>
                     <Checkbox
-                      checked={campaignData.settings.autoFollowUp}
+                      checked={campaignData.settings.followUp}
                       onCheckedChange={(checked) => setCampaignData(prev => ({
                         ...prev,
-                        settings: { ...prev.settings, autoFollowUp: checked as boolean }
+                        settings: { ...prev.settings, followUp: checked as boolean }
                       }))}
                     />
                   </div>

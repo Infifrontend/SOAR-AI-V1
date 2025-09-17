@@ -1245,7 +1245,7 @@ html {
   [data-slot="alert"] {
     grid-template-columns: auto 1fr !important;
   }
-  
+
   /* Ensure disabled elements show default cursor */
   button:disabled,
   a[aria-disabled="true"],
@@ -1256,7 +1256,7 @@ html {
 
   [role="dialog"]{
     overflow: auto !important;
-    
+
   }
   .cls-search-filter{
     background-color: white!important;
@@ -1286,4 +1286,40 @@ html {
   [draggable="true"]:active {
     cursor: grabbing;
   }
+
+  /* Custom styles for specific components */
+.cls-custompopup {
+  max-width: 95vw !important;
+  max-height: 90vh !important;
+}
+
+/* Campaign Wizard Audience Section Styles */
+.campaign-lead-card {
+  transition: all 0.2s ease-in-out;
+}
+
+.campaign-lead-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.selected-leads-container {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+}
+
+.available-leads-container {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.lead-search-filters {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.campaign-summary-box {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border: 1px solid #93c5fd;
+}
 }

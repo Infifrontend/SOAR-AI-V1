@@ -47,6 +47,9 @@ urlpatterns = [
     path('leads/dashboard/stats/', views.lead_dashboard_stats, name='lead_dashboard_stats'),
     path('leads/dashboard/recent-activity/', views.recent_lead_activity, name='recent_activity'),
     path('leads/dashboard/top-qualified/', views.top_qualified_leads, name='top_qualified_leads'),
+    
+    # Campaign lead targeting endpoints
+    path('leads/campaign-search/', views.LeadViewSet.as_view({'post': 'campaign_search'}), name='campaign_lead_search'),
 
     # Company bulk operations
     path('companies/upload/', views.CompanyViewSet.as_view({'post': 'upload'}), name='bulk_upload_companies'),

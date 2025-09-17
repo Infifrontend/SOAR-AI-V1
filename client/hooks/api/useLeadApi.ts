@@ -501,6 +501,24 @@ export const useLeadApi = () => {
     }
   }, [setLoading, setError, setData]);
 
+  // Enhanced campaign lead search
+  const campaignLeadSearch = useCallback(async (filters: any) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await baseApi.post(`/leads/campaign-search/`, filters);
+      setData(response.data);
+      return response.data;
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.detail || error.message || 'Failed to search leads';
+      setError(errorMessage);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, [setLoading, setError, setData]);
+
 
   // Send message function
   const sendMessage = useCallback(async (leadId: number, messageData: any) => {
@@ -850,5 +868,16 @@ export const useLeadApi = () => {
     getAttachmentDownloadUrl,
     sendProposal,
     launchCampaign,
+    campaignLeadSearch,
+    // Expose individual methods for external use
+    api: {
+      getLeads,
+      getLeadById,
+      createLead,
+      updateLead,
+      deleteLead,
+      launchCampaign,
+      campaignLeadSearch
+    }
   };
 };
