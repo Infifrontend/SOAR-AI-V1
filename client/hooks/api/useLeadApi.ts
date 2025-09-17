@@ -482,16 +482,36 @@ export const useLeadApi = () => {
   }, [setLoading, setError, setData]);
 
   // Send proposal email
-  const sendProposal = useCallback(async (opportunityId: number, proposalData: any) => {
+  const sendProposal = useCallback(async (opportunityId: number, proposalData: any, attachedFile?: File) => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await baseApi.post(`/opportunities/${opportunityId}/send-proposal/`, proposalData);
+      // Create FormData to handle file uploads
+      const formData = new FormData();
+      
+      // Add all proposal data fields
+      Object.keys(proposalData).forEach(key => {
+        if (proposalData[key] !== null && proposalData[key] !== undefined) {
+          formData.append(key, proposalData[key]);
+        }
+      });
+      
+      // Add file attachment if provided
+      if (attachedFile) {
+        formData.append('attachedFile', attachedFile);
+      }
+
+      const response = await baseApi.post(`/opportunities/${opportunityId}/send-proposal/`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
       setData(response.data);
       return response.data;
     } catch (error: any) {
-      const errorMessage = error.response?.data?.detail || error.message || 'Failed to send proposal';
+      const errorMessage = error.response?.data?.error || error.response?.data?.detail || error.message || 'Failed to send proposal';
       setError(errorMessage);
       throw error;
     } finally {

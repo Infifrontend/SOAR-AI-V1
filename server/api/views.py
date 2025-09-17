@@ -188,6 +188,225 @@ class PermissionViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
+class OpportunityViewSet(viewsets.ModelViewSet):
+    queryset = Opportunity.objects.select_related('lead__company', 'lead__contact').all()
+    serializer_class = OpportunitySerializer
+
+    def get_queryset(self):
+        queryset = self.queryset
+        stage = self.request.query_params.get('stage')
+        search = self.request.query_params.get('search')
+
+        if stage and stage != 'all':
+            queryset = queryset.filter(stage=stage)
+
+        if search:
+            queryset = queryset.filter(
+                Q(name__icontains=search) |
+                Q(lead__company__name__icontains=search) |
+                Q(lead__contact__first_name__icontains=search) |
+                Q(lead__contact__last_name__icontains=search)
+            )
+
+        return queryset.order_by('-updated_at')
+
+    @action(detail=False, methods=['post'])
+    def search(self, request):
+        """Search opportunities with filters"""
+        try:
+            filters = request.data if hasattr(request, 'data') else {}
+            
+            stage_filter = filters.get('stage', 'all')
+            search_term = filters.get('search', '')
+
+            opportunities = self.get_queryset()
+
+            if stage_filter != 'all':
+                opportunities = opportunities.filter(stage=stage_filter)
+
+            if search_term:
+                opportunities = opportunities.filter(
+                    Q(name__icontains=search_term) |
+                    Q(lead__company__name__icontains=search_term) |
+                    Q(lead__contact__first_name__icontains=search_term) |
+                    Q(lead__contact__last_name__icontains=search_term)
+                )
+
+            # Get latest activities for each opportunity
+            opportunities_data = []
+            for opp in opportunities:
+                opp_data = OpportunitySerializer(opp).data
+                
+                # Add latest activities
+                latest_activities = OpportunityActivity.objects.filter(
+                    opportunity=opp
+                ).order_by('-date', '-created_at')[:3]
+                
+                opp_data['latest_activities'] = [{
+                    'id': activity.id,
+                    'type': activity.type,
+                    'type_display': activity.get_type_display(),
+                    'description': activity.description,
+                    'date': activity.date.isoformat(),
+                    'created_at': activity.created_at.isoformat(),
+                    'created_by_name': activity.created_by.get_full_name() if activity.created_by else 'System'
+                } for activity in latest_activities]
+                
+                opportunities_data.append(opp_data)
+
+            return Response(opportunities_data)
+
+        except Exception as e:
+            return Response(
+                {'error': f'Search failed: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @action(detail=True, methods=['post'])
+    def send_proposal(self, request, pk=None):
+        """Send proposal email with attachments"""
+        try:
+            opportunity = self.get_object()
+            proposal_data = request.data
+
+            # Get company and contact info
+            company = opportunity.lead.company
+            contact = opportunity.lead.contact
+
+            # Prepare email content using template service
+            from .email_template_service import EmailTemplateService
+            from django.core.mail import EmailMultiAlternatives
+            from django.conf import settings
+            import os
+
+            # Generate email content
+            subject = f"Corporate Travel Proposal - {company.name}"
+            
+            email_content = f"""
+            <p>We are pleased to present our comprehensive corporate travel proposal for {company.name}.</p>
+            
+            <h3>Proposal Details:</h3>
+            <ul>
+                <li><strong>Title:</strong> {proposal_data.get('title', 'Corporate Travel Solution')}</li>
+                <li><strong>Description:</strong> {proposal_data.get('description', 'Customized travel management services')}</li>
+                <li><strong>Estimated Value:</strong> ${opportunity.value:,.2f}</li>
+                <li><strong>Validity Period:</strong> {proposal_data.get('validityPeriod', '30')} days</li>
+            </ul>
+            
+            <p>Please find the detailed proposal document attached to this email.</p>
+            
+            <p>We look forward to discussing this opportunity with you and answering any questions you may have.</p>
+            """
+
+            # Generate complete HTML email using template service
+            html_content, plain_text_content = EmailTemplateService.get_standard_template(
+                subject=subject,
+                content=email_content,
+                recipient_name=f"{contact.first_name} {contact.last_name}",
+                template_type="proposal"
+            )
+
+            # Create email message
+            email = EmailMultiAlternatives(
+                subject=subject,
+                body=plain_text_content,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                to=[contact.email],
+            )
+            
+            # Attach HTML alternative
+            email.attach_alternative(html_content, "text/html")
+
+            # Handle file attachment if present
+            attachment_added = False
+            if 'attachedFile' in request.FILES:
+                attached_file = request.FILES['attachedFile']
+                
+                # Validate file size (10MB limit)
+                if attached_file.size > 10 * 1024 * 1024:
+                    return Response({
+                        'success': False,
+                        'error': 'File size exceeds 10MB limit'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+                
+                # Validate file type (common document formats)
+                allowed_extensions = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt']
+                file_extension = os.path.splitext(attached_file.name)[1].lower()
+                
+                if file_extension not in allowed_extensions:
+                    return Response({
+                        'success': False,
+                        'error': f'File type {file_extension} not allowed. Supported formats: {", ".join(allowed_extensions)}'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+                
+                # Attach file to email
+                email.attach(attached_file.name, attached_file.read(), attached_file.content_type)
+                attachment_added = True
+
+            # Check for existing proposal draft attachment
+            elif hasattr(opportunity, 'proposal_draft') and opportunity.proposal_draft.attachment_path:
+                draft = opportunity.proposal_draft
+                attachment_path = os.path.join(settings.MEDIA_ROOT, draft.attachment_path)
+                
+                if os.path.exists(attachment_path):
+                    with open(attachment_path, 'rb') as f:
+                        file_content = f.read()
+                        filename = draft.attachment_original_name or os.path.basename(attachment_path)
+                        
+                        # Determine MIME type based on file extension
+                        file_extension = os.path.splitext(filename)[1].lower()
+                        mime_types = {
+                            '.pdf': 'application/pdf',
+                            '.doc': 'application/msword',
+                            '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                            '.xls': 'application/vnd.ms-excel',
+                            '.xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                            '.ppt': 'application/vnd.ms-powerpoint',
+                            '.pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                            '.txt': 'text/plain'
+                        }
+                        mime_type = mime_types.get(file_extension, 'application/octet-stream')
+                        
+                        email.attach(filename, file_content, mime_type)
+                        attachment_added = True
+
+            # Send the email
+            result = email.send(fail_silently=False)
+            
+            if result == 1:
+                # Update opportunity stage to proposal if it's in discovery
+                if opportunity.stage == 'discovery':
+                    opportunity.stage = 'proposal'
+                    opportunity.save()
+
+                # Create activity log
+                OpportunityActivity.objects.create(
+                    opportunity=opportunity,
+                    type='proposal',
+                    description=f'Proposal sent via email to {contact.email}' + 
+                                (' with attachment' if attachment_added else ''),
+                    date=timezone.now().date(),
+                    created_by=request.user if request.user.is_authenticated else None
+                )
+
+                return Response({
+                    'success': True,
+                    'message': f'Proposal sent successfully to {contact.email}',
+                    'attachment_included': attachment_added
+                })
+            else:
+                return Response({
+                    'success': False,
+                    'error': 'Failed to send email'
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        except Exception as e:
+            return Response({
+                'success': False,
+                'error': f'Failed to send proposal: {str(e)}'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class EmailTemplateViewSet(viewsets.ModelViewSet):
     queryset = EmailTemplate.objects.all()
     serializer_class = EmailTemplateSerializer

@@ -352,8 +352,7 @@ class OpportunityActivitySerializer(serializers.ModelSerializer):
         return 'System'
 
 class OpportunitySerializer(serializers.ModelSerializer):
-    lead_info = LeadSerializer(source='lead', read_only=True)
-    company_name = serializers.CharField(source='lead.company.name', read_only=True)
+    lead_info = serializers.SerializerMethodField()
     weighted_value = serializers.SerializerMethodField()
     activities = OpportunityActivitySerializer(many=True, read_only=True)
     latest_activities = serializers.SerializerMethodField()
@@ -384,6 +383,28 @@ class OpportunitySerializer(serializers.ModelSerializer):
         if value not in valid_stages:
             raise serializers.ValidationError(f"Invalid stage. Must be one of: {valid_stages}")
         return value
+
+    def get_lead_info(self, obj):
+        if obj.lead:
+            return {
+                'company': {
+                    'id': obj.lead.company.id,
+                    'name': obj.lead.company.name,
+                    'industry': obj.lead.company.industry,
+                    'location': obj.lead.company.location,
+                    'employee_count': obj.lead.company.employee_count,
+                    'size': obj.lead.company.size,
+                },
+                'contact': {
+                    'id': obj.lead.contact.id,
+                    'first_name': obj.lead.contact.first_name,
+                    'last_name': obj.lead.contact.last_name,
+                    'email': obj.lead.contact.email,
+                    'phone': obj.lead.contact.phone,
+                    'position': obj.lead.contact.position,
+                }
+            }
+        return None
 
 
 class OptimizedOpportunitySerializer(serializers.ModelSerializer):
@@ -638,6 +659,16 @@ class CampaignTemplateSerializer(serializers.ModelSerializer):
         data['created_by'] = 'System'
         return data
 
+    def validate_content(self, value):
+        if not value or not value.strip():
+            raise serializers.ValidationError("Content cannot be empty.")
+        return value
+
+    def validate_name(self, value):
+        if not value or not value.strip():
+            raise serializers.ValidationError("Template name is required.")
+        return value.strip()
+
 class ProposalDraftSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProposalDraft
@@ -758,7 +789,7 @@ class RoleSerializer(serializers.ModelSerializer):
         # Extract menu permissions and description
         menu_permissions = validated_data.pop('menu_permissions', [])
         role_description = validated_data.pop('role_description', '')
-        
+
         # Create the group
         group = Group.objects.create(**validated_data)
 

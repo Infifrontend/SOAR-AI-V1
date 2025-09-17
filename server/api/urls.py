@@ -47,7 +47,7 @@ urlpatterns = [
     path('leads/dashboard/stats/', views.lead_dashboard_stats, name='lead_dashboard_stats'),
     path('leads/dashboard/recent-activity/', views.recent_lead_activity, name='recent_activity'),
     path('leads/dashboard/top-qualified/', views.top_qualified_leads, name='top_qualified_leads'),
-    
+
     # Campaign lead targeting endpoints
     path('leads/campaign-search/', views.LeadViewSet.as_view({'post': 'campaign_search'}), name='campaign_lead_search'),
 
@@ -82,7 +82,7 @@ urlpatterns = [
 
     # Generic history endpoint
     path('get-history/', views.get_history, name='get_history'),
-    
+
     # Lead history endpoint - removed as view function doesn't exist
 
     # Send proposal endpoint

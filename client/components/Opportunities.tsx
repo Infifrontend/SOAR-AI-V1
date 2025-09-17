@@ -4061,11 +4061,63 @@ const getRandomRiskLevel = () => {
                       {isDraftLoading ? "Saving..." : "Save Draft"}
                     </Button>
                     <Button
-                      onClick={() => {
-                        if (proposalDialogMode === 'proposal') {
-                          handleSaveProposal();
-                        } else {
-                          handleGenerateRevisedProposal();
+                      onClick={async () => {
+                        if (!selectedOpportunity) return;
+
+                        setIsDraftLoading(true);
+                        setLoadingOpportunityId(selectedOpportunity.id);
+
+                        try {
+                          // Prepare proposal data
+                          const proposalData = {
+                            opportunity_id: selectedOpportunity.id,
+                            subject: proposalForm.title || `Travel Solutions Proposal - ${selectedOpportunity.lead_info?.company?.name}`,
+                            email_content: generateEmailPreview(),
+                            delivery_method: proposalForm.deliveryMethod,
+                            validity_period: proposalForm.validityPeriod,
+                            special_terms: proposalForm.specialTerms,
+                          };
+
+                          // Send the proposal with attachment
+                          const result = await sendProposal(
+                            selectedOpportunity.id, 
+                            proposalData,
+                            proposalForm.attachedFile || undefined
+                          );
+
+                          if (result.success) {
+                            toast.success(result.message || 'Proposal sent successfully!');
+
+                            // Clear draft after successful send
+                            await clearDraft(selectedOpportunity.id);
+
+                            // Update opportunity stage to proposal
+                            setOpportunities(prev => prev.map(opp => 
+                              opp.id === selectedOpportunity.id 
+                                ? { ...opp, stage: 'proposal' }
+                                : opp
+                            ));
+
+                            // Close dialog and reset form
+                            setShowProposalDialog(false);
+                            setProposalForm({
+                              title: "",
+                              description: "",
+                              validityPeriod: "30",
+                              specialTerms: "",
+                              deliveryMethod: "email",
+                              attachedFile: null,
+                            });
+                            setAttachmentInfo({ exists: false, filename: "", path: "" });
+                          } else {
+                            toast.error(result.error || 'Failed to send proposal');
+                          }
+                        } catch (error: any) {
+                          console.error('Error sending proposal:', error);
+                          toast.error(error.response?.data?.error || 'Failed to send proposal. Please try again.');
+                        } finally {
+                          setIsDraftLoading(false);
+                          setLoadingOpportunityId(null);
                         }
                       }}
                       disabled={
