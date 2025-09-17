@@ -1295,38 +1295,59 @@ const getRandomRiskLevel = () => {
     const company = selectedOpportunity.lead_info?.company;
     const contact = selectedOpportunity.lead_info?.contact;
 
+    // Get negotiation data for detailed proposal sections
+    const negotiationData = negotiationForm;
+    const isNegotiationMode = proposalDialogMode === 'negotiation';
+
     return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Travel Solutions Proposal</title>
+    <title>${proposalForm.title || 'Travel Solutions Proposal'}</title>
     <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 700px; margin: 0 auto; padding: 20px; background: #f5f5f5; }
         .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
         .content { background: white; padding: 30px; border: 1px solid #ddd; }
         .footer { background: #f8f9fa; padding: 20px; text-align: center; border-radius: 0 0 8px 8px; border: 1px solid #ddd; border-top: none; }
-        .highlight { background: #e3f2fd; padding: 15px; border-left: 4px solid #2196f3; margin: 20px 0; }
+        .highlight { background: #e3f2fd; padding: 15px; border-left: 4px solid #2196f3; margin: 20px 0; border-radius: 4px; }
         .terms { background: #f5f5f5; padding: 15px; border-radius: 4px; margin: 20px 0; }
+        .volume-section { background: #fff3e0; padding: 15px; border-left: 4px solid #ff9800; margin: 20px 0; border-radius: 4px; }
+        .financial-section { background: #e8f5e8; padding: 15px; border-left: 4px solid #4caf50; margin: 20px 0; border-radius: 4px; }
+        .negotiation-section { background: #f3e5f5; padding: 15px; border-left: 4px solid #9c27b0; margin: 20px 0; border-radius: 4px; }
         .button { display: inline-block; background: #4CAF50; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 10px 0; }
+        .route-discount { background: #fff; border: 1px solid #e0e0e0; padding: 10px; margin: 5px 0; border-radius: 4px; }
+        .section-title { color: #1976d2; font-weight: bold; margin: 15px 0 10px 0; }
+        .cabin-mix { display: flex; gap: 15px; flex-wrap: wrap; }
+        .cabin-item { background: #fff; padding: 10px; border-radius: 4px; border: 1px solid #e0e0e0; text-align: center; min-width: 80px; }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>🛫 Travel Solutions Proposal</h1>
-        <p>Your Corporate Travel Partnership Opportunity</p>
+        <h1>🛫 ${proposalForm.title || 'Travel Solutions Proposal'}</h1>
+        <p>${isNegotiationMode ? 'Contract Negotiation Terms' : 'Your Corporate Travel Partnership Opportunity'}</p>
     </div>
 
     <div class="content">
-        <p><strong>Dear ${contact?.first_name} ${contact?.last_name},</strong></p>
+        <p><strong>Dear ${contact?.first_name || 'Corporate'} ${contact?.last_name || 'Team'},</strong></p>
 
-        <p>Thank you for your interest in our corporate travel solutions. We are pleased to present this comprehensive proposal for <strong>${company?.name}</strong>.</p>
+        <p>Thank you for your interest in our corporate travel solutions. We are pleased to present this comprehensive ${isNegotiationMode ? 'negotiation document' : 'proposal'} for <strong>${company?.name}</strong>.</p>
 
         <div class="highlight">
-            <h3>📋 ${proposalForm.title}</h3>
-            <p>${proposalForm.description}</p>
+            <h3>📋 ${proposalForm.title || `${isNegotiationMode ? 'Negotiation Terms' : 'Travel Solutions Proposal'} - ${company?.name}`}</h3>
+            <p>${proposalForm.description || `Comprehensive travel management solution tailored for ${company?.name}'s needs.`}</p>
         </div>
+
+        ${isNegotiationMode && negotiationData.dealTitle ? `
+        <div class="negotiation-section">
+            <h3 class="section-title">📋 Deal Information</h3>
+            <p><strong>Deal Title:</strong> ${negotiationData.dealTitle}</p>
+            <p><strong>Corporate Contact:</strong> ${negotiationData.corporateContact}</p>
+            <p><strong>Account Manager:</strong> ${negotiationData.airlineAccountManager}</p>
+            <p><strong>Expected Close Date:</strong> ${negotiationData.expectedCloseDate ? new Date(negotiationData.expectedCloseDate).toLocaleDateString() : 'TBD'}</p>
+        </div>
+        ` : ''}
 
         <h3>🎯 Key Benefits for ${company?.name}:</h3>
         <ul>
@@ -1337,14 +1358,81 @@ const getRandomRiskLevel = () => {
             <li><strong>Seamless Integration:</strong> Easy integration with your existing systems</li>
         </ul>
 
+        ${negotiationData.annualBookingVolume || negotiationData.projectedSpend || negotiationData.preferredRoutes ? `
+        <div class="volume-section">
+            <h3 class="section-title">📊 Volume Commitment</h3>
+            ${negotiationData.annualBookingVolume ? `<p><strong>Annual Booking Volume:</strong> ${negotiationData.annualBookingVolume}</p>` : ''}
+            ${negotiationData.projectedSpend ? `<p><strong>Projected Annual Spend:</strong> $${negotiationData.projectedSpend}</p>` : ''}
+            ${negotiationData.preferredRoutes ? `<p><strong>Preferred Routes:</strong> ${negotiationData.preferredRoutes}</p>` : ''}
+            <p><strong>Travel Frequency:</strong> ${negotiationData.travelFrequency === 'monthly' ? 'Monthly' : 'Quarterly'}</p>
+            
+            <div class="cabin-mix">
+                <div class="cabin-item">
+                    <div><strong>${negotiationData.domesticEconomy}%</strong></div>
+                    <div>Domestic Economy</div>
+                </div>
+                <div class="cabin-item">
+                    <div><strong>${negotiationData.domesticBusiness}%</strong></div>
+                    <div>Business Class</div>
+                </div>
+                <div class="cabin-item">
+                    <div><strong>${negotiationData.international}%</strong></div>
+                    <div>International</div>
+                </div>
+            </div>
+        </div>
+        ` : ''}
+
+        ${negotiationData.baseDiscount || negotiationData.routeDiscounts?.length > 0 || negotiationData.volumeIncentives ? `
+        <div class="financial-section">
+            <h3 class="section-title">💰 Discount & Offer Terms</h3>
+            ${negotiationData.baseDiscount ? `<p><strong>Base Discount:</strong> ${negotiationData.baseDiscount}%</p>` : ''}
+            ${negotiationData.volumeIncentives ? `<p><strong>Volume Incentives:</strong> ${negotiationData.volumeIncentives}</p>` : ''}
+            
+            ${negotiationData.routeDiscounts?.length > 0 ? `
+            <div>
+                <strong>Route-Specific Discounts:</strong>
+                ${negotiationData.routeDiscounts.map(route => 
+                  route.route ? `<div class="route-discount">
+                    <strong>${route.route}:</strong> ${route.discount}% 
+                    ${route.conditions ? `(${route.conditions})` : ''}
+                  </div>` : ''
+                ).join('')}
+            </div>
+            ` : ''}
+
+            ${Object.values(negotiationData.loyaltyBenefits || {}).some(Boolean) ? `
+            <p><strong>Loyalty Benefits:</strong>
+            ${negotiationData.loyaltyBenefits?.extraMiles ? '✓ Extra Miles ' : ''}
+            ${negotiationData.loyaltyBenefits?.priorityBoarding ? '✓ Priority Boarding ' : ''}
+            ${negotiationData.loyaltyBenefits?.loungeAccess ? '✓ Lounge Access' : ''}
+            </p>
+            ` : ''}
+        </div>
+        ` : ''}
+
+        ${negotiationData.contractDuration || negotiationData.paymentTerms || negotiationData.settlementType ? `
+        <div class="terms">
+            <h3 class="section-title">📝 Contract Terms</h3>
+            ${negotiationData.contractDuration ? `<p><strong>Contract Duration:</strong> ${negotiationData.contractDuration} months</p>` : ''}
+            ${negotiationData.autoRenewal !== undefined ? `<p><strong>Auto Renewal:</strong> ${negotiationData.autoRenewal ? 'Yes' : 'No'}</p>` : ''}
+            ${negotiationData.paymentTerms ? `<p><strong>Payment Terms:</strong> ${negotiationData.paymentTerms.replace('_', ' ').toUpperCase()}</p>` : ''}
+            ${negotiationData.settlementType ? `<p><strong>Settlement Type:</strong> ${negotiationData.settlementType.toUpperCase()}</p>` : ''}
+        </div>
+        ` : ''}
+
         <h3>💼 Proposal Details:</h3>
         <div class="terms">
-            <p><strong>Delivery Method:</strong> ${proposalForm.deliveryMethod === 'email' ? 'Email Delivery' : 
+            <p><strong>Delivery Method:</strong> ${
+              proposalForm.deliveryMethod === 'email' ? 'Email Delivery' : 
               proposalForm.deliveryMethod === 'secure_portal' ? 'Secure Portal Access' :
-              proposalForm.deliveryMethod === 'in_person' ? 'In-Person Presentation' : 'Video Call Presentation'}</p>
-            <p><strong>Proposal Validity:</strong> ${proposalForm.validityPeriod} days from date of receipt</p>
+              proposalForm.deliveryMethod === 'in_person' ? 'In-Person Presentation' : 'Video Call Presentation'
+            }</p>
+            <p><strong>Proposal Validity:</strong> ${proposalForm.validityPeriod || '30'} days from date of receipt</p>
             <p><strong>Estimated Deal Value:</strong> ${formatCurrency(selectedOpportunity?.value)}</p>
             <p><strong>Expected Implementation:</strong> 2-4 weeks after contract signing</p>
+            ${proposalForm.attachedFile ? `<p><strong>Attached Document:</strong> ${proposalForm.attachedFile.name}</p>` : ''}
+            ${attachmentInfo.exists ? `<p><strong>Previously Attached:</strong> ${attachmentInfo.filename}</p>` : ''}
         </div>
 
         ${proposalForm.specialTerms ? `
@@ -1354,16 +1442,30 @@ const getRandomRiskLevel = () => {
         </div>
         ` : ''}
 
+        ${negotiationData.corporateCommitments ? `
+        <div class="highlight">
+            <h3 class="section-title">🤝 Corporate Commitments</h3>
+            <p>${negotiationData.corporateCommitments}</p>
+        </div>
+        ` : ''}
+
+        ${negotiationData.airlineConcessions ? `
+        <div class="highlight">
+            <h3 class="section-title">✈️ Airline Concessions</h3>
+            <p>${negotiationData.airlineConcessions}</p>
+        </div>
+        ` : ''}
+
         <h3>🚀 Next Steps:</h3>
         <ol>
-            <li>Review the attached detailed proposal document</li>
-            <li>Schedule a presentation meeting with our team</li>
-            <li>Discuss customization requirements</li>
+            <li>Review the ${isNegotiationMode ? 'negotiation terms' : 'detailed proposal document'}</li>
+            <li>Schedule a ${isNegotiationMode ? 'contract finalization' : 'presentation'} meeting with our team</li>
+            <li>Discuss ${isNegotiationMode ? 'final terms and conditions' : 'customization requirements'}</li>
             <li>Finalize contract terms and implementation timeline</li>
         </ol>
 
         <div class="highlight">
-            <p><strong>⏰ This proposal is valid until:</strong> ${new Date(Date.now() + parseInt(proposalForm.validityPeriod) * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { 
+            <p><strong>⏰ This ${isNegotiationMode ? 'negotiation document' : 'proposal'} is valid until:</strong> ${new Date(Date.now() + parseInt(proposalForm.validityPeriod || '30') * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { 
               year: 'numeric', 
               month: 'long', 
               day: 'numeric' 
@@ -1372,7 +1474,7 @@ const getRandomRiskLevel = () => {
 
         <p>We are excited about the opportunity to partner with ${company?.name} and help optimize your corporate travel program. Our team is ready to answer any questions and provide additional information as needed.</p>
 
-        <p>Thank you for considering our proposal. We look forward to hearing from you soon.</p>
+        <p>Thank you for considering our ${isNegotiationMode ? 'negotiation terms' : 'proposal'}. We look forward to hearing from you soon.</p>
 
         <p>Best regards,<br>
         <strong>SOAR AI Corporate Travel Team</strong><br>
@@ -1381,13 +1483,13 @@ const getRandomRiskLevel = () => {
     </div>
 
     <div class="footer">
-        <p><small>This proposal is confidential and intended solely for ${company?.name}. Please do not distribute without permission.</small></p>
+        <p><small>This ${isNegotiationMode ? 'negotiation document' : 'proposal'} is confidential and intended solely for ${company?.name}. Please do not distribute without permission.</small></p>
         <p><small>© 2024 SOAR AI. All rights reserved.</small></p>
     </div>
 </body>
 </html>
     `.trim();
-  }, [selectedOpportunity, proposalForm, formatCurrency]);
+  }, [selectedOpportunity, proposalForm, negotiationForm, proposalDialogMode, formatCurrency, attachmentInfo]);
 
   const [negotiationForm, setNegotiationForm] = useState({
     // Header Section
