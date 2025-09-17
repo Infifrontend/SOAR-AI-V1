@@ -1403,7 +1403,7 @@ export function AllLeads({ onNavigate }: AllLeadsProps) {
                           </div>
                           <div className="flex items-center gap-1 mt-3 text-xs text-gray-500">
                             <User className="h-3 w-3" />
-                            <span>by {entry.user_name || 'System'}</span>
+                            <span>by {entry.user_name || 'User'}</span>
                           </div>
                         </div>
                       </div>

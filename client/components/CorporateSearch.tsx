@@ -1357,14 +1357,14 @@ export function CorporateSearch({
             )}
           </Button>
 
-          <Button
+          {/* <Button
             variant="outline"
             onClick={() => setShowAdvancedFilters(true)}
             className="border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-md flex items-center gap-2"
           >
             <Filter className="h-4 w-4" />
             Advanced Filters
-          </Button>
+          </Button> */}
 
           <Button
             variant="outline"
