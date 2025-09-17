@@ -106,6 +106,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"; // Added T
 import { CorporateProfile } from "./CorporateProfile";
 import { MarketingCampaignWizard } from "./MarketingCampaignWizard";
 import { formatDate, formatDateTime } from '../utils/dateFormatter';
+import { useUserApi } from "../hooks/api/useUserApi"; // Import useUserApi
 
 interface LeadsListProps {
   initialFilters?: any;
@@ -173,6 +174,16 @@ interface Lead {
   campaignCount: number; // Number of email campaigns run against this lead
   history_entries: HistoryEntry[]; // This will be populated from API calls
   has_opportunity: boolean; // Added to track if lead has been converted to an opportunity
+}
+
+// Interface for User (for agent assignment dropdown)
+interface User {
+  id: number;
+  username: string;
+  email: string;
+  first_name?: string;
+  last_name?: string;
+  // Add other relevant user properties if needed
 }
 
 // Helper function to transform API history entry to a consistent format
@@ -679,8 +690,11 @@ const buildLeadHistory = (apiLead: any) => {
 export function LeadsList({ initialFilters, onNavigate }: LeadsListProps) {
   const [leads, setLeads] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState<User[]>([]); // State for users
+  const [loadingUsers, setLoadingUsers] = useState(false); // Loading state for users
   const leadApi = useLeadApi();
   const companyApi = useCompanyApi();
+  const userApi = useUserApi(); // Initialize user API hook
   const [successMessage, setSuccessMessage] = useState<string>("");
   const [selectedLead, setSelectedLead] = useState<any>(null); // State for the lead selected in other dialogs
   const [showNewCompanyDialog, setShowNewCompanyDialog] = useState(false); // Changed from showNewLeadDialog
@@ -820,6 +834,28 @@ export function LeadsList({ initialFilters, onNavigate }: LeadsListProps) {
     useState("Medium Priority");
   const [assignmentNotes, setAssignmentNotes] = useState("");
   const [isAssigning, setIsAssigning] = useState(false);
+
+  // Fetch users for the agent assignment dropdown
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setLoadingUsers(true);
+      try {
+        const response = await userApi.getUsers(); // Assuming getUsers returns an array of users
+        setUsers(response || []); // Set users, or an empty array if response is null/undefined
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        toast.error("Failed to fetch sales agents");
+        setUsers([]); // Ensure users is an empty array on error
+      } finally {
+        setLoadingUsers(false);
+      }
+    };
+
+    if (showAssignAgentModal) { // Only fetch when the modal is opened
+      fetchUsers();
+    }
+  }, [showAssignAgentModal, userApi]);
+
 
   const isFormValid = () => {
     return (
@@ -4971,7 +5007,7 @@ Key Topics: Travel volume, preferred airlines, booking preferences, cost optimiz
         open={showAssignAgentModal}
         onOpenChange={setShowAssignAgentModal}
       >
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-lg font-semibold">
               <User className="h-5 w-5 text-orange-600" />
@@ -5025,59 +5061,27 @@ Key Topics: Travel volume, preferred airlines, booking preferences, cost optimiz
                   ? "Select New Sales Agent"
                   : "Select Sales Agent"}
               </Label>
-              <Select value={selectedAgent} onValueChange={setSelectedAgent}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Choose an agent..." />
+              <Select value={selectedAgent} onValueChange={setSelectedAgent} disabled={loadingUsers}>
+                <SelectTrigger>
+                  <SelectValue placeholder={loadingUsers ? "Loading users..." : "Choose an agent..."} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Sarah Wilson">
-                    <div className="flex flex-col items-start py-1">
-                      <div className="font-medium text-gray-900">
-                        Sarah Wilson
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        Manufacturing, Healthcare • 8 leads
-                      </div>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="John Doe">
-                    <div className="flex flex-col items-start py-1">
-                      <div className="font-medium text-gray-900">John Doe</div>
-                      <div className="text-xs text-gray-500">
-                        Technology, Finance • 12 leads
-                      </div>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="Jane Smith">
-                    <div className="flex flex-col items-start py-1">
-                      <div className="font-medium text-gray-900">
-                        Jane Smith
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        Retail, Consulting • 6 leads
-                      </div>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="Mike Johnson">
-                    <div className="flex flex-col items-start py-1">
-                      <div className="font-medium text-gray-900">
-                        Mike Johnson
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        Energy, Manufacturing • 9 leads
-                      </div>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="David Brown">
-                    <div className="flex flex-col items-start py-1">
-                      <div className="font-medium text-gray-900">
-                        David Brown
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        Healthcare, Government • 4 leads
-                      </div>
-                    </div>
-                  </SelectItem>
+                  {loadingUsers ? (
+                    <SelectItem value="" disabled>Loading users...</SelectItem>
+                  ) : users.length > 0 ? (
+                    users.map((user) => (
+                      <SelectItem key={user.id} value={user.username}>
+                        {user.first_name && user.last_name
+                          ? `${user.first_name} ${user.last_name}`
+                          : user.username}
+                        {user.email && (
+                          <span className="text-sm text-gray-500 ml-2">({user.email})</span>
+                        )}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="" disabled>No users available</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -5153,7 +5157,7 @@ Key Topics: Travel volume, preferred airlines, booking preferences, cost optimiz
             </Button>
             <Button
               onClick={handleConfirmAssignAgent}
-              disabled={!selectedAgent || isAssigning}
+              disabled={!selectedAgent || isAssigning || loadingUsers}
               className="bg-orange-500 hover:bg-orange-600 text-white"
             >
               {isAssigning ? (
