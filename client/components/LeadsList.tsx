@@ -4023,16 +4023,6 @@ SOAR-AI Team`,
                       const isContactRelated = ['contact_made', 'call_made', 'email_sent', 'contact_response', 'phone_call_completed', 'email_response', 'meeting_completed'].includes(entry.history_type);
                       const isStatusChange = entry.history_type === 'status_change';
 
-                      const isEmailEntry = entry.history_type === 'contact_made' || entry.history_type === 'email_sent';
-                      const hasEmailContent = entry.contact_tooltip && entry.contact_tooltip.message;
-
-                      // Clean email content for tooltip display
-                      const cleanEmailContent = hasEmailContent 
-                        ? entry.contact_tooltip.message
-                            .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-                            .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
-                        : '';
-
                       return (
                         <div
                           key={entry.id || index}
@@ -4083,55 +4073,12 @@ SOAR-AI Team`,
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
-                                {isEmailEntry && hasEmailContent ? (
-                                  <TooltipProvider>
-                                    <Tooltip>
-                                      <TooltipTrigger asChild>
-                                        <div className="cursor-help">
-                                          <h4 className="text-sm font-medium text-gray-900 flex items-center gap-2">
-                                            <Mail className="w-4 h-4 text-orange-600" />
-                                            {entry.action}
-                                            <Info className="w-3 h-3 text-blue-500" />
-                                          </h4>
-                                          <p className="text-sm text-gray-600 mt-1">
-                                            {entry.details}
-                                          </p>
-                                          <p className="text-xs text-blue-600 mt-1">
-                                            Hover to see full email content
-                                          </p>
-                                        </div>
-                                      </TooltipTrigger>
-                                      <TooltipContent 
-                                        side="right" 
-                                        className="max-w-md max-h-96 overflow-auto bg-white border border-gray-200 shadow-lg p-4"
-                                      >
-                                        <div className="space-y-2">
-                                          <div className="font-medium text-gray-900 border-b pb-2">
-                                            Email Content:
-                                          </div>
-                                          <div 
-                                            className="text-sm text-gray-700 overflow-auto max-h-80"
-                                            dangerouslySetInnerHTML={{ __html: cleanEmailContent }}
-                                          />
-                                          {entry.contact_tooltip?.timestamp && (
-                                            <div className="text-xs text-gray-500 border-t pt-2">
-                                              Sent: {new Date(entry.contact_tooltip.timestamp).toLocaleString()}
-                                            </div>
-                                          )}
-                                        </div>
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  </TooltipProvider>
-                                ) : (
-                                  <div>
-                                    <h4 className="text-sm font-medium text-gray-900">
-                                      {entry.action}
-                                    </h4>
-                                    <p className="text-sm text-gray-600 mt-1">
-                                      {entry.details}
-                                    </p>
-                                  </div>
-                                )}
+                                <h4 className="text-sm font-medium text-gray-900">
+                                  {entry.action}
+                                </h4>
+                                <p className="text-sm text-gray-600 mt-1">
+                                  {entry.details}
+                                </p>
 
                                 {(entry.history_type === "agent_assignment" ||
                                   entry.history_type ===
