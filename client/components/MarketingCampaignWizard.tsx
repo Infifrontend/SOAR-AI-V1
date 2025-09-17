@@ -99,7 +99,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
         objective: initialData.objective || 'lead-nurturing',
         channels: initialData.channels || ['email'],
         targetAudience: [],
-        content: initialData.content || {
+        content: {
           email: {
             subject: initialData.content?.email?.subject || '',
             body: initialData.content?.email?.body || '',
@@ -163,6 +163,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
   const [isLaunching, setIsLaunching] = useState(false);
   const [emailTemplates, setEmailTemplates] = useState<any[]>([]);
   const [loadingEmailTemplates, setLoadingEmailTemplates] = useState(false);
+  const [selectedEmailTemplate, setSelectedEmailTemplate] = useState<any>(null); // State to track selected email template
 
   // Use actual selectedLeads from props instead of mock data
   const selectedLeads = propSelectedLeads || [];
@@ -212,7 +213,8 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
           }
         }
       }));
-      setSelectedTemplate(template);
+      // This handles campaign templates, not email templates from settings
+      // setSelectedTemplate(template); // Already handled by setCampaignData
     } else if (initialData?.templateMode && initialData?.selectedEmailTemplate) {
       // Handle email template from new template system
       const template = initialData.selectedEmailTemplate;
@@ -229,14 +231,36 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
           }
         }
       }));
-      setSelectedTemplate({
-        id: template.id.toString(),
+      // This needs to also set selectedEmailTemplate to match
+      setSelectedEmailTemplate({
+        id: `email-${template.id}`, // Prefix to distinguish from campaign templates
         name: template.name,
         description: template.description,
         variables: template.variables || [],
         sections: [{ type: 'body', content: template.content }],
-        layout: 'custom'
+        layout: 'custom',
+        is_global: template.is_global,
+        created_by_name: template.created_by_name,
+        template_type: template.template_type
       });
+      setCampaignData(prev => ({
+        ...prev,
+        selectedTemplate: {
+          id: `email-${template.id}`, // Prefix to distinguish from campaign templates
+          name: template.name,
+          description: template.description,
+          channel_type: 'email', // Assuming email templates are always email channel
+          subject_line: template.subject_line,
+          content: template.content, // This will be rendered in handleEmailTemplateSelect
+          cta: 'Learn More',
+          estimated_open_rate: 45, // Default values for email templates
+          estimated_click_rate: 12,
+          is_custom: !template.is_global, // Assuming global templates are not custom
+          created_by: template.created_by_name || 'System',
+          template_type: 'email_template',
+          variables: template.variables || []
+        }
+      }));
     }
   }, [initialData]);
 
@@ -249,15 +273,20 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
     }
   };
 
+  // Load email templates from Settings Template Creation
   const loadEmailTemplates = async () => {
+    setLoadingEmailTemplates(true);
     try {
-      setLoadingEmailTemplates(true);
-      const templates = await getEmailTemplates();
-      console.log('Email templates loaded:', templates);
-      setEmailTemplates(templates || []);
+      const response = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/email-templates/`);
+      if (response.ok) {
+        const templates = await response.json();
+        setEmailTemplates(templates);
+      } else {
+        setEmailTemplateError('Failed to load email templates');
+      }
     } catch (error) {
-      console.error('Failed to load email templates:', error);
-      setEmailTemplates([]);
+      setEmailTemplateError('Error loading email templates');
+      console.error('Error loading email templates:', error);
     } finally {
       setLoadingEmailTemplates(false);
     }
@@ -410,7 +439,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
 
     // For email templates, use the content directly or wrap it in standard layout
     let renderedContent = '';
-    
+
     if (template.content && template.content.startsWith('<!DOCTYPE') || template.content.startsWith('<html')) {
       // Content is already complete HTML
       renderedContent = template.content;
@@ -424,33 +453,34 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
       );
     }
 
-    // Create a template object that matches the expected structure
-    const emailTemplate = {
-      id: `email-${template.id}`,
+    // Create a template object that matches the expected structure for campaignData.selectedTemplate
+    const newSelectedTemplate = {
+      id: `email-${template.id}`, // Prefix to distinguish from campaign templates
       name: template.name,
       description: template.description || 'Email template',
-      channel_type: 'email',
+      channel_type: 'email', // Email templates are email-only
       subject_line: template.subject_line,
-      content: template.content,
+      content: template.content, // Store original content for potential reuse or reference
       cta: 'Schedule Demo',
       cta_link: ctaLink,
       estimated_open_rate: 45, // Default values for email templates
       estimated_click_rate: 12,
-      is_custom: !template.is_global,
+      is_custom: !template.is_global, // Assuming global templates are not custom
       created_by: template.created_by_name || 'System',
       template_type: 'email_template',
       variables: template.variables || []
     };
 
+    setSelectedEmailTemplate(newSelectedTemplate); // Set the selected email template state
     setCampaignData(prev => ({
       ...prev,
-      selectedTemplate: emailTemplate,
+      selectedTemplate: newSelectedTemplate, // Also set it as the selected template for the campaign
       channels: ['email'], // Email templates are email-only
       content: {
         ...prev.content,
         email: {
           subject: subject,
-          body: renderedContent,
+          body: renderedContent, // Use the rendered content for the campaign's email body
           cta: 'Schedule Demo',
           cta_link: ctaLink
         }
@@ -458,6 +488,70 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
     }));
   };
 
+  // Function to handle previewing an email template
+  const handlePreviewEmailTemplate = async (template: any) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/email-templates/${template.id}/preview/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sample_data: {
+            company_name: 'TechCorp Solutions',
+            contact_name: 'John Smith',
+            job_title: 'Travel Manager',
+            industry: 'Technology',
+            employees: '2,500',
+            travel_budget: '$750,000',
+            annual_revenue: '$50M',
+            location: 'San Francisco, CA',
+            phone: '+1 (555) 123-4567',
+            email: 'john.smith@techcorp.com',
+            website: 'www.techcorp.com'
+          }
+        }),
+      });
+
+      if (response.ok) {
+        const preview = await response.json();
+
+        // Create a new window to show the preview
+        const previewWindow = window.open('', '_blank', 'width=800,height=600');
+        if (previewWindow) {
+          previewWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <title>Template Preview - ${template.name}</title>
+              <style>
+                body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+                .preview-header { background: #f5f5f5; padding: 10px; margin-bottom: 20px; border-radius: 4px; }
+                .preview-subject { font-weight: bold; margin-bottom: 10px; }
+                .preview-content { background: white; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; }
+              </style>
+            </head>
+            <body>
+              <div class="preview-header">
+                <div class="preview-subject">Subject: ${preview.subject || template.subject_line || 'Email Preview'}</div>
+                <div style="font-size: 12px; color: #666;">Template: ${template.name}</div>
+              </div>
+              <div class="preview-content">
+                ${preview.content}
+              </div>
+            </body>
+            </html>
+          `);
+          previewWindow.document.close();
+        }
+      } else {
+        throw new Error('Failed to generate preview');
+      }
+    } catch (error) {
+      console.error('Error previewing template:', error);
+      alert('Failed to generate template preview');
+    }
+  };
 
 
   const handleChannelChange = (channel: string, checked: boolean) => {
@@ -892,22 +986,18 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                   Email Templates ({emailTemplates.length})
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {emailTemplates
-                    .filter(template => campaignData.channels.includes('email'))
-                    .map((template) => (
+                  {emailTemplates.map((template) => (
                     <Card 
-                      key={`email-${template.id}`}
+                      key={template.id} 
                       className={`cursor-pointer transition-all hover:shadow-md border-2 ${
-                        campaignData.selectedTemplate?.id === `email-${template.id}` 
-                          ? 'border-blue-500 bg-blue-50' 
-                          : 'border-gray-200 hover:border-blue-300'
+                        selectedEmailTemplate?.id === `email-${template.id}` ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-orange-300'
                       }`}
                       onClick={() => handleEmailTemplateSelect(template)}
                     >
-                      <CardHeader className="pb-3">
-                        <div className="flex items-center justify-between">
-                          <CardTitle className="text-sm font-medium">{template.name}</CardTitle>
-                          <div className="flex items-center gap-1">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium">{template.name}</h4>
+                          <div className="flex gap-1">
                             <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
                               <Mail className="h-3 w-3 mr-1" />
                               Email
@@ -917,23 +1007,58 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                             </Badge>
                           </div>
                         </div>
-                        <CardDescription className="text-xs line-clamp-2">
+                        <p className="text-sm text-muted-foreground mb-3">
                           {template.description || 'Professional email template'}
-                        </CardDescription>
-                        <div className="text-xs text-gray-600 mt-2">
-                          <strong>Subject:</strong> {template.subject_line || 'No subject'}
-                        </div>
-                      </CardHeader>
-                      <CardContent className="pt-0">
-                        <div className="flex justify-between text-xs text-gray-600">
-                          <span>Variables: {template.variable_count || 0}</span>
-                          <span>{template.is_global ? 'Global' : 'Custom'}</span>
-                        </div>
-                        {template.created_by_name && (
-                          <div className="text-xs text-gray-500 mt-1">
-                            By: {template.created_by_name}
+                        </p>
+                        {template.subject_line && (
+                          <div className="mb-2">
+                            <span className="text-xs text-gray-500">Subject: </span>
+                            <span className="text-xs font-medium">{template.subject_line}</span>
                           </div>
                         )}
+                        <div className="flex flex-wrap gap-1 mb-3">
+                          {template.variables?.slice(0, 3).map((variable: string, index: number) => (
+                            <Badge key={index} variant="secondary" className="text-xs">
+                              {variable.startsWith('{{') ? variable : `{{${variable}}}`}
+                            </Badge>
+                          ))}
+                          {template.variables && template.variables.length > 3 && (
+                            <Badge variant="secondary" className="text-xs">
+                              +{template.variables.length - 3} more
+                            </Badge>
+                          )}
+                        </div>
+                        {template.created_by_name && (
+                          <div className="mb-2">
+                            <span className="text-xs text-gray-500">
+                              Created by: {template.created_by_name}
+                            </span>
+                          </div>
+                        )}
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handlePreviewEmailTemplate(template);
+                            }}
+                            className="flex-1"
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            Preview
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEmailTemplateSelect(template);
+                            }}
+                            className="flex-1 bg-orange-500 hover:bg-orange-600"
+                          >
+                            Select
+                          </Button>
+                        </div>
                       </CardContent>
                     </Card>
                   ))}

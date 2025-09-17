@@ -250,7 +250,7 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
     setSelectedCampaign(campaign);
     setShowViewDialog(true);
     setViewTab('overview');
-    
+
     // Fetch real-time stats for this campaign
     try {
       const stats = await getRealTimeStats(campaign.id.toString());
@@ -512,7 +512,11 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
           description: templateData.description,
           variables: variables,
           sections: sections,
-          layout: layout
+          layout: layout,
+          subject_line: templateData.subject_line,
+          created_by_name: templateData.created_by_name,
+          is_global: templateData.is_global,
+          template_type: templateData.template_type
         };
       });
 
@@ -1236,100 +1240,84 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
           </div>
 
           {/* Standard Templates Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {standardTemplates.map((template) => (
               <Card 
-                key={template.id}
-                style={{ 
-                  fontFamily: 'var(--font-family)',
-                  border: '1px solid #C9C9C9',
-                  borderRadius: 'var(--radius-md)',
-                  cursor: 'pointer',
-                  transition: 'box-shadow 0.2s ease-in-out'
-                }}
-                className="hover:shadow-md"
+                key={template.id} 
+                className={`cursor-pointer transition-all hover:shadow-md ${
+                  selectedTemplate?.id === template.id ? 'ring-2 ring-primary border-primary' : ''
+                }`}
+                onClick={() => handleTemplateSelect(template)}
               >
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle style={{ 
-                      fontSize: 'var(--text-lg)', 
-                      fontWeight: 'var(--font-weight-medium)',
-                      fontFamily: 'var(--font-family)'
-                    }}>
-                      {template.name}
-                    </CardTitle>
-                    <Badge variant="outline">
-                      {template.layout === 'standard' ? 'Standard Layout' : `${template.sections.length} sections`}
-                    </Badge>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium">{template.name}</h4>
+                    <div className="flex gap-1">
+                      {template.template_type && (
+                        <Badge variant="outline" className="text-xs">
+                          {template.template_type.replace('_', ' ')}
+                        </Badge>
+                      )}
+                      <Badge variant="outline">
+                        {template.layout === 'standard' ? 'Standard' : 'Custom'}
+                      </Badge>
+                    </div>
                   </div>
-                  <CardDescription style={{ 
-                    fontSize: 'var(--text-sm)',
-                    color: 'var(--color-muted-foreground)',
-                    fontFamily: 'var(--font-family)'
-                  }}>
+                  <p className="text-sm text-muted-foreground mb-3">
                     {template.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div>
-                      <p style={{ 
-                        fontSize: 'var(--text-xs)', 
-                        fontWeight: 'var(--font-weight-medium)',
-                        marginBottom: 'var(--space-xs)'
-                      }}>
-                        Template Structure:
-                      </p>
-                      <div className="flex flex-wrap gap-1">
-                        {template.sections.map((section, index) => (
-                          <Badge 
-                            key={index} 
-                            variant="secondary"
-                            style={{ fontSize: 'var(--text-xs)' }}
-                          >
-                            {section.type}
-                          </Badge>
-                        ))}
-                      </div>
+                  </p>
+                  {template.subject_line && (
+                    <div className="mb-2">
+                      <span className="text-xs text-gray-500">Subject: </span>
+                      <span className="text-xs font-medium">{template.subject_line}</span>
                     </div>
-
-                    {template.variables.length > 0 && (
-                      <div>
-                        <p style={{ 
-                          fontSize: 'var(--text-xs)', 
-                          fontWeight: 'var(--font-weight-medium)',
-                          marginBottom: 'var(--space-xs)'
-                        }}>
-                          Variables: {template.variables.join(', ')}
-                        </p>
-                      </div>
+                  )}
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    {template.variables.slice(0, 3).map((variable, index) => (
+                      <Badge key={index} variant="secondary" className="text-xs">
+                        {variable.startsWith('{{') ? variable : `{{${variable}}}`}
+                      </Badge>
+                    ))}
+                    {template.variables.length > 3 && (
+                      <Badge variant="secondary" className="text-xs">
+                        +{template.variables.length - 3} more
+                      </Badge>
                     )}
-
-                    <div className="flex gap-2 mt-4">
-                      <Button  className='bg-orange-500 hover:bg-orange-600 text-white hover:text-white'
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => {
-                          handleTemplateSelect(template);
-                          setShowTemplatePreview(true);
-                        }}
-                        style={{
-                          fontFamily: 'var(--font-family)',
-                          fontSize: 'var(--text-sm)'
-                        }}
-                      >
-                        <Eye className="h-4 w-4 mr-1" />
-                        Preview
-                      </Button>
-                      {/* <Button 
-                        size="sm"
-                        onClick={() => handleUseTemplate(template)}
-                        className='bg-orange-500 hover:bg-orange-600 text-white'
-                      >
-                        <Send className="h-4 w-4 mr-1" />
-                        Use Template
-                      </Button> */}
+                  </div>
+                  {template.created_by_name && (
+                    <div className="mb-2">
+                      <span className="text-xs text-gray-500">
+                        Created by: {template.created_by_name}
+                      </span>
+                      {template.is_global && (
+                        <Badge variant="secondary" className="text-xs ml-2">Global</Badge>
+                      )}
                     </div>
+                  )}
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleTemplateSelect(template);
+                        setShowTemplatePreview(true);
+                      }}
+                      className="flex-1"
+                    >
+                      <Eye className="h-4 w-4 mr-1" />
+                      Preview
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleUseTemplate(template);
+                      }}
+                      className="flex-1"
+                    >
+                      Use
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -1866,8 +1854,8 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
         </DialogContent>
       </Dialog>
       )}
-     
-     
+
+
 
       {/* Tracking Details Modal */}
       <Dialog open={showTrackingDetails} onOpenChange={setShowTrackingDetails}>
