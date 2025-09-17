@@ -73,8 +73,8 @@ interface CampaignTemplate {
 
 interface Lead {
   id: string | number;
-  company: string;
-  contact: string;
+  company: string | { name: string; industry: string; [key: string]: any };
+  contact: string | { first_name: string; last_name: string; position: string; email: string; [key: string]: any };
   title: string;
   email: string;
   industry: string;
@@ -347,11 +347,11 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
 
   // Filter available leads based on search term and filters
   const filteredAvailableLeads = availableLeads.filter(lead => {
-    const matchesSearchTerm = (lead.company?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                              (lead.contact?.first_name + ' ' + lead.contact?.last_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-                              (lead.contact?.email || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearchTerm = (typeof lead.company === 'object' ? lead.company?.name : lead.company || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                              (typeof lead.contact === 'object' ? `${lead.contact?.first_name || ''} ${lead.contact?.last_name || ''}`.trim() : lead.contact || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                              (typeof lead.contact === 'object' ? lead.contact?.email : lead.email || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatusFilter = statusFilter === 'all' || lead.status.toLowerCase() === statusFilter.toLowerCase();
-    const matchesIndustryFilter = industryFilter === 'all' || (lead.company?.industry || '').toLowerCase() === industryFilter.toLowerCase();
+    const matchesIndustryFilter = industryFilter === 'all' || (typeof lead.company === 'object' ? (lead.company?.industry || '').toLowerCase() : lead.industry.toLowerCase()) === industryFilter.toLowerCase();
     return matchesSearchTerm && matchesStatusFilter && matchesIndustryFilter;
   });
 
@@ -360,9 +360,9 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
     // Check if the lead is already selected
     if (!selectedLeads.some(lead => lead.id === leadToAdd.id)) {
       setSelectedLeads(prevSelectedLeads => [...prevSelectedLeads, leadToAdd]);
-      toast.success(`${leadToAdd.contact} from ${leadToAdd.company} added to campaign.`);
+      toast.success(`${typeof leadToAdd.contact === 'object' ? leadToAdd.contact?.first_name : leadToAdd.contact} from ${typeof leadToAdd.company === 'object' ? leadToAdd.company?.name : leadToAdd.company} added to campaign.`);
     } else {
-      toast.warn(`${leadToAdd.contact} from ${leadToAdd.company} is already selected.`);
+      toast.warn(`${typeof leadToAdd.contact === 'object' ? leadToAdd.contact?.first_name : leadToAdd.contact} from ${typeof leadToAdd.company === 'object' ? leadToAdd.company?.name : leadToAdd.company} is already selected.`);
     }
   };
 
@@ -1273,9 +1273,17 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                     {selectedLeads.map((lead) => (
                       <div key={lead.id} className="flex items-center justify-between p-3 bg-white rounded border">
                         <div className="flex-1">
-                          <div className="font-medium text-gray-900">{lead.company}</div>
-                          <div className="text-sm text-gray-600">{lead.contact} - {lead.title}</div>
-                          <div className="text-xs text-gray-500">{lead.email}</div>
+                          <div className="font-medium text-gray-900">
+                            {typeof lead.company === 'object' ? lead.company?.name || 'Unknown Company' : lead.company || 'Unknown Company'}
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            {typeof lead.contact === 'object'
+                              ? `${lead.contact?.first_name || ''} ${lead.contact?.last_name || ''}`.trim() || 'Unknown Contact'
+                              : lead.contact || 'Unknown Contact'} - {lead.title || lead.contact?.position || 'Unknown Title'}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {typeof lead.contact === 'object' ? lead.contact?.email || lead.email || 'No email' : lead.email || 'No email'} • {typeof lead.company === 'object' ? lead.company?.industry || 'Unknown Industry' : lead.industry || 'Unknown Industry'}
+                          </div>
                         </div>
                         <div className="flex items-center gap-2">
                           <Badge variant="outline" className="text-xs">{lead.status}</Badge>
@@ -1365,9 +1373,17 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                     {filteredAvailableLeads.map((lead) => (
                       <div key={lead.id} className="flex items-center justify-between p-3 bg-gray-50 rounded hover:bg-gray-100 transition-colors">
                         <div className="flex-1">
-                          <div className="font-medium text-gray-900">{lead.company}</div>
-                          <div className="text-sm text-gray-600">{lead.contact} - {lead.title}</div>
-                          <div className="text-xs text-gray-500">{lead.email} • {lead.industry}</div>
+                          <div className="font-medium text-gray-900">
+                            {typeof lead.company === 'object' ? lead.company?.name || 'Unknown Company' : lead.company || 'Unknown Company'}
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            {typeof lead.contact === 'object'
+                              ? `${lead.contact?.first_name || ''} ${lead.contact?.last_name || ''}`.trim() || 'Unknown Contact'
+                              : lead.contact || 'Unknown Contact'} - {lead.title || lead.contact?.position || 'Unknown Title'}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {typeof lead.contact === 'object' ? lead.contact?.email || lead.email || 'No email' : lead.email || 'No email'} • {typeof lead.company === 'object' ? lead.company?.industry || 'Unknown Industry' : lead.industry || 'Unknown Industry'}
+                          </div>
                         </div>
                         <div className="flex items-center gap-2">
                           <Badge variant="outline" className="text-xs">{lead.status}</Badge>
@@ -1834,7 +1850,7 @@ TechCorp Solutions can achieve complete travel governance without slowing down y
                     </div>
 
                     {/* Email Body Preview with proper styling */}
-                    <div className="border rounded-lg overflow-hidden bg-white">
+                    <div className="border rounded-lg overflow-hidden">
                       <iframe
                         srcDoc={campaignData.content.email.body || `
                           <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f5f7fb;">
