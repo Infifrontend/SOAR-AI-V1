@@ -190,7 +190,7 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
 
   useEffect(() => {
     loadCampaigns();
-    loadStandardTemplates();
+    // loadStandardTemplates();
     fetchTemplates(); // Load templates from API as well
   }, []);
 
@@ -476,7 +476,7 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
 
   const fetchTemplates = async () => {
     try {
-      const response = await fetch('https://f08f172c-ab06-433f-aa2f-30c498986833-00-2n6bjrfy6tvjp.pike.replit.dev:5173/api/email-templates/');
+      const response = await fetch('https://51f54198-a9a2-4b01-b85b-23549e0b6e1c-00-385i2ayjj8nal.pike.replit.dev/api/email-templates/')
       if (!response.ok) {
         throw new Error('Failed to fetch templates');
       }
@@ -523,7 +523,9 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
       // Combine built-in templates with API templates
       const builtInTemplates = EmailTemplateService.getStandardTemplates();
       const allTemplates = [...builtInTemplates, ...formattedTemplates];
-      setStandardTemplates(allTemplates);
+      // setStandardTemplates(allTemplates);      
+      setStandardTemplates(formattedTemplates);
+
     } catch (error) {
       console.error('Error fetching templates:', error);
       toast.error('Failed to load templates');
@@ -1308,7 +1310,7 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
                       <Eye className="h-4 w-4 mr-1" />
                       Preview
                     </Button>
-                    <Button 
+                    {/* <Button 
                       size="sm" 
                       onClick={(e) => {
                         e.stopPropagation();
@@ -1317,7 +1319,7 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
                       className="flex-1"
                     >
                       Use
-                    </Button>
+                    </Button> */}
                   </div>
                 </CardContent>
               </Card>
@@ -1635,7 +1637,7 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
                           maxHeight: '300px',
                           overflowY: 'auto'
                         }}>
-                          <pre 
+                          <div 
                             style={{ 
                               fontSize: 'var(--text-sm)',
                               fontFamily: 'var(--font-family)',
@@ -1644,7 +1646,7 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
                               wordWrap: 'break-word'
                             }}
                             dangerouslySetInnerHTML={{ __html: selectedCampaign.email_content || "" }}>
-                          </pre>
+                          </div>
                         </div>
                       </div>
                     </div>
