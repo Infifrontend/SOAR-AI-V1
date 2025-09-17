@@ -333,17 +333,17 @@ const transformApiLeadToUILead = (apiLead: any) => {
     assigned_agent_details: apiLead.assigned_to
       ? {
           // Map assigned agent details if available
-          name: typeof apiLead.assigned_to === 'string' 
-            ? apiLead.assigned_to 
+          name: typeof apiLead.assigned_to === 'string'
+            ? apiLead.assigned_to
             : apiLead.assigned_to.full_name || apiLead.assigned_to.username,
-          email: typeof apiLead.assigned_to === 'string' 
-            ? `${apiLead.assigned_to}@soarai.com` 
+          email: typeof apiLead.assigned_to === 'string'
+            ? `${apiLead.assigned_to}@soarai.com`
             : apiLead.assigned_to.email || `${apiLead.assigned_to.username}@soarai.com`,
-          specialties: typeof apiLead.assigned_to === 'string' 
-            ? [] 
+          specialties: typeof apiLead.assigned_to === 'string'
+            ? []
             : apiLead.assigned_to.specialties || [],
-          current_leads: typeof apiLead.assigned_to === 'string' 
-            ? 0 
+          current_leads: typeof apiLead.assigned_to === 'string'
+            ? 0
             : apiLead.assigned_to.current_leads || 0,
         }
       : undefined,
@@ -881,7 +881,14 @@ export function LeadsList({ initialFilters, onNavigate }: LeadsListProps) {
   const [isAssigning, setIsAssigning] = useState(false);
 
   // New states for Initiate Call Dialog
-  const [callNotes, setCallNotes] = useState('');
+  const [callForm, setCallForm] = useState({
+    callType: 'Discovery Call',
+    duration: '30 minutes',
+    scheduledDate: '',
+    scheduledTime: '',
+    callAgenda: '',
+    preparationNotes: '',
+  });
   const [isInitiatingCall, setIsInitiatingCall] = useState(false);
 
 
@@ -1803,26 +1810,48 @@ SOAR-AI Team`,
   // Handle action dropdown selections
   const handleInitiateCall = (lead: any) => {
     setSelectedLeadForAction(lead);
-    setCallNotes(''); // Reset call notes when opening the modal
+    // Reset call form state to default when opening the modal
+    setCallForm({
+      callType: 'Discovery Call',
+      duration: '30 minutes',
+      scheduledDate: '',
+      scheduledTime: '',
+      callAgenda: '',
+      preparationNotes: '',
+    });
     setShowInitiateCallModal(true);
   };
 
   const handleInitiateCallSubmit = async () => {
     if (!selectedLeadForAction) return;
+    if (!callForm.scheduledDate || !callForm.scheduledTime) {
+      toast.error("Please select a date and time for the call.");
+      return;
+    }
 
     setIsInitiatingCall(true);
     try {
+      // Construct the full date-time string
+      const scheduledDateTime = `${callForm.scheduledDate}T${callForm.scheduledTime}:00`;
+
       // Here you would typically call an API to initiate the call or schedule it.
       // For now, we'll simulate success with a toast message.
-      // Replace with actual API call: await leadApi.initiateCall(selectedLeadForAction.id, { notes: callNotes });
+      // Replace with actual API call: await leadApi.scheduleCall(selectedLeadForAction.id, { ...callForm, scheduledDateTime });
 
       // Simulate API call success
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      toast.success(`Call scheduled with ${selectedLeadForAction.company}!`);
+      toast.success(`Call scheduled with ${selectedLeadForAction.company} for ${new Date(scheduledDateTime).toLocaleString()}!`);
       setShowInitiateCallModal(false);
       setSelectedLeadForAction(null);
-      setCallNotes(''); // Clear notes after successful submission
+      setCallForm({ // Reset form after successful submission
+        callType: 'Discovery Call',
+        duration: '30 minutes',
+        scheduledDate: '',
+        scheduledTime: '',
+        callAgenda: '',
+        preparationNotes: '',
+      });
     } catch (error) {
       console.error("Error initiating call:", error);
       toast.error("Failed to schedule call. Please try again.");
@@ -1845,7 +1874,8 @@ SOAR-AI Team`,
   // Handle assign/reassign agent
   const handleAssignAgent = (lead: any) => {
     setSelectedLeadForAssign(lead);
-    setSelectedAgent(""); // Reset selected agent
+    // Reset selected agent and notes when opening the modal
+    setSelectedAgent(lead.assignedAgent || "");
     setAssignmentPriority("Medium Priority"); // Reset priority
     setAssignmentNotes(""); // Reset notes
     setShowAssignAgentModal(true);
@@ -4704,36 +4734,91 @@ SOAR-AI Team`,
         open={showInitiateCallModal}
         onOpenChange={setShowInitiateCallModal}
       >
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <PhoneCall className="h-5 w-5 text-blue-600" />
-              Initiate Call with {selectedLeadForAction?.company}
+              <PhoneCall className="h-5 w-5 text-gray-700" />
+              Initiate Call - {selectedLeadForAction?.company}
             </DialogTitle>
             <DialogDescription>
-              Start a phone call with {selectedLeadForAction?.contact}
+              Schedule a phone call with {selectedLeadForAction?.contact} at {selectedLeadForAction?.company}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            <div className="p-4 bg-blue-50 rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <Phone className="h-4 w-4 text-blue-600" />
-                <span className="font-medium text-blue-900">Contact Information</span>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="text-sm font-medium text-gray-700">Call Type</Label>
+                <Select
+                  value={callForm.callType}
+                  onValueChange={(value) => setCallForm(prev => ({...prev, callType: value}))}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Discovery Call">Discovery Call</SelectItem>
+                    <SelectItem value="Follow-up Call">Follow-up Call</SelectItem>
+                    <SelectItem value="Presentation Call">Presentation Call</SelectItem>
+                    <SelectItem value="Closing Call">Closing Call</SelectItem>
+                    <SelectItem value="Check-in Call">Check-in Call</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <p className="text-sm text-blue-800">
-                <strong>Phone:</strong> {selectedLeadForAction?.phone}
-              </p>
-              <p className="text-sm text-blue-800">
-                <strong>Email:</strong> {selectedLeadForAction?.email}
-              </p>
+              <div>
+                <Label className="text-sm font-medium text-gray-700">Duration (minutes)</Label>
+                <Select
+                  value={callForm.duration}
+                  onValueChange={(value) => setCallForm(prev => ({...prev, duration: value}))}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="15 minutes">15 minutes</SelectItem>
+                    <SelectItem value="30 minutes">30 minutes</SelectItem>
+                    <SelectItem value="45 minutes">45 minutes</SelectItem>
+                    <SelectItem value="60 minutes">60 minutes</SelectItem>
+                    <SelectItem value="90 minutes">90 minutes</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
+
             <div>
-              <Label className="text-sm font-medium text-gray-700">Call Notes (Optional)</Label>
+              <Label className="text-sm font-medium text-gray-700">Scheduled Date & Time</Label>
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                <Input
+                  type="date"
+                  value={callForm.scheduledDate}
+                  onChange={(e) => setCallForm(prev => ({...prev, scheduledDate: e.target.value}))}
+                  className="text-sm"
+                />
+                <Input
+                  type="time"
+                  value={callForm.scheduledTime}
+                  onChange={(e) => setCallForm(prev => ({...prev, scheduledTime: e.target.value}))}
+                  className="text-sm"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label className="text-sm font-medium text-gray-700">Call Agenda</Label>
               <Textarea
-                placeholder="Add any notes or talking points for this call..."
-                value={callNotes}
-                onChange={(e) => setCallNotes(e.target.value)}
-                className="mt-1 min-h-[80px] resize-none"
+                value={callForm.callAgenda}
+                onChange={(e) => setCallForm(prev => ({...prev, callAgenda: e.target.value}))}
+                className="mt-1 min-h-[80px] resize-none text-sm"
+                placeholder="Discovery call with contact from company to discuss corporate travel needs and potential partnership opportunities."
+              />
+            </div>
+
+            <div>
+              <Label className="text-sm font-medium text-gray-700">Preparation Notes</Label>
+              <Textarea
+                value={callForm.preparationNotes}
+                onChange={(e) => setCallForm(prev => ({...prev, preparationNotes: e.target.value}))}
+                placeholder="Any additional preparation notes or context..."
+                className="mt-1 min-h-[60px] resize-none text-sm"
               />
             </div>
           </div>
@@ -4743,21 +4828,19 @@ SOAR-AI Team`,
               onClick={() => {
                 setShowInitiateCallModal(false);
                 setSelectedLeadForAction(null);
-                setCallNotes('');
               }}
               className="text-gray-600 border-gray-300"
-              disabled={isInitiatingCall}
             >
               Cancel
             </Button>
             <Button
               onClick={handleInitiateCallSubmit}
-              className="bg-blue-500 hover:bg-blue-600 text-white"
-              disabled={isInitiatingCall}
+              disabled={isInitiatingCall || !callForm.scheduledDate || !callForm.scheduledTime}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
             >
               {isInitiatingCall ? (
                 <>
-                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                   Scheduling...
                 </>
               ) : (
