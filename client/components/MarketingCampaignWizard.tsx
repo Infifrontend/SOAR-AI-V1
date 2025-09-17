@@ -184,6 +184,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
   const [selectedEmailTemplate, setSelectedEmailTemplate] = useState<any>(null); // State to track selected email template
   const [showTemplatePreview, setShowTemplatePreview] = useState(false);
   const [templatePreviewData, setTemplatePreviewData] = useState<any>(null);
+  const [showContentPreview, setShowContentPreview] = useState(false);
 
   // State for available leads section
   const [availableLeads, setAvailableLeads] = useState<Lead[]>([]);
@@ -1430,17 +1431,32 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
 
       case 3:
         return (
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Content Creation</h3>
+          <div className="space-y-8 max-w-4xl mx-auto">
+            <div className="text-center">
+              <h3 className="text-2xl font-semibold text-gray-900 mb-2">Content Creation</h3>
+              <p className="text-gray-600">Create compelling content for your marketing campaign</p>
+            </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Content Tabs */}
-              <div className="lg:col-span-2 space-y-6">
-                <div className="border-b border-gray-200">
+            {/* Channel Tabs */}
+            <Card className="shadow-sm">
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg">Campaign Content</CardTitle>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowContentPreview(true)}
+                    className="flex items-center gap-2"
+                  >
+                    <Eye className="h-4 w-4" />
+                    Preview Content
+                  </Button>
+                </div>
+                <div className="border-b border-gray-200 mt-4">
                   <nav className="-mb-px flex space-x-8">
                     <button
                       onClick={() => {}}
-                      className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                      className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${
                         campaignData.channels.includes('email')
                           ? 'border-orange-500 text-orange-600'
                           : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -1451,7 +1467,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                     </button>
                     <button
                       onClick={() => {}}
-                      className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                      className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${
                         campaignData.channels.includes('whatsapp')
                           ? 'border-green-500 text-green-600'
                           : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -1463,7 +1479,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                     </button>
                     <button
                       onClick={() => {}}
-                      className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                      className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${
                         campaignData.channels.includes('linkedin')
                           ? 'border-blue-500 text-blue-600'
                           : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -1475,158 +1491,113 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                     </button>
                   </nav>
                 </div>
+              </CardHeader>
 
-                {/* Email Content Tab */}
-                {campaignData.channels.includes('email') && (
-                  <Card>
-                    <CardContent className="p-6 space-y-4">
+              {/* Email Content Form */}
+              {campaignData.channels.includes('email') && (
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 gap-6">
+                    <div>
+                      <Label htmlFor="email-subject" className="text-base font-medium text-gray-900 mb-2 block">
+                        Email Subject Line
+                      </Label>
+                      <Input
+                        id="email-subject"
+                        value={campaignData.content.email.subject}
+                        onChange={(e) => setCampaignData(prev => ({
+                          ...prev,
+                          content: {
+                            ...prev.content,
+                            email: { ...prev.content.email, subject: e.target.value }
+                          }
+                        }))}
+                        placeholder="Ensure 100% travel policy compliance at {{company_name}}"
+                        className="text-base h-12"
+                      />
+                      <p className="text-sm text-gray-500 mt-1">
+                        Use variables like {{company_name}} for personalization
+                      </p>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="email-body" className="text-base font-medium text-gray-900 mb-2 block">
+                        Email Content
+                      </Label>
+                      <div className="bg-gray-50 rounded-lg p-1">
+                        <RichTextEditor
+                          value={campaignData.content.email.body || ''}
+                          onChange={(value) => setCampaignData(prev => ({
+                            ...prev,
+                            content: {
+                              ...prev.content,
+                              email: { ...prev.content.email, body: value }
+                            }
+                          }))}
+                          placeholder="Hi {{contact_name}},\n\nManaging travel compliance for {{employees}} employees can be challenging. SOAR-AI ensures 100% policy adherence while maintaining traveler satisfaction.\n\nKey compliance features for {{industry}} companies:\n• Automated policy enforcement\n• Real-time approval workflows\n• Expense management integration\n• Regulatory compliance reporting\n• Instant policy violation alerts\n\n{{company_name}} can achieve complete travel governance without slowing down your team."
+                          showVariables={true}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="email-subject" className="text-sm font-medium text-gray-700">
-                          Email Subject Line
+                        <Label htmlFor="email-cta" className="text-base font-medium text-gray-900 mb-2 block">
+                          Call-to-Action Button Text
                         </Label>
                         <Input
-                          id="email-subject"
-                          value={campaignData.content.email.subject}
+                          id="email-cta"
+                          value={campaignData.content.email.cta}
                           onChange={(e) => setCampaignData(prev => ({
                             ...prev,
                             content: {
                               ...prev.content,
-                              email: { ...prev.content.email, subject: e.target.value }
+                              email: { ...prev.content.email, cta: e.target.value }
                             }
                           }))}
-                          placeholder="Ensure 100% travel policy compliance at {{company_name}}"
-                          className="mt-1"
+                          placeholder="Schedule Demo"
+                          className="text-base h-12"
                         />
                       </div>
-
                       <div>
-                        <Label htmlFor="email-body" className="text-sm font-medium text-gray-700">
-                          Email Body
+                        <Label htmlFor="email-cta-link" className="text-base font-medium text-gray-900 mb-2 block">
+                          Call-to-Action Link (Optional)
                         </Label>
-
-                        <div>
-                          <RichTextEditor
-                            value={campaignData.content.email.body || ''}
-                            onChange={(value) => setCampaignData(prev => ({
-                              ...prev,
-                              content: {
-                                ...prev.content,
-                                email: { ...prev.content.email, body: value }
-                              }
-                            }))}
-                            placeholder="Hi {{contact_name}},\n\nManaging travel compliance for {{employees}} employees can be challenging. SOAR-AI ensures 100% policy adherence while maintaining traveler satisfaction.\n\nKey compliance features for {{industry}} companies:\n• Automated policy enforcement\n• Real-time approval workflows\n• Expense management integration\n• Regulatory compliance reporting\n• Instant policy violation alerts\n\n{{company_name}} can achieve complete travel governance without slowing down your team."
-                            showVariables={true}
-                          />
-                        </div>
+                        <Input
+                          id="email-cta-link"
+                          type="url"
+                          value={campaignData.content.email.cta_link || ''}
+                          onChange={(e) => setCampaignData(prev => ({
+                            ...prev,
+                            content: {
+                              ...prev.content,
+                              email: { ...prev.content.email, cta_link: e.target.value }
+                            }
+                          }))}
+                          placeholder="https://calendly.com/soar-ai/demo"
+                          className="text-base h-12"
+                        />
                       </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="email-cta" className="text-sm font-medium text-gray-700">
-                            Call-to-Action Button Text
-                          </Label>
-                          <Input
-                            id="email-cta"
-                            value={campaignData.content.email.cta}
-                            onChange={(e) => setCampaignData(prev => ({
-                              ...prev,
-                              content: {
-                                ...prev.content,
-                                email: { ...prev.content.email, cta: e.target.value }
-                              }
-                            }))}
-                            placeholder="Schedule Demo"
-                            className="mt-1"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="email-cta-link" className="text-sm font-medium text-gray-700">
-                            Call-to-Action Link (Optional)
-                          </Label>
-                          <Input
-                            id="email-cta-link"
-                            type="url"
-                            value={campaignData.content.email.cta_link || ''}
-                            onChange={(e) => setCampaignData(prev => ({
-                              ...prev,
-                              content: {
-                                ...prev.content,
-                                email: { ...prev.content.email, cta_link: e.target.value }
-                              }
-                            }))}
-                            placeholder="https://calendly.com/soar-ai/demo"
-                            className="mt-1"
-                          />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
-
-                {/* Available Personalization Variables (moved inside RichTextEditor placeholder for now) */}
-              </div>
-
-              {/* Content Preview */}
-              <div className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">Content Preview</CardTitle>
-                    <CardDescription className="text-sm">See how your content will look to recipients</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {/* Preview for TechCorp Solutions */}
-                    <div className="text-sm text-gray-600 mb-2">Preview for TechCorp Solutions</div>
-
-                    {/* Email Preview */}
-                    <div className="border rounded-lg p-4 bg-white">
-                      <div className="mb-2">
-                        <span className="font-medium text-sm text-gray-700">Subject: </span>
-                        <span className="text-sm">
-                          {campaignData.content.email.subject?.replace('{{company_name}}', 'TechCorp Solutions') || 'Ensure 100% travel policy compliance at TechCorp Solutions'}
-                        </span>
-                      </div>
-                      <div className="text-sm text-gray-700 mb-2">
-                        <span className="font-medium">Hi Sarah Johnson,</span>
-                      </div>
-                      <div className="text-sm text-gray-700 whitespace-pre-wrap mb-4">
-                        {campaignData.content.email.body?.replace('{{contact_name}}', 'Sarah Johnson')
-                          .replace('{{employees}}', '2,500')
-                          .replace('{{industry}}', 'Technology')
-                          .replace('{{company_name}}', 'TechCorp Solutions') ||
-                        `Managing travel compliance for 2,500 employees can be challenging. SOAR-AI ensures 100% policy adherence while maintaining traveler satisfaction.
-
-Key compliance features for Technology companies:
-• Automated policy enforcement
-• Real-time approval workflows
-• Expense management integration
-• Regulatory compliance reporting
-• Instant policy violation alerts
-
-TechCorp Solutions can achieve complete travel governance without slowing down your team.`}
-                      </div>
-                      {campaignData.content.email.cta && (
-                        campaignData.content.email.cta_link ? (
-                          <a
-                            href={campaignData.content.email.cta_link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-block"
-                          >
-                            <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white">
-                              {campaignData.content.email.cta}
-                            </Button>
-                          </a>
-                        ) : (
-                          <Button size="sm" className="bg-orange-500 hover:bg-orange-600 text-white">
-                            {campaignData.content.email.cta}
-                          </Button>
-                        )
-                      )}
                     </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
+
+                    {/* Content Tips */}
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <Lightbulb className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <h4 className="font-medium text-blue-900 mb-2">Content Creation Tips</h4>
+                          <ul className="text-sm text-blue-800 space-y-1">
+                            <li>• Keep your subject line under 50 characters for better open rates</li>
+                            <li>• Use personalization variables to make emails more relevant</li>
+                            <li>• Include a clear call-to-action that drives engagement</li>
+                            <li>• Test your content with the preview before launching</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              )}
+            </Card>
           </div>
         );
 
@@ -2416,6 +2387,188 @@ TechCorp Solutions can achieve complete travel governance without slowing down y
               >
                 <CheckCircle className="h-4 w-4 mr-2" />
                 Use This Template
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Content Preview Dialog */}
+      <Dialog open={showContentPreview} onOpenChange={setShowContentPreview}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader className="flex-shrink-0">
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5 text-blue-600" />
+              Content Preview
+            </DialogTitle>
+            <DialogDescription>
+              Preview how your campaign content will appear to recipients
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex-1 overflow-y-auto space-y-6">
+            {/* Sample Recipients */}
+            <div className="bg-gray-50 p-4 rounded-lg border">
+              <h4 className="font-medium text-gray-900 mb-2">Preview Recipients</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="font-medium">Company:</span> TechCorp Solutions
+                </div>
+                <div>
+                  <span className="font-medium">Contact:</span> Sarah Johnson
+                </div>
+                <div>
+                  <span className="font-medium">Industry:</span> Technology
+                </div>
+                <div>
+                  <span className="font-medium">Employees:</span> 2,500
+                </div>
+              </div>
+            </div>
+
+            {/* Email Preview */}
+            {campaignData.channels.includes('email') && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <Mail className="h-5 w-5" />
+                  Email Preview
+                </h3>
+                
+                <div className="border rounded-lg overflow-hidden bg-white shadow-sm">
+                  {/* Email Header */}
+                  <div className="bg-gray-50 px-4 py-3 border-b">
+                    <div className="space-y-2 text-sm">
+                      <div>
+                        <span className="font-medium text-gray-700">From:</span>
+                        <span className="ml-2">SOAR-AI &lt;corporate@soar-ai.com&gt;</span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700">To:</span>
+                        <span className="ml-2">Sarah Johnson &lt;sarah.johnson@techcorp.com&gt;</span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700">Subject:</span>
+                        <span className="ml-2 font-medium">
+                          {campaignData.content.email.subject
+                            ?.replace('{{company_name}}', 'TechCorp Solutions')
+                            ?.replace('{{contact_name}}', 'Sarah Johnson') ||
+                            'Ensure 100% travel policy compliance at TechCorp Solutions'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Email Body */}
+                  <div className="p-6">
+                    <div 
+                      className="prose prose-sm max-w-none"
+                      dangerouslySetInnerHTML={{
+                        __html: (campaignData.content.email.body || `
+                          <p><strong>Hi Sarah Johnson,</strong></p>
+                          <p>Managing travel compliance for 2,500 employees can be challenging. SOAR-AI ensures 100% policy adherence while maintaining traveler satisfaction.</p>
+                          <p><strong>Key compliance features for Technology companies:</strong></p>
+                          <ul>
+                            <li>Automated policy enforcement</li>
+                            <li>Real-time approval workflows</li>
+                            <li>Expense management integration</li>
+                            <li>Regulatory compliance reporting</li>
+                            <li>Instant policy violation alerts</li>
+                          </ul>
+                          <p>TechCorp Solutions can achieve complete travel governance without slowing down your team.</p>
+                        `)
+                        .replace(/{{contact_name}}/g, 'Sarah Johnson')
+                        .replace(/{{company_name}}/g, 'TechCorp Solutions')
+                        .replace(/{{employees}}/g, '2,500')
+                        .replace(/{{industry}}/g, 'Technology')
+                        .replace(/{{travel_budget}}/g, '$750,000')
+                        .replace(/{{sender_name}}/g, 'SOAR-AI Team')
+                      }}
+                    />
+                    
+                    {/* Call-to-Action */}
+                    {campaignData.content.email.cta && (
+                      <div className="mt-6 text-center">
+                        <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3">
+                          {campaignData.content.email.cta}
+                        </Button>
+                        {campaignData.content.email.cta_link && (
+                          <p className="text-xs text-gray-500 mt-2">
+                            Links to: {campaignData.content.email.cta_link}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Email Footer */}
+                  <div className="bg-gray-50 px-4 py-3 border-t text-xs text-gray-500 text-center">
+                    <p>&copy; {new Date().getFullYear()} SOAR-AI. All rights reserved.</p>
+                    <p>This is a preview of your campaign content.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* WhatsApp Preview (if channel is selected) */}
+            {campaignData.channels.includes('whatsapp') && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5" />
+                  WhatsApp Preview
+                </h3>
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <p className="text-sm text-green-800">
+                    WhatsApp content preview would appear here when implemented.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* LinkedIn Preview (if channel is selected) */}
+            {campaignData.channels.includes('linkedin') && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <Linkedin className="h-5 w-5" />
+                  LinkedIn Preview
+                </h3>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-sm text-blue-800">
+                    LinkedIn content preview would appear here when implemented.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Preview Notes */}
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-medium text-amber-900 mb-1">Preview Notes</h4>
+                  <ul className="text-sm text-amber-800 space-y-1">
+                    <li>• This preview uses sample data from TechCorp Solutions</li>
+                    <li>• Actual emails will use real recipient data and personalization</li>
+                    <li>• Variables like {{company_name}} will be replaced with actual values</li>
+                    <li>• The final email design may include additional branding elements</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex-shrink-0 flex justify-between items-center pt-4 border-t">
+            <div className="text-sm text-gray-500">
+              Preview generated for: {selectedLeads.length} selected leads
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" onClick={() => setShowContentPreview(false)}>
+                Close Preview
+              </Button>
+              <Button 
+                onClick={() => setShowContentPreview(false)}
+                className="bg-orange-500 hover:bg-orange-600 text-white"
+              >
+                Continue Editing
               </Button>
             </div>
           </div>
