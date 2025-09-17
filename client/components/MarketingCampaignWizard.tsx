@@ -347,8 +347,8 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
 
   // Filter available leads based on search term and filters
   const filteredAvailableLeads = availableLeads.filter(lead => {
-    const matchesSearchTerm = lead.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                              lead.contact.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearchTerm = lead.company.includes(searchTerm.toLowerCase()) ||
+                              lead.contact.includes(searchTerm.toLowerCase()) ||
                               lead.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatusFilter = statusFilter === 'all' || lead.status.toLowerCase() === statusFilter.toLowerCase();
     const matchesIndustryFilter = industryFilter === 'all' || lead.industry.toLowerCase() === industryFilter.toLowerCase();
