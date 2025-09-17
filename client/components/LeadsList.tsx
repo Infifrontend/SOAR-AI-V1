@@ -1764,7 +1764,7 @@ SOAR-AI Team`,
       console.log("Fetched history:", history);
 
       // Transform API response to internal format
-      const transformedHistory = history?.data.map((item: any) => ({
+      const transformedHistory = history?.map((item: any) => ({
         id: item.id,
         history_type: item.history_type, // Use the type from the API response
         action: item.action, // Use the action from the API response
