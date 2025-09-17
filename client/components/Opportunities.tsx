@@ -788,6 +788,7 @@ export function Opportunities({
   const [showProposalDialog, setShowProposalDialog] = useState(false);
   const [proposalDialogMode, setProposalDialogMode] = useState<'proposal' | 'negotiation'>('proposal');
   const [emailPreviewContent, setEmailPreviewContent] = useState("");
+  const [showEmailPreview, setShowEmailPreview] = useState(false);
   const [isDraftLoading, setIsDraftLoading] = useState(false);
   const [loadingOpportunityId, setLoadingOpportunityId] = useState<number | null>(null);
   const [currentView, setCurrentView] = useState("list");
@@ -1155,6 +1156,57 @@ const getRandomRiskLevel = () => {
     attachedFile: null,
   });
 
+  const [negotiationForm, setNegotiationForm] = useState({
+    // Header Section
+    dealTitle: "",
+    corporateContact: "",
+    airlineAccountManager: "",
+    expectedCloseDate: "",
+
+    // Volume Commitment
+    annualBookingVolume: "",
+    projectedSpend: "",
+    preferredRoutes: "",
+    domesticEconomy: 60,
+    domesticBusiness: 25,
+    international: 15,
+    travelFrequency: "monthly",
+
+    // Discount/Offer Terms
+    baseDiscount: "",
+    routeDiscounts: [
+      { route: "", discount: "", conditions: "" }
+    ],
+    loyaltyBenefits: {
+      extraMiles: false,
+      priorityBoarding: false,
+      loungeAccess: false
+    },
+    volumeIncentives: "",
+
+    // Financial & Contract Terms
+    contractDuration: "24",
+    autoRenewal: true,
+    paymentTerms: "net_30",
+    settlementType: "bsp",
+
+    // Negotiation Strategy
+    airlineConcessions: "",
+    corporateCommitments: "",
+    internalNotes: "",
+    priorityLevel: "medium",
+
+    // Approvals Workflow
+    discountApprovalRequired: false,
+    revenueManagerAssigned: "",
+    legalApprovalRequired: false,
+
+    // Document Attachments
+    attachedFile: null
+  });
+
+  const [isDragging, setIsDragging] = useState(false);
+
   const [attachmentInfo, setAttachmentInfo] = useState({
     exists: false,
     filename: "",
@@ -1489,57 +1541,6 @@ const getRandomRiskLevel = () => {
 </html>
     `.trim();
   }, [selectedOpportunity, proposalForm, negotiationForm, proposalDialogMode, formatCurrency, attachmentInfo]);
-
-  const [negotiationForm, setNegotiationForm] = useState({
-    // Header Section
-    dealTitle: "",
-    corporateContact: "",
-    airlineAccountManager: "",
-    expectedCloseDate: "",
-
-    // Volume Commitment
-    annualBookingVolume: "",
-    projectedSpend: "",
-    preferredRoutes: "",
-    domesticEconomy: 60,
-    domesticBusiness: 25,
-    international: 15,
-    travelFrequency: "monthly",
-
-    // Discount/Offer Terms
-    baseDiscount: "",
-    routeDiscounts: [
-      { route: "", discount: "", conditions: "" }
-    ],
-    loyaltyBenefits: {
-      extraMiles: false,
-      priorityBoarding: false,
-      loungeAccess: false
-    },
-    volumeIncentives: "",
-
-    // Financial & Contract Terms
-    contractDuration: "24",
-    autoRenewal: true,
-    paymentTerms: "net_30",
-    settlementType: "bsp",
-
-    // Negotiation Strategy
-    airlineConcessions: "",
-    corporateCommitments: "",
-    internalNotes: "",
-    priorityLevel: "medium",
-
-    // Approvals Workflow
-    discountApprovalRequired: false,
-    revenueManagerAssigned: "",
-    legalApprovalRequired: false,
-
-    // Document Attachments
-    attachedFile: null
-  });
-
-  const [isDragging, setIsDragging] = useState(false);
 
   // Fetch opportunities data on component mount and when filters change
   useEffect(() => {
