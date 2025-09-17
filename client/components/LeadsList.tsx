@@ -3164,7 +3164,7 @@ SOAR-AI Team`,
                       onClick={() => handleAssignAgent(lead)}
                     >
                       <User className="h-4 w-4 mr-1" />
-                      {lead.assignedAgent ? "Reassign" : "Assign Agent"}
+                      {lead.assigned_to !== null ? "Reassign" : "Assign Agent"}
                     </Button>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -3223,7 +3223,7 @@ SOAR-AI Team`,
                         }}
                         disabled={
                           movingToOpportunityId === lead.id ||
-                          lead.contractReady
+                          lead.has_opportunity
                         }
                       >
                         {movingToOpportunityId === lead.id ? (
@@ -3231,7 +3231,7 @@ SOAR-AI Team`,
                             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-1"></div>
                             Moving...
                           </>
-                        ) : !lead.contractReady ? (
+                        ) : !lead.has_opportunity ? (
                           <>
                             <ArrowRight className="h-3 w-3 mr-1" />
                             Move to Opportunity
@@ -5082,7 +5082,8 @@ Key Topics: Travel volume, preferred airlines, booking preferences, cost optimiz
                   : "Select Sales Agent"}
               </Label>
               <Select
-                value={selectedAgent}
+                value={selectedLeadForAssign?.assignedAgent
+                ? selectedLeadForAssign?.assignedAgent : selectedAgent}
                 onValueChange={setSelectedAgent}
                 disabled={loadingUsers}
               >
