@@ -31,7 +31,8 @@ import {
   Send,
   Eye,
   FileText,
-  Lightbulb
+  Lightbulb,
+  AlertTriangle
 } from 'lucide-react';
 import {
   Dialog,
@@ -163,6 +164,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
   const [isLaunching, setIsLaunching] = useState(false);
   const [emailTemplates, setEmailTemplates] = useState<any[]>([]);
   const [loadingEmailTemplates, setLoadingEmailTemplates] = useState(false);
+  const [emailTemplateError, setEmailTemplateError] = useState<string | null>(null);
   const [selectedEmailTemplate, setSelectedEmailTemplate] = useState<any>(null); // State to track selected email template
 
   // Use actual selectedLeads from props instead of mock data
@@ -276,16 +278,20 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
   // Load email templates from Settings Template Creation
   const loadEmailTemplates = async () => {
     setLoadingEmailTemplates(true);
+    setEmailTemplateError(null);
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/email-templates/`);
       if (response.ok) {
         const templates = await response.json();
+        console.log('Loaded email templates:', templates);
         setEmailTemplates(templates);
       } else {
-        setEmailTemplateError('Failed to load email templates');
+        const errorText = await response.text();
+        throw new Error(`Failed to load email templates: ${response.status} ${errorText}`);
       }
     } catch (error) {
-      setEmailTemplateError('Error loading email templates');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error loading email templates';
+      setEmailTemplateError(errorMessage);
       console.error('Error loading email templates:', error);
     } finally {
       setLoadingEmailTemplates(false);
@@ -984,96 +990,159 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                 <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                   <Mail className="h-4 w-4" />
                   Email Templates ({emailTemplates.length})
+                  {loadingEmailTemplates && (
+                    <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+                  )}
                 </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {emailTemplates.map((template) => (
-                    <Card 
-                      key={template.id} 
-                      className={`cursor-pointer transition-all hover:shadow-md border-2 ${
-                        selectedEmailTemplate?.id === `email-${template.id}` ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-orange-300'
-                      }`}
-                      onClick={() => handleEmailTemplateSelect(template)}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-medium">{template.name}</h4>
-                          <div className="flex gap-1">
-                            <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
-                              <Mail className="h-3 w-3 mr-1" />
-                              Email
-                            </Badge>
-                            <Badge variant="secondary" className="text-xs">
-                              {template.template_type}
-                            </Badge>
+                
+                {loadingEmailTemplates ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[1, 2, 3].map((i) => (
+                      <Card key={i} className="border-gray-200">
+                        <CardContent className="p-4">
+                          <div className="animate-pulse">
+                            <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                            <div className="h-3 bg-gray-200 rounded mb-3 w-3/4"></div>
+                            <div className="h-2 bg-gray-200 rounded mb-2"></div>
+                            <div className="h-2 bg-gray-200 rounded mb-3 w-1/2"></div>
+                            <div className="flex gap-2">
+                              <div className="h-8 bg-gray-200 rounded flex-1"></div>
+                              <div className="h-8 bg-gray-200 rounded flex-1"></div>
+                            </div>
                           </div>
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-3">
-                          {template.description || 'Professional email template'}
-                        </p>
-                        {template.subject_line && (
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {emailTemplates.map((template) => (
+                      <Card 
+                        key={`email-template-${template.id}`} 
+                        className={`cursor-pointer transition-all hover:shadow-md border-2 ${
+                          selectedEmailTemplate?.id === `email-${template.id}` ? 'border-orange-500 bg-orange-50' : 'border-gray-200 hover:border-orange-300'
+                        }`}
+                        onClick={() => handleEmailTemplateSelect(template)}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between mb-2">
+                            <h4 className="font-medium text-sm leading-tight pr-2">{template.name}</h4>
+                            <div className="flex gap-1 flex-shrink-0">
+                              <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                                <Mail className="h-3 w-3 mr-1" />
+                                Email
+                              </Badge>
+                              {template.is_global && (
+                                <Badge variant="default" className="text-xs bg-green-100 text-green-800 border-green-200">
+                                  Global
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                          
                           <div className="mb-2">
-                            <span className="text-xs text-gray-500">Subject: </span>
-                            <span className="text-xs font-medium">{template.subject_line}</span>
+                            <Badge variant="secondary" className="text-xs capitalize">
+                              {template.template_type.replace('_', ' ')}
+                            </Badge>
                           </div>
-                        )}
-                        <div className="flex flex-wrap gap-1 mb-3">
-                          {template.variables?.slice(0, 3).map((variable: string, index: number) => (
-                            <Badge key={index} variant="secondary" className="text-xs">
-                              {variable.startsWith('{{') ? variable : `{{${variable}}}`}
-                            </Badge>
-                          ))}
-                          {template.variables && template.variables.length > 3 && (
-                            <Badge variant="secondary" className="text-xs">
-                              +{template.variables.length - 3} more
-                            </Badge>
+                          
+                          <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                            {template.description || 'Professional email template for campaigns'}
+                          </p>
+                          
+                          {template.subject_line && (
+                            <div className="mb-3 p-2 bg-gray-50 rounded">
+                              <span className="text-xs text-gray-500">Subject: </span>
+                              <span className="text-xs font-medium">{template.subject_line}</span>
+                            </div>
                           )}
-                        </div>
-                        {template.created_by_name && (
-                          <div className="mb-2">
-                            <span className="text-xs text-gray-500">
-                              Created by: {template.created_by_name}
-                            </span>
+                          
+                          {template.variables && template.variables.length > 0 && (
+                            <div className="mb-3">
+                              <div className="text-xs text-gray-500 mb-1">Variables:</div>
+                              <div className="flex flex-wrap gap-1">
+                                {template.variables.slice(0, 2).map((variable: string, index: number) => (
+                                  <Badge key={index} variant="outline" className="text-xs">
+                                    {variable.startsWith('{{') ? variable : `{{${variable}}}`}
+                                  </Badge>
+                                ))}
+                                {template.variables.length > 2 && (
+                                  <Badge variant="outline" className="text-xs">
+                                    +{template.variables.length - 2}
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                          
+                          <div className="flex items-center justify-between mb-3 text-xs text-gray-500">
+                            <span>By: {template.created_by_name || 'System'}</span>
+                            <span>{new Date(template.created_at).toLocaleDateString()}</span>
                           </div>
-                        )}
-                        <div className="flex gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handlePreviewEmailTemplate(template);
-                            }}
-                            className="flex-1"
-                          >
-                            <Eye className="h-4 w-4 mr-1" />
-                            Preview
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleEmailTemplateSelect(template);
-                            }}
-                            className="flex-1 bg-orange-500 hover:bg-orange-600"
-                          >
-                            Select
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                          
+                          <div className="flex gap-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handlePreviewEmailTemplate(template);
+                              }}
+                              className="flex-1 text-xs"
+                            >
+                              <Eye className="h-3 w-3 mr-1" />
+                              Preview
+                            </Button>
+                            <Button 
+                              size="sm" 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEmailTemplateSelect(template);
+                              }}
+                              className="flex-1 bg-orange-500 hover:bg-orange-600 text-xs"
+                            >
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Select
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+                
                 {emailTemplates.length === 0 && !loadingEmailTemplates && (
-                  <div className="text-center py-8 text-gray-500">
-                    <Mail className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p className="text-sm">No email templates available</p>
+                  <div className="text-center py-12 border-2 border-dashed border-gray-200 rounded-lg">
+                    <Mail className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No Email Templates</h3>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Create email templates in Settings to use them in campaigns
+                    </p>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => onNavigate('settings', { activeTab: 'template-creation' })}
+                      className="text-orange-600 border-orange-300 hover:bg-orange-50"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Email Template
+                    </Button>
+                  </div>
+                )}
+                
+                {emailTemplateError && (
+                  <div className="text-center py-8">
+                    <AlertTriangle className="h-8 w-8 mx-auto mb-4 text-red-400" />
+                    <p className="text-sm text-red-600">
+                      Error loading email templates: {emailTemplateError}
+                    </p>
                     <Button 
                       variant="outline" 
                       size="sm" 
-                      onClick={() => onNavigate('settings', { activeTab: 'template-creation' })}
+                      onClick={loadEmailTemplates}
                       className="mt-2"
                     >
-                      Create Email Template
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Retry
                     </Button>
                   </div>
                 )}
