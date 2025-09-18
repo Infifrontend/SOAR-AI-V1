@@ -1746,7 +1746,7 @@ const getRandomRiskLevel = () => {
       value: opportunity.value.toString(),
       estimated_close_date: opportunity.estimated_close_date,
       next_steps: opportunity.next_steps || "",
-      description: opportunity.description || "",
+      description:  "",
     });
     setShowEditDialog(true);
   }, []);
@@ -1770,25 +1770,47 @@ const getRandomRiskLevel = () => {
         // Fetch both opportunity and lead history
         const [opportunityHistoryResponse, leadHistoryResponse] = await Promise.all([
           getOpportunityHistory(opportunity.id),
-          getHistory(opportunity.lead_info?.company?.id || opportunity.leadId)
+          // getHistory(opportunity.lead_info?.company?.id || opportunity.leadId)
         ]);
+        console.log(opportunityHistoryResponse.data,'opportunityHistoryResponseopportunityHistoryResponse');
+        
+               const opportunityHistory = opportunityHistoryResponse.data || [];
+        const leadHistory = (leadHistoryResponse && (leadHistoryResponse.data || leadHistoryResponse)) || [];
 
-        const opportunityHistory = opportunityHistoryResponse.data || [];
-        const leadHistory = leadHistoryResponse.data || [];
+        const parseTimestamp = (entry: any) => {
+          const iso = entry.timestamp || entry.created_at || entry.date;
+          if (iso) {
+            const t = Date.parse(iso);
+            if (!isNaN(t)) return t;
+          }
+          if (entry.formatted_timestamp) {
+            const m = entry.formatted_timestamp.match(/(\d{2})-(\d{2})-(\d{4})\s+at\s+(\d{1,2}):(\d{2}):(\d{2})\s*(AM|PM)/i);
+            if (m) {
+              const [, dd, mm, yyyy, hh, min, ss, ampm] = m;
+              let hour = parseInt(hh, 10);
+              if (/pm/i.test(ampm) && hour < 12) hour += 12;
+              if (/am/i.test(ampm) && hour === 12) hour = 0;
+              return new Date(parseInt(yyyy, 10), parseInt(mm, 10) - 1, parseInt(dd, 10), hour, parseInt(min, 10), parseInt(ss, 10)).getTime();
+            }
+          }
+          return 0;
+        };
 
-        // Combine and sort histories by timestamp
         const combinedHistory = [
-          ...opportunityHistory.map(entry => ({
+          ...opportunityHistory.map((entry: any) => ({
             ...entry,
             source: 'opportunity',
-            entity_type: 'opportunity'
+            entity_type: 'opportunity',
+            _sort_ts: parseTimestamp(entry),
           })),
-          ...leadHistory.map(entry => ({
+          ...leadHistory.map((entry: any) => ({
             ...entry,
             source: 'lead',
-            entity_type: 'lead'
+            entity_type: 'lead',
+            _sort_ts: parseTimestamp(entry),
           }))
-        ].sort((a, b) => new Date(b.timestamp || b.created_at || b.date).getTime() - new Date(a.timestamp || a.created_at || a.date).getTime());
+        ].sort((a: any, b: any) => b._sort_ts - a._sort_ts)
+         .map(({ _sort_ts, ...rest }: any) => rest); // drop helper field before saving
 
         setHistoryData(combinedHistory);
       } catch (error) {
@@ -3363,21 +3385,42 @@ const getRandomRiskLevel = () => {
                       };
                       return iconMap[iconName] || Activity;
                     };
+                    const getIconColor = (type: string) => {
+                      const colorMap: { [key: string]: string } = {
+                        'creation': 'bg-blue-100 text-blue-600',
+                        'status_change': 'bg-green-100 text-green-600',
+                        'note_added': 'bg-purple-100 text-purple-600',
+                        'score_update': 'bg-orange-100 text-orange-600',
+                        'assignment': 'bg-indigo-100 text-indigo-600',
+                        'contact_made': 'bg-blue-100 text-blue-600',
+                        'email_sent': 'bg-blue-100 text-blue-600',
+                        'call_made': 'bg-green-100 text-green-600',
+                        'meeting_scheduled': 'bg-purple-100 text-purple-600',
+                        'qualification': 'bg-green-100 text-green-600',
+                        'disqualification': 'bg-red-100 text-red-600',
+                        'opportunity_created': 'bg-yellow-100 text-yellow-600',
+                        'proposal_sent': 'bg-indigo-100 text-indigo-600',
+                        'negotiation_started': 'bg-purple-100 text-purple-600',
+                        'won': 'bg-green-100 text-green-600',
+                        'lost': 'bg-red-100 text-red-600'
+                      };
+                      return colorMap[entry.history_type] || 'bg-gray-100 text-gray-600';
+                    };
 
                     const IconComponent = getIconComponent(entry.icon || 'activity');
-                    const isLeadHistory = entry.source === 'lead';
+                    // const isLeadHistory = entry.source === 'lead';
 
                     return (
-                      <div key={index} className={`border-l-4 ${isLeadHistory ? 'border-green-500' : 'border-blue-500'} pl-4 py-3 bg-gray-50 rounded-r-lg`}>
+                      <div key={index} className={`pl-4 py-3 bg-gray-50 rounded-r-lg`}>
                         <div className="flex items-start gap-3">
-                          <div className={`flex items-center justify-center w-8 h-8 rounded-full ${isLeadHistory ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'} flex-shrink-0`}>
+                          <div className={`flex items-center justify-center w-8 h-8 rounded-full ${getIconColor(entry.history_type)}`}>
                             <IconComponent className="h-4 w-4" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1 flex-wrap">
-                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${isLeadHistory ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}>
+                              {/* <span className={`px-2 py-1 rounded-full text-xs font-medium ${isLeadHistory ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}`}>
                                 {isLeadHistory ? 'Lead' : 'Opportunity'}
-                              </span>
+                              </span> */}
                               <span className="font-medium text-gray-900 text-sm">
                                 {entry.type_display || entry.action || entry.history_type}
                               </span>
