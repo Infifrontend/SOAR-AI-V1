@@ -3060,18 +3060,31 @@ export function CorporateSearch({
                 <div className="space-y-2 text-sm text-blue-800">
                   <div className="flex items-start gap-2">
                     <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium">1</span>
-                    <span><strong>Contact the lead:</strong> Reach out via email or SMS to establish initial communication</span>
+                    <span><strong>Initial outreach:</strong> Contact leads via email, SMS, or scheduled calls</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium">2</span>
-                    <span><strong>Add notes:</strong> Document all interactions, meeting outcomes, and key insights</span>
+                    <span><strong>Documentation:</strong> Add notes and track full communication history</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium">3</span>
-                    <span><strong>Qualify or disqualify:</strong> Assess the lead's potential and move them to the appropriate status</span>
+                    <span><strong>Team management:</strong> Assign or reassign leads to the right sales agents</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium">4</span>
+                    <span><strong>Marketing actions:</strong> Start campaigns or apply bulk actions for multiple leads</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium">5</span>
+                    <span><strong>Qualification:</strong> Qualify or disqualify leads, then move qualified ones to opportunities</span>
                   </div>
                 </div>
               </div>
+              <div>
+                <p className="font-medium text-orange-800 mb-1">💡 Pro Tip:</p>
+                <p className="text-orange-700 text-xs">Start with email contact, add detailed notes after each interaction, and use the AI score to prioritize your efforts. Qualified leads can be moved to opportunities for deal tracking.</p>
+              </div>
+
             </div>
           )}
 
