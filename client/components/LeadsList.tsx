@@ -98,6 +98,7 @@ import {
   FileText, // Added for FileText
   XCircle, // Added for XCircle
   ChevronUp, // Added for ChevronUp
+  NotebookPen, // Added for note_added
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -4011,9 +4012,11 @@ SOAR-AI Team`,
                             className?: string;
                           }>;
                         } = {
-                          plus: Plus,
+                          'plus': Plus,
                           mail: Mail,
                           phone: Phone,
+                          "activity": Activity,
+                          "trendingUp": TrendingUp,
                           "message-circle": MessageCircle,
                           "message-square": MessageSquare,
                           "trending-up": TrendingUp,
@@ -4021,7 +4024,7 @@ SOAR-AI Team`,
                           "check-circle": CheckCircle,
                           "x-circle": X,
                           calendar: Calendar,
-                          briefcase: Briefcase,
+                          "briefcase": Briefcase,
                           "file-text": FileText,
                           handshake: Handshake,
                           award: Award,
@@ -4063,8 +4066,20 @@ SOAR-AI Team`,
                             {entry.icon === "calendar" && (
                               <Calendar className="w-4 h-4 text-blue-600" />
                             )}
+                            {entry.icon === "activity" && (
+                              <Activity className="w-4 h-4 text-blue-600" />
+                            )}
                             {entry.icon === "file-text" && (
                               <FileText className="w-4 h-4 text-gray-600" />
+                            )}
+                            {entry.icon === "trendingUp" && (
+                              <TrendingUpIcon className="w-4 h-4 text-gray-600" />
+                            )}
+                             {entry.icon === "plus" && (
+                              <Plus className="w-4 h-4 text-gray-600" />
+                            )}
+                              {entry.icon === "briefcase" && (
+                              <Briefcase className="w-4 h-4 text-gray-600" />
                             )}
                             {![
                               "user",
@@ -4076,6 +4091,10 @@ SOAR-AI Team`,
                               "x-circle",
                               "calendar",
                               "file-text",
+                              "activity",
+                              "trendingUp",
+                              "plus",
+                              "briefcase"
                             ].includes(entry.icon) && (
                               <div className="w-2 h-2 bg-gray-400 rounded-full" />
                             )}
