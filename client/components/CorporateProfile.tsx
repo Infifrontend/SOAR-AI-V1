@@ -158,7 +158,7 @@ export function CorporateProfile({
               <div>
                 <p className="text-sm text-muted-foreground">Revenue</p>
                 <p className="text-2xl font-bold">
-                  ${(corporateData.revenue / 1000000).toFixed(0)}M
+                 {corporateData.revenue =='N/A'? 'N/A' : <span>${(corporateData.revenue / 1000000).toFixed(0)}M</span>}
                 </p>
               </div>
             </div>

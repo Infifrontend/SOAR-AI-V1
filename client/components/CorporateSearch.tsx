@@ -139,7 +139,7 @@ const transformCompanyData = (company) => {
       `${Math.floor(Math.random() * 5000) + 1000} trips`,
     contracts: Math.floor(Math.random() * 20) + 1,
     revenue:
-      company.annual_revenue || Math.floor(Math.random() * 50000000) + 10000000,
+      company.annual_revenue == 0.00 ? 'N/A' : company.annual_revenue || Math.floor(Math.random() * 50000000) + 10000000,
     phone:
       company.phone ||
       "+1 (555) " +
