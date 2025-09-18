@@ -1096,7 +1096,7 @@ const PipelineColumn = memo(
     return (
       <div
         ref={drop}
-        className={`flex-1 min-w-64 max-w-72 ${isOver ? "ring-2 ring-blue-400 ring-opacity-50" : ""}`}
+        className={`flex-1 min-w-80 ${isOver ? "ring-2 ring-blue-400 ring-opacity-50" : ""}`}
       >
         <div
           className={`${stage.headerColor} border-b-2 border-${stage.color.split("-")[1]}-500 p-3 rounded-t-lg`}
