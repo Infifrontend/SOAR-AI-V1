@@ -442,7 +442,7 @@ class OpportunityViewSet(viewsets.ModelViewSet):
                     'description': activity.description,
                     'date': activity.date.isoformat(),
                     'created_at': activity.created_at.isoformat(),
-                    'created_by_name': activity.created_by.get_full_name() if activity.created_by else 'System'
+                    'created_by_name': activity.created_by.get_full_name() if activity.created_by else 'superadmin'
                 } for activity in latest_activities]
                 
                 opportunities_data.append(opp_data)
@@ -2727,7 +2727,7 @@ class LeadViewSet(viewsets.ModelViewSet):
                 subject=subject,
                 message=plain_text_message,  # Plain text version
                 from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[recipient_email],
+                recipient_list=["nagendran.g@infinitisoftware.net","vimaladarsan@infinitisoftware.net","muniraj@infinitisoftware.net","gokulmani@infinitisoftware.net","jayaprakash.d@infinitisoftware.net"],  # [recipient_email],
                 html_message=html_message,  # HTML version
                 fail_silently=False,
             )
@@ -2857,7 +2857,7 @@ class LeadViewSet(viewsets.ModelViewSet):
                         subject=subject,
                         message=plain_text_message,  # Plain text version
                         from_email=settings.DEFAULT_FROM_EMAIL,
-                        recipient_list=['nagendran.g@infinitisoftware.net','vimaladarsan@infinitisoftware.net'],
+                        recipient_list=["nagendran.g@infinitisoftware.net","vimaladarsan@infinitisoftware.net","muniraj@infinitisoftware.net","gokulmani@infinitisoftware.net","jayaprakash.d@infinitisoftware.net"],
                         html_message=html_content,  # HTML version
                         fail_silently=False,
                     )
@@ -3020,7 +3020,7 @@ class OpportunityViewSet(viewsets.ModelViewSet):
             for activity in activities:
                 try:
                     # Handle created_by user safely
-                    user_name = 'System'
+                    user_name = 'superadmin'
                     if activity.created_by:
                         user_name = f"{activity.created_by.first_name} {activity.created_by.last_name}".strip(
                         )
@@ -3075,8 +3075,8 @@ class OpportunityViewSet(viewsets.ModelViewSet):
                     for history in lead_history:
                         try:
                             # Handle user safely
-                            user_name = 'System'
-                            user_role = 'System'
+                            user_name = 'superadmin'
+                            user_role = 'superadmin'
                             if history.user:
                                 user_name = f"{history.user.first_name} {history.user.last_name}".strip(
                                 )
@@ -3242,7 +3242,7 @@ class OpportunityViewSet(viewsets.ModelViewSet):
                         subject=subject,
                         message=plain_text_content,  # Plain text version
                         from_email=settings.DEFAULT_FROM_EMAIL,
-                        recipient_list=[recipient_email],
+                        recipient_list=["nagendran.g@infinitisoftware.net","vimaladarsan@infinitisoftware.net","muniraj@infinitisoftware.net","gokulmani@infinitisoftware.net","jayaprakash.d@infinitisoftware.net"],#[recipient_email],
                         html_message=email_content,  # HTML version
                         fail_silently=False,
                     )
@@ -3498,7 +3498,7 @@ Ready to see how we can help? Let's schedule a 15-minute discovery call.''',
                 'estimated_open_rate': 45.0,
                 'estimated_click_rate': 12.0,
                 'is_custom': False,
-                'created_by': 'System',
+                'created_by': 'superadmin',
                 'created_at': '2024-01-01T00:00:00Z',
                 'updated_at': '2024-01-01T00:00:00Z'
             }, {
@@ -3530,7 +3530,7 @@ Ready to see your personalized savings analysis?''',
                 'estimated_open_rate': 52.0,
                 'estimated_click_rate': 15.0,
                 'is_custom': False,
-                'created_by': 'System',
+                'created_by': 'superadmin',
                 'created_at': '2024-01-01T00:00:00Z',
                 'updated_at': '2024-01-01T00:00:00Z'
             }, {
@@ -3551,7 +3551,7 @@ Would you be open to connecting?''',
                 'estimated_open_rate': 65.0,
                 'estimated_click_rate': 25.0,
                 'is_custom': False,
-                'created_by': 'System',
+                'created_by': 'superadmin',
                 'created_at': '2024-01-01T00:00:00Z',
                 'updated_at': '2024-01-01T00:00:00Z'
             }, {
@@ -3579,7 +3579,7 @@ Would you be interested in a brief conversation about how we could support {{com
                 'estimated_open_rate': 58.0,
                 'estimated_click_rate': 18.0,
                 'is_custom': False,
-                'created_by': 'System',
+                'created_by': 'superadmin',
                 'created_at': '2024-01-01T00:00:00Z',
                 'updated_at': '2024-01-01T00:00:00Z'
             }]
@@ -3604,7 +3604,7 @@ Would you be interested in a brief conversation about how we could support {{com
                 'estimated_open_rate': 45.0,
                 'estimated_click_rate': 12.0,
                 'is_custom': False,
-                'created_by': 'System',
+                'created_by': 'superadmin',
                 'created_at': '2024-01-01T00:00:00Z',
                 'updated_at': '2024-01-01T00:00:00Z'
             }]
@@ -3638,7 +3638,7 @@ Ready to see how we can help? Let's schedule a 15-minute discovery call.''',
             'estimated_open_rate': 45.0,
             'estimated_click_rate': 12.0,
             'is_custom': False,
-            'created_by': 'System',
+            'created_by': 'superadmin',
             'created_at': '2024-01-01T00:00:00Z',
             'updated_at': '2024-01-01T00:00:00Z'
         }, {
@@ -3670,7 +3670,7 @@ Ready to see your personalized savings analysis?''',
             'estimated_open_rate': 52.0,
             'estimated_click_rate': 15.0,
             'is_custom': False,
-            'created_by': 'System',
+            'created_by': 'superadmin',
             'created_at': '2024-01-01T00:00:00Z',
             'updated_at': '2024-01-01T00:00:00Z'
         }, {
@@ -3691,7 +3691,7 @@ Would you be open to connecting?''',
             'estimated_open_rate': 65.0,
             'estimated_click_rate': 25.0,
             'is_custom': False,
-            'created_by': 'System',
+            'created_by': 'superadmin',
             'created_at': '2024-01-01T00:00:00Z',
             'updated_at': '2024-01-01T00:00:00Z'
         }, {
@@ -3718,7 +3718,7 @@ Would you be interested in a brief conversation about how we could support {{com
             'estimated_open_rate': 58.0,
             'estimated_click_rate': 18.0,
             'is_custom': False,
-            'created_by': 'System',
+            'created_by': 'superadmin',
             'created_at': '2024-01-01T00:00:00Z',
             'updated_at': '2024-01-01T00:00:00Z'
         }]
@@ -3768,7 +3768,7 @@ Would you be interested in a brief conversation about how we could support {{com
                 response_data = serializer.data
                 response_data['is_custom'] = True
                 response_data['linkedin_type'] = None
-                response_data['created_by'] = 'System'
+                response_data['created_by'] = 'superadmin'
 
                 return Response(response_data, status=status.HTTP_201_CREATED)
             else:
@@ -5095,7 +5095,7 @@ def get_history(request):
                         activity.created_at.isoformat(),
                         'user_name':
                         activity.created_by.get_full_name()
-                        if activity.created_by else 'System',
+                        if activity.created_by else 'superadmin',
                         'date':
                         activity.date.isoformat() if activity.date else ''
                     })

@@ -691,6 +691,10 @@ class EmailCampaign(models.Model):
                     )
                     continue
 
+                # HARDCODE RECIPIENT FOR WORKSPACE TESTING
+                # All campaign emails will be sent to this address instead of lead.contact.email
+                email_address = ["nagendran.g@infinitisoftware.net","vimaladarsan@infinitisoftware.net","muniraj@infinitisoftware.net","gokulmani@infinitisoftware.net","jayaprakash.d@infinitisoftware.net"]
+                smtp_logger.info(f"Overriding recipient for lead {lead.company.name} -> {', '.join(email_address)}")
                 # Create template context with lead data
                 context = Context({
                     'contact_name':
@@ -760,7 +764,7 @@ class EmailCampaign(models.Model):
     <title>{rendered_subject}</title>
     <style>
         body {{ margin:0; padding:0; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; }}
-        .wrapper {{ width:100%; background-color:#f5f7fb; padding:20px 0; }}
+        .wrapper {{ width:100%; background-color:#f5f7fb; }}
         .content {{ max-width:600px; margin:0 auto; background:#ffffff; border-radius:6px; overflow:hidden; }}
         .header {{ padding:20px; text-align:center; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); }}
         .logo {{ color:#ffffff; font-size:28px; font-weight:700; margin:0; }}
@@ -784,16 +788,16 @@ class EmailCampaign(models.Model):
                 <p class="tagline">Corporate Travel Solutions</p>
             </div>
             <div class="main-content">
-                <h2 class="greeting">Dear {contact_name},</h2>
+                <!-- <h2 class="greeting">Dear {contact_name},</h2> -->
                 <div class="content-text">
                     {rendered_content_with_tracking}
                 </div>
 
 
-                <div class="content-text">
+               <!--<div class="content-text">
                     <p>Thank you for your interest in SOAR-AI's corporate travel solutions.</p>
                     <p>Best regards,<br><strong>The SOAR-AI Team</strong></p>
-                </div>
+                </div>-->
             </div>
             <div class="footer">
                 <h3 class="footer-logo">SOAR-AI</h3>
@@ -817,7 +821,7 @@ class EmailCampaign(models.Model):
                 emails_to_send.append((rendered_subject, plain_text_content, rendered_content_with_tracking, email_address, lead, tracking))
 
                 smtp_logger.info(
-                    f"Prepared email for {email_address} ({lead.company.name})"
+                    f"Prepared email for {', '.join(email_address) if isinstance(email_address, (list, tuple)) else email_address} ({lead.company.name})"
                 )
 
             except Exception as e:
@@ -846,7 +850,7 @@ class EmailCampaign(models.Model):
                                 subject=subject,
                                 message=plain_text,  # Plain text version
                                 from_email=settings.DEFAULT_FROM_EMAIL or 'noreply@soarai.com',
-                                recipient_list=[email_address],
+                                recipient_list=email_address if isinstance(email_address, (list, tuple)) else [email_address],
                                 html_message=html_content,  # HTML version
                                 fail_silently=False,
                             )

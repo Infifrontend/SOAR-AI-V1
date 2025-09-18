@@ -394,8 +394,8 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
         table { border-spacing:0; }
         img { border:0; display:block; }
         a { color:inherit; text-decoration:none; }
-        .wrapper { width:100%; background-color:#f5f7fb; padding:20px 0; }
-        .content { max-width:600px; margin:0 auto; background:#ffffff; border-radius:6px; overflow:hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .wrapper { width:100%; padding:20px 0; }
+        .content { max-width:600px; margin:0 auto; background:#ffffff; border-radius:6px; overflow:hidden;}
         .header { padding:20px; text-align:center; background-color:#007bff; color:#ffffff; }
         .main { padding:24px; font-family:Arial, 'Helvetica Neue', Helvetica, sans-serif; color:#333333; font-size:16px; line-height:24px; }
         .h1 { font-size:22px; margin:0 0 16px 0; color:#111827; font-weight:600; }
@@ -537,7 +537,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
         template.content || '',
         'Schedule Demo',
         ctaLink,
-        subject
+        ''
       );
     }
 
@@ -609,10 +609,10 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
 
         // Create a complete email layout with header and footer
         const completeEmailHtml = EmailTemplateService.renderCorporateContactTemplate(
-          preview.sample_data?.contact_name || 'John Smith',
+          // preview.sample_data?.contact_name || 'John Smith',
           preview.sample_data?.company_name || 'TechCorp Solutions',
           preview.content,
-          preview.subject || template.subject_line || 'Email Template Preview',
+          // preview.subject || template.subject_line || 'Email Template Preview',
           'Schedule Demo',
           'https://calendly.com/soar-ai/demo'
         );
@@ -1882,7 +1882,13 @@ SOAR-AI Team</p>`;
 
                     <div className="flex items-center justify-between py-3 border-b">
                       <span className="text-gray-600 font-medium">Start Date:</span>
-                      <span className="font-semibold text-gray-900">{new Date().toISOString().split('T')[0]}</span>
+                      <span className="font-semibold text-gray-900">{(() => {
+                        const d = new Date();
+                        const day = String(d.getDate()).padStart(2, '0');
+                        const month = String(d.getMonth() + 1).padStart(2, '0');
+                        const year = d.getFullYear();
+                        return `${day}-${month}-${year}`;
+                      })()}</span>
                     </div>
                   </div>
                 </div>
@@ -2393,7 +2399,7 @@ SOAR-AI Team</p>`;
 
       {/* Template Preview Dialog */}
       <Dialog open={showTemplatePreview} onOpenChange={setShowTemplatePreview}>
-        <DialogContent className="max-w-6xl max-h-[95vh] overflow-hidden flex flex-col">
+        <DialogContent className="max-w-6xl max-h-[95vh] overflow-hidden flex flex-col cls-custompopup">
           <DialogHeader className="flex-shrink-0 border-b pb-4">
             <DialogTitle className="flex items-center gap-2">
               <Eye className="h-5 w-5 text-blue-600" />
@@ -2407,7 +2413,7 @@ SOAR-AI Team</p>`;
           {templatePreviewData && (
             <div className="flex-1 overflow-hidden flex flex-col space-y-4">
               {/* Email Header Info */}
-              <div className="flex-shrink-0 bg-gray-50 p-4 rounded-lg border">
+              {/* <div className="flex-shrink-0 bg-gray-50 p-4 rounded-lg border">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="font-semibold text-gray-700">Subject:</span>
@@ -2432,7 +2438,7 @@ SOAR-AI Team</p>`;
                     <div className="mt-1 text-gray-900">John Smith &lt;john.smith@techcorp.com&gt;</div>
                   </div>
                 </div>
-              </div>
+              </div> */}
 
               {/* Email Content Preview */}
               <div className="flex-1 overflow-hidden">
@@ -2451,7 +2457,7 @@ SOAR-AI Team</p>`;
               </div>
 
               {/* Template Details Footer */}
-              <div className="flex-shrink-0 bg-blue-50 p-4 rounded-lg border border-blue-200">
+              {/* <div className="flex-shrink-0 bg-blue-50 p-4 rounded-lg border border-blue-200">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                   <div>
                     <span className="font-semibold text-blue-800">Variables Used:</span>
@@ -2483,7 +2489,7 @@ SOAR-AI Team</p>`;
                     </div>
                   </div>
                 </div>
-              </div>
+              </div> */}
             </div>
           )}
 

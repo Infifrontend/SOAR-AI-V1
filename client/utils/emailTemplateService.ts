@@ -920,13 +920,13 @@ export class EmailTemplateService {
       <!-- Main Content -->
       <tr>
         <td class="email-content">
-          <h2 class="greeting">Dear ${recipientName} Team,</h2>
+          <!--<h2 class="greeting">Dear ${recipientName} Team,</h2>
 
           <div class="content-text">
             ${cleanContent.startsWith('<p>') ? cleanContent : `<p class="content-text">${cleanContent}</p>`}
-          </div>
+          </div>-->
 
-          <div class="highlight-box">
+         <!-- <div class="highlight-box">
             <p style="margin:0; color:#2b6cb0; font-weight:600; font-size:16px;">
               Why Choose SOAR-AI for ${companyName}?
             </p>
@@ -937,17 +937,17 @@ export class EmailTemplateService {
               <li>Comprehensive reporting and analytics dashboard</li>
               <li>Sustainable travel options and carbon tracking</li>
             </ul>
-          </div>
+          </div> -->
 
           ${ctaText && ctaLink ? `
-          <div class="cta-container">
+         <!-- <div class="cta-container">
             <a href="${ctaLink}" class="cta-button" target="_blank">
               ${ctaText}
             </a>
           </div>
-          ` : ''}
+          -->` : ''}
 
-          <div class="contact-info">
+         <!-- <div class="contact-info">
             <h4>Get in Touch</h4>
             <div class="contact-item">
               <span class="contact-icon">📧</span>
@@ -961,10 +961,10 @@ export class EmailTemplateService {
               <span class="contact-icon">🌐</span>
               <span>www.soar-ai.com</span>
             </div>
-          </div>
+          </div> -->
 
           <p class="content-text">
-            We look forward to the opportunity to transform ${companyName}'s corporate travel experience.
+            ${companyName}
           </p>
 
           <p class="content-text" style="margin-bottom:0;">
@@ -986,13 +986,13 @@ export class EmailTemplateService {
             <a href="#">Unsubscribe</a>
           </div>
 
-          <p class="footer-disclaimer">
+         <!-- <p class="footer-disclaimer">
             This email was sent regarding partnership opportunities for ${companyName}.<br>
             If you would prefer not to receive future communications, please reply with "UNSUBSCRIBE".<br>
             © ${new Date().getFullYear()} SOAR-AI Corporation. All rights reserved.
-          </p>
+          </p> -->
         </td>
-      </tr>
+      </tr> 
 
     </table>
   </div>

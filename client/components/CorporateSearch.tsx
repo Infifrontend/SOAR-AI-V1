@@ -235,7 +235,7 @@ const getSizeDisplay = (size) => {
     large: "Large",
     enterprise: "Enterprise",
   };
-  return sizes[size] || "Medium";
+  return sizes[size] || "Unknown";
 };
 
 const generateAIRecommendation = (company) => {

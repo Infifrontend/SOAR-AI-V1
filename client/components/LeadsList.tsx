@@ -3367,7 +3367,7 @@ SOAR-AI Team`,
                                         })}
                                       </span>
                                       <div className="text-xs text-gray-500">
-                                        By: {note.created_by || "System"}
+                                        By: {note.created_by || "User"}
                                       </div>
                                       <Badge
                                         className={`text-xs ${getUrgencyBadgeStyle(note.urgency)}`}

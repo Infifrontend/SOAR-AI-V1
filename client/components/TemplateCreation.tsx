@@ -266,7 +266,7 @@ export function TemplateCreation() {
         
         // Create a complete email layout with header and footer
         const completeEmailHtml = EmailTemplateService.renderCorporateContactTemplate(
-          preview.sample_data?.contact_name || 'John Smith',
+          // preview.sample_data?.contact_name || 'John Smith',
           preview.sample_data?.company_name || 'TechCorp Solutions',
           preview.content,
           preview.subject || template.subject_line || 'Email Template Preview',
@@ -755,7 +755,7 @@ export function TemplateCreation() {
           </DialogHeader>
           
           {previewData && (
-            <div className="space-y-4 max-h-[50vh] overflow-y-auto">
+            <div className="space-y-4 max-h-[90vh] overflow-y-auto">
               {previewData.subject && (
                 <div>
                   <Label className="text-sm font-medium">Subject Line</Label>

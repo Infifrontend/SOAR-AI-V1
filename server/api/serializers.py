@@ -92,10 +92,10 @@ class LeadHistorySerializer(serializers.ModelSerializer):
     def get_user_name(self, obj):
         if obj.user:
             return obj.user.get_full_name() or obj.user.username
-        return 'System'
+        return 'superadmin'
 
     def get_user_role(self, obj):
-        return 'Agent' if obj.user else 'System'
+        return 'Agent' if obj.user else 'superadmin'
 
     def get_formatted_timestamp(self, obj):
         return obj.timestamp.strftime('%m/%d/%Y at %I:%M %p')
@@ -108,7 +108,7 @@ class LeadHistorySerializer(serializers.ModelSerializer):
     def get_user_name(self, obj):
         if obj.user:
             return f"{obj.user.first_name} {obj.user.last_name}".strip() or obj.user.username
-        return "System"
+        return "superadmin"
 
     def get_user_role(self, obj):
         if obj.user:
@@ -116,7 +116,7 @@ class LeadHistorySerializer(serializers.ModelSerializer):
             if obj.user.is_staff:
                 return "Sales Manager"
             return "Sales Representative"
-        return "System"
+        return "superadmin"
 
     def get_formatted_timestamp(self, obj):
         from django.utils import timezone
@@ -182,7 +182,7 @@ class LeadHistorySerializer(serializers.ModelSerializer):
             return {
                 'previous_status': obj.previous_status,
                 'new_status': obj.new_status,
-                'changed_by': obj.user.get_full_name() if obj.user else 'System',
+                'changed_by': obj.user.get_full_name() if obj.user else 'superadmin',
                 'timestamp': obj.timestamp.strftime('%m/%d/%Y at %I:%M %p') if obj.timestamp else ''
             }
         return None
@@ -349,7 +349,7 @@ class OpportunityActivitySerializer(serializers.ModelSerializer):
     def get_created_by_name(self, obj):
         if obj.created_by:
             return f"{obj.created_by.first_name} {obj.created_by.last_name}".strip() or obj.created_by.username
-        return 'System'
+        return 'superadmin'
 
 class OpportunitySerializer(serializers.ModelSerializer):
     lead_info = serializers.SerializerMethodField()
@@ -628,7 +628,7 @@ class CampaignTemplateSerializer(serializers.ModelSerializer):
     """Serializer for Campaign Templates"""
     linkedin_type = serializers.CharField(required=False, allow_blank=True, allow_null=True, read_only=True)
     is_custom = serializers.BooleanField(default=False, read_only=True)
-    created_by = serializers.CharField(default='System', read_only=True)
+    created_by = serializers.CharField(default='superadmin', read_only=True)
 
     class Meta:
         model = CampaignTemplate
@@ -638,7 +638,7 @@ class CampaignTemplateSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'linkedin_type': {'required': False, 'read_only': True},
             'is_custom': {'default': False, 'read_only': True},
-            'created_by': {'default': 'System', 'read_only': True}
+            'created_by': {'default': 'superadmin', 'read_only': True}
         }
 
     def to_internal_value(self, data):
@@ -656,7 +656,7 @@ class CampaignTemplateSerializer(serializers.ModelSerializer):
         # Set is_custom based on whether it's a default template or not
         data['is_custom'] = not str(instance.id).startswith(('welcome-series', 'cost-savings', 'linkedin-connection', 'multi-channel-sequence'))
         # Set created_by for display
-        data['created_by'] = 'System'
+        data['created_by'] = 'superadmin'
         return data
 
     def validate_content(self, value):
@@ -877,7 +877,7 @@ class EmailTemplateSerializer(serializers.ModelSerializer):
     def get_created_by_name(self, obj):
         if obj.created_by:
             return f"{obj.created_by.first_name} {obj.created_by.last_name}".strip() or obj.created_by.username
-        return 'System'
+        return 'superadmin'
 
     def get_variable_count(self, obj):
         return len(obj.variables) if obj.variables else 0

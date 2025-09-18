@@ -1398,7 +1398,7 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
 
       {/* Campaign Details Modal */}
       <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
-        <DialogContent className="max-w-modal-2xl max-h-[90vh] overflow-y-auto" style={{ 
+        <DialogContent className="max-w-modal-2xl  max-h-[95vh] overflow-hidden" style={{ 
           fontFamily: 'var(--font-family)',
           backgroundColor: 'var(--color-background)',
           border: '1px solid #C9C9C9'
@@ -1609,7 +1609,7 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
               )}
             </TabsContent>
 
-            <TabsContent value="content" className="space-y-4" style={{ marginTop: 'var(--space-lg)' }}>
+            <TabsContent value="content" className="space-y-4 max-h-[50vh] overflow-y-auto" style={{ marginTop: 'var(--space-lg)' }}>
               {selectedCampaign && (
                 <Card style={{ 
                   fontFamily: 'var(--font-family)',
@@ -1629,25 +1629,17 @@ export function EmailCampaigns({ onNavigate }: EmailCampaignsProps) {
                       </div>
                       <div>
                         <span style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--font-weight-medium)' }}>Message:</span>
-                        <div style={{ 
-                          backgroundColor: 'var(--color-muted)',
-                          padding: 'var(--space-lg)',
-                          borderRadius: 'var(--radius-md)',
-                          marginTop: 'var(--space-xs)',
-                          maxHeight: '300px',
-                          overflowY: 'auto'
-                        }}>
-                          <div 
-                            style={{ 
+                        <div 
+                             style={{ 
                               fontSize: 'var(--text-sm)',
                               fontFamily: 'var(--font-family)',
                               color: 'var(--color-foreground)',
-                              whiteSpace: 'pre-wrap',
-                              wordWrap: 'break-word'
+                              whiteSpace: 'normal',
+                              wordWrap: 'break-word',
+                              background: '#e1e6eb',
                             }}
                             dangerouslySetInnerHTML={{ __html: selectedCampaign.email_content || "" }}>
                           </div>
-                        </div>
                       </div>
                     </div>
                   </CardContent>
