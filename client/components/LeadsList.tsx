@@ -2164,7 +2164,7 @@ SOAR-AI Team`,
           parseInt(
             selectedLeadForOpportunity.travelBudget.replace(/[^0-9]/g, ""),
           ) || 250000,
-        description: `Opportunity created from qualified lead. ${selectedLeadForOpportunity.notes}`,
+        description: ``,
         next_steps: "Send initial proposal and schedule presentation",
       };
 
