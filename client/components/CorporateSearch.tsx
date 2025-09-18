@@ -3060,7 +3060,7 @@ export function CorporateSearch({
                 <div className="space-y-2 text-sm text-blue-800">
                   <div className="flex items-start gap-2">
                     <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium">1</span>
-                    <span><strong>Contact the lead:</strong> Reach out via email or phone to establish initial communication</span>
+                    <span><strong>Contact the lead:</strong> Reach out via email or SMS to establish initial communication</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium">2</span>
