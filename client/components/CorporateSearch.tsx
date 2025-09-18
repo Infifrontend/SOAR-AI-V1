@@ -95,11 +95,6 @@ import {
   ArrowUp,
   ArrowDown,
   Upload, // Import Upload icon
-  User,
-  UserCheck,
-  Megaphone,
-  XCircle,
-  Lightbulb,
 } from "lucide-react";
 
 // Import useDebounce hook
@@ -3060,116 +3055,20 @@ export function CorporateSearch({
               <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
                 <div className="flex items-start gap-2 mb-3">
                   <ArrowRight className="h-5 w-5 text-blue-600 mt-0.5" />
-                  <h4 className="font-medium text-blue-900">What's Next? - Complete Lead Management Guide</h4>
+                  <h4 className="font-medium text-blue-900">What's Next?</h4>
                 </div>
-                <div className="space-y-3 text-sm text-blue-800">
-                  {/* Contact Actions */}
-                  <div className="bg-white/50 rounded-md p-3 border border-blue-100">
-                    <h5 className="font-semibold text-blue-900 mb-2 flex items-center gap-1">
-                      <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
-                      Initial Contact & Communication
-                    </h5>
-                    <div className="space-y-1.5 ml-7">
-                      <div className="flex items-center gap-2">
-                        <Mail className="h-3 w-3 text-blue-600" />
-                        <span><strong>Send Email:</strong> Professional outreach with personalized message</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-3 w-3 text-blue-600" />
-                        <span><strong>SMS Contact:</strong> Quick follow-up or appointment scheduling</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-3 w-3 text-blue-600" />
-                        <span><strong>Schedule Calls:</strong> Book discovery calls or demos</span>
-                      </div>
-                    </div>
+                <div className="space-y-2 text-sm text-blue-800">
+                  <div className="flex items-start gap-2">
+                    <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium">1</span>
+                    <span><strong>Contact the lead:</strong> Reach out via email or SMS to establish initial communication</span>
                   </div>
-
-                  {/* Documentation */}
-                  <div className="bg-white/50 rounded-md p-3 border border-blue-100">
-                    <h5 className="font-semibold text-blue-900 mb-2 flex items-center gap-1">
-                      <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
-                      Documentation & Tracking
-                    </h5>
-                    <div className="space-y-1.5 ml-7">
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-3 w-3 text-blue-600" />
-                        <span><strong>Add Notes:</strong> Document all interactions, meeting outcomes, and insights</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Activity className="h-3 w-3 text-blue-600" />
-                        <span><strong>View History:</strong> Track all activities and communication timeline</span>
-                      </div>
-                    </div>
+                  <div className="flex items-start gap-2">
+                    <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium">2</span>
+                    <span><strong>Add notes:</strong> Document all interactions, meeting outcomes, and key insights</span>
                   </div>
-
-                  {/* Team Management */}
-                  <div className="bg-white/50 rounded-md p-3 border border-blue-100">
-                    <h5 className="font-semibold text-blue-900 mb-2 flex items-center gap-1">
-                      <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
-                      Team Assignment & Management
-                    </h5>
-                    <div className="space-y-1.5 ml-7">
-                      <div className="flex items-center gap-2">
-                        <User className="h-3 w-3 text-blue-600" />
-                        <span><strong>Assign Agent:</strong> Delegate to appropriate sales team member</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <UserCheck className="h-3 w-3 text-blue-600" />
-                        <span><strong>Reassign Agent:</strong> Transfer lead to different agent if needed</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Campaign & Marketing */}
-                  <div className="bg-white/50 rounded-md p-3 border border-blue-100">
-                    <h5 className="font-semibold text-blue-900 mb-2 flex items-center gap-1">
-                      <span className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">4</span>
-                      Marketing & Campaigns
-                    </h5>
-                    <div className="space-y-1.5 ml-7">
-                      <div className="flex items-center gap-2">
-                        <Megaphone className="h-3 w-3 text-blue-600" />
-                        <span><strong>Start Campaign:</strong> Include in email marketing campaigns</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Target className="h-3 w-3 text-blue-600" />
-                        <span><strong>Bulk Actions:</strong> Select multiple leads for group campaigns</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Lead Qualification */}
-                  <div className="bg-white/50 rounded-md p-3 border border-blue-100">
-                    <h5 className="font-semibold text-blue-900 mb-2 flex items-center gap-1">
-                      <span className="w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-xs font-bold">5</span>
-                      Final Decision & Next Steps
-                    </h5>
-                    <div className="space-y-1.5 ml-7">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="h-3 w-3 text-green-600" />
-                        <span><strong>Qualify Lead:</strong> Mark as high-potential and move to opportunities</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <XCircle className="h-3 w-3 text-red-600" />
-                        <span><strong>Disqualify Lead:</strong> Move to nurture campaign or archive</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <TrendingUp className="h-3 w-3 text-purple-600" />
-                        <span><strong>Move to Opportunities:</strong> Convert qualified leads to deals</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Pro Tip */}
-                  <div className="bg-gradient-to-r from-orange-50 to-yellow-50 rounded-md p-3 border border-orange-200">
-                    <div className="flex items-start gap-2">
-                      <Lightbulb className="h-4 w-4 text-orange-500 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="font-medium text-orange-800 mb-1">💡 Pro Tip:</p>
-                        <p className="text-orange-700 text-xs">Start with email contact, add detailed notes after each interaction, and use the AI score to prioritize your efforts. Qualified leads can be moved to opportunities for deal tracking.</p>
-                      </div>
-                    </div>
+                  <div className="flex items-start gap-2">
+                    <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium">3</span>
+                    <span><strong>Qualify or disqualify:</strong> Assess the lead's potential and move them to the appropriate status</span>
                   </div>
                 </div>
               </div>
