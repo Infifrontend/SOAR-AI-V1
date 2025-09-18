@@ -5342,6 +5342,41 @@ SOAR-AI Team`,
               </span>{" "}
               to opportunities? This will create a new opportunity record.
             </DialogDescription>
+            <div className="bg-blue-50 rounded-lg p-4 border border-blue-200 mt-4">
+              <div className="flex items-start gap-2 mb-3">
+                <ArrowRight className="h-5 w-5 text-blue-600 mt-0.5" />
+                <h4 className="font-medium text-blue-900">What's Next?</h4>
+              </div>
+              <div className="space-y-2 text-sm text-blue-800">
+                <div className="flex items-start gap-2">
+                  <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium">1</span>
+                  <span><strong>Edit & Add Details:</strong> Update opportunity info, add next steps and notes</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium">2</span>
+                  <span><strong>Log Activity:</strong> Track all actions, assign the corporate, and maintain records</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium">3</span>
+                  <span><strong>Send Proposal:</strong> Share proposal documents with the client</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium">4</span>
+                  <span><strong>Negotiate:</strong> Manage discussions, offers, and counteroffers</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium">5</span>
+                  <span><strong>Close Deal:</strong> After confirmation, mark as <em>Won</em> or update status accordingly</span>
+                </div>
+              </div>
+            </div>
+            <div className="mt-2">
+              <p className="font-medium text-orange-800 mb-1">💡 Pro Tip:</p>
+              <p className="text-orange-700 text-xs">
+                After moving a lead to an opportunity, always add clear next steps and notes. Keep logging activities, send proposals on time, and maintain structured negotiation steps. Updating the status to <em>Won</em> ensures the deal is properly closed in your pipeline.
+              </p>
+            </div>
+
           </DialogHeader>
           <DialogFooter className="flex gap-2">
             <Button
