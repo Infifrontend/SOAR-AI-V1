@@ -3389,6 +3389,7 @@ const getRandomRiskLevel = () => {
                       const colorMap: { [key: string]: string } = {
                         'creation': 'bg-blue-100 text-blue-600',
                         'status_change': 'bg-green-100 text-green-600',
+                        'activity_added': 'bg-purple-100 text-purple-600',
                         'note_added': 'bg-purple-100 text-purple-600',
                         'score_update': 'bg-orange-100 text-orange-600',
                         'assignment': 'bg-indigo-100 text-indigo-600',
