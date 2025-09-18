@@ -744,6 +744,7 @@ def create_lead_history(lead,
                         icon=None,
                         user=None):
     """Creates a LeadHistory entry if the table exists."""
+    print(f"Creating lead history: {lead},{history_type}, {action}, {details}")
     try:
         from .models import LeadHistory
         LeadHistory.objects.create(lead=lead,
@@ -1884,7 +1885,7 @@ class LeadViewSet(viewsets.ModelViewSet):
             action=f'Lead score updated to {lead.score}',
             details=
             f'Lead score updated from {old_score} to {lead.score} based on engagement metrics and profile analysis.',
-            icon='trending-up',
+            icon='trendingUp',
             user=request.user if request.user.is_authenticated else None)
 
         return Response({'status': 'score updated', 'new_score': lead.score})
@@ -2433,7 +2434,7 @@ class LeadViewSet(viewsets.ModelViewSet):
                         next_steps=opportunity_data.get(
                             'next_steps',
                             'Send initial proposal and schedule presentation'))
-
+                    print(f"XXXXXXXXXXXXXXXXXXXXXXXXXXX Opportunity created: {opportunity}")
                     # Update lead
                     locked_lead.moved_to_opportunity = True
                     timestamp = timezone.now().strftime('%Y-%m-%d %H:%M')
@@ -2926,16 +2927,64 @@ class OpportunityViewSet(viewsets.ModelViewSet):
     queryset = Opportunity.objects.prefetch_related('activities').all()
     serializer_class = OpportunitySerializer
 
+    
     def update(self, request, *args, **kwargs):
         """Handle opportunity updates with proper validation"""
+        print("XXXXXXXXXXXXXXXXXXXXXXX Update request data:", request.data)
         try:
             instance = self.get_object()
             serializer = self.get_serializer(instance,
-                                             data=request.data,
-                                             partial=True)
+                                            data=request.data,
+                                            partial=True)
 
             if serializer.is_valid():
+                # Save previous values for meaningful history
+                previous_values = {
+                    'stage': instance.stage,
+                    'probability': instance.probability,
+                    'value': instance.value,
+                    'estimated_close_date': instance.estimated_close_date,
+                    'next_steps': instance.next_steps,
+                    'description': instance.description
+                }
+
                 serializer.save()
+
+                # Fetch the lead linked to this opportunity
+                opportunities_data = list(Opportunity.objects.filter(id=instance.id).values())
+                lead_id = opportunities_data[0]['lead_id'] if opportunities_data else None
+                print("[DEBUG] All opportunities data:", opportunities_data)
+                print("[DEBUG] Extracted lead_id:", lead_id)
+
+                # Import Lead model and fetch the actual instance
+                from .models import Lead
+                lead_instance = None
+                if lead_id:
+                    try:
+                        lead_instance = Lead.objects.get(id=lead_id)
+                    except Lead.DoesNotExist:
+                        print(f"[ERROR] Lead with id {lead_id} not found")
+
+                # Prepare meaningful details for history
+                if lead_instance:
+                    details_list = []
+                    for field, new_value in request.data.items():
+                        old_value = previous_values.get(field)
+                        if old_value != new_value:
+                            details_list.append(f"{field.replace('_', ' ').title()} has been changed from '{old_value}' to '{new_value}'")
+
+                    details_text = "\n".join(details_list) if details_list else "No significant changes."
+
+                    # Create lead history entry
+                    create_lead_history(
+                        lead=lead_instance,
+                        history_type='opportunity_updated',
+                        action='Opportunity Stage Updated',
+                        details=details_text,
+                        icon='activity',
+                        user=request.user if request.user.is_authenticated else None
+                    )
+
                 return Response(serializer.data)
             else:
                 print(f"Validation errors: {serializer.errors}")
@@ -2950,6 +2999,7 @@ class OpportunityViewSet(viewsets.ModelViewSet):
             return Response({'error': f'Update failed: {str(e)}'},
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+   
     @action(detail=True, methods=['post'])
     def add_activity(self, request, pk=None):
         """Add activity to opportunity"""
@@ -2963,6 +3013,7 @@ class OpportunityViewSet(viewsets.ModelViewSet):
                 'date': request.data.get('date',
                                          timezone.now().date()),
             }
+           
 
             activity_serializer = OpportunityActivitySerializer(
                 data=activity_data)
@@ -2974,6 +3025,32 @@ class OpportunityViewSet(viewsets.ModelViewSet):
 
                 # Return the activity with updated serializer data including user info
                 response_data = OpportunityActivitySerializer(activity).data
+
+                opportunities_data = list(Opportunity.objects.all().values())
+                lead_id = opportunities_data[0]['lead_id']
+                print("[DEBUG] All opportunities data:", opportunities_data)
+                print("[DEBUG] Extracted lead_id:", lead_id)
+
+                # Import Lead model and fetch the actual instance
+                from .models import Lead
+                try:
+                    lead_instance = Lead.objects.get(id=lead_id)
+                except Lead.DoesNotExist:
+                    print(f"[ERROR] Lead with id {lead_id} not found")
+                    lead_instance = None
+
+                if lead_instance:
+                    create_lead_history(
+                        lead=lead_instance,   # Pass the Lead object instead of just the ID
+                        history_type='activity_added',
+                        action='Activity Added',
+                        details = (
+                        f"Activity Type: {activity.get_type_display()}\n"
+                        f"Description: {activity.description}\n"
+                        f"Date: {activity.date.strftime('%B %d, %Y') if activity.date else 'N/A'}"),
+                        icon='activity',
+                        user=request.user if request.user.is_authenticated else None
+                    )
 
                 return Response(
                     {
@@ -3200,6 +3277,7 @@ class OpportunityViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'])
     def send_proposal(self, request, pk=None):
         """Send proposal email for opportunity"""
+        print("[DEBUG] send_proposal request ttttttttttttttttttttt data:", request.data)
         try:
             opportunity = self.get_object()
 
@@ -3212,6 +3290,15 @@ class OpportunityViewSet(viewsets.ModelViewSet):
             validity_period = request.data.get('validity_period', '30')
             special_terms = request.data.get('special_terms', '')
 
+            subject_text = request.data.get('subject', '')
+            if "Negotiation" in subject_text:
+                history_type = 'Negotiation'
+                action_text = 'Negotiation proposal has been sent to the Corporate'
+            else:
+                history_type = 'Send_proposal'
+                action_text = 'Proposal has been sent to the Corporate'
+
+            
             if not email_content:
                 return Response({'error': 'Email content is required'},
                                 status=status.HTTP_400_BAD_REQUEST)
@@ -3247,15 +3334,28 @@ class OpportunityViewSet(viewsets.ModelViewSet):
                         fail_silently=False,
                     )
 
-                    # Create activity record for the proposal
-                    OpportunityActivity.objects.create(
-                        opportunity=opportunity,
-                        type='proposal',
-                        description=
-                        f'Proposal email sent to {recipient_email}. Subject: {subject}',
-                        date=timezone.now().date(),
-                        created_by=request.user
-                        if request.user.is_authenticated else None)
+                    # 🔹 Replace OpportunityActivity with LeadHistory
+                    opportunities_data = list(Opportunity.objects.all().values())
+                    lead_id = opportunities_data[0]['lead_id']
+                    print("[DEBUG] All opportunities data:", opportunities_data)
+                    print("[DEBUG] Extracted lead_id:", lead_id)
+
+                    from .models import Lead
+                    try:
+                        lead_instance = Lead.objects.get(id=lead_id)
+                    except Lead.DoesNotExist:
+                        print(f"[ERROR] Lead with id {lead_id} not found")
+                        lead_instance = None
+
+                    if lead_instance:
+                        create_lead_history(
+                            lead=lead_instance,
+                            history_type=history_type,
+                            action=action_text,
+                            details=f'{history_type} Email  has been sent to the corporate with respective details.',
+                            icon='mail',
+                            user=request.user if request.user.is_authenticated else None
+                        )
 
                     return Response(
                         {
@@ -3276,22 +3376,33 @@ class OpportunityViewSet(viewsets.ModelViewSet):
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
             else:
-                # For non-email methods, just create an activity record
-                OpportunityActivity.objects.create(
-                    opportunity=opportunity,
-                    type='proposal',
-                    description=
-                    f'Proposal sent via {delivery_method}. {special_terms}',
-                    date=timezone.now().date(),
-                    created_by=request.user
-                    if request.user.is_authenticated else None)
+                # 🔹 Replace OpportunityActivity with LeadHistory for non-email delivery
+                opportunities_data = list(Opportunity.objects.all().values())
+                lead_id = opportunities_data[0]['lead_id']
+                print("[DEBUG] All opportunities data:", opportunities_data)
+                print("[DEBUG] Extracted lead_id:", lead_id)
+
+                from .models import Lead
+                try:
+                    lead_instance = Lead.objects.get(id=lead_id)
+                except Lead.DoesNotExist:
+                    print(f"[ERROR] Lead with id {lead_id} not found")
+                    lead_instance = None
+
+                if lead_instance:
+                      create_lead_history(
+                            lead=lead_instance,
+                            history_type=history_type,
+                            action=action_text,
+                            details=f'{history_type} Email  has been sent to the corporate with respective details.',
+                            icon='mail',
+                            user=request.user if request.user.is_authenticated else None
+                        )
 
                 return Response(
                     {
-                        'success':
-                        True,
-                        'message':
-                        f'Proposal sent successfully via {delivery_method}',
+                        'success': True,
+                        'message': f'Proposal sent successfully via {delivery_method}',
                     },
                     status=status.HTTP_200_OK)
 
