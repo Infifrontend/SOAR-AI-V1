@@ -3022,7 +3022,7 @@ export function CorporateSearch({
           </DialogHeader>
 
           {selectedCorporateForMove && (
-            <div className="py-4">
+            <div className="py-4 space-y-4">
               <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                 <div className="flex items-center gap-2">
                   <Building2 className="h-4 w-4 text-gray-600" />
@@ -3048,6 +3048,28 @@ export function CorporateSearch({
                   >
                     AI Score {selectedCorporateForMove.aiScore}
                   </Badge>
+                </div>
+              </div>
+
+              {/* What's Next Section */}
+              <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                <div className="flex items-start gap-2 mb-3">
+                  <ArrowRight className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <h4 className="font-medium text-blue-900">What's Next?</h4>
+                </div>
+                <div className="space-y-2 text-sm text-blue-800">
+                  <div className="flex items-start gap-2">
+                    <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium">1</span>
+                    <span><strong>Contact the lead:</strong> Reach out via email or phone to establish initial communication</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium">2</span>
+                    <span><strong>Add notes:</strong> Document all interactions, meeting outcomes, and key insights</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium">3</span>
+                    <span><strong>Qualify or disqualify:</strong> Assess the lead's potential and move them to the appropriate status</span>
+                  </div>
                 </div>
               </div>
             </div>
