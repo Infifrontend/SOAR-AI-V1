@@ -407,7 +407,7 @@ const OpportunityCard = memo(
           <div>
             <span className="text-gray-500">Company Size:</span>
             <span className="ml-1 text-gray-900">
-              {company.employee_count || "Unknown"} employees
+              {company.size || "Unknown"} 
             </span>
           </div>
           <div>
@@ -948,7 +948,7 @@ const leadApi = useLeadApi();
 
   return {
     id: apiLead.id,
-    name: apiLead.contact.company_name,
+    name: apiLead.company.name,
     type: getCompanyTypeDisplay(apiLead.company.company_type || apiLead.company.size),
     industry: getIndustryDisplay(apiLead.company.industry),
     location: apiLead.company.location,
