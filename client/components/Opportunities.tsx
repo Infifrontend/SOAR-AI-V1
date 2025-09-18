@@ -276,6 +276,7 @@ const PipelineOpportunityCard = memo(
       industry: "Unknown",
       location: "Unknown",
       employee_count: 0,
+      size: "Unknown",
     };
     const contact = opportunity.lead_info?.contact || {
       first_name: "Unknown",
@@ -308,56 +309,173 @@ const PipelineOpportunityCard = memo(
       });
     }, []);
 
+    const getBadgeColor = (stage: string) => {
+      switch (stage) {
+        case "discovery":
+          return "bg-blue-100 text-blue-800";
+        case "proposal":
+          return "bg-orange-100 text-orange-800";
+        case "negotiation":
+          return "bg-purple-100 text-purple-800";
+        case "closed_won":
+          return "bg-green-100 text-green-800";
+        case "closed_lost":
+          return "bg-red-100 text-red-800";
+        default:
+          return "bg-gray-100 text-gray-800";
+      }
+    };
+
     return (
       <div
         ref={drag}
-        className={`bg-white border border-gray-200 rounded-lg p-4 mb-3 cursor-pointer hover:shadow-md transition-all duration-200 ${
+        className={`bg-white border border-gray-200 rounded-lg p-4 mb-3 cursor-pointer hover:shadow-lg transition-all duration-200 ${
           isDragging ? "opacity-50 rotate-1 scale-105" : ""
         }`}
       >
-        {/* Header with Company Name and Value */}
+        {/* Header with Company Name and Badge */}
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2 flex-1">
-            <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg flex-shrink-0">
-              <Building2 className="h-4 w-4 text-blue-600" />
+            <div className="flex items-center justify-center w-9 h-9 bg-blue-100 rounded-lg flex-shrink-0">
+              <Building2 className="h-5 w-5 text-blue-600" />
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="font-semibold text-sm text-gray-900 truncate">
-                {company.name}
-              </h4>
-              <div className="text-xs text-gray-600">
+              <div className="flex items-center gap-2 mb-1">
+                <h4 className="font-semibold text-sm text-gray-900 truncate">
+                  {company.name}
+                </h4>
+                <Badge
+                  className={`text-xs px-2 py-0.5 ${getBadgeColor(opportunity.stage)}`}
+                >
+                  {stages.find((s) => s.id === opportunity.stage)?.label ||
+                    opportunity.stage}
+                </Badge>
+              </div>
+              <div className="text-xs text-gray-600 flex items-center gap-1">
+                <User className="h-3 w-3" />
                 {contact.first_name} {contact.last_name}
+                {contact.position && (
+                  <>
+                    <span>•</span>
+                    <span>{contact.position}</span>
+                  </>
+                )}
               </div>
             </div>
           </div>
           <div className="text-right flex-shrink-0">
-            <div className="text-base font-bold text-green-600">
+            <div className="text-lg font-bold text-green-600">
               {formatCurrency(opportunity.value)}
+            </div>
+            <div className="text-xs text-gray-500">
+              {opportunity.probability}% chance
+            </div>
+          </div>
+        </div>
+
+        {/* Company Details */}
+        <div className="mb-3 p-2 bg-gray-50 rounded-md">
+          <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
+            <div className="flex items-center gap-1">
+              <Building2 className="h-3 w-3" />
+              <span>{company.industry}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Users className="h-3 w-3" />
+              <span>{company.size || "Unknown"}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Globe className="h-3 w-3" />
+              <span className="truncate">{company.location}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Calendar className="h-3 w-3" />
+              <span>{formatDate(opportunity.estimated_close_date)}</span>
             </div>
           </div>
         </div>
 
         {/* Probability Bar */}
         <div className="mb-3">
-          <Progress value={opportunity.probability} className="h-1" />
-          <div className="text-xs text-gray-500 mt-1">
-            {opportunity.probability}% probability
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs font-medium text-gray-700">
+              Deal Probability
+            </span>
+            <span className="text-xs text-gray-600">
+              {opportunity.probability}%
+            </span>
+          </div>
+          <Progress value={opportunity.probability} className="h-2" />
+        </div>
+
+        {/* Contact Information */}
+        <div className="mb-3">
+          <div className="flex items-center gap-3 text-xs text-gray-600">
+            {contact.email && (
+              <div className="flex items-center gap-1">
+                <Mail className="h-3 w-3" />
+                <span className="truncate max-w-[100px]">{contact.email}</span>
+              </div>
+            )}
+            {contact.phone && (
+              <div className="flex items-center gap-1">
+                <Phone className="h-3 w-3" />
+                <span>{contact.phone}</span>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Basic Details */}
-        <div className="text-xs text-gray-600 mb-3">
-          <div>Industry: {company.industry}</div>
-          <div>Close: {formatDate(opportunity.estimated_close_date)}</div>
+        {/* Next Steps */}
+        {opportunity.next_steps && (
+          <div className="mb-3 p-2 bg-blue-50 rounded-md border-l-2 border-blue-400">
+            <div className="text-xs font-medium text-blue-800 mb-1">
+              Next Action:
+            </div>
+            <div className="text-xs text-blue-700 line-clamp-2">
+              {opportunity.next_steps}
+            </div>
+          </div>
+        )}
+
+        {/* Tags */}
+        <div className="flex flex-wrap gap-1 mb-3">
+          <Badge variant="outline" className="text-xs px-2 py-0.5">
+            {company.industry}
+          </Badge>
+          <Badge variant="outline" className="text-xs px-2 py-0.5">
+            {company.size || "Enterprise"}
+          </Badge>
+          {contact.position && (
+            <Badge variant="outline" className="text-xs px-2 py-0.5">
+              Decision Maker
+            </Badge>
+          )}
         </div>
 
-        {/* Action Buttons - Minimal */}
-        <div className="flex gap-1 justify-between">
+        {/* Recent Activities */}
+        {opportunity.latest_activities && opportunity.latest_activities.length > 0 && (
+          <div className="mb-3 p-2 bg-yellow-50 rounded-md border border-yellow-200">
+            <div className="text-xs font-medium text-yellow-800 mb-1 flex items-center gap-1">
+              <Activity className="h-3 w-3" />
+              Latest Activity:
+            </div>
+            <div className="text-xs text-yellow-700">
+              {opportunity.latest_activities[0].type_display} - {formatDate(opportunity.latest_activities[0].date)}
+            </div>
+            <div className="text-xs text-yellow-600 truncate mt-1">
+              {opportunity.latest_activities[0].description}
+            </div>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        <div className="flex gap-2 justify-between">
           <div className="flex gap-1">
             <Button
               size="sm"
               variant="outline"
-              className="h-6 px-2 text-xs border-gray-300 text-gray-700 hover:bg-gray-50 rounded font-medium"
+              className="h-7 px-2 text-xs border-gray-300 text-gray-700 hover:bg-gray-50 rounded font-medium"
               onClick={(e) => {
                 e.stopPropagation();
                 onEdit(opportunity);
@@ -368,7 +486,18 @@ const PipelineOpportunityCard = memo(
             <Button
               variant="outline"
               size="sm"
-              className="h-6 px-2 text-xs border-gray-300 text-gray-700 hover:bg-gray-50 rounded font-medium"
+              className="h-7 px-2 text-xs border-gray-300 text-gray-700 hover:bg-gray-50 rounded font-medium"
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddActivity(opportunity);
+              }}
+            >
+              <Plus className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 px-2 text-xs border-gray-300 text-gray-700 hover:bg-gray-50 rounded font-medium"
               onClick={(e) => {
                 e.stopPropagation();
                 handleViewProfile(String(opportunity.lead_info?.company?.id));
@@ -376,102 +505,122 @@ const PipelineOpportunityCard = memo(
             >
               <Eye className="h-3 w-3" />
             </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-7 px-2 text-xs border-gray-300 text-gray-700 hover:bg-gray-50 rounded font-medium"
+              onClick={(e) => {
+                e.stopPropagation();
+                onViewHistory(opportunity);
+              }}
+            >
+              <History className="h-3 w-3" />
+            </Button>
           </div>
           
-          {/* Status-driven flow buttons - minimal */}
-          {opportunity.stage === "discovery" && (
-            <Button
-              size="sm"
-              className="h-6 px-2 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded font-medium disabled:opacity-50"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (onSendProposal) {
-                  onSendProposal(opportunity);
-                }
-              }}
-              disabled={isDraftLoading}
-            >
-              {isDraftLoading ? (
-                <RefreshCw className="h-3 w-3 animate-spin" />
-              ) : (
-                <FileText className="h-3 w-3" />
-              )}
-            </Button>
-          )}
-
-          {opportunity.stage === "proposal" && (
-            <Button
-              size="sm"
-              className="h-6 px-2 text-xs bg-orange-500 hover:bg-orange-600 text-white rounded font-medium disabled:opacity-50"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (onMoveToNegotiation) {
-                  onMoveToNegotiation(opportunity);
-                }
-              }}
-              disabled={isDraftLoading}
-            >
-              {isDraftLoading ? (
-                <RefreshCw className="h-3 w-3 animate-spin" />
-              ) : (
-                <ArrowRight className="h-3 w-3" />
-              )}
-            </Button>
-          )}
-
-          {(opportunity.stage === "negotiation" || opportunity.stage === "proposal") && (
-            <div className="relative group">
+          {/* Status-driven flow buttons */}
+          <div className="flex gap-1">
+            {opportunity.stage === "discovery" && (
               <Button
                 size="sm"
-                className="h-6 px-2 text-xs bg-green-600 hover:bg-green-700 text-white rounded font-medium transition-all duration-200"
+                className="h-7 px-3 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded font-medium disabled:opacity-50"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onSendProposal) {
+                    onSendProposal(opportunity);
+                  }
+                }}
+                disabled={isDraftLoading}
               >
-                <Handshake className="h-3 w-3" />
-                <ChevronDown className="h-2 w-2 ml-1" />
+                {isDraftLoading ? (
+                  <RefreshCw className="h-3 w-3 animate-spin" />
+                ) : (
+                  <>
+                    <FileText className="h-3 w-3 mr-1" />
+                    Propose
+                  </>
+                )}
               </Button>
+            )}
 
-              {/* Hover dropdown */}
-              <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <div className="bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden min-w-[120px]">
-                  <div className="p-1">
-                    <button
-                      className="w-full px-3 py-2 text-xs text-center hover:bg-green-50 flex items-center justify-center gap-1 text-green-700 font-medium rounded transition-colors duration-150 disabled:opacity-50"
-                      disabled={loadingOpportunityId === opportunity.id}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (onCloseDeal) {
-                          onCloseDeal(opportunity, "closed_won");
-                        }
-                      }}
-                    >
-                      {loadingOpportunityId === opportunity.id ? (
-                        <RefreshCw className="h-3 w-3 animate-spin" />
-                      ) : (
-                        <CheckCircle className="h-3 w-3" />
-                      )}
-                      Won
-                    </button>
-                    <button
-                      className="w-full px-3 py-2 text-xs text-center hover:bg-red-50 flex items-center justify-center gap-1 text-red-700 font-medium rounded transition-colors duration-150 mt-1 disabled:opacity-50"
-                      disabled={loadingOpportunityId === opportunity.id}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (onCloseDeal) {
-                          onCloseDeal(opportunity, "closed_lost");
-                        }
-                      }}
-                    >
-                      {loadingOpportunityId === opportunity.id ? (
-                        <RefreshCw className="h-3 w-3 animate-spin" />
-                      ) : (
-                        <AlertTriangle className="h-3 w-3" />
-                      )}
-                      Lost
-                    </button>
+            {opportunity.stage === "proposal" && (
+              <Button
+                size="sm"
+                className="h-7 px-3 text-xs bg-orange-500 hover:bg-orange-600 text-white rounded font-medium disabled:opacity-50"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onMoveToNegotiation) {
+                    onMoveToNegotiation(opportunity);
+                  }
+                }}
+                disabled={isDraftLoading}
+              >
+                {isDraftLoading ? (
+                  <RefreshCw className="h-3 w-3 animate-spin" />
+                ) : (
+                  <>
+                    <ArrowRight className="h-3 w-3 mr-1" />
+                    Negotiate
+                  </>
+                )}
+              </Button>
+            )}
+
+            {(opportunity.stage === "negotiation" || opportunity.stage === "proposal") && (
+              <div className="relative group">
+                <Button
+                  size="sm"
+                  className="h-7 px-3 text-xs bg-green-600 hover:bg-green-700 text-white rounded font-medium transition-all duration-200"
+                >
+                  <Handshake className="h-3 w-3 mr-1" />
+                  Close
+                  <ChevronDown className="h-3 w-3 ml-1" />
+                </Button>
+
+                {/* Hover dropdown */}
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  <div className="bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden min-w-[140px]">
+                    <div className="p-1">
+                      <button
+                        className="w-full px-3 py-2 text-xs text-center hover:bg-green-50 flex items-center justify-center gap-2 text-green-700 font-medium rounded transition-colors duration-150 disabled:opacity-50"
+                        disabled={loadingOpportunityId === opportunity.id}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onCloseDeal) {
+                            onCloseDeal(opportunity, "closed_won");
+                          }
+                        }}
+                      >
+                        {loadingOpportunityId === opportunity.id ? (
+                          <RefreshCw className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <CheckCircle className="h-3 w-3" />
+                        )}
+                        Deal Won
+                      </button>
+                      <button
+                        className="w-full px-3 py-2 text-xs text-center hover:bg-red-50 flex items-center justify-center gap-2 text-red-700 font-medium rounded transition-colors duration-150 mt-1 disabled:opacity-50"
+                        disabled={loadingOpportunityId === opportunity.id}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onCloseDeal) {
+                            onCloseDeal(opportunity, "closed_lost");
+                          }
+                        }}
+                      >
+                        {loadingOpportunityId === opportunity.id ? (
+                          <RefreshCw className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <AlertTriangle className="h-3 w-3" />
+                        )}
+                        Deal Lost
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     );
