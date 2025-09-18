@@ -236,7 +236,251 @@ const ActivityAccordion = memo(({ activities }: ActivityAccordionProps) => {
 });
 ActivityAccordion.displayName = "ActivityAccordion";
 
-// Opportunity Card Component matching the design in the image
+// Minimal Pipeline Card Component for Pipeline View
+interface PipelineOpportunityCardProps {
+  opportunity: Opportunity;
+  onEdit: (opportunity: Opportunity) => void;
+  onAddActivity: (opportunity: Opportunity) => void;
+  onViewHistory: (opportunity: Opportunity) => void;
+  onSendProposal?: (opportunity: Opportunity) => void;
+  onMoveToNegotiation?: (opportunity: Opportunity) => void;
+  onCloseDeal?: (opportunity: Opportunity, status: string) => void;
+  handleViewProfile: (profileId: string) => void;
+  isDraftLoading?: boolean;
+  loadingOpportunityId?: number | null;
+}
+
+const PipelineOpportunityCard = memo(
+  ({
+    opportunity,
+    onEdit,
+    onAddActivity,
+    onViewHistory,
+    onSendProposal,
+    onMoveToNegotiation,
+    onCloseDeal,
+    handleViewProfile,
+    isDraftLoading,
+    loadingOpportunityId
+  }: PipelineOpportunityCardProps) => {
+    const [{ isDragging }, drag] = useDrag(() => ({
+      type: ItemTypes.OPPORTUNITY,
+      item: { id: opportunity.id, stage: opportunity.stage },
+      collect: (monitor) => ({
+        isDragging: monitor.isDragging(),
+      }),
+    }));
+
+    const company = opportunity.lead_info?.company || {
+      name: "Unknown Company",
+      industry: "Unknown",
+      location: "Unknown",
+      employee_count: 0,
+    };
+    const contact = opportunity.lead_info?.contact || {
+      first_name: "Unknown",
+      last_name: "Contact",
+      email: "",
+      phone: "",
+      position: "",
+    };
+
+    const formatCurrency = useCallback((amount: number | null | undefined) => {
+      const numAmount = Number(amount);
+      if (!numAmount || isNaN(numAmount)) {
+        return "$0";
+      }
+
+      if (numAmount >= 1000000) {
+        return `$${(numAmount / 1000000).toFixed(1)}M`;
+      } else if (numAmount >= 1000) {
+        return `$${(numAmount / 1000).toFixed(0)}K`;
+      } else {
+        return `$${numAmount.toFixed(0)}`;
+      }
+    }, []);
+
+    const formatDate = useCallback((dateString: string) => {
+      return new Date(dateString).toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+    }, []);
+
+    return (
+      <div
+        ref={drag}
+        className={`bg-white border border-gray-200 rounded-lg p-4 mb-3 cursor-pointer hover:shadow-md transition-all duration-200 ${
+          isDragging ? "opacity-50 rotate-1 scale-105" : ""
+        }`}
+      >
+        {/* Header with Company Name and Value */}
+        <div className="flex items-start justify-between mb-3">
+          <div className="flex items-center gap-2 flex-1">
+            <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg flex-shrink-0">
+              <Building2 className="h-4 w-4 text-blue-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="font-semibold text-sm text-gray-900 truncate">
+                {company.name}
+              </h4>
+              <div className="text-xs text-gray-600">
+                {contact.first_name} {contact.last_name}
+              </div>
+            </div>
+          </div>
+          <div className="text-right flex-shrink-0">
+            <div className="text-base font-bold text-green-600">
+              {formatCurrency(opportunity.value)}
+            </div>
+          </div>
+        </div>
+
+        {/* Probability Bar */}
+        <div className="mb-3">
+          <Progress value={opportunity.probability} className="h-1" />
+          <div className="text-xs text-gray-500 mt-1">
+            {opportunity.probability}% probability
+          </div>
+        </div>
+
+        {/* Basic Details */}
+        <div className="text-xs text-gray-600 mb-3">
+          <div>Industry: {company.industry}</div>
+          <div>Close: {formatDate(opportunity.estimated_close_date)}</div>
+        </div>
+
+        {/* Action Buttons - Minimal */}
+        <div className="flex gap-1 justify-between">
+          <div className="flex gap-1">
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-6 px-2 text-xs border-gray-300 text-gray-700 hover:bg-gray-50 rounded font-medium"
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(opportunity);
+              }}
+            >
+              <Edit className="h-3 w-3" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-6 px-2 text-xs border-gray-300 text-gray-700 hover:bg-gray-50 rounded font-medium"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleViewProfile(String(opportunity.lead_info?.company?.id));
+              }}
+            >
+              <Eye className="h-3 w-3" />
+            </Button>
+          </div>
+          
+          {/* Status-driven flow buttons - minimal */}
+          {opportunity.stage === "discovery" && (
+            <Button
+              size="sm"
+              className="h-6 px-2 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded font-medium disabled:opacity-50"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onSendProposal) {
+                  onSendProposal(opportunity);
+                }
+              }}
+              disabled={isDraftLoading}
+            >
+              {isDraftLoading ? (
+                <RefreshCw className="h-3 w-3 animate-spin" />
+              ) : (
+                <FileText className="h-3 w-3" />
+              )}
+            </Button>
+          )}
+
+          {opportunity.stage === "proposal" && (
+            <Button
+              size="sm"
+              className="h-6 px-2 text-xs bg-orange-500 hover:bg-orange-600 text-white rounded font-medium disabled:opacity-50"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onMoveToNegotiation) {
+                  onMoveToNegotiation(opportunity);
+                }
+              }}
+              disabled={isDraftLoading}
+            >
+              {isDraftLoading ? (
+                <RefreshCw className="h-3 w-3 animate-spin" />
+              ) : (
+                <ArrowRight className="h-3 w-3" />
+              )}
+            </Button>
+          )}
+
+          {(opportunity.stage === "negotiation" || opportunity.stage === "proposal") && (
+            <div className="relative group">
+              <Button
+                size="sm"
+                className="h-6 px-2 text-xs bg-green-600 hover:bg-green-700 text-white rounded font-medium transition-all duration-200"
+              >
+                <Handshake className="h-3 w-3" />
+                <ChevronDown className="h-2 w-2 ml-1" />
+              </Button>
+
+              {/* Hover dropdown */}
+              <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div className="bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden min-w-[120px]">
+                  <div className="p-1">
+                    <button
+                      className="w-full px-3 py-2 text-xs text-center hover:bg-green-50 flex items-center justify-center gap-1 text-green-700 font-medium rounded transition-colors duration-150 disabled:opacity-50"
+                      disabled={loadingOpportunityId === opportunity.id}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onCloseDeal) {
+                          onCloseDeal(opportunity, "closed_won");
+                        }
+                      }}
+                    >
+                      {loadingOpportunityId === opportunity.id ? (
+                        <RefreshCw className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <CheckCircle className="h-3 w-3" />
+                      )}
+                      Won
+                    </button>
+                    <button
+                      className="w-full px-3 py-2 text-xs text-center hover:bg-red-50 flex items-center justify-center gap-1 text-red-700 font-medium rounded transition-colors duration-150 mt-1 disabled:opacity-50"
+                      disabled={loadingOpportunityId === opportunity.id}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onCloseDeal) {
+                          onCloseDeal(opportunity, "closed_lost");
+                        }
+                      }}
+                    >
+                      {loadingOpportunityId === opportunity.id ? (
+                        <RefreshCw className="h-3 w-3 animate-spin" />
+                      ) : (
+                        <AlertTriangle className="h-3 w-3" />
+                      )}
+                      Lost
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  },
+);
+
+PipelineOpportunityCard.displayName = "PipelineOpportunityCard";
+
+// Opportunity Card Component matching the design in the image (for List View)
 interface OpportunityCardProps {
   opportunity: Opportunity;
   onEdit: (opportunity: Opportunity) => void;
@@ -649,7 +893,7 @@ interface PipelineColumnProps {
   onSendProposal?: (opportunity: Opportunity) => void;
   onMoveToNegotiation?: (opportunity: Opportunity) => void;
   onCloseDeal?: (opportunity: Opportunity, status: string) => void;
-  handleViewProfile: (opportunity: Opportunity) => void;
+  handleViewProfile: (profileId: string) => void;
   loadingOpportunityId?: number | null;
 }
 
@@ -726,7 +970,7 @@ const PipelineColumn = memo(
         >
           <div className="space-y-3">
             {opportunities.map((opportunity) => (
-              <OpportunityCard
+              <PipelineOpportunityCard
                 key={opportunity.id}
                 opportunity={opportunity}
                 onEdit={onEdit}
