@@ -236,7 +236,7 @@ const ActivityAccordion = memo(({ activities }: ActivityAccordionProps) => {
 });
 ActivityAccordion.displayName = "ActivityAccordion";
 
-// Minimal Pipeline Opportunity Card Component
+// Opportunity Card Component matching the design in the image
 interface OpportunityCardProps {
   opportunity: Opportunity;
   onEdit: (opportunity: Opportunity) => void;
@@ -249,6 +249,9 @@ interface OpportunityCardProps {
   isDraftLoading?: boolean;
   loadingOpportunityId?: number | null;
 }
+
+
+
 
 const OpportunityCard = memo(
   ({
@@ -264,6 +267,7 @@ const OpportunityCard = memo(
     loadingOpportunityId
 
   }: OpportunityCardProps) => {
+
 
     const [{ isDragging }, drag] = useDrag(() => ({
       type: ItemTypes.OPPORTUNITY,
@@ -287,7 +291,25 @@ const OpportunityCard = memo(
       position: "",
     };
 
+    const getBadgeColor = (stage: string) => {
+      switch (stage) {
+        case "discovery":
+          return "bg-blue-100 text-blue-800";
+        case "proposal":
+          return "bg-orange-100 text-orange-800";
+        case "negotiation":
+          return "bg-purple-100 text-purple-800";
+        case "closed_won":
+          return "bg-green-100 text-green-800";
+        case "closed_lost":
+          return "bg-red-100 text-red-800";
+        default:
+          return "bg-gray-100 text-gray-800";
+      }
+    };
+
     const formatCurrency = useCallback((amount: number | null | undefined) => {
+      // Handle null, undefined, or NaN values
       const numAmount = Number(amount);
       if (!numAmount || isNaN(numAmount)) {
         return "$0";
@@ -302,127 +324,254 @@ const OpportunityCard = memo(
       }
     }, []);
 
+    const formatDate = useCallback((dateString: string) => {
+      return new Date(dateString).toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+    }, []);
+
+
+
     return (
       <div
         ref={drag}
-        className={`bg-white border border-gray-200 rounded-lg p-4 mb-3 cursor-pointer hover:shadow-lg hover:border-gray-300 transition-all duration-200 ${
-          isDragging ? "opacity-60 scale-105 shadow-lg" : ""
+        className={`bg-white border border-gray-200 rounded-lg p-5 mb-3 cursor-pointer hover:shadow-md transition-all duration-200 ${
+          isDragging ? "opacity-50 rotate-1 scale-105" : ""
         }`}
       >
-        {/* Company Header */}
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-lg flex-shrink-0">
-              <Building2 className="h-4 w-4 text-blue-600" />
+        {/* Header with Company and Contact Info */}
+        <div className="flex items-start justify-between p-2 mb-3">
+          <div className="flex items-center gap-3 flex-1">
+            <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-lg flex-shrink-0">
+              <Building2 className="h-5 w-5 text-blue-600" />
             </div>
-            <div className="min-w-0 flex-1">
-              <h4 className="font-semibold text-sm text-gray-900 truncate">
-                {company.name}
-              </h4>
-              <p className="text-xs text-gray-500 truncate">
-                {contact.first_name} {contact.last_name}
-              </p>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <h4 className="font-semibold text-base text-gray-900 truncate">
+                  {company.name}
+                </h4>
+                <Badge
+                  className={`text-xs px-2 py-1 ${getBadgeColor(opportunity.stage)}`}
+                >
+                  {stages.find((s) => s.id === opportunity.stage)?.label ||
+                    opportunity.stage}
+                </Badge>
+              </div>
+              <div className="flex items-center gap-1 text-sm text-gray-600">
+                <span>
+                  {contact.first_name} {contact.last_name}
+                </span>
+                {contact.position && (
+                  <>
+                    <span>•</span>
+                    <span>{contact.position}</span>
+                  </>
+                )}
+              </div>
             </div>
           </div>
           <div className="text-right flex-shrink-0">
-            <div className="font-bold text-sm text-green-600">
+            <div className="text-lg font-bold text-green-600">
               {formatCurrency(opportunity.value)}
             </div>
-            <div className="text-xs text-gray-400">
-              {opportunity.probability}%
+            <div className="text-sm text-gray-500">
+              {opportunity.probability}% probability
             </div>
           </div>
         </div>
 
-        {/* Probability Progress */}
+        {/* Probability Bar */}
         <div className="mb-3">
-          <Progress value={opportunity.probability} className="h-1.5" />
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-sm font-medium text-gray-700">
+              Probability: {opportunity.probability}%
+            </span>
+          </div>
+          <Progress value={opportunity.probability} className="h-2" />
         </div>
 
-        {/* Key Info */}
-        <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
-          <span className="truncate">{company.industry}</span>
-          <span className="flex-shrink-0">
-            {new Date(opportunity.estimated_close_date).toLocaleDateString('en-US', { 
-              month: 'short', 
-              day: 'numeric' 
-            })}
-          </span>
+        {/* Details Grid */}
+        <div className="grid grid-cols-2 gap-3 mb-3 text-sm">
+          <div>
+            <span className="text-gray-500">Industry:</span>
+            <span className="ml-1 text-gray-900">{company.industry}</span>
+          </div>
+          <div>
+            <span className="text-gray-500">Created:</span>
+            <span className="ml-1 text-gray-900">
+              {formatDate(opportunity.created_at)}
+            </span>
+          </div>
+          <div>
+            <span className="text-gray-500">Company Size:</span>
+            <span className="ml-1 text-gray-900">
+              {company.size || "Unknown"} 
+            </span>
+          </div>
+          <div>
+            <span className="text-gray-500">Last Activity:</span>
+            <span className="ml-1 text-gray-900">
+              {formatDate(opportunity.updated_at)}
+            </span>
+          </div>
         </div>
 
-        {/* Action Buttons - Minimal */}
-        <div className="flex items-center justify-between gap-1">
-          <div className="flex gap-1">
+        {/* Contact Information */}
+        <div className="flex items-center gap-4 mb-3 text-sm text-gray-600">
+          {contact.email && (
+            <div className="flex items-center gap-1">
+              <Mail className="h-3 w-3" />
+              <span className="truncate max-w-[120px]">{contact.email}</span>
+            </div>
+          )}
+          {contact.phone && (
+            <div className="flex items-center gap-1">
+              <Phone className="h-3 w-3" />
+              <span>{contact.phone}</span>
+            </div>
+          )}
+          <div className="flex items-center gap-1">
+            <Globe className="h-3 w-3" />
+            <span>{company.location}</span>
+          </div>
+        </div>
+
+        {/* Next Action Section */}
+        <div className="mb-3">
+          <div className="flex items-start gap-2 mb-2 rounded-lg border px-4 py-3 text-sm bg-blue-100">
+            <div className="w-2 h-2 bg-gray-400 rounded-full mt-2 flex-shrink-0"></div>
+            <div>
+              <span className="text-blue-600 font-medium text-sm">
+                Next Action:
+              </span>
+              <div className="text-blue-600 text-sm">
+                {opportunity.next_steps || "Contract terms discussion"}
+              </div>
+            </div>
+          </div>
+
+          <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+            <div className="text-gray-900 font-medium text-sm mb-1">Notes:</div>
+            <div className="text-gray-600 text-sm">
+              {opportunity.description ||
+                "Focused on cost optimization across multiple manufacturing sites"}
+            </div>
+          </div>
+
+          {/* Recent Activities Section */}
+          {opportunity.latest_activities &&
+            opportunity.latest_activities.length > 0 && (
+              <ActivityAccordion activities={opportunity.latest_activities} />
+            )}
+        </div>
+
+        {/* Tags/Badges */}
+        <div className="flex flex-wrap gap-1 mb-3">
+          <Badge variant="outline" className="text-xs">
+            {company.industry}
+          </Badge>
+          <Badge variant="outline" className="text-xs">
+            {company.size || "Enterprise"}
+          </Badge>
+          <Badge variant="outline" className="text-xs">
+            Decision Maker
+          </Badge>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-2 justify-between">
+          <div className="flex gap-2">
             <Button
-              variant="ghost"
               size="sm"
-              className="h-7 px-2 text-xs hover:bg-gray-100"
+              className="h-8 px-3 text-xs bg-orange-500 hover:bg-orange-600 text-white rounded-md font-medium"
               onClick={(e) => {
                 e.stopPropagation();
                 onEdit(opportunity);
               }}
             >
-              <Edit className="h-3 w-3" />
+              <Edit className="h-3 w-3 mr-1" />
+              Edit
             </Button>
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
-              className="h-7 px-2 text-xs hover:bg-gray-100"
+              className="h-8 px-3 text-xs border-gray-300 text-gray-700 hover:bg-gray-50 rounded-md font-medium"
               onClick={(e) => {
                 e.stopPropagation();
                 onAddActivity(opportunity);
               }}
             >
-              <Plus className="h-3 w-3" />
+              <Plus className="h-3 w-3 mr-1" />
+              Add Activity
             </Button>
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
-              className="h-7 px-2 text-xs hover:bg-gray-100"
+              className="h-8 px-3 text-xs border-gray-300 text-gray-700 hover:bg-gray-50 rounded-md font-medium"
               onClick={(e) => {
                 e.stopPropagation();
                 onViewHistory(opportunity);
               }}
             >
-              <History className="h-3 w-3" />
+              <History className="h-3 w-3 mr-1" />
+              History
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 px-3 text-xs border-gray-300 text-gray-700 hover:bg-gray-50 rounded-md font-medium"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleViewProfile(String(opportunity.lead_info?.company?.id));
+              }}
+            >
+              <Eye className="h-3 w-3 mr-1" />
+              Details
             </Button>
           </div>
-          
-          {/* Primary Action Button */}
-          <div className="flex gap-1">
-            {opportunity.stage === "discovery" && onSendProposal && (
+          <div className="flex gap-2">
+            {/* Status-driven flow buttons */}
+            {opportunity.stage === "discovery" && (
               <Button
                 size="sm"
-                className="h-7 px-3 text-xs bg-blue-600 hover:bg-blue-700 text-white"
+                className="h-8 px-3 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-md font-medium disabled:opacity-50"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onSendProposal(opportunity);
+                  if (onSendProposal) {
+                    onSendProposal(opportunity);
+                  }
                 }}
                 disabled={isDraftLoading}
               >
                 {isDraftLoading ? (
-                  <RefreshCw className="h-3 w-3 animate-spin" />
+                  <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
                 ) : (
-                  <FileText className="h-3 w-3" />
+                  <FileText className="h-3 w-3 mr-1" />
                 )}
+                {isDraftLoading ? "Loading..." : "Send Proposal"}
               </Button>
             )}
 
-            {opportunity.stage === "proposal" && onMoveToNegotiation && (
+            {opportunity.stage === "proposal" && (
               <Button
                 size="sm"
-                className="h-7 px-3 text-xs bg-orange-500 hover:bg-orange-600 text-white"
+                className="h-8 px-3 text-xs bg-orange-500 hover:bg-orange-600 text-white rounded-md font-medium disabled:opacity-50"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onMoveToNegotiation(opportunity);
+                  if (onMoveToNegotiation) {
+                    onMoveToNegotiation(opportunity);
+                  }
                 }}
                 disabled={isDraftLoading}
               >
                 {isDraftLoading ? (
-                  <RefreshCw className="h-3 w-3 animate-spin" />
+                  <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
                 ) : (
-                  <ArrowRight className="h-3 w-3" />
+                  <ArrowRight className="h-3 w-3 mr-1" />
                 )}
+                {isDraftLoading ? "Loading..." : "Negotiate"}
               </Button>
             )}
 
@@ -430,45 +579,52 @@ const OpportunityCard = memo(
               <div className="relative group">
                 <Button
                   size="sm"
-                  className="h-7 px-3 text-xs bg-green-600 hover:bg-green-700 text-white"
+                  className="h-8 px-3 text-xs bg-green-600 hover:bg-green-700 text-white rounded-md font-medium transition-all duration-200"
                 >
-                  <Handshake className="h-3 w-3" />
+                  <Handshake className="h-3 w-3 mr-1" />
+                  Close Deal
+                  <ChevronDown className="h-3 w-3 ml-1" />
                 </Button>
 
-                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                  <div className="bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden min-w-[120px]">
-                    <button
-                      className="w-full px-3 py-2 text-xs text-center hover:bg-green-50 text-green-700 font-medium transition-colors disabled:opacity-50"
-                      disabled={loadingOpportunityId === opportunity.id}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (onCloseDeal) {
-                          onCloseDeal(opportunity, "closed_won");
-                        }
-                      }}
-                    >
-                      {loadingOpportunityId === opportunity.id ? (
-                        <RefreshCw className="h-3 w-3 mx-auto animate-spin" />
-                      ) : (
-                        "Won"
-                      )}
-                    </button>
-                    <button
-                      className="w-full px-3 py-2 text-xs text-center hover:bg-red-50 text-red-700 font-medium transition-colors border-t disabled:opacity-50"
-                      disabled={loadingOpportunityId === opportunity.id}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (onCloseDeal) {
-                          onCloseDeal(opportunity, "closed_lost");
-                        }
-                      }}
-                    >
-                      {loadingOpportunityId === opportunity.id ? (
-                        <RefreshCw className="h-3 w-3 mx-auto animate-spin" />
-                      ) : (
-                        "Lost"
-                      )}
-                    </button>
+                {/* Hover dropdown - positioned below the button and centered */}
+                <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  <div className="bg-white border border-gray-200 rounded-lg shadow-xl overflow-hidden min-w-[160px]">
+                    <div className="p-1">
+                      <button
+                        className="w-full px-4 py-3 text-xs text-center hover:bg-green-50 flex items-center justify-center gap-2 text-green-700 font-medium rounded-md transition-colors duration-150 disabled:opacity-50"
+                        disabled={loadingOpportunityId === opportunity.id}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onCloseDeal) {
+                            onCloseDeal(opportunity, "closed_won");
+                          }
+                        }}
+                      >
+                        {loadingOpportunityId === opportunity.id ? (
+                          <RefreshCw className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <CheckCircle className="h-4 w-4" />
+                        )}
+                        Deal Won
+                      </button>
+                      <button
+                        className="w-full px-4 py-3 text-xs text-center hover:bg-red-50 flex items-center justify-center gap-2 text-red-700 font-medium rounded-md transition-colors duration-150 mt-1 disabled:opacity-50"
+                        disabled={loadingOpportunityId === opportunity.id}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onCloseDeal) {
+                            onCloseDeal(opportunity, "closed_lost");
+                          }
+                        }}
+                      >
+                        {loadingOpportunityId === opportunity.id ? (
+                          <RefreshCw className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <AlertTriangle className="h-4 w-4" />
+                        )}
+                        Deal Lost
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
