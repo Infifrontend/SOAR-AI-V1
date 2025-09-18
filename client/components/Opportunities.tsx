@@ -3389,6 +3389,7 @@ const getRandomRiskLevel = () => {
                       const colorMap: { [key: string]: string } = {
                         'creation': 'bg-blue-100 text-blue-600',
                         'status_change': 'bg-green-100 text-green-600',
+                        'lead_created': 'bg-red-100 text-blue-600',
                         'activity_added': 'bg-purple-100 text-purple-600',
                         'note_added': 'bg-purple-100 text-purple-600',
                         'score_update': 'bg-orange-100 text-orange-600',
@@ -3400,7 +3401,8 @@ const getRandomRiskLevel = () => {
                         'qualification': 'bg-green-100 text-green-600',
                         'disqualification': 'bg-red-100 text-red-600',
                         'opportunity_created': 'bg-yellow-100 text-yellow-600',
-                        'proposal_sent': 'bg-indigo-100 text-indigo-600',
+                        'opportunity_updated': 'bg-indigo-100 text-indigo-600',
+                        'sent_proposal': 'bg-indigo-100 text-indigo-600',
                         'negotiation_started': 'bg-purple-100 text-purple-600',
                         'won': 'bg-green-100 text-green-600',
                         'lost': 'bg-red-100 text-red-600'
