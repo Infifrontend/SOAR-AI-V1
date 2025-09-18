@@ -517,7 +517,7 @@ const PipelineOpportunityCard = memo(
               <History className="h-3 w-3" />
             </Button>
           </div>
-          
+
           {/* Status-driven flow buttons */}
           <div className="flex gap-1">
             {opportunity.stage === "discovery" && (
@@ -1096,7 +1096,7 @@ const PipelineColumn = memo(
     return (
       <div
         ref={drop}
-        className={`flex-1 min-w-80 ${isOver ? "ring-2 ring-blue-400 ring-opacity-50" : ""}`}
+        className={`flex-1 w-1/2 max-w-none ${isOver ? "ring-2 ring-blue-400 ring-opacity-50" : ""}`}
       >
         <div
           className={`${stage.headerColor} border-b-2 border-${stage.color.split("-")[1]}-500 p-3 rounded-t-lg`}
@@ -1181,7 +1181,6 @@ export function Opportunities({
   const [showProposalDialog, setShowProposalDialog] = useState(false);
   const [proposalDialogMode, setProposalDialogMode] = useState<'proposal' | 'negotiation'>('proposal');
   const [emailPreviewContent, setEmailPreviewContent] = useState("");
-  const [showEmailPreview, setShowEmailPreview] = useState(false);
   const [isDraftLoading, setIsDraftLoading] = useState(false);
   const [loadingOpportunityId, setLoadingOpportunityId] = useState<number | null>(null);
   const [currentView, setCurrentView] = useState("list");
@@ -2167,7 +2166,7 @@ const getRandomRiskLevel = () => {
           getHistory(opportunity?.lead_id)
         ]);
         console.log(opportunityHistoryResponse.data,'opportunityHistoryResponseopportunityHistoryResponse');
-        
+
                const opportunityHistory = opportunityHistoryResponse.data || [];
         const leadHistory = (leadHistoryResponse && (leadHistoryResponse.data || leadHistoryResponse)) || [];
 
@@ -2239,7 +2238,7 @@ const getRandomRiskLevel = () => {
           description: existingDraft.description || `Comprehensive travel management solution tailored for ${opportunity.lead_info?.company?.name}'s needs including cost optimization, policy compliance, and reporting analytics.`,
           validityPeriod: existingDraft.validity_period || "30",
           specialTerms: existingDraft.special_terms || "",
-          deliveryMethod: existingDraft.delivery_method || "email",
+          deliveryMethod: existingDraft.delivery_method || 'email',
           attachedFile: null, // File is not saved in draft
         });
 
@@ -2253,8 +2252,7 @@ const getRandomRiskLevel = () => {
           travelFrequency: existingDraft.travel_frequency || prevForm.travelFrequency,
           annualBookingVolume: existingDraft.annual_booking_volume || prevForm.annualBookingVolume,
           projectedSpend: existingDraft.projected_spend || prevForm.projectedSpend,
-          preferredRoutes: existingDraft.preferred_routes || prevForm.preferredRoutes,
-          domesticEconomy: existingDraft.domestic_economy !== undefined ? existingDraft.domestic_economy : prevForm.domesticEconomy,
+          preferredRoutes: existingDraft.preferred_routes || prevForm.preferredRoutes,          domesticEconomy: existingDraft.domestic_economy !== undefined ? existingDraft.domestic_economy : prevForm.domesticEconomy,
           domesticBusiness: existingDraft.domestic_business !== undefined ? existingDraft.domesticBusiness : prevForm.domesticBusiness,
           international: existingDraft.international !== undefined ? existingDraft.international : prevForm.international,
           baseDiscount: existingDraft.base_discount || prevForm.baseDiscount,
@@ -2366,7 +2364,7 @@ const getRandomRiskLevel = () => {
           description: existingDraft.description || `Updated negotiation terms and conditions for ${opportunity.lead_info?.company?.name}'s corporate travel agreement.`,
           validityPeriod: existingDraft.validity_period || "30",
           specialTerms: existingDraft.special_terms || "",
-          deliveryMethod: existingDraft.delivery_method || "email",
+          deliveryMethod: existingDraft.delivery_method || 'email',
           attachedFile: null, // File is not saved in draft
         });
 
