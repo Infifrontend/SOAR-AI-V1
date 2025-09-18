@@ -199,12 +199,12 @@ const ActivityAccordion = memo(({ activities }: ActivityAccordionProps) => {
             {isExpanded ? (
               <>
                 <span>Show less</span>
-                <ChevronDown className="h-3 w-3" />
+                <ChevronUp className="h-3 w-3" />
               </>
             ) : (
               <>
                 <span>Show {remainingCount} more</span>
-                <ChevronUp className="h-3 w-3" />
+                <ChevronDown className="h-3 w-3" />
               </>
             )}
           </button>
@@ -517,7 +517,7 @@ const PipelineOpportunityCard = memo(
               <History className="h-3 w-3" />
             </Button>
           </div>
-
+          
           {/* Status-driven flow buttons */}
           <div className="flex gap-1">
             {opportunity.stage === "discovery" && (
@@ -1096,7 +1096,7 @@ const PipelineColumn = memo(
     return (
       <div
         ref={drop}
-        className={`flex-1 min-w-72 max-w-80 ${isOver ? "ring-2 ring-blue-400 ring-opacity-50" : ""}`}
+        className={`flex-1 min-w-80 ${isOver ? "ring-2 ring-blue-400 ring-opacity-50" : ""}`}
       >
         <div
           className={`${stage.headerColor} border-b-2 border-${stage.color.split("-")[1]}-500 p-3 rounded-t-lg`}
@@ -1181,6 +1181,7 @@ export function Opportunities({
   const [showProposalDialog, setShowProposalDialog] = useState(false);
   const [proposalDialogMode, setProposalDialogMode] = useState<'proposal' | 'negotiation'>('proposal');
   const [emailPreviewContent, setEmailPreviewContent] = useState("");
+  const [showEmailPreview, setShowEmailPreview] = useState(false);
   const [isDraftLoading, setIsDraftLoading] = useState(false);
   const [loadingOpportunityId, setLoadingOpportunityId] = useState<number | null>(null);
   const [currentView, setCurrentView] = useState("list");
@@ -2166,7 +2167,7 @@ const getRandomRiskLevel = () => {
           getHistory(opportunity?.lead_id)
         ]);
         console.log(opportunityHistoryResponse.data,'opportunityHistoryResponseopportunityHistoryResponse');
-
+        
                const opportunityHistory = opportunityHistoryResponse.data || [];
         const leadHistory = (leadHistoryResponse && (leadHistoryResponse.data || leadHistoryResponse)) || [];
 
@@ -2730,7 +2731,7 @@ const getRandomRiskLevel = () => {
       console.log("Sending proposal with data:", proposalData);
 
       // Send proposal via API
-      await sendProposal(selectedOpportunity.id, proposalData, proposalForm.attachedFile);
+      await sendProposal(selectedOpportunity.id, proposalData);
 
       // Clear the draft since proposal is being sent
       clearDraft(selectedOpportunity.id);
@@ -2851,7 +2852,7 @@ const getRandomRiskLevel = () => {
       // Set loading state for the send revised proposal button
       setLoadingOpportunityId(selectedOpportunity.id);
 
-      // Prepare proposal data for sending
+      // Prepare proposal data for sending (same as Send Proposal)
       const proposalData = {
         opportunity_id: selectedOpportunity.id,
         subject: proposalForm.title || `Negotiation Terms - ${selectedOpportunity.lead_info?.company?.name}`,
@@ -2863,13 +2864,13 @@ const getRandomRiskLevel = () => {
 
       console.log("Sending revised proposal with data:", proposalData);
 
-      // Send proposal via API
-      await sendProposal(selectedOpportunity.id, proposalData, proposalForm.attachedFile);
+      // Send proposal via API (same as Send Proposal)
+      await sendProposal(selectedOpportunity.id, proposalData);
 
       // Clear the draft since proposal is being sent
       clearDraft(selectedOpportunity.id);
 
-      // Update opportunity stage to negotiation
+      // Update opportunity stage to negotiation (different from Send Proposal)
       await updateOpportunityStage(selectedOpportunity.id, {
         stage: "negotiation",
         probability: 80,
