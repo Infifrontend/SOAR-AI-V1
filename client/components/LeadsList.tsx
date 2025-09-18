@@ -5206,7 +5206,7 @@ SOAR-AI Team`,
                 </>
               )}
             </Button>
-          </DialogFooter>Pco
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
