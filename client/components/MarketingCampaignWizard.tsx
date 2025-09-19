@@ -379,6 +379,11 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
     toast.info('All selected leads cleared.');
   };
 
+  const matchedLeads = selectedLeads.map(selLead => {
+    return availableLeads.filter(avLead => avLead.id === selLead.id);
+  }).flat();
+  
+  console.log(matchedLeads, "matchedLeads");
 
   // Standard layout with proper email structure
   const renderEmailTemplate = (content: string, cta: string, ctaLink: string, subject: string) => `
@@ -1642,12 +1647,20 @@ SOAR-AI Team</p>`;
                                 className="prose prose-sm max-w-none"
                                 dangerouslySetInnerHTML={{
                                   __html: campaignData.content.email.body
-                                    .replace(/{{contact_name}}/g, '<span class="bg-yellow-100 px-1 rounded">Sarah Johnson</span>')
-                                    .replace(/{{company_name}}/g, '<span class="bg-yellow-100 px-1 rounded">TechCorp Solutions</span>')
-                                    .replace(/{{employees}}/g, '<span class="bg-yellow-100 px-1 rounded">2,500</span>')
-                                    .replace(/{{industry}}/g, '<span class="bg-yellow-100 px-1 rounded">Technology</span>')
-                                    .replace(/{{sender_name}}/g, '<span class="bg-yellow-100 px-1 rounded">Alex Smith</span>')
+                                    .replace(/{{contact_name}}/g, matchedLeads[0]?.contact?.full_name || "Contact Name")
+                                    .replace(/{{contact_email}}/g, matchedLeads[0]?.contact?.email || "Contact Email")
+                                    .replace(/{{job_title}}/g, matchedLeads[0]?.contact?.position || "Job Title")
+                                    .replace(/{{phone}}/g, matchedLeads[0]?.contact?.phone || "Phone")
+                                    .replace(/{{company_name}}/g, matchedLeads[0]?.company?.name || "Company Name")
+                                    .replace(/{{industry}}/g, matchedLeads[0]?.company?.industry || "Industry")
+                                    .replace(/{{employees}}/g, matchedLeads[0]?.company?.employee_count || "Employees")
+                                    .replace(/{{location}}/g, matchedLeads[0]?.company?.location || "Location")
+                                    .replace(/{{annual_revenue}}/g, matchedLeads[0]?.company?.annual_revenue || "Annual Revenue")
+                                    .replace(/{{website}}/g, matchedLeads[0]?.company?.website || "Website")
+                                    .replace(/{{travel_budget}}/g, matchedLeads[0]?.company?.travel_budget || "Travel Budget")
+                                    .replace(/{{sender_name}}/g, matchedLeads[0]?.contact?.full_name || "Sender Name")
                                 }}
+                                
                               />
                             ) : (
                               <div className="text-gray-400 text-sm italic">
