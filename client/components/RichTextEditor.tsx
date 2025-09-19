@@ -177,7 +177,7 @@ export function RichTextEditor({
                 <div>
                   <div className="text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Contact Variables</div>
                   <div className="grid grid-cols-1 gap-1">
-                    {variables.filter(v => v.category === 'contact').map((variable) => (
+                    {commonVariables.filter(v => v.category === 'contact').map((variable) => (
                       <Button
                         key={variable.name}
                         type="button"
@@ -202,7 +202,7 @@ export function RichTextEditor({
                 <div>
                   <div className="text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Company Variables</div>
                   <div className="grid grid-cols-1 gap-1">
-                    {variables.filter(v => v.category === 'company').map((variable) => (
+                    {commonVariables.filter(v => v.category === 'company').map((variable) => (
                       <Button
                         key={variable.name}
                         type="button"
@@ -227,7 +227,7 @@ export function RichTextEditor({
                 <div>
                   <div className="text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">Other Variables</div>
                   <div className="grid grid-cols-1 gap-1">
-                    {variables.filter(v => !v.category || (v.category !== 'contact' && v.category !== 'company')).map((variable) => (
+                    {commonVariables.filter(v => !v.category || (v.category !== 'contact' && v.category !== 'company')).map((variable) => (
                       <Button
                         key={variable.name}
                         type="button"
