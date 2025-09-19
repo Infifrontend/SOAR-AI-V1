@@ -419,7 +419,7 @@ class OptimizedOpportunitySerializer(serializers.ModelSerializer):
             'id', 'name', 'stage', 'probability', 'value',
             'estimated_close_date', 'created_at', 'updated_at',
             'description', 'next_steps', 'lead_info', 'weighted_value',
-            'latest_activities'
+            'latest_activities','lead_id'
         ]
 
     def get_lead_info(self, obj):

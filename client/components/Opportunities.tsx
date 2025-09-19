@@ -1771,7 +1771,7 @@ const getRandomRiskLevel = () => {
         // Fetch both opportunity and lead history
         const [opportunityHistoryResponse, leadHistoryResponse] = await Promise.all([
           getOpportunityHistory(opportunity.id),
-          getHistory(opportunity.lead_info?.company?.id || opportunity.leadId)
+          getHistory(opportunity?.lead_id)
         ]);
         console.log(opportunityHistoryResponse.data,'opportunityHistoryResponseopportunityHistoryResponse');
         
