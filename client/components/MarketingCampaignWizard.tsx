@@ -1291,15 +1291,16 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                             {typeof lead.contact === 'object' ? lead.contact?.email || lead.email || 'No email' : lead.email || 'No email'} • {typeof lead.company === 'object' ? lead.company?.industry || 'Unknown Industry' : lead.industry || 'Unknown Industry'}
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="text-xs">{lead.status}</Badge>
+                        <div className="flex items-center w-50 gap-4">
+                          <Badge variant="outline" className="text-xs bg-green-400 text-white">{lead.status}</Badge>
                           <Button
-                            variant="ghost"
+                            variant="outline"
                             size="sm"
                             onClick={() => handleRemoveLead(lead.id)}
-                            className="text-red-600 hover:text-red-700 h-8 w-8 p-0"
+                            className="text-red-600 hover:text-red-700 h-8 px-3 flex items-center gap-2"
                           >
                             <X className="h-4 w-4" />
+                            Remove
                           </Button>
                         </div>
                       </div>
@@ -1319,7 +1320,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                 <Label className="text-lg font-medium">Available Leads</Label>
 
                 {/* Filters */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-1 bg-gray-50 rounded-lg">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                     <Input
@@ -1361,7 +1362,7 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                     variant="outline"
                     onClick={loadAvailableLeads}
                     disabled={loadingLeads}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 cls-addcomapany"
                   >
                     <RefreshCw className={`h-4 w-4 ${loadingLeads ? 'animate-spin' : ''}`} />
                     Refresh
@@ -1392,13 +1393,13 @@ export function MarketingCampaignWizard({ onNavigate, initialCampaignData: initi
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="text-xs">{lead.status}</Badge>
-                          <Badge variant="secondary" className="text-xs">Score: {lead.score}</Badge>
+                          <Badge variant="outline" className="text-xs bg-green-400 text-white">{lead.status}</Badge>
+                          <Badge variant="secondary" className="text-xs  bg-orange-400 text-white ">Score: {lead.score}</Badge>
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handleAddLead(lead)}
-                            className="h-8 px-3"
+                            className="h-8 px-3 cls-addcomapany"
                           >
                             <Plus className="h-4 w-4 mr-1" />
                             Add
@@ -2113,7 +2114,7 @@ SOAR-AI Team</p>`;
               {editMode ? 'Edit your existing marketing campaign' : 'Create targeted marketing campaigns across multiple channels'}
             </p>
           </div>
-        <Button variant="ghost" size="sm" onClick={onBack}>
+        <Button variant="outline" size="sm" onClick={onBack} className="cls-addcomapany">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Leads
         </Button>
@@ -2550,18 +2551,22 @@ SOAR-AI Team</p>`;
             <div className="bg-gray-50 p-4 rounded-lg border">
               <h4 className="font-medium text-gray-900 mb-2">Preview Recipients</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="font-medium">Company:</span> TechCorp Solutions
-                </div>
-                <div>
-                  <span className="font-medium">Contact:</span> Sarah Johnson
-                </div>
-                <div>
-                  <span className="font-medium">Industry:</span> Technology
-                </div>
-                <div>
-                  <span className="font-medium">Employees:</span> 2,500
-                </div>
+              <div>
+                <span className="font-medium">Company:</span>{" "}
+                {matchedLeads[0]?.company?.name || "TechCorp Solutions"}
+              </div>
+              <div>
+                <span className="font-medium">Contact:</span>{" "}
+                {matchedLeads[0]?.contact?.full_name || "Sarah Johnson"}
+              </div>
+              <div>
+                <span className="font-medium">Industry:</span>{" "}
+                {matchedLeads[0]?.company?.industry || "Technology"}
+              </div>
+              <div>
+                <span className="font-medium">Employees:</span>{" "}
+                {matchedLeads[0]?.company?.employee_count || "2,500"}
+              </div>
               </div>
             </div>
 
@@ -2577,23 +2582,35 @@ SOAR-AI Team</p>`;
                   {/* Email Header */}
                   <div className="bg-gray-50 px-4 py-3 border-b">
                     <div className="space-y-2 text-sm">
-                      <div>
-                        <span className="font-medium text-gray-700">From:</span>
-                        <span className="ml-2">SOAR-AI &lt;corporate@soar-ai.com&gt;</span>
-                      </div>
-                      <div>
-                        <span className="font-medium text-gray-700">To:</span>
-                        <span className="ml-2">Sarah Johnson &lt;sarah.johnson@techcorp.com&gt;</span>
-                      </div>
-                      <div>
-                        <span className="font-medium text-gray-700">Subject:</span>
-                        <span className="ml-2 font-medium">
-                          {campaignData.content.email.subject
-                            ?.replace('{{company_name}}', 'TechCorp Solutions')
-                            ?.replace('{{contact_name}}', 'Sarah Johnson') ||
-                            'Ensure 100% travel policy compliance at TechCorp Solutions'}
-                        </span>
-                      </div>
+                    <div>
+                      <span className="font-medium text-gray-700">From:</span>
+                      <span className="ml-2">
+                        SOAR-AI &lt;corporate@soar-ai.com&gt;
+                      </span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">To:</span>
+                      <span className="ml-2">
+                        {matchedLeads[0]?.contact?.full_name || "Sarah Johnson"} &lt;
+                        {matchedLeads[0]?.contact?.email || "sarah.johnson@techcorp.com"}&gt;
+                      </span>
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">Subject:</span>
+                      <span className="ml-2 font-medium">
+                        {campaignData.content.email.subject
+                          ?.replace(
+                            "{{company_name}}",
+                            matchedLeads[0]?.company?.name || "TechCorp Solutions"
+                          )
+                          ?.replace(
+                            "{{contact_name}}",
+                            matchedLeads[0]?.contact?.full_name || "Sarah Johnson"
+                          ) ||
+                          "Ensure 100% travel policy compliance at TechCorp Solutions"}
+                      </span>
+                    </div>
+
                     </div>
                   </div>
 
@@ -2629,9 +2646,9 @@ SOAR-AI Team</p>`;
                           }}
                           dangerouslySetInnerHTML={{
                             __html: (campaignData.content.email.body || `
-                              <p style="margin-bottom: 16px;"><strong>Hi Sarah Johnson,</strong></p>
-                              <p style="margin-bottom: 16px;">Managing travel compliance for 2,500 employees can be challenging. SOAR-AI ensures 100% policy adherence while maintaining traveler satisfaction.</p>
-                              <p style="margin-bottom: 12px;"><strong>Key compliance features for Technology companies:</strong></p>
+                              <p style="margin-bottom: 16px;"><strong>Hi {{contact_name}},</strong></p>
+                              <p style="margin-bottom: 16px;">Managing travel compliance for {{employees}} employees can be challenging. SOAR-AI ensures 100% policy adherence while maintaining traveler satisfaction.</p>
+                              <p style="margin-bottom: 12px;"><strong>Key compliance features for {{industry}} companies:</strong></p>
                               <ul style="margin-bottom: 16px; padding-left: 20px;">
                                 <li style="margin-bottom: 6px;">Automated policy enforcement</li>
                                 <li style="margin-bottom: 6px;">Real-time approval workflows</li>
@@ -2639,7 +2656,7 @@ SOAR-AI Team</p>`;
                                 <li style="margin-bottom: 6px;">Regulatory compliance reporting</li>
                                 <li style="margin-bottom: 6px;">Instant policy violation alerts</li>
                               </ul>
-                              <p style="margin-bottom: 16px;">TechCorp Solutions can achieve complete travel governance without slowing down your team.</p>
+                              <p style="margin-bottom: 16px;">{{company_name}} can achieve complete travel governance without slowing down your team.</p>
                               <p style="margin-bottom: 24px;"><strong>Why choose SOAR-AI:</strong></p>
                               <div style="background-color: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 24px; border-left: 4px solid #3b82f6;">
                                 <ul style="margin: 0; padding-left: 20px;">
@@ -2650,13 +2667,20 @@ SOAR-AI Team</p>`;
                                 </ul>
                               </div>
                             `)
-                            .replace(/{{contact_name}}/g, '<span style="background-color: #fef3c7; padding: 2px 6px; border-radius: 4px; color: #92400e;">Sarah Johnson</span>')
-                            .replace(/{{company_name}}/g, '<span style="background-color: #fef3c7; padding: 2px 6px; border-radius: 4px; color: #92400e;">TechCorp Solutions</span>')
-                            .replace(/{{employees}}/g, '<span style="background-color: #fef3c7; padding: 2px 6px; border-radius: 4px; color: #92400e;">2,500</span>')
-                            .replace(/{{industry}}/g, '<span style="background-color: #fef3c7; padding: 2px 6px; border-radius: 4px; color: #92400e;">Technology</span>')
-                            .replace(/{{travel_budget}}/g, '<span style="background-color: #fef3c7; padding: 2px 6px; border-radius: 4px; color: #92400e;">$750,000</span>')
-                            .replace(/{{sender_name}}/g, '<span style="background-color: #fef3c7; padding: 2px 6px; border-radius: 4px; color: #92400e;">SOAR-AI Team</span>')
+                              .replace(/{{contact_name}}/g, `<span style="background-color: #fef3c7; padding: 2px 6px; border-radius: 4px; color: #92400e;">${matchedLeads[0]?.contact?.full_name || "Contact Name"}</span>`)
+                              .replace(/{{contact_email}}/g, `<span style="background-color: #fef3c7; padding: 2px 6px; border-radius: 4px; color: #92400e;">${matchedLeads[0]?.contact?.email || "Contact Email"}</span>`)
+                              .replace(/{{job_title}}/g, `<span style="background-color: #fef3c7; padding: 2px 6px; border-radius: 4px; color: #92400e;">${matchedLeads[0]?.contact?.position || "Job Title"}</span>`)
+                              .replace(/{{phone}}/g, `<span style="background-color: #fef3c7; padding: 2px 6px; border-radius: 4px; color: #92400e;">${matchedLeads[0]?.contact?.phone || "Phone"}</span>`)
+                              .replace(/{{company_name}}/g, `<span style="background-color: #fef3c7; padding: 2px 6px; border-radius: 4px; color: #92400e;">${matchedLeads[0]?.company?.name || "Company Name"}</span>`)
+                              .replace(/{{industry}}/g, `<span style="background-color: #fef3c7; padding: 2px 6px; border-radius: 4px; color: #92400e;">${matchedLeads[0]?.company?.industry || "Industry"}</span>`)
+                              .replace(/{{employees}}/g, `<span style="background-color: #fef3c7; padding: 2px 6px; border-radius: 4px; color: #92400e;">${matchedLeads[0]?.company?.employee_count || "Employees"}</span>`)
+                              .replace(/{{location}}/g, `<span style="background-color: #fef3c7; padding: 2px 6px; border-radius: 4px; color: #92400e;">${matchedLeads[0]?.company?.location || "Location"}</span>`)
+                              .replace(/{{annual_revenue}}/g, `<span style="background-color: #fef3c7; padding: 2px 6px; border-radius: 4px; color: #92400e;">${matchedLeads[0]?.company?.annual_revenue || "Annual Revenue"}</span>`)
+                              .replace(/{{website}}/g, `<span style="background-color: #fef3c7; padding: 2px 6px; border-radius: 4px; color: #92400e;">${matchedLeads[0]?.company?.website || "Website"}</span>`)
+                              .replace(/{{travel_budget}}/g, `<span style="background-color: #fef3c7; padding: 2px 6px; border-radius: 4px; color: #92400e;">${matchedLeads[0]?.company?.travel_budget || "Travel Budget"}</span>`)
+                              .replace(/{{sender_name}}/g, `<span style="background-color: #fef3c7; padding: 2px 6px; border-radius: 4px; color: #92400e;">${matchedLeads[0]?.contact?.full_name || "Sender Name"}</span>`)
                           }}
+                          
                         />
 
                         {/* Call-to-Action Section */}
