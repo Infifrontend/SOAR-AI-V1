@@ -727,14 +727,14 @@ export function Settings({
             className="rounded-lg px-6 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-[#FD9646] data-[state=active]:border-b-[#FD9646] font-medium text-gray-600 data-[state=active]:text-gray-900 hover:text-gray-900 transition-all duration-200 flex items-center gap-2 cls-btn"
           >
             <Shield className="h-4 w-4" />
-            Roles & Access
+            Roles
           </TabsTrigger>
           <TabsTrigger
             value="template-creation"
             className="rounded-lg px-6 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:border-b-2 data-[state=active]:border-[#FD9646] data-[state=active]:border-b-[#FD9646] font-medium text-gray-600 data-[state=active]:text-gray-900 hover:text-gray-900 transition-all duration-200 flex items-center gap-2 cls-btn"
           >
             <FileText className="h-4 w-4" />
-            Template Creation
+            Templates
           </TabsTrigger>
           {/* <TabsTrigger 
             value="screen-management" 
