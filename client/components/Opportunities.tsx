@@ -1760,17 +1760,18 @@ const getRandomRiskLevel = () => {
     });
     setShowActivityDialog(true);
   }, []);
-
+  
   const handleViewHistory = useCallback(
     async (opportunity: Opportunity) => {
       setSelectedOpportunity(opportunity);
       setIsLoadingHistory(true);
 
       try {
+        console.log(opportunity,"opportunity")
         // Fetch both opportunity and lead history
         const [opportunityHistoryResponse, leadHistoryResponse] = await Promise.all([
           getOpportunityHistory(opportunity.id),
-          // getHistory(opportunity.lead_info?.company?.id || opportunity.leadId)
+          getHistory(opportunity.lead_info?.company?.id || opportunity.leadId)
         ]);
         console.log(opportunityHistoryResponse.data,'opportunityHistoryResponseopportunityHistoryResponse');
         
@@ -1795,14 +1796,14 @@ const getRandomRiskLevel = () => {
           }
           return 0;
         };
-
+        console.log(leadHistory,"leadHistory",opportunityHistory,"opportunityHistory");
         const combinedHistory = [
-          ...opportunityHistory.map((entry: any) => ({
-            ...entry,
-            source: 'opportunity',
-            entity_type: 'opportunity',
-            _sort_ts: parseTimestamp(entry),
-          })),
+          // ...opportunityHistory.map((entry: any) => ({
+          //   ...entry,
+          //   source: 'opportunity',
+          //   entity_type: 'opportunity',
+          //   _sort_ts: parseTimestamp(entry),
+          // })),
           ...leadHistory.map((entry: any) => ({
             ...entry,
             source: 'lead',
